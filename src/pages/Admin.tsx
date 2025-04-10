@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,13 +6,51 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
 import { useBackground } from '../context/BackgroundContext';
 import { useToast } from '@/components/ui/use-toast';
-import { Draw, Banner } from '../types';
+import { Draw, Banner, User } from '../types';
 import { Link } from 'react-router-dom';
+
+// Mock users data - would be replaced with actual data from a database
+const mockUsers: User[] = [
+  {
+    id: '1',
+    email: 'admin@example.com',
+    name: 'Admin User',
+    avatar: '/placeholder.svg',
+    wallet: 200,
+    isAdmin: true,
+  },
+  {
+    id: '2',
+    email: 'user1@example.com',
+    name: 'Regular User 1',
+    avatar: '/placeholder.svg',
+    wallet: 50,
+    isAdmin: false,
+  },
+  {
+    id: '3',
+    email: 'user2@example.com',
+    name: 'Regular User 2',
+    avatar: '/placeholder.svg',
+    wallet: 75,
+    isAdmin: false,
+  },
+  {
+    id: '4',
+    email: 'user3@example.com',
+    name: 'VIP User',
+    avatar: '/placeholder.svg',
+    wallet: 500,
+    isAdmin: false,
+  }
+];
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
@@ -25,6 +62,12 @@ const Admin: React.FC = () => {
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
   const bgImageFileInputRef = useRef<HTMLInputElement>(null);
   
+  // State for users management
+  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  
+  // Other state variables
   const [newDraw, setNewDraw] = useState<Omit<Draw, 'id'>>({
     title: '',
     description: '',
@@ -48,6 +91,26 @@ const Admin: React.FC = () => {
     navigate('/');
     return null;
   }
+
+  // Filter users based on search term
+  const filteredUsers = users.filter(user => 
+    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  // Function to toggle admin status
+  const toggleAdminStatus = (userId: string) => {
+    setUsers(prevUsers => 
+      prevUsers.map(u => 
+        u.id === userId ? { ...u, isAdmin: !u.isAdmin } : u
+      )
+    );
+    
+    toast({
+      title: 'User role updated',
+      description: `User status has been changed successfully.`,
+    });
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -262,9 +325,10 @@ const Admin: React.FC = () => {
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
       
       <Tabs defaultValue="draws">
-        <TabsList className="grid grid-cols-4 mb-6">
+        <TabsList className="grid grid-cols-5 mb-6">
           <TabsTrigger value="draws">Draws</TabsTrigger>
           <TabsTrigger value="banners">Banners</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="media">Media</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
@@ -588,6 +652,103 @@ const Admin: React.FC = () => {
               ))}
             </div>
           )}
+        </TabsContent>
+        
+        <TabsContent value="users">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">User Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6 flex gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search users by name or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-gold/30 focus:border-gold"
+                  />
+                </div>
+              </div>
+              
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Wallet Balance</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="h-24 text-center">
+                          No users found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-full overflow-hidden bg-gold/10 flex items-center justify-center">
+                                {user.avatar ? (
+                                  <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                                ) : (
+                                  <Users className="h-5 w-5 text-gold/70" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-medium">{user.name || 'Anonymous'}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <DollarSign className="h-4 w-4 mr-1 text-gold/70" />
+                              {user.wallet}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              <Switch 
+                                checked={user.isAdmin} 
+                                onCheckedChange={() => toggleAdminStatus(user.id)}
+                                className={user.isAdmin ? "bg-gold" : ""}
+                              />
+                              <span>{user.isAdmin ? 'Admin' : 'User'}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleAdminStatus(user.id)}
+                              className="h-8 w-8 p-0 text-gold hover:text-gold-light"
+                            >
+                              {user.isAdmin ? (
+                                <UserX className="h-4 w-4" />
+                              ) : (
+                                <UserCheck className="h-4 w-4" />
+                              )}
+                              <span className="sr-only">
+                                {user.isAdmin ? 'Remove admin rights' : 'Make admin'}
+                              </span>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="media">
