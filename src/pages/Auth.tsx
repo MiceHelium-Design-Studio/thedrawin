@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
@@ -21,12 +20,12 @@ const Auth: React.FC = () => {
     return <Navigate to="/" />;
   }
 
-  const handleSubmit = async (data: { email: string; password: string; name?: string }) => {
+  const handleSubmit = async (data: { email: string; password: string; name?: string; phone?: string }) => {
     try {
       if (mode === 'login') {
         await login(data.email, data.password);
       } else {
-        await signup(data.email, data.password, data.name || '');
+        await signup(data.email, data.password, data.name || '', data.phone || '');
       }
       navigate('/');
       toast({
@@ -63,7 +62,7 @@ const Auth: React.FC = () => {
         backgroundBlendMode: 'overlay'
       }}
     >
-      <div className="max-w-md w-full mx-auto glass-card rounded-xl backdrop-blur-md border border-gold/30 shadow-lg p-6 my-8">
+      <div className="max-w-md w-full mx-auto glass-card rounded-xl backdrop-blur-md shadow-lg p-6 my-8">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-serif font-bold bg-gold-gradient bg-clip-text text-transparent inline-block tracking-tight">
             The Draw Win 2025

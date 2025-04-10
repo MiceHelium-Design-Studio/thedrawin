@@ -7,7 +7,7 @@ import { Coins } from 'lucide-react';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
-  onSubmit: (data: { email: string; password: string; name?: string }) => Promise<void>;
+  onSubmit: (data: { email: string; password: string; name?: string; phone?: string }) => Promise<void>;
   loading: boolean;
 }
 
@@ -15,10 +15,15 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({ email, password, ...(mode === 'signup' ? { name } : {}) });
+    await onSubmit({ 
+      email, 
+      password, 
+      ...(mode === 'signup' ? { name, phone } : {}) 
+    });
   };
 
   return (
@@ -35,17 +40,32 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {mode === 'signup' && (
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-gold-light font-medium tracking-wide uppercase">Name</Label>
-            <Input
-              id="name"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="neo-input font-light"
-            />
-          </div>
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-gold-light font-medium tracking-wide uppercase">Name</Label>
+              <Input
+                id="name"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="neo-input font-light"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-gold-light font-medium tracking-wide uppercase">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                className="neo-input font-light"
+              />
+            </div>
+          </>
         )}
         
         <div className="space-y-2">
