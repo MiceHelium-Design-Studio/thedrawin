@@ -13,6 +13,7 @@ const MOCK_DRAWS: Draw[] = [
     status: 'active',
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 86400000 * 2).toISOString(),
+    bannerImage: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&auto=format&fit=crop',
   },
   {
     id: '2',
@@ -24,6 +25,7 @@ const MOCK_DRAWS: Draw[] = [
     status: 'upcoming',
     startDate: new Date(Date.now() + 86400000).toISOString(),
     endDate: new Date(Date.now() + 86400000 * 5).toISOString(),
+    bannerImage: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop',
   },
   {
     id: '3',
@@ -35,15 +37,28 @@ const MOCK_DRAWS: Draw[] = [
     status: 'completed',
     startDate: new Date(Date.now() - 86400000 * 7).toISOString(),
     endDate: new Date(Date.now() - 86400000 * 1).toISOString(),
-    winner: 'John D.'
+    winner: 'John D.',
+    bannerImage: 'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?w=800&auto=format&fit=crop',
   }
 ];
 
 const MOCK_BANNERS: Banner[] = [
   {
     id: '1',
-    imageUrl: '/placeholder.svg',
+    imageUrl: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=1200&auto=format&fit=crop',
     linkUrl: 'https://example.com',
+    active: true
+  },
+  {
+    id: '2',
+    imageUrl: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=1200&auto=format&fit=crop',
+    linkUrl: 'https://example.com/promo',
+    active: true
+  },
+  {
+    id: '3',
+    imageUrl: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1200&auto=format&fit=crop',
+    linkUrl: 'https://example.com/special',
     active: true
   }
 ];
