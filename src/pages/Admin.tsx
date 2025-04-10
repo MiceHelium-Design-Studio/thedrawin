@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit, 
   Users, UserCheck, UserX, Search, Filter, Bell, BellRing, MessageSquare, Send 
@@ -405,14 +406,18 @@ const Admin: React.FC = () => {
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
       
       <Tabs defaultValue="draws">
-        <TabsList className="grid grid-cols-6 mb-6">
-          <TabsTrigger value="draws">Draws</TabsTrigger>
-          <TabsTrigger value="banners">Banners</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="media">Media</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-        </TabsList>
+        <div className="relative mb-6 overflow-auto">
+          <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+            <TabsList className="inline-flex h-10 w-full min-w-max">
+              <TabsTrigger value="draws" className="px-4">Draws</TabsTrigger>
+              <TabsTrigger value="banners" className="px-4">Banners</TabsTrigger>
+              <TabsTrigger value="users" className="px-4">Users</TabsTrigger>
+              <TabsTrigger value="notifications" className="px-4">Notifications</TabsTrigger>
+              <TabsTrigger value="media" className="px-4">Media</TabsTrigger>
+              <TabsTrigger value="appearance" className="px-4">Appearance</TabsTrigger>
+            </TabsList>
+          </ScrollArea>
+        </div>
         
         <TabsContent value="draws">
           <Card className="mb-6">
