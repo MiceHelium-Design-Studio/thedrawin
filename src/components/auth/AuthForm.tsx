@@ -24,32 +24,32 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
   return (
     <div className="w-full max-w-md mx-auto px-8">
       <div className="flex justify-center mb-6">
-        <div className="rounded-full bg-gold-light p-3 shadow-md">
-          <Coins className="h-10 w-10 text-gold-dark" />
+        <div className="rounded-full bg-gold/20 p-3 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+          <Coins className="h-10 w-10 text-gold" />
         </div>
       </div>
       
-      <h2 className="text-2xl font-bold text-center mb-6">
+      <h2 className="text-2xl font-serif text-center mb-6 text-gold">
         {mode === 'login' ? 'Sign In' : 'Create Account'}
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {mode === 'signup' && (
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name" className="text-gold-light">Name</Label>
             <Input
               id="name"
               placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="border-gold/30 focus:border-gold"
+              className="bg-black border-gold/30 focus:border-gold text-gold-light"
             />
           </div>
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="text-gold-light">Email</Label>
           <Input
             id="email"
             type="email"
@@ -57,12 +57,12 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="border-gold/30 focus:border-gold"
+            className="bg-black border-gold/30 focus:border-gold text-gold-light"
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password" className="text-gold-light">Password</Label>
           <Input
             id="password"
             type="password"
@@ -70,7 +70,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="border-gold/30 focus:border-gold"
+            className="bg-black border-gold/30 focus:border-gold text-gold-light"
           />
         </div>
         

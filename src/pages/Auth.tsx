@@ -50,13 +50,13 @@ const Auth: React.FC = () => {
       className="min-h-screen flex flex-col justify-center p-4 bg-cover bg-center pattern-bg" 
       style={{ 
         backgroundImage: `url(${authBackgroundImage})`,
-        backgroundColor: 'rgba(15, 30, 66, 0.85)',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
         backgroundBlendMode: 'overlay'
       }}
     >
       <div className="max-w-md w-full mx-auto glass-card rounded-xl backdrop-blur-md border border-gold/30 shadow-lg p-6 my-8">
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold bg-gold-gradient bg-clip-text text-transparent inline-block">
+          <h1 className="text-3xl font-serif font-bold bg-gold-gradient bg-clip-text text-transparent inline-block">
             Gold Coin Raffle
           </h1>
           <div className="h-1 w-20 mx-auto my-3 bg-gold/50 rounded-full"></div>
@@ -74,7 +74,7 @@ const Auth: React.FC = () => {
           <Button 
             variant="outline" 
             onClick={toggleMode}
-            className="text-gold hover:text-gold-light border border-gold/30 hover:border-gold/60 bg-darkBlue/50 hover:bg-darkBlue-light/70 transition-all duration-300"
+            className="text-gold hover:text-gold-light border border-gold/30 hover:border-gold/60 bg-black/50 hover:bg-black-light/70 transition-all duration-300"
           >
             {mode === 'login' ? 'Sign Up' : 'Sign In'}
           </Button>

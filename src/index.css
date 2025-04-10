@@ -5,65 +5,65 @@
 
 @layer base {
   :root {
-    --background: 220 70% 13%;
-    --foreground: 45 100% 96%;
+    --background: 0 0% 0%;
+    --foreground: 45 80% 60%;
 
-    --card: 222 47% 15%;
-    --card-foreground: 45 100% 96%;
+    --card: 220 20% 6%;
+    --card-foreground: 45 80% 60%;
 
-    --popover: 222 47% 15%;
-    --popover-foreground: 45 100% 96%;
+    --popover: 220 20% 6%;
+    --popover-foreground: 45 80% 60%;
 
-    --primary: 45 100% 50%;
+    --primary: 45 80% 52%;
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 222 47% 25%;
-    --secondary-foreground: 45 100% 96%;
+    --secondary: 210 20% 10%;
+    --secondary-foreground: 45 80% 60%;
 
-    --muted: 220 40% 20%;
-    --muted-foreground: 45 20% 80%;
+    --muted: 210 20% 12%;
+    --muted-foreground: 45 50% 70%;
 
-    --accent: 45 70% 50%;
+    --accent: 45 70% 52%;
     --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 30% 30%;
-    --input: 220 30% 30%;
-    --ring: 45 100% 50%;
+    --border: 45 40% 40%;
+    --input: 210 20% 12%;
+    --ring: 45 80% 52%;
 
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 220 70% 13%;
-    --foreground: 45 100% 96%;
+    --background: 0 0% 0%;
+    --foreground: 45 80% 60%;
 
-    --card: 222 47% 15%;
-    --card-foreground: 45 100% 96%;
+    --card: 220 20% 6%;
+    --card-foreground: 45 80% 60%;
 
-    --popover: 222 47% 15%;
-    --popover-foreground: 45 100% 96%;
+    --popover: 220 20% 6%;
+    --popover-foreground: 45 80% 60%;
 
-    --primary: 45 100% 50%;
+    --primary: 45 80% 52%;
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 222 47% 25%;
-    --secondary-foreground: 45 100% 96%;
+    --secondary: 210 20% 10%;
+    --secondary-foreground: 45 80% 60%;
 
-    --muted: 220 40% 20%;
-    --muted-foreground: 45 20% 80%;
+    --muted: 210 20% 12%;
+    --muted-foreground: 45 50% 70%;
 
-    --accent: 45 70% 50%;
+    --accent: 45 70% 52%;
     --accent-foreground: 0 0% 0%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 30% 30%;
-    --input: 220 30% 30%;
-    --ring: 45 100% 50%;
+    --border: 45 40% 40%;
+    --input: 210 20% 12%;
+    --ring: 45 80% 52%;
   }
 }
 
@@ -73,7 +73,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
@@ -91,7 +91,7 @@
 }
 
 .futuristic-border {
-  @apply border border-gold/30 rounded-lg shadow-[0_0_10px_rgba(255,215,0,0.3)];
+  @apply border border-gold/30 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.3)];
 }
 
 .glow-effect {
@@ -99,15 +99,15 @@
 }
 
 .futuristic-button {
-  @apply bg-darkBlue text-gold border border-gold/50 hover:border-gold hover:shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-all duration-300;
+  @apply bg-black text-gold border border-gold/50 hover:border-gold hover:shadow-[0_0_10px_rgba(212,175,55,0.5)] transition-all duration-300;
 }
 
 .futuristic-input {
-  @apply bg-darkBlue-light border-gold/30 focus:border-gold focus:ring-gold/50 text-foreground;
+  @apply bg-black-light border-gold/30 focus:border-gold focus:ring-gold/50 text-foreground;
 }
 
 .futuristic-card {
-  @apply bg-gradient-to-b from-darkBlue to-darkBlue-light border border-gold/20 shadow-lg rounded-xl overflow-hidden;
+  @apply bg-gradient-to-b from-black to-black-light border border-gold/20 shadow-lg rounded-xl overflow-hidden;
 }
 
 .gold-text {
@@ -115,5 +115,33 @@
 }
 
 .pattern-bg {
-  @apply bg-darkBlue bg-futuristic-pattern bg-fixed;
+  @apply bg-black bg-futuristic-pattern bg-fixed;
+}
+
+.luxury-heading {
+  @apply font-serif text-gold text-3xl md:text-4xl font-bold;
+}
+
+.luxury-subheading {
+  @apply font-serif text-gold/80 text-xl md:text-2xl;
+}
+
+.luxury-card {
+  @apply bg-black-light border border-gold/30 rounded-xl shadow-lg p-6 hover:border-gold/50 transition-all duration-300;
+}
+
+.luxury-input {
+  @apply bg-black border border-gold/30 rounded-md focus:ring-gold/50 focus:border-gold text-gold-light;
+}
+
+.black-gold-gradient {
+  @apply bg-gradient-to-tr from-black via-black-light to-black border border-gold/20;
+}
+
+.gold-border {
+  @apply border border-gold/30 hover:border-gold/60 transition-all duration-300;
+}
+
+.elegant-shadow {
+  @apply shadow-[0_4px_20px_rgba(212,175,55,0.15)];
 }

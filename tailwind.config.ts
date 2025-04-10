@@ -27,8 +27,13 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				gold: {
 					light: '#FFE9A3',
-					DEFAULT: '#FFD700',
-					dark: '#B8860B',
+					DEFAULT: '#D4AF37',
+					dark: '#996515',
+				},
+				black: {
+					light: '#222222',
+					DEFAULT: '#000000',
+					dark: '#0A0A0A',
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
@@ -114,10 +119,10 @@ export default {
 				},
 				'glow': {
 					'0%, 100%': { 
-						boxShadow: '0 0 5px #FFD700, 0 0 10px #FFD700' 
+						boxShadow: '0 0 5px #D4AF37, 0 0 10px #D4AF37' 
 					},
 					'50%': { 
-						boxShadow: '0 0 20px #FFD700, 0 0 30px #FFD700'
+						boxShadow: '0 0 20px #D4AF37, 0 0 30px #D4AF37'
 					}
 				}
 			},
@@ -129,10 +134,32 @@ export default {
 				'glow': 'glow 2s ease-in-out infinite'
 			},
 			backgroundImage: {
-				'gold-gradient': 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 50%, #FFD700 100%)',
-				'blue-gradient': 'linear-gradient(180deg, #0F1E42 0%, #1A2C5B 100%)',
-				'futuristic-pattern': 'radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 80%)',
-			}
+				'gold-gradient': 'linear-gradient(90deg, #D4AF37 0%, #FFF8DC 50%, #D4AF37 100%)',
+				'black-gradient': 'linear-gradient(180deg, #000000 0%, #222222 100%)',
+				'futuristic-pattern': 'radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 80%)',
+			},
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
+				serif: ['Playfair Display', 'serif'],
+			},
+			typography: {
+				DEFAULT: {
+					css: {
+						maxWidth: '65ch',
+						color: 'hsl(var(--foreground))',
+						'h1,h2,h3,h4,h5,h6': {
+							color: 'hsl(var(--foreground))',
+							fontWeight: '700',
+						},
+						a: {
+							color: 'hsl(var(--primary))',
+							'&:hover': {
+								color: 'hsl(var(--primary))',
+							},
+						},
+					},
+				},
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
