@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -86,27 +87,27 @@
 }
 
 .glass-card {
-  @apply bg-card/80 backdrop-blur-md border border-gold/20 shadow-lg;
+  @apply bg-card/80 backdrop-blur-md border-0 shadow-lg;
 }
 
 .futuristic-border {
-  @apply border border-gold/30 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.3)];
+  @apply border-0 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.3)];
 }
 
 .futuristic-button {
-  @apply bg-black text-gold border border-gold/50 hover:border-gold hover:shadow-[0_0_10px_rgba(212,175,55,0.5)] transition-all duration-300;
+  @apply bg-black text-gold border-0 hover:shadow-[0_0_10px_rgba(212,175,55,0.5)] transition-all duration-300;
 }
 
 .futuristic-input {
-  @apply bg-black-light border-gold/30 focus:border-gold focus:ring-gold/50 text-foreground;
+  @apply bg-black-light border-0 focus:ring-gold/50 text-foreground;
 }
 
 .futuristic-card {
-  @apply bg-gradient-to-b from-black to-black-light border border-gold/20 shadow-lg rounded-xl overflow-hidden;
+  @apply bg-gradient-to-b from-black to-black-light border-0 shadow-lg rounded-xl overflow-hidden;
 }
 
 .gold-text {
-  @apply text-gold font-medium;
+  @apply text-gold font-medium uppercase;
 }
 
 .pattern-bg {
@@ -114,29 +115,54 @@
 }
 
 .luxury-heading {
-  @apply font-serif text-gold text-3xl md:text-4xl font-bold;
+  @apply font-serif text-gold text-3xl md:text-4xl font-bold uppercase tracking-wide;
 }
 
 .luxury-subheading {
-  @apply font-serif text-gold/80 text-xl md:text-2xl;
+  @apply font-serif text-gold/80 text-xl md:text-2xl uppercase tracking-wide;
 }
 
 .luxury-card {
-  @apply bg-black-light border border-gold/30 rounded-xl shadow-lg p-6 hover:border-gold/50 transition-all duration-300;
+  @apply bg-black-light border-0 rounded-xl shadow-lg p-6 transition-all duration-300;
 }
 
 .luxury-input {
-  @apply bg-black border border-gold/30 rounded-md focus:ring-gold/50 focus:border-gold text-gold-light;
+  @apply bg-black border-0 rounded-md focus:ring-gold/50 text-gold-light;
 }
 
 .black-gold-gradient {
-  @apply bg-gradient-to-tr from-black via-black-light to-black border border-gold/20;
+  @apply bg-gradient-to-tr from-black via-black-light to-black border-0;
 }
 
 .gold-border {
-  @apply border border-gold/30 hover:border-gold/60 transition-all duration-300;
+  @apply border-0 transition-all duration-300;
 }
 
 .elegant-shadow {
   @apply shadow-[0_4px_20px_rgba(212,175,55,0.15)];
+}
+
+/* Futuristic styles */
+.neo-glow {
+  @apply shadow-[0_0_15px_rgba(212,175,55,0.2)];
+}
+
+.neo-button {
+  @apply bg-black border-0 text-gold py-3 px-6 rounded-lg hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all duration-300;
+}
+
+.neo-input {
+  @apply bg-black-light/50 border-0 rounded-lg text-gold-light focus:ring-gold/30 focus:shadow-[0_0_10px_rgba(212,175,55,0.3)];
+}
+
+.neo-card {
+  @apply bg-gradient-to-b from-black-light/80 to-black border-0 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.3)] backdrop-blur-sm;
+}
+
+.uppercase-text {
+  @apply uppercase tracking-wider;
+}
+
+.title-text {
+  @apply uppercase tracking-wider font-bold;
 }

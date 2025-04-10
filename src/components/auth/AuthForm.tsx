@@ -24,32 +24,32 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
   return (
     <div className="w-full max-w-md mx-auto px-8">
       <div className="flex justify-center mb-6">
-        <div className="rounded-full bg-gold/20 p-3 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+        <div className="rounded-full bg-gold/20 p-3 shadow-[0_0_15px_rgba(212,175,55,0.3)] neo-glow">
           <Coins className="h-10 w-10 text-gold" />
         </div>
       </div>
       
-      <h2 className="text-2xl font-serif text-center mb-6 text-gold tracking-tight">
+      <h2 className="text-2xl font-serif text-center mb-6 text-gold tracking-wider uppercase font-bold">
         {mode === 'login' ? 'Sign In' : 'Create Account'}
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {mode === 'signup' && (
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-gold-light font-medium tracking-wide">Name</Label>
+            <Label htmlFor="name" className="text-gold-light font-medium tracking-wide uppercase">Name</Label>
             <Input
               id="name"
               placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="bg-black border-gold/30 focus:border-gold text-gold-light font-light"
+              className="neo-input font-light"
             />
           </div>
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-gold-light font-medium tracking-wide">Email</Label>
+          <Label htmlFor="email" className="text-gold-light font-medium tracking-wide uppercase">Email</Label>
           <Input
             id="email"
             type="email"
@@ -57,12 +57,12 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="bg-black border-gold/30 focus:border-gold text-gold-light font-light"
+            className="neo-input font-light"
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-gold-light font-medium tracking-wide">Password</Label>
+          <Label htmlFor="password" className="text-gold-light font-medium tracking-wide uppercase">Password</Label>
           <Input
             id="password"
             type="password"
@@ -70,14 +70,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="bg-black border-gold/30 focus:border-gold text-gold-light font-light"
+            className="neo-input font-light"
           />
         </div>
         
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-gold hover:bg-gold-dark text-black font-medium tracking-wide"
+          className="w-full bg-gold hover:bg-gold-dark text-black font-medium tracking-wide uppercase mt-8 py-6"
         >
           {loading ? (
             <div className="flex items-center justify-center">
