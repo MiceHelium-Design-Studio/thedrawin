@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,6 @@ import { useBackground } from '../context/BackgroundContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Draw, Banner, User } from '../types';
-import { Link } from 'react-router-dom';
 import {
   Select,
   SelectContent,
@@ -85,6 +85,26 @@ const Admin: React.FC = () => {
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  
+  // Add the missing state variables
+  const [newDraw, setNewDraw] = useState<Partial<Draw>>({
+    title: '',
+    description: '',
+    maxParticipants: 100,
+    currentParticipants: 0,
+    ticketPrices: [5, 10, 20],
+    status: 'upcoming',
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 86400000 * 7).toISOString(),
+  });
+  
+  const [newBanner, setNewBanner] = useState<Partial<Banner>>({
+    imageUrl: '',
+    linkUrl: '',
+    active: true,
+  });
+  
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationType, setNotificationType] = useState('system');
@@ -336,7 +356,7 @@ const Admin: React.FC = () => {
 
     try {
       if (sendToAllUsers) {
-        await sendNotification(notificationMessage, notificationType);
+        await sendNotification(notificationMessage, notificationType as 'system' | 'win' | 'draw' | 'promotion');
       } else {
         if (selectedUserIds.length === 0) {
           toast({
@@ -346,7 +366,7 @@ const Admin: React.FC = () => {
           });
           return;
         }
-        await sendNotification(notificationMessage, notificationType, selectedUserIds);
+        await sendNotification(notificationMessage, notificationType as 'system' | 'win' | 'draw' | 'promotion', selectedUserIds);
       }
       
       // Reset form

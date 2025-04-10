@@ -29,7 +29,7 @@ interface NotificationContextType {
   markAsRead: (id: string) => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
-  sendNotification: (message: string, type: string, userIds?: string[]) => Promise<void>;
+  sendNotification: (message: string, type: 'system' | 'win' | 'draw' | 'promotion', userIds?: string[]) => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -87,7 +87,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const sendNotification = async (message: string, type: string, userIds?: string[]) => {
+  const sendNotification = async (message: string, type: 'system' | 'win' | 'draw' | 'promotion', userIds?: string[]) => {
     setLoading(true);
     try {
       // Simulate API call
@@ -98,7 +98,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         userId: userIds ? userIds[0] : 'all', // If userIds is provided, take the first one, otherwise 'all'
         message,
         read: false,
-        type,
+        type: type as 'system' | 'win' | 'draw', // Cast to the valid types in Notification
         createdAt: new Date().toISOString(),
       };
       
