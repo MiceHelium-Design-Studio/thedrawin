@@ -4,10 +4,32 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
-import { Wallet, LogOut, User, DollarSign, Upload } from 'lucide-react';
+import { 
+  Wallet, 
+  LogOut, 
+  User, 
+  DollarSign, 
+  Upload, 
+  CreditCard, 
+  ArrowLeftRight, 
+  Building, 
+  Bank 
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  RadioGroup,
+  RadioGroupItem
+} from "@/components/ui/radio-group";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 const uploadMedia = async (file: File) => {
   return new Promise<{ url: string; name: string }>((resolve) => {
@@ -24,6 +46,8 @@ const uploadMedia = async (file: File) => {
   });
 };
 
+type PaymentMethod = 'regular' | 'card' | 'whish' | 'western-union';
+
 const Profile: React.FC = () => {
   const { user, logout, updateProfile, addFunds, loading } = useAuth();
   const navigate = useNavigate();
@@ -34,6 +58,13 @@ const Profile: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar || '');
   const [amount, setAmount] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('regular');
+  
+  const form = useForm({
+    defaultValues: {
+      paymentMethod: 'regular'
+    }
+  });
   
   if (!user) {
     navigate('/auth');
@@ -87,7 +118,7 @@ const Profile: React.FC = () => {
       setAmount('');
       toast({
         title: 'Funds added',
-        description: `$${amount} has been added to your wallet.`,
+        description: `$${amount} has been added to your wallet using ${getPaymentMethodLabel(paymentMethod)}.`,
       });
     } catch (error) {
       toast({
@@ -122,6 +153,32 @@ const Profile: React.FC = () => {
         description: 'There was an error uploading your avatar.',
       });
       console.error(error);
+    }
+  };
+  
+  const getPaymentMethodLabel = (method: PaymentMethod): string => {
+    switch (method) {
+      case 'card':
+        return 'Credit/Debit Card';
+      case 'whish':
+        return 'Whish Money Transfer';
+      case 'western-union':
+        return 'Western Union / OMT';
+      default:
+        return 'Regular Payment';
+    }
+  };
+  
+  const getPaymentMethodIcon = (method: PaymentMethod) => {
+    switch (method) {
+      case 'card':
+        return <CreditCard className="h-5 w-5 text-gold" />;
+      case 'whish':
+        return <ArrowLeftRight className="h-5 w-5 text-gold" />;
+      case 'western-union':
+        return <Building className="h-5 w-5 text-gold" />;
+      default:
+        return <Bank className="h-5 w-5 text-gold" />;
     }
   };
   
@@ -296,12 +353,69 @@ const Profile: React.FC = () => {
               </Button>
             </div>
             
+            <div>
+              <Label>Payment Method</Label>
+              <Form {...form}>
+                <FormField
+                  control={form.control}
+                  name="paymentMethod"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3 mt-2">
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={(value: PaymentMethod) => {
+                            setPaymentMethod(value);
+                            field.onChange(value);
+                          }}
+                          value={paymentMethod}
+                          className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                        >
+                          <div className="border border-gold/30 rounded-md p-4 hover:bg-black-light/30 cursor-pointer transition-colors">
+                            <FormLabel className="cursor-pointer flex items-center gap-2">
+                              <RadioGroupItem value="regular" className="text-gold" />
+                              <Bank className="h-5 w-5 text-gold" />
+                              <span>Bank Transfer</span>
+                            </FormLabel>
+                          </div>
+                          
+                          <div className="border border-gold/30 rounded-md p-4 hover:bg-black-light/30 cursor-pointer transition-colors">
+                            <FormLabel className="cursor-pointer flex items-center gap-2">
+                              <RadioGroupItem value="card" className="text-gold" />
+                              <CreditCard className="h-5 w-5 text-gold" />
+                              <span>Visa/Mastercard</span>
+                            </FormLabel>
+                          </div>
+                          
+                          <div className="border border-gold/30 rounded-md p-4 hover:bg-black-light/30 cursor-pointer transition-colors">
+                            <FormLabel className="cursor-pointer flex items-center gap-2">
+                              <RadioGroupItem value="whish" className="text-gold" />
+                              <ArrowLeftRight className="h-5 w-5 text-gold" />
+                              <span>Whish Money Transfer</span>
+                            </FormLabel>
+                          </div>
+                          
+                          <div className="border border-gold/30 rounded-md p-4 hover:bg-black-light/30 cursor-pointer transition-colors">
+                            <FormLabel className="cursor-pointer flex items-center gap-2">
+                              <RadioGroupItem value="western-union" className="text-gold" />
+                              <Building className="h-5 w-5 text-gold" />
+                              <span>Western Union / OMT</span>
+                            </FormLabel>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </Form>
+            </div>
+            
             <Button
               onClick={handleAddFunds}
               disabled={loading || !amount}
               className="w-full bg-gold hover:bg-gold-dark text-black"
             >
-              Add Funds
+              {getPaymentMethodIcon(paymentMethod)}
+              Pay with {getPaymentMethodLabel(paymentMethod)}
             </Button>
           </div>
         </CardContent>
