@@ -57,11 +57,11 @@ const Auth: React.FC = () => {
       <div className="max-w-md w-full mx-auto glass-card rounded-xl backdrop-blur-md border border-gold/30 shadow-lg p-6 my-8">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-serif font-bold bg-gold-gradient bg-clip-text text-transparent inline-block">
-            Gold Coin Raffle
+            The Draw Win 2025
           </h1>
           <div className="h-1 w-20 mx-auto my-3 bg-gold/50 rounded-full"></div>
           <p className="text-gold-light/80 mt-2">
-            Enter draws to win valuable gold coins
+            Enter draws to win valuable prizes
           </p>
         </div>
 
@@ -82,7 +82,7 @@ const Auth: React.FC = () => {
       </div>
       
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-        <p className="text-xs text-gold-light/40">© 2025 Gold Coin Raffle</p>
+        <p className="text-xs text-gold-light/40">© 2025 The Draw Win</p>
       </div>
     </div>
   );
