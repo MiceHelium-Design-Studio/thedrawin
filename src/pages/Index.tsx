@@ -1,3 +1,9 @@
 
+import React from 'react';
 import Home from './Home';
-export default Home;
+
+const Index = () => {
+  return <Home />;
+};
+
+export default Index;

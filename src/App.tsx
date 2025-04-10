@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,6 +21,7 @@ import Admin from "./pages/Admin";
 import MediaLibrary from "./pages/MediaLibrary";
 import NotFound from "./pages/NotFound";
 
+// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
 // Protected route component
@@ -37,36 +39,40 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <DrawProvider>
-          <NotificationProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Layout>
-                <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                  
-                  <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                  <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
-                  <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
-                  <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                  <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                  <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
-                  
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Layout>
-            </BrowserRouter>
-          </NotificationProvider>
-        </DrawProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AuthProvider>
+            <DrawProvider>
+              <NotificationProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Layout>
+                    <Routes>
+                      <Route path="/auth" element={<Auth />} />
+                      
+                      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                      <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
+                      <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
+                      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+                      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                      <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
+                      
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Layout>
+                </BrowserRouter>
+              </NotificationProvider>
+            </DrawProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;
