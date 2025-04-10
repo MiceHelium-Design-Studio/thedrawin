@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -86,8 +85,7 @@ const Admin: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   
-  // Add the missing state variables
-  const [newDraw, setNewDraw] = useState<Partial<Draw>>({
+  const [newDraw, setNewDraw] = useState<Omit<Draw, 'id'>>({
     title: '',
     description: '',
     maxParticipants: 100,
@@ -96,9 +94,10 @@ const Admin: React.FC = () => {
     status: 'upcoming',
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 86400000 * 7).toISOString(),
+    bannerImage: '',
   });
   
-  const [newBanner, setNewBanner] = useState<Partial<Banner>>({
+  const [newBanner, setNewBanner] = useState<Omit<Banner, 'id'>>({
     imageUrl: '',
     linkUrl: '',
     active: true,
@@ -107,7 +106,7 @@ const Admin: React.FC = () => {
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   
   const [notificationMessage, setNotificationMessage] = useState('');
-  const [notificationType, setNotificationType] = useState('system');
+  const [notificationType, setNotificationType] = useState<'system' | 'win' | 'draw' | 'promotion'>('system');
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [sendToAllUsers, setSendToAllUsers] = useState(true);
   const [showUserSelector, setShowUserSelector] = useState(false);
@@ -236,6 +235,7 @@ const Admin: React.FC = () => {
         status: 'upcoming',
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 86400000 * 7).toISOString(),
+        bannerImage: '',
       });
       toast({
         title: 'Draw created',
@@ -356,7 +356,7 @@ const Admin: React.FC = () => {
 
     try {
       if (sendToAllUsers) {
-        await sendNotification(notificationMessage, notificationType as 'system' | 'win' | 'draw' | 'promotion');
+        await sendNotification(notificationMessage, notificationType);
       } else {
         if (selectedUserIds.length === 0) {
           toast({
@@ -366,7 +366,7 @@ const Admin: React.FC = () => {
           });
           return;
         }
-        await sendNotification(notificationMessage, notificationType as 'system' | 'win' | 'draw' | 'promotion', selectedUserIds);
+        await sendNotification(notificationMessage, notificationType, selectedUserIds);
       }
       
       // Reset form

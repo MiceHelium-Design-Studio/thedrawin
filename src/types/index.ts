@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -35,7 +36,7 @@ export interface Notification {
   userId: string;
   message: string;
   read: boolean;
-  type: 'win' | 'draw' | 'system';
+  type: 'win' | 'draw' | 'system' | 'promotion';
   createdAt: string;
 }
 

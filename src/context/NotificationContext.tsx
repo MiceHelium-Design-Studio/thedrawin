@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { Notification } from '../types';
 import { useToast } from '@/components/ui/use-toast';
