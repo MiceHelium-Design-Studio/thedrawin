@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,17 +6,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Image, Plus, DollarSign, Calendar } from 'lucide-react';
+import { Image, Plus, DollarSign, Calendar, Upload, FolderOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Draw, Banner } from '../types';
+import { Link } from 'react-router-dom';
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
-  const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, loading } = useDraws();
+  const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, uploadMedia, loading } = useDraws();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [newDraw, setNewDraw] = useState<Omit<Draw, 'id'>>({
     title: '',
@@ -36,11 +37,34 @@ const Admin: React.FC = () => {
     active: true,
   });
   
-  // Check if user is admin
   if (!user?.isAdmin) {
     navigate('/');
     return null;
   }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      const uploadedItem = await uploadMedia(files[0]);
+      toast({
+        title: 'File uploaded',
+        description: `${uploadedItem.name} has been uploaded successfully.`,
+      });
+      
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description: 'There was an error uploading your file.',
+      });
+      console.error(error);
+    }
+  };
   
   const handleCreateDraw = async () => {
     try {
@@ -128,9 +152,10 @@ const Admin: React.FC = () => {
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
       
       <Tabs defaultValue="draws">
-        <TabsList className="grid grid-cols-2 mb-6">
+        <TabsList className="grid grid-cols-3 mb-6">
           <TabsTrigger value="draws">Draws</TabsTrigger>
           <TabsTrigger value="banners">Banners</TabsTrigger>
+          <TabsTrigger value="media">Media</TabsTrigger>
         </TabsList>
         
         <TabsContent value="draws">
@@ -390,6 +415,65 @@ const Admin: React.FC = () => {
               ))}
             </div>
           )}
+        </TabsContent>
+        
+        <TabsContent value="media">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Media Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-md">Upload Image File</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <Button 
+                          onClick={() => fileInputRef.current?.click()} 
+                          className="w-full bg-gold hover:bg-gold-dark text-black"
+                          disabled={loading}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Image File
+                        </Button>
+                        <input 
+                          type="file" 
+                          ref={fileInputRef} 
+                          className="hidden"
+                          accept="image/*" 
+                          onChange={handleFileChange} 
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-md">Media Library</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <p className="text-sm">
+                          Access the full media library with more advanced features for managing your media files.
+                        </p>
+                        <Button 
+                          onClick={() => navigate('/media')}
+                          variant="outline"
+                          className="w-full border-gold/30 text-gold hover:bg-gold/10"
+                        >
+                          <FolderOpen className="h-4 w-4 mr-2" />
+                          Open Media Library
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

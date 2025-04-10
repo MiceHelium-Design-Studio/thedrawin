@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Award, Bell, User, Settings, Image } from 'lucide-react';
+import { Home, Award, Bell, User, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { cn } from '../../lib/utils';
@@ -25,7 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 dark:bg-gray-900 dark:border-gray-800">
-          <div className="grid grid-cols-6 h-16">
+          <div className="grid grid-cols-5 h-16">
             <NavLink
               to="/"
               className={({ isActive }) =>
@@ -74,21 +74,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </span>
               )}
               <span>Alerts</span>
-            </NavLink>
-            
-            <NavLink
-              to="/media"
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center justify-center text-xs",
-                  isActive
-                    ? "text-gold font-medium"
-                    : "text-gray-500 hover:text-gold"
-                )
-              }
-            >
-              <Image className="h-6 w-6 mb-1" />
-              <span>Media</span>
             </NavLink>
             
             <NavLink

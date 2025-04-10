@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -60,6 +59,7 @@ const App = () => {
                       <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                      {/* Keep the media route but it won't be in the navigation */}
                       <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
                       
                       <Route path="*" element={<NotFound />} />
