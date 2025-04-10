@@ -6,9 +6,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Image, Plus, DollarSign, Calendar, Upload, FolderOpen } from 'lucide-react';
+import { Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
+import { useBackground } from '../context/BackgroundContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Draw, Banner } from '../types';
 import { Link } from 'react-router-dom';
@@ -16,10 +17,12 @@ import { Link } from 'react-router-dom';
 const Admin: React.FC = () => {
   const { user } = useAuth();
   const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, uploadMedia, loading } = useDraws();
+  const { authBackgroundImage, setAuthBackgroundImage } = useBackground();
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
+  const bgImageFileInputRef = useRef<HTMLInputElement>(null);
   
   const [newDraw, setNewDraw] = useState<Omit<Draw, 'id'>>({
     title: '',
@@ -92,6 +95,33 @@ const Admin: React.FC = () => {
         variant: 'destructive',
         title: 'Upload failed',
         description: 'There was an error uploading your banner image.',
+      });
+      console.error(error);
+    }
+  };
+  
+  const handleBgImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      const uploadedItem = await uploadMedia(files[0]);
+      
+      setAuthBackgroundImage(uploadedItem.url);
+      
+      toast({
+        title: 'Background image uploaded',
+        description: `${uploadedItem.name} has been set as the login background image.`,
+      });
+      
+      if (bgImageFileInputRef.current) {
+        bgImageFileInputRef.current.value = '';
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description: 'There was an error uploading your background image.',
       });
       console.error(error);
     }
@@ -183,10 +213,11 @@ const Admin: React.FC = () => {
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
       
       <Tabs defaultValue="draws">
-        <TabsList className="grid grid-cols-3 mb-6">
+        <TabsList className="grid grid-cols-4 mb-6">
           <TabsTrigger value="draws">Draws</TabsTrigger>
           <TabsTrigger value="banners">Banners</TabsTrigger>
           <TabsTrigger value="media">Media</TabsTrigger>
+          <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
         
         <TabsContent value="draws">
@@ -530,6 +561,91 @@ const Admin: React.FC = () => {
                     </CardContent>
                   </Card>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="appearance">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Appearance Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Login Background Image</h3>
+                  
+                  <div className="mb-4">
+                    <Label htmlFor="uploadBgImage">Upload New Background Image</Label>
+                    <div className="flex gap-2 items-center mt-1 mb-4">
+                      <Button 
+                        onClick={() => bgImageFileInputRef.current?.click()} 
+                        variant="outline" 
+                        className="w-full border-gold/30 text-gold hover:bg-gold/10"
+                        disabled={loading}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Background Image
+                      </Button>
+                      <input 
+                        type="file" 
+                        ref={bgImageFileInputRef} 
+                        className="hidden"
+                        accept="image/*" 
+                        onChange={handleBgImageFileUpload} 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="bgImageUrl">Current Background Image URL</Label>
+                    <div className="relative">
+                      <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        id="bgImageUrl"
+                        value={authBackgroundImage}
+                        onChange={(e) => setAuthBackgroundImage(e.target.value)}
+                        className="pl-10 border-gold/30 focus:border-gold"
+                      />
+                    </div>
+                    
+                    {authBackgroundImage && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium mb-2">Preview:</p>
+                        <div className="relative w-full h-40 rounded-md overflow-hidden border border-gray-200">
+                          <div 
+                            className="absolute inset-0 bg-cover bg-center" 
+                            style={{ 
+                              backgroundImage: `url(${authBackgroundImage})`,
+                              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                              backgroundBlendMode: 'overlay'
+                            }}
+                          ></div>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-4 rounded-md shadow">
+                              <h2 className="text-lg font-bold text-gold">Login Preview</h2>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={() => {
+                    navigate('/auth');
+                    toast({
+                      title: 'Previewing login page',
+                      description: 'You are now viewing the login page with the current background.',
+                    });
+                  }}
+                  className="bg-gold hover:bg-gold-dark text-black"
+                >
+                  <PaintBucket className="h-4 w-4 mr-2" />
+                  Preview Login Page
+                </Button>
               </div>
             </CardContent>
           </Card>

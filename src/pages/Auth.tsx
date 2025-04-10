@@ -4,6 +4,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../context/AuthContext';
+import { useBackground } from '../context/BackgroundContext';
 import { useToast } from '@/components/ui/use-toast';
 
 const Auth: React.FC = () => {
@@ -11,6 +12,7 @@ const Auth: React.FC = () => {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { authBackgroundImage } = useBackground();
 
   // Redirect if user is already logged in
   if (user) {
@@ -44,8 +46,15 @@ const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center p-4 bg-gray-50 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 my-8">
+    <div 
+      className="min-h-screen flex flex-col justify-center p-4 bg-cover bg-center" 
+      style={{ 
+        backgroundImage: `url(${authBackgroundImage})`,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundBlendMode: 'overlay'
+      }}
+    >
+      <div className="max-w-md w-full mx-auto bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 my-8">
         <div className="mb-4 text-center">
           <h1 className="text-3xl font-bold bg-gold-gradient bg-clip-text text-transparent inline-block">
             Gold Coin Raffle

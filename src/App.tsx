@@ -8,6 +8,7 @@ import Layout from "./components/layout/Layout";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { DrawProvider } from "./context/DrawContext";
 import { NotificationProvider } from "./context/NotificationContext";
+import { BackgroundProvider } from "./context/BackgroundContext";
 
 // Pages
 import Index from "./pages/Home";
@@ -46,26 +47,28 @@ const App = () => {
           <AuthProvider>
             <DrawProvider>
               <NotificationProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                  <Layout>
-                    <Routes>
-                      <Route path="/auth" element={<Auth />} />
-                      
-                      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                      <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
-                      <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
-                      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-                      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                      {/* Keep the media route but it won't be in the navigation */}
-                      <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
-                      
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Layout>
-                </BrowserRouter>
+                <BackgroundProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <Layout>
+                      <Routes>
+                        <Route path="/auth" element={<Auth />} />
+                        
+                        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                        <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
+                        <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
+                        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+                        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                        {/* Keep the media route but it won't be in the navigation */}
+                        <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
+                        
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Layout>
+                  </BrowserRouter>
+                </BackgroundProvider>
               </NotificationProvider>
             </DrawProvider>
           </AuthProvider>
