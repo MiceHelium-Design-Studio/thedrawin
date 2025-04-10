@@ -37,7 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )
               }
             >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50 glow-effect")}>
+              <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50")}>
                 <Home className="h-5 w-5 mb-1" />
               </div>
               <span>Home</span>
@@ -54,7 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )
               }
             >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50 glow-effect")}>
+              <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50")}>
                 <Award className="h-5 w-5 mb-1" />
               </div>
               <span>Winners</span>
@@ -71,7 +71,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )
               }
             >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50 glow-effect")}>
+              <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50")}>
                 <Bell className="h-5 w-5 mb-1" />
                 {unreadCount > 0 && (
                   <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center text-[10px] border border-black">
@@ -93,7 +93,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )
               }
             >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50 glow-effect")}>
+              <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50")}>
                 <User className="h-5 w-5 mb-1" />
               </div>
               <span>Profile</span>
@@ -111,12 +111,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   )
                 }
               >
-                <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50 glow-effect")}>
+                <div className={cn("p-1.5 rounded-full transition-all duration-300", isActive && "bg-black-light/50")}>
                   <Settings className="h-5 w-5 mb-1" />
                 </div>
                 <span>Admin</span>
-              </NavLink>
-            )}
+              </div>
+            </NavLink>
           </div>
         </nav>
       )}
