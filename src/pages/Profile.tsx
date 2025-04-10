@@ -1,19 +1,34 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
-import { Wallet, LogOut, User, DollarSign } from 'lucide-react';
+import { Wallet, LogOut, User, DollarSign, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+
+const uploadMedia = async (file: File) => {
+  return new Promise<{ url: string; name: string }>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setTimeout(() => {
+        resolve({
+          url: reader.result as string,
+          name: file.name
+        });
+      }, 500);
+    };
+    reader.readAsDataURL(file);
+  });
+};
 
 const Profile: React.FC = () => {
   const { user, logout, updateProfile, addFunds, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [name, setName] = useState(user?.name || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar || '');
@@ -83,6 +98,32 @@ const Profile: React.FC = () => {
       console.error(error);
     }
   };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      const uploadedItem = await uploadMedia(files[0]);
+      setAvatarUrl(uploadedItem.url);
+      
+      toast({
+        title: 'Image uploaded',
+        description: `${uploadedItem.name} has been uploaded successfully.`,
+      });
+      
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description: 'There was an error uploading your avatar.',
+      });
+      console.error(error);
+    }
+  };
   
   return (
     <div className="container mx-auto px-4 py-6">
@@ -91,12 +132,26 @@ const Profile: React.FC = () => {
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="text-lg bg-gold/20">
-                {user.name?.slice(0, 2) || 'U'}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback className="text-lg bg-gold/20">
+                  {user.name?.slice(0, 2) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              {isEditing && (
+                <div className="absolute -bottom-2 -right-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="rounded-full w-8 h-8 p-0 bg-background border-gold/30"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4 text-gold" />
+                  </Button>
+                </div>
+              )}
+            </div>
             
             <div className="flex-1">
               {isEditing ? (
@@ -113,12 +168,37 @@ const Profile: React.FC = () => {
                   
                   <div>
                     <Label htmlFor="avatar">Avatar URL</Label>
-                    <Input
-                      id="avatar"
-                      value={avatarUrl}
-                      onChange={(e) => setAvatarUrl(e.target.value)}
-                      className="border-gold/30 focus:border-gold"
-                    />
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          id="avatar"
+                          value={avatarUrl}
+                          onChange={(e) => setAvatarUrl(e.target.value)}
+                          className="border-gold/30 focus:border-gold"
+                          placeholder="URL will appear here after upload"
+                        />
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="border-gold/30 text-gold hover:text-gold-dark"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload
+                      </Button>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                      />
+                    </div>
+                    {avatarUrl && isEditing && (
+                      <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200">
+                        <img src={avatarUrl} alt="Avatar preview" className="w-full object-cover" />
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex gap-2">
