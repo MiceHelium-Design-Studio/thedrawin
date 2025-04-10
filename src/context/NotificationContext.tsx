@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import { Notification } from '../types';
+import { useToast } from '@/components/ui/use-toast';
 
 // Mock data until we integrate with Supabase
 const MOCK_NOTIFICATIONS: Notification[] = [
@@ -28,6 +29,7 @@ interface NotificationContextType {
   markAsRead: (id: string) => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
+  sendNotification: (message: string, type: string, userIds?: string[]) => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -35,6 +37,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const markAsRead = async (id: string) => {
     setLoading(true);
@@ -84,6 +87,43 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
+  const sendNotification = async (message: string, type: string, userIds?: string[]) => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const newNotification: Notification = {
+        id: Date.now().toString(),
+        userId: userIds ? userIds[0] : 'all', // If userIds is provided, take the first one, otherwise 'all'
+        message,
+        read: false,
+        type,
+        createdAt: new Date().toISOString(),
+      };
+      
+      setNotifications(prev => [newNotification, ...prev]);
+      
+      toast({
+        title: "Notification sent",
+        description: userIds 
+          ? `Sent to ${userIds.length} specific user(s)` 
+          : "Sent to all users",
+      });
+      
+    } catch (error) {
+      console.error('Send notification error:', error);
+      toast({
+        variant: 'destructive',
+        title: "Failed to send notification",
+        description: "There was an error sending the notification.",
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <NotificationContext.Provider
       value={{
@@ -91,7 +131,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         loading,
         markAsRead,
         deleteNotification,
-        markAllAsRead
+        markAllAsRead,
+        sendNotification
       }}
     >
       {children}

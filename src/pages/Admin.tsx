@@ -8,15 +8,34 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
+import { 
+  Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit, 
+  Users, UserCheck, UserX, Search, Filter, Bell, BellRing, MessageSquare, Send 
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
 import { useBackground } from '../context/BackgroundContext';
+import { useNotifications } from '../context/NotificationContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Draw, Banner, User } from '../types';
 import { Link } from 'react-router-dom';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-// Mock users data - would be replaced with actual data from a database
 const mockUsers: User[] = [
   {
     id: '1',
@@ -56,49 +75,34 @@ const Admin: React.FC = () => {
   const { user } = useAuth();
   const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, uploadMedia, loading } = useDraws();
   const { authBackgroundImage, setAuthBackgroundImage } = useBackground();
+  const { sendNotification, notifications } = useNotifications();
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
   const bgImageFileInputRef = useRef<HTMLInputElement>(null);
   
-  // State for users management
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   
-  // Other state variables
-  const [newDraw, setNewDraw] = useState<Omit<Draw, 'id'>>({
-    title: '',
-    description: '',
-    maxParticipants: 100,
-    currentParticipants: 0,
-    ticketPrices: [5, 10, 20],
-    status: 'upcoming',
-    startDate: new Date().toISOString(),
-    endDate: new Date(Date.now() + 86400000 * 7).toISOString(),
-  });
-  
-  const [newBanner, setNewBanner] = useState<Omit<Banner, 'id'>>({
-    imageUrl: '',
-    linkUrl: '',
-    active: true,
-  });
-  
-  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState('system');
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [sendToAllUsers, setSendToAllUsers] = useState(true);
+  const [showUserSelector, setShowUserSelector] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   
   if (!user?.isAdmin) {
     navigate('/');
     return null;
   }
 
-  // Filter users based on search term
   const filteredUsers = users.filter(user => 
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
-  // Function to toggle admin status
   const toggleAdminStatus = (userId: string) => {
     setUsers(prevUsers => 
       prevUsers.map(u => 
@@ -320,15 +324,72 @@ const Admin: React.FC = () => {
     setNewDraw(prev => ({ ...prev, ticketPrices: prices }));
   };
   
+  const handleSendNotification = async () => {
+    if (!notificationMessage.trim()) {
+      toast({
+        variant: 'destructive',
+        title: "Message required",
+        description: "Please enter a notification message.",
+      });
+      return;
+    }
+
+    try {
+      if (sendToAllUsers) {
+        await sendNotification(notificationMessage, notificationType);
+      } else {
+        if (selectedUserIds.length === 0) {
+          toast({
+            variant: 'destructive',
+            title: "No users selected",
+            description: "Please select at least one user to send the notification to.",
+          });
+          return;
+        }
+        await sendNotification(notificationMessage, notificationType, selectedUserIds);
+      }
+      
+      // Reset form
+      setNotificationMessage('');
+      setNotificationType('system');
+      setSelectedUserIds([]);
+      setSendToAllUsers(true);
+      setShowUserSelector(false);
+      setDialogOpen(false);
+      
+    } catch (error) {
+      console.error('Error sending notification:', error);
+    }
+  };
+  
+  const handleUserSelectionChange = (userId: string) => {
+    setSelectedUserIds(prev => {
+      if (prev.includes(userId)) {
+        return prev.filter(id => id !== userId);
+      } else {
+        return [...prev, userId];
+      }
+    });
+  };
+  
+  const toggleSendToAllUsers = () => {
+    setSendToAllUsers(!sendToAllUsers);
+    setShowUserSelector(!sendToAllUsers);
+    if (sendToAllUsers) {
+      setSelectedUserIds([]);
+    }
+  };
+  
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
       
       <Tabs defaultValue="draws">
-        <TabsList className="grid grid-cols-5 mb-6">
+        <TabsList className="grid grid-cols-6 mb-6">
           <TabsTrigger value="draws">Draws</TabsTrigger>
           <TabsTrigger value="banners">Banners</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="media">Media</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
@@ -749,6 +810,206 @@ const Admin: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="notifications">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Push Notifications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="message">Notification Message</Label>
+                  <Textarea
+                    id="message"
+                    value={notificationMessage}
+                    onChange={(e) => setNotificationMessage(e.target.value)}
+                    placeholder="Enter your notification message..."
+                    className="border-gold/30 focus:border-gold"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="type">Notification Type</Label>
+                  <Select
+                    value={notificationType}
+                    onValueChange={(value) => setNotificationType(value)}
+                  >
+                    <SelectTrigger className="border-gold/30 focus:border-gold">
+                      <SelectValue placeholder="Select notification type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="system">
+                        <div className="flex items-center">
+                          <Bell className="h-4 w-4 mr-2 text-blue-500" />
+                          <span>System</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="draw">
+                        <div className="flex items-center">
+                          <BellRing className="h-4 w-4 mr-2 text-green-500" />
+                          <span>Draw</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="promotion">
+                        <div className="flex items-center">
+                          <DollarSign className="h-4 w-4 mr-2 text-gold" />
+                          <span>Promotion</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="sendToAll"
+                    checked={sendToAllUsers}
+                    onCheckedChange={toggleSendToAllUsers}
+                    className={sendToAllUsers ? "bg-gold" : ""}
+                  />
+                  <Label htmlFor="sendToAll">Send to all users</Label>
+                </div>
+                
+                {showUserSelector && (
+                  <div>
+                    <Label className="mb-2 block">Select recipients</Label>
+                    <div className="mb-2 flex justify-between">
+                      <p className="text-sm text-gray-500">
+                        {selectedUserIds.length} users selected
+                      </p>
+                      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="border-gold/30 text-gold hover:bg-gold/10"
+                          >
+                            <Users className="h-4 w-4 mr-2" />
+                            Select Users
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Select Recipients</DialogTitle>
+                            <DialogDescription>
+                              Choose which users will receive this notification.
+                            </DialogDescription>
+                          </DialogHeader>
+                          
+                          <div className="max-h-80 overflow-y-auto py-4">
+                            <div className="space-y-2">
+                              {users.map(user => (
+                                <div key={user.id} className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`user-${user.id}`}
+                                    checked={selectedUserIds.includes(user.id)}
+                                    onChange={() => handleUserSelectionChange(user.id)}
+                                    className="h-4 w-4 text-gold rounded border-gold/30 focus:ring-gold/30"
+                                  />
+                                  <label htmlFor={`user-${user.id}`} className="text-sm flex items-center space-x-2">
+                                    <div className="h-6 w-6 rounded-full overflow-hidden bg-gold/10">
+                                      {user.avatar ? (
+                                        <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                                      ) : (
+                                        <Users className="h-4 w-4 m-1 text-gold/70" />
+                                      )}
+                                    </div>
+                                    <span>{user.name || user.email}</span>
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <DialogFooter>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setDialogOpen(false)}
+                              className="border-gold/30 text-gold hover:bg-gold/10"
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={() => setDialogOpen(false)}
+                              className="bg-gold hover:bg-gold-dark text-black"
+                            >
+                              Done
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
+                )}
+                
+                <Button
+                  onClick={handleSendNotification}
+                  disabled={!notificationMessage.trim() || (!sendToAllUsers && selectedUserIds.length === 0) || loading}
+                  className="w-full bg-gold hover:bg-gold-dark text-black"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Notification
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <h2 className="text-lg font-semibold mb-4">Recent Notifications</h2>
+          
+          {notifications.length === 0 ? (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-gray-500">No notifications sent yet.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {notifications.slice(0, 10).map(notification => (
+                <Card key={notification.id}>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-start gap-3">
+                        {notification.type === 'system' ? (
+                          <Bell className="h-5 w-5 mt-1 text-blue-500" />
+                        ) : notification.type === 'draw' ? (
+                          <BellRing className="h-5 w-5 mt-1 text-green-500" />
+                        ) : (
+                          <DollarSign className="h-5 w-5 mt-1 text-gold" />
+                        )}
+                        <div>
+                          <p className="font-medium">{notification.message}</p>
+                          <div className="flex text-sm text-gray-500 mt-1">
+                            <p>Sent to: {notification.userId === 'all' ? 'All Users' : `User ${notification.userId}`}</p>
+                            <span className="mx-2">•</span>
+                            <p>{new Date(notification.createdAt).toLocaleString()}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs border-red-500 text-red-500 hover:bg-red-50"
+                          onClick={() => {
+                            toast({
+                              title: "This is just a demo",
+                              description: "In a real implementation, this would delete the notification."
+                            });
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="media">
