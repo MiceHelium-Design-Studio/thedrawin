@@ -13,7 +13,7 @@ import {
   CreditCard, 
   ArrowLeftRight, 
   Building, 
-  Bank 
+  Banknote 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -178,7 +178,7 @@ const Profile: React.FC = () => {
       case 'western-union':
         return <Building className="h-5 w-5 text-gold" />;
       default:
-        return <Bank className="h-5 w-5 text-gold" />;
+        return <Banknote className="h-5 w-5 text-gold" />;
     }
   };
   
@@ -373,7 +373,7 @@ const Profile: React.FC = () => {
                           <div className="border border-gold/30 rounded-md p-4 hover:bg-black-light/30 cursor-pointer transition-colors">
                             <FormLabel className="cursor-pointer flex items-center gap-2">
                               <RadioGroupItem value="regular" className="text-gold" />
-                              <Bank className="h-5 w-5 text-gold" />
+                              <Banknote className="h-5 w-5 text-gold" />
                               <span>Bank Transfer</span>
                             </FormLabel>
                           </div>
