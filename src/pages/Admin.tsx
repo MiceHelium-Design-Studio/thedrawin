@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket } from 'lucide-react';
+import { Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
 import { useBackground } from '../context/BackgroundContext';
@@ -40,6 +41,8 @@ const Admin: React.FC = () => {
     linkUrl: '',
     active: true,
   });
+  
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   
   if (!user?.isAdmin) {
     navigate('/');
@@ -77,10 +80,17 @@ const Admin: React.FC = () => {
     try {
       const uploadedItem = await uploadMedia(files[0]);
       
-      setNewBanner(prev => ({
-        ...prev,
-        imageUrl: uploadedItem.url
-      }));
+      if (editingBanner) {
+        setEditingBanner({
+          ...editingBanner,
+          imageUrl: uploadedItem.url
+        });
+      } else {
+        setNewBanner(prev => ({
+          ...prev,
+          imageUrl: uploadedItem.url
+        }));
+      }
       
       toast({
         title: 'Banner image uploaded',
@@ -176,6 +186,34 @@ const Admin: React.FC = () => {
     }
   };
   
+  const handleUpdateBanner = async () => {
+    if (!editingBanner) return;
+    
+    try {
+      await updateBanner(editingBanner.id, editingBanner);
+      setEditingBanner(null);
+      toast({
+        title: 'Banner updated',
+        description: 'The banner has been updated successfully.',
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Update failed',
+        description: 'There was an error updating the banner.',
+      });
+      console.error(error);
+    }
+  };
+  
+  const handleEditBanner = (banner: Banner) => {
+    setEditingBanner(banner);
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingBanner(null);
+  };
+  
   const handleToggleBannerStatus = async (banner: Banner) => {
     try {
       await updateBanner(banner.id, { active: !banner.active });
@@ -199,7 +237,18 @@ const Admin: React.FC = () => {
   
   const handleBannerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNewBanner(prev => ({ ...prev, [name]: value }));
+    
+    if (editingBanner) {
+      setEditingBanner(prev => ({
+        ...prev!,
+        [name]: value
+      }));
+    } else {
+      setNewBanner(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
   
   const handleTicketPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -389,7 +438,7 @@ const Admin: React.FC = () => {
         <TabsContent value="banners">
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-lg">Add New Banner</CardTitle>
+              <CardTitle className="text-lg">{editingBanner ? 'Edit Banner' : 'Add New Banner'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -422,15 +471,19 @@ const Admin: React.FC = () => {
                     <Input
                       id="imageUrl"
                       name="imageUrl"
-                      value={newBanner.imageUrl}
+                      value={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl}
                       onChange={handleBannerInputChange}
                       className="pl-10 border-gold/30 focus:border-gold"
                       placeholder="Image URL will appear here after upload"
                     />
                   </div>
-                  {newBanner.imageUrl && (
+                  {(editingBanner?.imageUrl || newBanner.imageUrl) && (
                     <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200">
-                      <img src={newBanner.imageUrl} alt="Banner preview" className="w-full object-cover" />
+                      <img 
+                        src={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl} 
+                        alt="Banner preview" 
+                        className="w-full object-cover" 
+                      />
                     </div>
                   )}
                 </div>
@@ -440,20 +493,40 @@ const Admin: React.FC = () => {
                   <Input
                     id="linkUrl"
                     name="linkUrl"
-                    value={newBanner.linkUrl}
+                    value={editingBanner ? editingBanner.linkUrl : newBanner.linkUrl}
                     onChange={handleBannerInputChange}
                     className="border-gold/30 focus:border-gold"
                   />
                 </div>
                 
-                <Button
-                  onClick={handleCreateBanner}
-                  disabled={!newBanner.imageUrl || !newBanner.linkUrl || loading}
-                  className="w-full bg-gold hover:bg-gold-dark text-black"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Banner
-                </Button>
+                {editingBanner ? (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleUpdateBanner}
+                      disabled={!editingBanner.imageUrl || !editingBanner.linkUrl || loading}
+                      className="flex-1 bg-gold hover:bg-gold-dark text-black"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Banner
+                    </Button>
+                    <Button
+                      onClick={handleCancelEdit}
+                      variant="outline"
+                      className="border-gold/30 text-gold hover:bg-gold/10"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleCreateBanner}
+                    disabled={!newBanner.imageUrl || !newBanner.linkUrl || loading}
+                    className="w-full bg-gold hover:bg-gold-dark text-black"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Banner
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -496,6 +569,16 @@ const Admin: React.FC = () => {
                             }`}
                           >
                             {banner.active ? 'Disable' : 'Enable'}
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleEditBanner(banner)}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs border-gold/30 text-gold hover:bg-gold/10"
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit
                           </Button>
                         </div>
                       </div>
