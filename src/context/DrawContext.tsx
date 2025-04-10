@@ -18,7 +18,7 @@ const MOCK_DRAWS: Draw[] = [
   {
     id: '2',
     title: 'VIP Gold Coin Draw',
-    description: 'Exclusive draw for a rare collector's gold coin.',
+    description: 'Exclusive draw for a rare collector\'s gold coin.',
     maxParticipants: 50,
     currentParticipants: 12,
     ticketPrices: [20],
@@ -28,7 +28,7 @@ const MOCK_DRAWS: Draw[] = [
   },
   {
     id: '3',
-    title: 'Last Week's Gold Rush',
+    title: 'Last Week\'s Gold Rush',
     description: 'Congratulations to our winner!',
     maxParticipants: 100,
     currentParticipants: 100,
