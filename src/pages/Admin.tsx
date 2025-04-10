@@ -19,6 +19,7 @@ const Admin: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerFileInputRef = useRef<HTMLInputElement>(null);
   
   const [newDraw, setNewDraw] = useState<Omit<Draw, 'id'>>({
     title: '',
@@ -61,6 +62,36 @@ const Admin: React.FC = () => {
         variant: 'destructive',
         title: 'Upload failed',
         description: 'There was an error uploading your file.',
+      });
+      console.error(error);
+    }
+  };
+  
+  const handleBannerFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      const uploadedItem = await uploadMedia(files[0]);
+      
+      setNewBanner(prev => ({
+        ...prev,
+        imageUrl: uploadedItem.url
+      }));
+      
+      toast({
+        title: 'Banner image uploaded',
+        description: `${uploadedItem.name} has been uploaded successfully and set as the banner image.`,
+      });
+      
+      if (bannerFileInputRef.current) {
+        bannerFileInputRef.current.value = '';
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description: 'There was an error uploading your banner image.',
       });
       console.error(error);
     }
@@ -332,6 +363,28 @@ const Admin: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 <div>
+                  <Label htmlFor="uploadBannerImage">Upload Banner Image</Label>
+                  <div className="flex gap-2 items-center mt-1 mb-4">
+                    <Button 
+                      onClick={() => bannerFileInputRef.current?.click()} 
+                      variant="outline" 
+                      className="w-full border-gold/30 text-gold hover:bg-gold/10"
+                      disabled={loading}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Banner Image
+                    </Button>
+                    <input 
+                      type="file" 
+                      ref={bannerFileInputRef} 
+                      className="hidden"
+                      accept="image/*" 
+                      onChange={handleBannerFileUpload} 
+                    />
+                  </div>
+                </div>
+                
+                <div>
                   <Label htmlFor="imageUrl">Image URL</Label>
                   <div className="relative">
                     <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -341,8 +394,14 @@ const Admin: React.FC = () => {
                       value={newBanner.imageUrl}
                       onChange={handleBannerInputChange}
                       className="pl-10 border-gold/30 focus:border-gold"
+                      placeholder="Image URL will appear here after upload"
                     />
                   </div>
+                  {newBanner.imageUrl && (
+                    <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200">
+                      <img src={newBanner.imageUrl} alt="Banner preview" className="w-full object-cover" />
+                    </div>
+                  )}
                 </div>
                 
                 <div>
