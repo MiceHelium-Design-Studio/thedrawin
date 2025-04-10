@@ -17,6 +17,7 @@ import Winners from "./pages/Winners";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
+import MediaLibrary from "./pages/MediaLibrary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ const App = () => (
                   <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                   <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                   <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                  <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>

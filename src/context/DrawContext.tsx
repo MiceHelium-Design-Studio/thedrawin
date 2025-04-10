@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState } from 'react';
-import { Draw, Ticket, Banner } from '../types';
+import { Draw, Ticket, Banner, MediaItem } from '../types';
 
 // Mock data until we integrate with Supabase
 const MOCK_DRAWS: Draw[] = [
@@ -49,16 +48,47 @@ const MOCK_BANNERS: Banner[] = [
   }
 ];
 
+// Mock media library data
+const MOCK_MEDIA: MediaItem[] = [
+  {
+    id: '1',
+    name: 'Gold Coin',
+    url: '/placeholder.svg',
+    type: 'image',
+    size: 1024 * 50, // 50KB
+    uploadDate: new Date().toISOString(),
+  },
+  {
+    id: '2',
+    name: 'Banner Image',
+    url: '/placeholder.svg',
+    type: 'image',
+    size: 1024 * 120, // 120KB
+    uploadDate: new Date(Date.now() - 86400000).toISOString(),
+  },
+  {
+    id: '3',
+    name: 'Prize Photo',
+    url: '/placeholder.svg',
+    type: 'image',
+    size: 1024 * 85, // 85KB
+    uploadDate: new Date(Date.now() - 86400000 * 3).toISOString(),
+  }
+];
+
 interface DrawContextType {
   draws: Draw[];
   tickets: Ticket[];
   banners: Banner[];
+  media: MediaItem[];
   loading: boolean;
   createDraw: (draw: Omit<Draw, 'id'>) => Promise<void>;
   updateDraw: (id: string, draw: Partial<Draw>) => Promise<void>;
   buyTicket: (drawId: string, number: number, price: number) => Promise<void>;
   createBanner: (banner: Omit<Banner, 'id'>) => Promise<void>;
   updateBanner: (id: string, banner: Partial<Banner>) => Promise<void>;
+  uploadMedia: (file: File) => Promise<MediaItem>;
+  deleteMedia: (id: string) => Promise<void>;
 }
 
 const DrawContext = createContext<DrawContextType | undefined>(undefined);
@@ -67,6 +97,7 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [draws, setDraws] = useState<Draw[]>(MOCK_DRAWS);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [banners, setBanners] = useState<Banner[]>(MOCK_BANNERS);
+  const [media, setMedia] = useState<MediaItem[]>(MOCK_MEDIA);
   const [loading, setLoading] = useState(false);
 
   const createDraw = async (draw: Omit<Draw, 'id'>) => {
@@ -168,18 +199,62 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const uploadMedia = async (file: File): Promise<MediaItem> => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // In a real app, we would upload to a storage solution here
+      // For now, we'll create a mock URL
+      const newMedia: MediaItem = {
+        id: Date.now().toString(),
+        name: file.name,
+        url: '/placeholder.svg', // Using placeholder as we can't really upload
+        type: file.type.startsWith('image/') ? 'image' : 'document',
+        size: file.size,
+        uploadDate: new Date().toISOString(),
+      };
+      
+      setMedia(prev => [...prev, newMedia]);
+      return newMedia;
+    } catch (error) {
+      console.error('Upload media error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteMedia = async (id: string): Promise<void> => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setMedia(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Delete media error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <DrawContext.Provider
       value={{
         draws,
         tickets,
         banners,
+        media,
         loading,
         createDraw,
         updateDraw,
         buyTicket,
         createBanner,
-        updateBanner
+        updateBanner,
+        uploadMedia,
+        deleteMedia
       }}
     >
       {children}

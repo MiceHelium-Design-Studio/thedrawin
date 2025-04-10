@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -45,4 +44,13 @@ export interface Banner {
   imageUrl: string;
   linkUrl: string;
   active: boolean;
+}
+
+export interface MediaItem {
+  id: string;
+  name: string;
+  url: string;
+  type: 'image' | 'document' | 'video';
+  size: number;
+  uploadDate: string;
 }
