@@ -66,11 +66,11 @@ const Auth: React.FC = () => {
     >
       <div className="max-w-md w-full mx-auto glass-card rounded-xl backdrop-blur-md shadow-lg p-6 my-8">
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-serif font-bold bg-gold-gradient bg-clip-text text-transparent inline-block tracking-tight">
+          <h1 className="text-2xl font-serif font-bold bg-gold-gradient bg-clip-text text-transparent inline-block tracking-tight">
             THE DRAW WIN 2025
           </h1>
           <div className="h-1 w-24 mx-auto my-3 bg-gold/50 rounded-full"></div>
-          <p className="text-gold-light/80 mt-2 font-light tracking-wide">
+          <p className="text-sm text-gold-light/80 mt-2 font-light tracking-wide">
             ENTER DRAWS TO WIN VALUABLE PRIZES
           </p>
         </div>
@@ -120,13 +120,13 @@ const Auth: React.FC = () => {
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-sm text-gold-light/70 mb-2 font-light tracking-wide">
+          <p className="text-xs text-gold-light/70 mb-2 font-light tracking-wide">
             {mode === 'login' ? "DON'T HAVE AN ACCOUNT?" : 'ALREADY HAVE AN ACCOUNT?'}
           </p>
           <Button 
             variant="outline" 
             onClick={toggleMode}
-            className="text-gold hover:text-gold-light border border-gold/30 hover:border-gold/60 bg-black/50 hover:bg-black-light/70 transition-all duration-300 font-medium tracking-wide"
+            className="text-gold hover:text-gold-light border border-gold/30 hover:border-gold/60 bg-black/50 hover:bg-black-light/70 transition-all duration-300 font-medium tracking-wide text-sm"
           >
             {mode === 'login' ? 'SIGN UP' : 'SIGN IN'}
           </Button>

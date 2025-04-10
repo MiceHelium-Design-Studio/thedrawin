@@ -52,8 +52,8 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
           {draw.status === 'completed' && draw.winner && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
               <div className="text-center">
-                <h3 className="text-white font-bold">Winner</h3>
-                <p className="text-gold text-lg font-semibold">{draw.winner}</p>
+                <h3 className="text-white font-bold text-sm">Winner</h3>
+                <p className="text-gold text-base font-semibold">{draw.winner}</p>
               </div>
             </div>
           )}
@@ -62,16 +62,16 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
       
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{draw.title}</CardTitle>
+          <CardTitle className="text-base">{draw.title}</CardTitle>
           {getStatusBadge()}
         </div>
       </CardHeader>
       
       <CardContent>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{draw.description}</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{draw.description}</p>
         
         <div className="space-y-3">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-xs">
             <span>{draw.currentParticipants} of {draw.maxParticipants} entries</span>
             <span>{timeLeft()}</span>
           </div>
@@ -81,7 +81,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
           <div className="flex justify-between items-center pt-2">
             <div className="flex items-center">
               <Coins className="h-4 w-4 text-gold mr-1" />
-              <span className="text-sm">
+              <span className="text-xs">
                 {draw.ticketPrices.length > 1
                   ? `$${Math.min(...draw.ticketPrices)} - $${Math.max(...draw.ticketPrices)}`
                   : `$${draw.ticketPrices[0]}`}
@@ -90,7 +90,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
             
             <Button
               onClick={handleClick}
-              className={`px-4 ${
+              className={`px-4 text-xs ${
                 draw.status === 'completed'
                   ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   : 'bg-gold hover:bg-gold-dark text-black'

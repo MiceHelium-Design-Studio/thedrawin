@@ -30,11 +30,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
     <div className="w-full max-w-md mx-auto px-8">
       <div className="flex justify-center mb-6">
         <div className="rounded-full bg-gold/20 p-3 shadow-[0_0_15px_rgba(212,175,55,0.3)] neo-glow">
-          <Coins className="h-10 w-10 text-gold" />
+          <Coins className="h-8 w-8 text-gold" />
         </div>
       </div>
       
-      <h2 className="text-2xl font-serif text-center mb-6 text-gold tracking-wider uppercase font-bold">
+      <h2 className="text-xl font-serif text-center mb-6 text-gold tracking-wider uppercase font-bold">
         {mode === 'login' ? 'Sign In' : 'Create Account'}
       </h2>
       
@@ -42,7 +42,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
         {mode === 'signup' && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-gold-light font-medium tracking-wide uppercase">Name</Label>
+              <Label htmlFor="name" className="text-gold-light font-medium tracking-wide uppercase text-xs">Name</Label>
               <Input
                 id="name"
                 placeholder="Your name"
@@ -54,7 +54,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-gold-light font-medium tracking-wide uppercase">Phone Number</Label>
+              <Label htmlFor="phone" className="text-gold-light font-medium tracking-wide uppercase text-xs">Phone Number</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -69,7 +69,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-gold-light font-medium tracking-wide uppercase">Email</Label>
+          <Label htmlFor="email" className="text-gold-light font-medium tracking-wide uppercase text-xs">Email</Label>
           <Input
             id="email"
             type="email"
@@ -82,7 +82,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-gold-light font-medium tracking-wide uppercase">Password</Label>
+          <Label htmlFor="password" className="text-gold-light font-medium tracking-wide uppercase text-xs">Password</Label>
           <Input
             id="password"
             type="password"
@@ -97,7 +97,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-gold hover:bg-gold-dark text-black font-medium tracking-wide uppercase mt-8 py-6"
+          className="w-full bg-gold hover:bg-gold-dark text-black font-medium tracking-wide uppercase mt-8 py-5 text-sm"
         >
           {loading ? (
             <div className="flex items-center justify-center">

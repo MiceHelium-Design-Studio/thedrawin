@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6 flex items-center uppercase">
+      <h1 className="text-xl font-bold mb-6 flex items-center uppercase">
         <span className="bg-gold-gradient bg-clip-text text-transparent">THE DRAW WIN 2025</span>
       </h1>
       
@@ -34,7 +33,7 @@ const Home: React.FC = () => {
       {activeDraws.length > 0 && (
         <section className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold uppercase">Active Draws</h2>
+            <h2 className="text-base font-semibold uppercase">Active Draws</h2>
             <Button variant="ghost" size="sm" onClick={handleViewAll}>
               View All
             </Button>
@@ -49,7 +48,7 @@ const Home: React.FC = () => {
       )}
       
       <section>
-        <h2 className="text-lg font-semibold mb-4 uppercase">All Draws</h2>
+        <h2 className="text-base font-semibold mb-4 uppercase">All Draws</h2>
         <div className="grid gap-4">
           {sortedDraws.map(draw => (
             <DrawCard key={draw.id} draw={draw} />
