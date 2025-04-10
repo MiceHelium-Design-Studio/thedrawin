@@ -47,37 +47,42 @@ const Auth: React.FC = () => {
 
   return (
     <div 
-      className="min-h-screen flex flex-col justify-center p-4 bg-cover bg-center" 
+      className="min-h-screen flex flex-col justify-center p-4 bg-cover bg-center pattern-bg" 
       style={{ 
         backgroundImage: `url(${authBackgroundImage})`,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(15, 30, 66, 0.85)',
         backgroundBlendMode: 'overlay'
       }}
     >
-      <div className="max-w-md w-full mx-auto bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 my-8">
-        <div className="mb-4 text-center">
+      <div className="max-w-md w-full mx-auto glass-card rounded-xl backdrop-blur-md border border-gold/30 shadow-lg p-6 my-8">
+        <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold bg-gold-gradient bg-clip-text text-transparent inline-block">
             Gold Coin Raffle
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <div className="h-1 w-20 mx-auto my-3 bg-gold/50 rounded-full"></div>
+          <p className="text-gold-light/80 mt-2">
             Enter draws to win valuable gold coins
           </p>
         </div>
 
         <AuthForm mode={mode} onSubmit={handleSubmit} loading={loading} />
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gold-light/70 mb-2">
             {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}
           </p>
           <Button 
-            variant="link" 
+            variant="outline" 
             onClick={toggleMode}
-            className="text-gold hover:text-gold-dark"
+            className="text-gold hover:text-gold-light border border-gold/30 hover:border-gold/60 bg-darkBlue/50 hover:bg-darkBlue-light/70 transition-all duration-300"
           >
             {mode === 'login' ? 'Sign Up' : 'Sign In'}
           </Button>
         </div>
+      </div>
+      
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+        <p className="text-xs text-gold-light/40">© 2025 Gold Coin Raffle</p>
       </div>
     </div>
   );

@@ -58,6 +58,11 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				darkBlue: {
+					light: '#1A2C5B',
+					DEFAULT: '#0F1E42',
+					dark: '#071124',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -106,6 +111,14 @@ export default {
 					'100%': {
 						transform: 'rotate(360deg)',
 					},
+				},
+				'glow': {
+					'0%, 100%': { 
+						boxShadow: '0 0 5px #FFD700, 0 0 10px #FFD700' 
+					},
+					'50%': { 
+						boxShadow: '0 0 20px #FFD700, 0 0 30px #FFD700'
+					}
 				}
 			},
 			animation: {
@@ -113,9 +126,12 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'shimmer': 'shimmer 2s infinite linear',
 				'spin-slow': 'spin-slow 3s linear infinite',
+				'glow': 'glow 2s ease-in-out infinite'
 			},
 			backgroundImage: {
 				'gold-gradient': 'linear-gradient(90deg, #FFD700 0%, #FFF8DC 50%, #FFD700 100%)',
+				'blue-gradient': 'linear-gradient(180deg, #0F1E42 0%, #1A2C5B 100%)',
+				'futuristic-pattern': 'radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 80%)',
 			}
 		}
 	},
