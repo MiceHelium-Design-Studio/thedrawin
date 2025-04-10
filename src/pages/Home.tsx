@@ -26,7 +26,7 @@ const Home: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6 flex items-center">
-        <span className="bg-gold-gradient bg-clip-text text-transparent">Gold Coin Raffles</span>
+        <span className="bg-gold-gradient bg-clip-text text-transparent">The Draw Win 2025</span>
       </h1>
       
       <BannerSlider banners={banners} />
