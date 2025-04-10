@@ -113,6 +113,10 @@ const Admin: React.FC = () => {
   const [showUserSelector, setShowUserSelector] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   
+  const handleNotificationTypeChange = (value: 'system' | 'win' | 'draw' | 'promotion') => {
+    setNotificationType(value);
+  };
+  
   if (!user?.isAdmin) {
     navigate('/');
     return null;
@@ -859,7 +863,7 @@ const Admin: React.FC = () => {
                   <Label htmlFor="type">Notification Type</Label>
                   <Select
                     value={notificationType}
-                    onValueChange={(value) => setNotificationType(value)}
+                    onValueChange={handleNotificationTypeChange}
                   >
                     <SelectTrigger className="border-gold/30 focus:border-gold">
                       <SelectValue placeholder="Select notification type" />
