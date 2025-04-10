@@ -65,11 +65,11 @@ const Auth: React.FC = () => {
     >
       <div className="max-w-md w-full mx-auto glass-card rounded-xl backdrop-blur-md border border-gold/30 shadow-lg p-6 my-8">
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-serif font-bold bg-gold-gradient bg-clip-text text-transparent inline-block">
+          <h1 className="text-3xl font-serif font-bold bg-gold-gradient bg-clip-text text-transparent inline-block tracking-tight">
             The Draw Win 2025
           </h1>
-          <div className="h-1 w-20 mx-auto my-3 bg-gold/50 rounded-full"></div>
-          <p className="text-gold-light/80 mt-2">
+          <div className="h-1 w-24 mx-auto my-3 bg-gold/50 rounded-full"></div>
+          <p className="text-gold-light/80 mt-2 font-light tracking-wide">
             Enter draws to win valuable prizes
           </p>
         </div>
@@ -79,7 +79,7 @@ const Auth: React.FC = () => {
         <div className="mt-6">
           <div className="relative flex items-center justify-center">
             <Separator className="bg-gold/20" />
-            <span className="px-2 text-xs text-gold-light/60 bg-black/50 relative z-10">OR CONTINUE WITH</span>
+            <span className="px-2 text-xs text-gold-light/60 bg-black/50 relative z-10 font-medium tracking-wider uppercase">OR CONTINUE WITH</span>
           </div>
           
           <div className="flex justify-center space-x-4 mt-4">
@@ -119,13 +119,13 @@ const Auth: React.FC = () => {
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-sm text-gold-light/70 mb-2">
+          <p className="text-sm text-gold-light/70 mb-2 font-light tracking-wide">
             {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}
           </p>
           <Button 
             variant="outline" 
             onClick={toggleMode}
-            className="text-gold hover:text-gold-light border border-gold/30 hover:border-gold/60 bg-black/50 hover:bg-black-light/70 transition-all duration-300"
+            className="text-gold hover:text-gold-light border border-gold/30 hover:border-gold/60 bg-black/50 hover:bg-black-light/70 transition-all duration-300 font-medium tracking-wide"
           >
             {mode === 'login' ? 'Sign Up' : 'Sign In'}
           </Button>
@@ -133,7 +133,7 @@ const Auth: React.FC = () => {
       </div>
       
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-        <p className="text-xs text-gold-light/40">© 2025 The Draw Win</p>
+        <p className="text-xs text-gold-light/40 tracking-wider font-light">© 2025 The Draw Win</p>
       </div>
     </div>
   );

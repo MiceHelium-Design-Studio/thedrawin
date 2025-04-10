@@ -139,8 +139,8 @@ export default {
 				'futuristic-pattern': 'radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 80%)',
 			},
 			fontFamily: {
-				sans: ['Inter', 'sans-serif'],
-				serif: ['Playfair Display', 'serif'],
+				sans: ['Lato', 'system-ui', 'sans-serif'],
+				serif: ['Playfair Display', 'Georgia', 'serif'],
 			},
 			typography: {
 				DEFAULT: {
@@ -159,6 +159,14 @@ export default {
 						},
 					},
 				},
+			},
+			letterSpacing: {
+				tighter: '-0.05em',
+				tight: '-0.025em',
+				normal: '0',
+				wide: '0.025em',
+				wider: '0.05em',
+				widest: '0.1em',
 			},
 		}
 	},
