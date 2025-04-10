@@ -115,8 +115,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <Settings className="h-5 w-5 mb-1" />
                 </div>
                 <span>Admin</span>
-              </div>
-            </NavLink>
+              </NavLink>
+            )}
           </div>
         </nav>
       )}
