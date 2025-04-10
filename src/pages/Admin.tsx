@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -941,4 +942,134 @@ const Admin: React.FC = () => {
                                   <label htmlFor={`user-${user.id}`} className="text-sm flex items-center space-x-2">
                                     <div className="h-6 w-6 rounded-full overflow-hidden bg-gold/10">
                                       {user.avatar ? (
-                                        <img src={user.avatar} alt={user.
+                                        <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                                      ) : (
+                                        <Users className="h-4 w-4 text-gold/70" />
+                                      )}
+                                    </div>
+                                    <span>{user.name || user.email}</span>
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <DialogFooter>
+                            <Button
+                              variant="outline"
+                              onClick={() => setDialogOpen(false)}
+                              className="border-gold/30 text-gold hover:bg-gold/10"
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={() => setDialogOpen(false)}
+                              className="bg-gold hover:bg-gold-dark text-black"
+                            >
+                              Confirm
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
+                )}
+                
+                <Button
+                  onClick={handleSendNotification}
+                  disabled={!notificationMessage.trim() || (showUserSelector && selectedUserIds.length === 0)}
+                  className="w-full bg-gold hover:bg-gold-dark text-black"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Notification
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="media">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Media Library</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => fileInputRef.current?.click()} 
+                    className="flex-1 bg-gold hover:bg-gold-dark text-black"
+                    disabled={loading}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload New Media
+                  </Button>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden"
+                    accept="image/*,video/*,application/pdf" 
+                    onChange={handleFileChange} 
+                  />
+                  
+                  <Button 
+                    variant="outline"
+                    className="border-gold/30 text-gold hover:bg-gold/10"
+                  >
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    Browse
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="appearance">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Appearance Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-base font-medium mb-3">Login Background Image</h3>
+                  <div className="mb-4">
+                    <Button 
+                      onClick={() => bgImageFileInputRef.current?.click()} 
+                      variant="outline" 
+                      className="border-gold/30 text-gold hover:bg-gold/10 mb-4"
+                      disabled={loading}
+                    >
+                      <PaintBucket className="h-4 w-4 mr-2" />
+                      Upload Background Image
+                    </Button>
+                    <input 
+                      type="file" 
+                      ref={bgImageFileInputRef} 
+                      className="hidden"
+                      accept="image/*" 
+                      onChange={handleBgImageFileUpload} 
+                    />
+                  </div>
+                  
+                  {authBackgroundImage && (
+                    <div className="rounded-lg overflow-hidden border border-gray-200 mb-3 relative group">
+                      <img 
+                        src={authBackgroundImage} 
+                        alt="Auth background" 
+                        className="w-full h-48 object-cover" 
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default Admin;
