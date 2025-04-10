@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '../context/AuthContext';
 import { useBackground } from '../context/BackgroundContext';
 import { useToast } from '@/components/ui/use-toast';
+import { Facebook, Twitter, Linkedin, Mail } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const Auth: React.FC = () => {
   const { user, loading, login, signup } = useAuth();
@@ -41,6 +43,13 @@ const Auth: React.FC = () => {
     }
   };
 
+  const handleSocialLogin = (provider: string) => {
+    toast({
+      title: 'Social login',
+      description: `${provider} login is not implemented yet.`,
+    });
+  };
+
   const toggleMode = () => {
     setMode(prev => (prev === 'login' ? 'signup' : 'login'));
   };
@@ -66,6 +75,48 @@ const Auth: React.FC = () => {
         </div>
 
         <AuthForm mode={mode} onSubmit={handleSubmit} loading={loading} />
+
+        <div className="mt-6">
+          <div className="relative flex items-center justify-center">
+            <Separator className="bg-gold/20" />
+            <span className="px-2 text-xs text-gold-light/60 bg-black/50 relative z-10">OR CONTINUE WITH</span>
+          </div>
+          
+          <div className="flex justify-center space-x-4 mt-4">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => handleSocialLogin('Facebook')}
+              className="rounded-full hover:bg-black/60"
+            >
+              <Facebook className="h-5 w-5 text-gold" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => handleSocialLogin('Twitter')}
+              className="rounded-full hover:bg-black/60"
+            >
+              <Twitter className="h-5 w-5 text-gold" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => handleSocialLogin('LinkedIn')}
+              className="rounded-full hover:bg-black/60"
+            >
+              <Linkedin className="h-5 w-5 text-gold" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => handleSocialLogin('Email')}
+              className="rounded-full hover:bg-black/60"
+            >
+              <Mail className="h-5 w-5 text-gold" />
+            </Button>
+          </div>
+        </div>
 
         <div className="mt-8 text-center">
           <p className="text-sm text-gold-light/70 mb-2">
