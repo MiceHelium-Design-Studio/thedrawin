@@ -44,14 +44,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          const newNotification = payload.new as Notification;
+          const newNotification = mapDatabaseNotificationToAppNotification(payload.new);
           setNotifications(prev => [newNotification, ...prev]);
           
           // Show toast for new notification
           toast({
             title: "New Notification",
             description: newNotification.message,
-            icon: <Bell className="h-4 w-4 text-gold" />,
           });
         }
       )
@@ -61,6 +60,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       supabase.removeChannel(channel);
     };
   }, [user, toast]);
+
+  // Helper function to map database fields to app fields
+  const mapDatabaseNotificationToAppNotification = (dbNotification: any): Notification => {
+    return {
+      id: dbNotification.id,
+      userId: dbNotification.user_id,
+      message: dbNotification.message,
+      read: dbNotification.read,
+      type: dbNotification.type as 'win' | 'draw' | 'system' | 'promotion',
+      createdAt: dbNotification.created_at
+    };
+  };
 
   const fetchNotifications = async () => {
     if (!user) return;
@@ -73,7 +84,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setNotifications(data || []);
+      
+      // Map database fields to app fields
+      const mappedNotifications = (data || []).map(mapDatabaseNotificationToAppNotification);
+      setNotifications(mappedNotifications);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       toast({
