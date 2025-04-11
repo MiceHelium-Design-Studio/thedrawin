@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit, 
-  Users, UserCheck, UserX, Search, Filter, Bell, BellRing, MessageSquare, Send 
+  Users, UserCheck, UserX, Search, Filter, Bell, BellRing, MessageSquare, Send,
+  Type, Palette, Bold, Italic, Underline
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
@@ -113,6 +113,14 @@ const Admin: React.FC = () => {
   const [sendToAllUsers, setSendToAllUsers] = useState(true);
   const [showUserSelector, setShowUserSelector] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  
+  const [fontFamily, setFontFamily] = useState<string>("Lato");
+  const [primaryColor, setPrimaryColor] = useState<string>("#D4AF37");
+  const [secondaryColor, setSecondaryColor] = useState<string>("#222222");
+  const [backgroundColor, setBackgroundColor] = useState<string>("#000000");
+  const [fontsList] = useState<string[]>([
+    "Lato", "Arial", "Helvetica", "Verdana", "Georgia", "Times New Roman"
+  ]);
   
   const handleNotificationTypeChange = (value: 'system' | 'win' | 'draw' | 'promotion') => {
     setNotificationType(value);
@@ -404,6 +412,44 @@ const Admin: React.FC = () => {
     if (sendToAllUsers) {
       setSelectedUserIds([]);
     }
+  };
+  
+  const handleFontChange = (value: string) => {
+    setFontFamily(value);
+    // In a real app, this would update a CSS variable or context
+    document.documentElement.style.setProperty('--font-sans', value);
+    toast({
+      title: 'Font updated',
+      description: `Font has been changed to ${value}.`,
+    });
+  };
+  
+  const handleColorChange = (colorType: 'primary' | 'secondary' | 'background', value: string) => {
+    switch (colorType) {
+      case 'primary':
+        setPrimaryColor(value);
+        document.documentElement.style.setProperty('--primary', convertHexToHsl(value));
+        break;
+      case 'secondary':
+        setSecondaryColor(value);
+        document.documentElement.style.setProperty('--secondary', convertHexToHsl(value));
+        break;
+      case 'background':
+        setBackgroundColor(value);
+        document.documentElement.style.setProperty('--background', convertHexToHsl(value));
+        break;
+    }
+    
+    toast({
+      title: 'Color updated',
+      description: `${colorType.charAt(0).toUpperCase() + colorType.slice(1)} color has been updated.`,
+    });
+  };
+  
+  const convertHexToHsl = (hex: string): string => {
+    // This is a simplified conversion - in a real app you'd use a more accurate conversion
+    // For now we'll just return the color name for demonstration
+    return hex;
   };
   
   return (
@@ -1032,6 +1078,163 @@ const Admin: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
+                <div>
+                  <h3 className="text-base font-medium mb-3 flex items-center">
+                    <Type className="h-4 w-4 mr-2" />
+                    Typography
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="fontFamily">Font Family</Label>
+                      <Select
+                        value={fontFamily}
+                        onValueChange={handleFontChange}
+                      >
+                        <SelectTrigger id="fontFamily" className="border-gold/30 focus:border-gold">
+                          <SelectValue placeholder="Select font" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fontsList.map(font => (
+                            <SelectItem key={font} value={font} style={{ fontFamily: font }}>
+                              {font}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <Label className="flex items-center gap-1 mb-2">
+                          <Bold className="h-3.5 w-3.5" />
+                          Headings
+                        </Label>
+                        <div className="bg-black-light/30 p-3 rounded-md">
+                          <p className="text-xs mb-1 text-gold-light/70">Preview:</p>
+                          <h3 style={{ fontFamily }} className="mb-1">HEADING TEXT</h3>
+                          <p className="text-xs text-gold-light/70">
+                            Bold, capitalized
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label className="flex items-center gap-1 mb-2">
+                          <Bold className="h-3.5 w-3.5" />
+                          Buttons
+                        </Label>
+                        <div className="bg-black-light/30 p-3 rounded-md">
+                          <p className="text-xs mb-1 text-gold-light/70">Preview:</p>
+                          <div style={{ fontFamily }} className="text-sm font-bold uppercase tracking-wider text-white mb-1">
+                            BUTTON TEXT
+                          </div>
+                          <p className="text-xs text-gold-light/70">
+                            Bold, capitalized
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label className="flex items-center gap-1 mb-2">
+                          <Italic className="h-3.5 w-3.5" />
+                          Body Text
+                        </Label>
+                        <div className="bg-black-light/30 p-3 rounded-md">
+                          <p className="text-xs mb-1 text-gold-light/70">Preview:</p>
+                          <p style={{ fontFamily }} className="mb-1">Regular body text</p>
+                          <p className="text-xs text-gold-light/70">
+                            Regular weight
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-base font-medium mb-3 flex items-center">
+                    <Palette className="h-4 w-4 mr-2" />
+                    Colors
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="primaryColor">Primary Color (Gold)</Label>
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="h-8 w-8 rounded-md border border-white/20" 
+                          style={{ backgroundColor: primaryColor }}
+                        />
+                        <Input
+                          id="primaryColor"
+                          type="color"
+                          value={primaryColor}
+                          onChange={(e) => handleColorChange('primary', e.target.value)}
+                          className="w-full border-gold/30 focus:border-gold h-10"
+                        />
+                      </div>
+                      <p className="text-xs text-gold-light/70 mt-1">
+                        Used for buttons, highlights, and accents
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="secondaryColor">Secondary Color (Dark Gray)</Label>
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="h-8 w-8 rounded-md border border-white/20" 
+                          style={{ backgroundColor: secondaryColor }}
+                        />
+                        <Input
+                          id="secondaryColor"
+                          type="color"
+                          value={secondaryColor}
+                          onChange={(e) => handleColorChange('secondary', e.target.value)}
+                          className="w-full border-gold/30 focus:border-gold h-10"
+                        />
+                      </div>
+                      <p className="text-xs text-gold-light/70 mt-1">
+                        Used for cards, secondary buttons
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="backgroundColor">Background Color (Black)</Label>
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="h-8 w-8 rounded-md border border-white/20" 
+                          style={{ backgroundColor: backgroundColor }}
+                        />
+                        <Input
+                          id="backgroundColor"
+                          type="color"
+                          value={backgroundColor}
+                          onChange={(e) => handleColorChange('background', e.target.value)}
+                          className="w-full border-gold/30 focus:border-gold h-10"
+                        />
+                      </div>
+                      <p className="text-xs text-gold-light/70 mt-1">
+                        Main background color
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 p-4 bg-black-light/30 rounded-md">
+                    <h4 className="text-sm font-medium mb-2">Preview</h4>
+                    <div style={{ backgroundColor }} className="p-4 rounded-md">
+                      <div style={{ backgroundColor: secondaryColor }} className="p-4 rounded-md mb-3">
+                        <h5 style={{ color: 'white', fontFamily }} className="text-sm font-bold uppercase mb-2">Card Title</h5>
+                        <p style={{ color: 'white', fontFamily }} className="text-xs">This is what content will look like on your site.</p>
+                      </div>
+                      <button 
+                        style={{ backgroundColor: primaryColor, color: 'black', fontFamily }} 
+                        className="px-3 py-1.5 rounded-md text-xs font-bold uppercase"
+                      >
+                        Sample Button
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
                 <div>
                   <h3 className="text-base font-medium mb-3">Login Background Image</h3>
                   <div className="mb-4">
