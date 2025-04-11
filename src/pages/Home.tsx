@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useDraws } from '../context/DrawContext';
@@ -11,25 +11,9 @@ const Home: React.FC = () => {
   const { draws, banners, loading: drawsLoading } = useDraws();
   const { loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [forceRender, setForceRender] = useState(false);
   
   // Combine loading states
-  const loading = (authLoading || drawsLoading) && !forceRender;
-  
-  // Force render after a timeout to prevent infinite loading
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      console.log("Home page - Force rendering after timeout");
-      setForceRender(true);
-    }, 1000);
-    
-    return () => clearTimeout(timeout);
-  }, []);
-  
-  useEffect(() => {
-    // Log loading states for debugging
-    console.log('Home page - Auth loading:', authLoading, 'Draws loading:', drawsLoading, 'Force render:', forceRender);
-  }, [authLoading, drawsLoading, forceRender]);
+  const loading = authLoading || drawsLoading;
   
   // Get active draws first, then upcoming, then completed
   const sortedDraws = [...(draws || [])].sort((a, b) => {
@@ -46,11 +30,8 @@ const Home: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto flex items-center justify-center min-h-[50vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold mx-auto mb-4"></div>
-          <p className="text-gold">Loading draws...</p>
-        </div>
+      <div className="container mx-auto p-6 flex items-center justify-center min-h-[200px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
       </div>
     );
   }

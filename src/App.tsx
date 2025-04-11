@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +9,6 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { DrawProvider } from "./context/DrawContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { BackgroundProvider } from "./context/BackgroundContext";
-import { Skeleton } from "@/components/ui/skeleton";
 
 // Pages
 import Index from "./pages/Home";
@@ -32,41 +31,25 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected route component with improved loading handling
+// Simplified protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  const [forceRender, setForceRender] = useState(false);
   
-  // Force render after a short timeout to prevent infinite loading
-  useEffect(() => {
-    console.log("ProtectedRoute - Auth loading:", loading, "User:", user ? "logged in" : "not logged in");
-    const timeout = setTimeout(() => {
-      console.log("ProtectedRoute - Force rendering after timeout");
-      setForceRender(true);
-    }, 800); // Reduced timeout to ensure rendering happens
-    
-    return () => clearTimeout(timeout);
-  }, [loading, user]);
-  
-  // If still loading but not yet force rendered, show a quick loading spinner
-  if (loading && !forceRender) {
+  // Show minimal loading indicator if authentication is still being checked
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold mx-auto mb-4"></div>
-          <p className="text-gold">Loading...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[200px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
       </div>
     );
   }
   
-  // If no user, redirect to auth regardless of loading state once we're past force render
-  if (!user && (forceRender || !loading)) {
-    console.log("ProtectedRoute - No user, redirecting to /auth");
+  // If no user after loading completed, redirect to auth
+  if (!user) {
     return <Navigate to="/auth" />;
   }
   
-  // Otherwise, render children (even if still technically loading)
+  // User is authenticated, render children
   return <>{children}</>;
 };
 

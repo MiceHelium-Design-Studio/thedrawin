@@ -10,45 +10,16 @@ import { Facebook, Twitter, Linkedin, Mail } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const Auth: React.FC = () => {
-  const { user, loading, login, signup, signInWithGoogle } = useAuth();
+  const { user, login, signup, signInWithGoogle } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const navigate = useNavigate();
   const { toast } = useToast();
   const { authBackgroundImage } = useBackground();
-  const [loginSuccess, setLoginSuccess] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [forceRender, setForceRender] = useState(false);
 
-  // Force render after a short timeout to prevent infinite loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setForceRender(true);
-    }, 1000); // Shorter timeout for auth page
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Redirect if user is already logged in or login was successful
-  useEffect(() => {
-    if (user) {
-      // Use a small delay to allow the toast to be shown before redirect
-      const timer = setTimeout(() => {
-        navigate('/');
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [user, navigate]);
-
-  // If we're still in loading state but force render is true, don't show loader
-  if (loading && !forceRender) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
-          <p className="text-gold">Loading...</p>
-        </div>
-      </div>
-    );
+  // Simple redirect if user is already logged in
+  if (user) {
+    return <Navigate to="/" />;
   }
 
   const handleSubmit = async (data: { email: string; password: string; name?: string; phone?: string }) => {
@@ -65,7 +36,7 @@ const Auth: React.FC = () => {
         description: mode === 'login' ? 'You are now signed in.' : 'Your account has been created successfully.',
       });
       
-      setLoginSuccess(true);
+      // The redirect will be handled by the if(user) check on next render
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -83,7 +54,7 @@ const Auth: React.FC = () => {
       setIsProcessing(true);
       if (provider === 'Google') {
         await signInWithGoogle();
-        // The redirect will be handled by Supabase, so no need to navigate here
+        // The redirect will be handled by Supabase
       } else {
         toast({
           title: 'Social login',
@@ -106,11 +77,6 @@ const Auth: React.FC = () => {
     setMode(prev => (prev === 'login' ? 'signup' : 'login'));
   };
 
-  // Redirect if user is logged in
-  if (user || loginSuccess) {
-    return <Navigate to="/" />;
-  }
-
   return (
     <div 
       className="min-h-screen flex flex-col justify-center p-4 bg-cover bg-center pattern-bg" 
@@ -131,7 +97,7 @@ const Auth: React.FC = () => {
           </p>
         </div>
 
-        <AuthForm mode={mode} onSubmit={handleSubmit} loading={isProcessing || (loading && !forceRender)} />
+        <AuthForm mode={mode} onSubmit={handleSubmit} loading={isProcessing} />
 
         <div className="mt-6">
           <div className="relative flex items-center justify-center">
