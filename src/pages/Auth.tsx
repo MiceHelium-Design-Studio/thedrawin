@@ -16,6 +16,7 @@ const Auth: React.FC = () => {
   const { toast } = useToast();
   const { authBackgroundImage } = useBackground();
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Redirect if user is already logged in or login was successful
   useEffect(() => {
@@ -39,6 +40,7 @@ const Auth: React.FC = () => {
 
   const handleSubmit = async (data: { email: string; password: string; name?: string; phone?: string }) => {
     try {
+      setIsProcessing(true);
       if (mode === 'login') {
         await login(data.email, data.password);
       } else {
@@ -58,11 +60,14 @@ const Auth: React.FC = () => {
         description: 'Please check your credentials and try again.',
       });
       console.error(error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleSocialLogin = async (provider: string) => {
     try {
+      setIsProcessing(true);
       if (provider === 'Google') {
         await signInWithGoogle();
         // The redirect will be handled by Supabase, so no need to navigate here
@@ -79,6 +84,8 @@ const Auth: React.FC = () => {
         description: 'An error occurred during login.',
       });
       console.error(error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -111,7 +118,7 @@ const Auth: React.FC = () => {
           </p>
         </div>
 
-        <AuthForm mode={mode} onSubmit={handleSubmit} loading={loading} />
+        <AuthForm mode={mode} onSubmit={handleSubmit} loading={isProcessing || loading} />
 
         <div className="mt-6">
           <div className="relative flex items-center justify-center">
@@ -125,6 +132,7 @@ const Auth: React.FC = () => {
               size="icon" 
               onClick={() => handleSocialLogin('Facebook')}
               className="rounded-full hover:bg-black/60"
+              disabled={isProcessing}
             >
               <Facebook className="h-5 w-5 text-gold" />
             </Button>
@@ -133,6 +141,7 @@ const Auth: React.FC = () => {
               size="icon" 
               onClick={() => handleSocialLogin('Twitter')}
               className="rounded-full hover:bg-black/60"
+              disabled={isProcessing}
             >
               <Twitter className="h-5 w-5 text-gold" />
             </Button>
@@ -141,6 +150,7 @@ const Auth: React.FC = () => {
               size="icon" 
               onClick={() => handleSocialLogin('LinkedIn')}
               className="rounded-full hover:bg-black/60"
+              disabled={isProcessing}
             >
               <Linkedin className="h-5 w-5 text-gold" />
             </Button>
@@ -149,6 +159,7 @@ const Auth: React.FC = () => {
               size="icon" 
               onClick={() => handleSocialLogin('Google')}
               className="rounded-full hover:bg-black/60"
+              disabled={isProcessing}
             >
               <Mail className="h-5 w-5 text-gold" />
             </Button>
@@ -163,6 +174,7 @@ const Auth: React.FC = () => {
             variant="outline" 
             onClick={toggleMode}
             className="text-white hover:text-white border border-gold/30 hover:border-gold/60 bg-black/50 hover:bg-black-light/70 transition-all duration-300 font-medium tracking-wide text-sm uppercase"
+            disabled={isProcessing}
           >
             {mode === 'login' ? 'SIGN UP' : 'SIGN IN'}
           </Button>
