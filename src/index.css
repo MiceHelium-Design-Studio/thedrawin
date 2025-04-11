@@ -76,7 +76,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans font-bold uppercase tracking-wide;
+    @apply font-sans font-bold uppercase tracking-wide text-white;
   }
   
   h1 {
@@ -104,11 +104,11 @@
   }
   
   button, .button {
-    @apply font-sans font-bold uppercase tracking-wide;
+    @apply font-sans font-bold uppercase tracking-wide text-white;
   }
   
   nav a, .menu-item {
-    @apply font-sans font-bold uppercase tracking-wider text-xs;
+    @apply font-sans font-bold uppercase tracking-wider text-xs text-white;
   }
 }
 
@@ -150,11 +150,11 @@
 }
 
 .luxury-heading {
-  @apply font-sans text-gold text-3xl md:text-4xl font-bold uppercase tracking-wide;
+  @apply font-sans text-white text-3xl md:text-4xl font-bold uppercase tracking-wide;
 }
 
 .luxury-subheading {
-  @apply font-sans text-gold/80 text-xl md:text-2xl uppercase tracking-wide;
+  @apply font-sans text-white/80 text-xl md:text-2xl uppercase tracking-wide;
 }
 
 .luxury-card {
@@ -195,19 +195,19 @@
 }
 
 .uppercase-text {
-  @apply font-sans uppercase tracking-wider;
+  @apply font-sans uppercase tracking-wider text-white;
 }
 
 .title-text {
-  @apply font-sans font-bold uppercase tracking-wider;
+  @apply font-sans font-bold uppercase tracking-wider text-white;
 }
 
 .heading-text {
-  @apply font-sans font-bold uppercase tracking-wide;
+  @apply font-sans font-bold uppercase tracking-wide text-white;
 }
 
 .subheading-text {
-  @apply font-sans font-medium uppercase tracking-wide;
+  @apply font-sans font-medium uppercase tracking-wide text-white;
 }
 
 .body-text {

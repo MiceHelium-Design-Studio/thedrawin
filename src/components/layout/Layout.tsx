@@ -33,7 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   "flex flex-col items-center justify-center text-xs transition-all duration-300",
                   isActive
                     ? "text-gold font-medium"
-                    : "text-gold-light/70 hover:text-gold"
+                    : "text-white hover:text-gold"
                 )
               }
             >
@@ -50,7 +50,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   "flex flex-col items-center justify-center text-xs transition-all duration-300",
                   isActive
                     ? "text-gold font-medium"
-                    : "text-gold-light/70 hover:text-gold"
+                    : "text-white hover:text-gold"
                 )
               }
             >
@@ -67,7 +67,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   "flex flex-col items-center justify-center text-xs relative transition-all duration-300",
                   isActive
                     ? "text-gold font-medium"
-                    : "text-gold-light/70 hover:text-gold"
+                    : "text-white hover:text-gold"
                 )
               }
             >
@@ -89,7 +89,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   "flex flex-col items-center justify-center text-xs transition-all duration-300",
                   isActive
                     ? "text-gold font-medium"
-                    : "text-gold-light/70 hover:text-gold"
+                    : "text-white hover:text-gold"
                 )
               }
             >
@@ -107,7 +107,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     "flex flex-col items-center justify-center text-xs transition-all duration-300",
                     isActive
                       ? "text-gold font-medium"
-                      : "text-gold-light/70 hover:text-gold"
+                      : "text-white hover:text-gold"
                   )
                 }
               >

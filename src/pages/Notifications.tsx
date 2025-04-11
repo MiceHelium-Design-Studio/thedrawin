@@ -66,7 +66,7 @@ const Notifications: React.FC = () => {
             size="sm"
             onClick={handleMarkAllAsRead}
             disabled={loading}
-            className="text-xs border-gold/40 text-gold hover:text-gold-dark"
+            className="text-xs border-gold/40 text-white hover:text-white"
           >
             <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
             Mark all as read
@@ -76,7 +76,7 @@ const Notifications: React.FC = () => {
       
       {notifications.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">You have no notifications.</p>
+          <p className="text-white">You have no notifications.</p>
         </div>
       ) : (
         <div>

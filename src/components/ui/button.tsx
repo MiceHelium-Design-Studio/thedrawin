@@ -6,20 +6,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-bold uppercase tracking-wider ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-bold uppercase tracking-wider ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-white",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_10px_rgba(212,175,55,0.3)] border-0 hover:shadow-[0_0_15px_rgba(212,175,55,0.4)]",
+        default: "bg-primary text-white hover:bg-primary/90 shadow-[0_0_10px_rgba(212,175,55,0.3)] border-0 hover:shadow-[0_0_15px_rgba(212,175,55,0.4)]",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 border-0",
+          "bg-destructive text-white hover:bg-destructive/90 border-0",
         outline:
-          "border-0 bg-black-light/30 hover:bg-black-light/50 text-gold hover:text-gold-light hover:shadow-[0_0_10px_rgba(212,175,55,0.3)]",
+          "border-0 bg-black-light/30 hover:bg-black-light/50 text-white hover:text-white hover:shadow-[0_0_10px_rgba(212,175,55,0.3)]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 border-0",
-        ghost: "hover:bg-black-light/30 hover:text-accent-foreground",
-        link: "text-gold underline-offset-4 hover:underline hover:text-gold-light",
-        luxury: "bg-black border-0 text-gold hover:bg-black-light transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.2)] hover:shadow-[0_0_15px_rgba(212,175,55,0.3)]"
+          "bg-secondary text-white hover:bg-secondary/80 border-0",
+        ghost: "hover:bg-black-light/30 hover:text-white",
+        link: "text-white underline-offset-4 hover:underline hover:text-white",
+        luxury: "bg-black border-0 text-white hover:bg-black-light transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.2)] hover:shadow-[0_0_15px_rgba(212,175,55,0.3)]"
       },
       size: {
         default: "h-10 px-4 py-2",
