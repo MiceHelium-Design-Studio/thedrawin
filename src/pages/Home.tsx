@@ -10,11 +10,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const Home: React.FC = () => {
   const { draws, banners, loading: drawsLoading } = useDraws();
-  const { loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
-  // Combine loading states
-  const loading = authLoading || drawsLoading;
+  // Simplify loading state handling
+  const isLoading = authLoading || drawsLoading;
   
   // Get active draws first, then upcoming, then completed
   const sortedDraws = [...(draws || [])].sort((a, b) => {
@@ -35,15 +35,20 @@ const Home: React.FC = () => {
         <span className="bg-gold-gradient bg-clip-text text-transparent">THE DRAW WIN 2025</span>
       </h1>
       
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-4">
-          <Skeleton className="h-48 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-48 w-full rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48 rounded-md" />
+            <Skeleton className="h-24 w-full rounded-md" />
+            <Skeleton className="h-24 w-full rounded-md" />
+          </div>
         </div>
       ) : (
         <>
-          <BannerSlider banners={banners || []} />
+          {banners && banners.length > 0 && (
+            <BannerSlider banners={banners} />
+          )}
           
           {activeDraws.length > 0 && (
             <section className="mb-8">
@@ -65,9 +70,15 @@ const Home: React.FC = () => {
           <section>
             <h2 className="text-base font-semibold mb-4 uppercase">All Draws</h2>
             <div className="grid gap-4">
-              {sortedDraws.map(draw => (
-                <DrawCard key={draw.id} draw={draw} />
-              ))}
+              {sortedDraws.length > 0 ? (
+                sortedDraws.map(draw => (
+                  <DrawCard key={draw.id} draw={draw} />
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No draws available
+                </div>
+              )}
             </div>
           </section>
         </>

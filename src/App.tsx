@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,11 +31,11 @@ const queryClient = new QueryClient({
   },
 });
 
-// Simplified protected route component
+// Improved protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // If still loading, render children anyway and let the child component handle loading state
+  // Always render children while loading - each page handles its own loading state
   if (loading) {
     return <>{children}</>;
   }
@@ -53,40 +53,38 @@ const App = () => {
   console.log("App rendering");
   
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <AuthProvider>
-            <DrawProvider>
-              <NotificationProvider>
-                <BackgroundProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <Layout>
-                      <Routes>
-                        <Route path="/auth" element={<Auth />} />
-                        
-                        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                        <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
-                        <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
-                        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-                        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                        {/* Keep the media route but it won't be in the navigation */}
-                        <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
-                        
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </Layout>
-                  </BrowserRouter>
-                </BackgroundProvider>
-              </NotificationProvider>
-            </DrawProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <DrawProvider>
+            <NotificationProvider>
+              <BackgroundProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Layout>
+                    <Routes>
+                      <Route path="/auth" element={<Auth />} />
+                      
+                      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                      <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
+                      <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
+                      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+                      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                      {/* Keep the media route but it won't be in the navigation */}
+                      <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
+                      
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Layout>
+                </BrowserRouter>
+              </BackgroundProvider>
+            </NotificationProvider>
+          </DrawProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
