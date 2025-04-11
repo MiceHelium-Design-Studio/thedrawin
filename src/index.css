@@ -76,7 +76,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold uppercase tracking-wide;
+    @apply font-sans font-bold uppercase tracking-wide;
   }
   
   h1 {
@@ -97,6 +97,18 @@
   
   h5, h6 {
     @apply text-sm md:text-base;
+  }
+  
+  p {
+    @apply font-sans font-normal;
+  }
+  
+  button, .button {
+    @apply font-sans font-bold uppercase tracking-wide;
+  }
+  
+  nav a, .menu-item {
+    @apply font-sans font-bold uppercase tracking-wider text-xs;
   }
 }
 
@@ -138,11 +150,11 @@
 }
 
 .luxury-heading {
-  @apply font-serif text-gold text-3xl md:text-4xl font-bold uppercase tracking-wide;
+  @apply font-sans text-gold text-3xl md:text-4xl font-bold uppercase tracking-wide;
 }
 
 .luxury-subheading {
-  @apply font-serif text-gold/80 text-xl md:text-2xl uppercase tracking-wide;
+  @apply font-sans text-gold/80 text-xl md:text-2xl uppercase tracking-wide;
 }
 
 .luxury-card {
@@ -183,21 +195,21 @@
 }
 
 .uppercase-text {
-  @apply uppercase tracking-wider;
+  @apply font-sans uppercase tracking-wider;
 }
 
 .title-text {
-  @apply font-bold uppercase tracking-wider;
+  @apply font-sans font-bold uppercase tracking-wider;
 }
 
 .heading-text {
-  @apply font-bold uppercase tracking-wide;
+  @apply font-sans font-bold uppercase tracking-wide;
 }
 
 .subheading-text {
-  @apply font-medium uppercase tracking-wide;
+  @apply font-sans font-medium uppercase tracking-wide;
 }
 
 .body-text {
-  @apply text-base leading-relaxed;
+  @apply font-sans text-base leading-relaxed;
 }

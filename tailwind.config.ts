@@ -140,7 +140,7 @@ export default {
 			},
 			fontFamily: {
 				sans: ['Lato', 'system-ui', 'sans-serif'],
-				serif: ['Playfair Display', 'Georgia', 'serif'],
+				serif: ['Lato', 'system-ui', 'sans-serif'], // Change serif to also use Lato
 			},
 			typography: {
 				DEFAULT: {
@@ -150,6 +150,8 @@ export default {
 						'h1,h2,h3,h4,h5,h6': {
 							color: 'hsl(var(--foreground))',
 							fontWeight: '700',
+							fontFamily: 'Lato, system-ui, sans-serif',
+							textTransform: 'uppercase',
 						},
 						a: {
 							color: 'hsl(var(--primary))',
