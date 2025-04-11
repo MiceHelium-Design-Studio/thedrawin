@@ -7,10 +7,11 @@ import { useAuth } from '../context/AuthContext';
 import DrawCard from '../components/draws/DrawCard';
 import BannerSlider from '../components/draws/BannerSlider';
 import { Skeleton } from '@/components/ui/skeleton';
+import { RotateCcw } from 'lucide-react';
 
 const Home: React.FC = () => {
   const { draws, banners, loading: drawsLoading } = useDraws();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, clearCacheAndReload } = useAuth();
   const navigate = useNavigate();
   
   // Simplify loading state handling
@@ -31,9 +32,20 @@ const Home: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-xl font-bold mb-6 flex items-center uppercase">
-        <span className="bg-gold-gradient bg-clip-text text-transparent">THE DRAW WIN 2025</span>
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-xl font-bold flex items-center uppercase">
+          <span className="bg-gold-gradient bg-clip-text text-transparent">THE DRAW WIN 2025</span>
+        </h1>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={clearCacheAndReload}
+          className="flex items-center gap-1"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          <span>Refresh</span>
+        </Button>
+      </div>
       
       {isLoading ? (
         <div className="space-y-4">

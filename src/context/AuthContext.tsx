@@ -1,8 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
   user: User | null;
@@ -13,6 +13,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   addFunds: (amount: number) => Promise<void>;
+  clearCacheAndReload: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,17 +22,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Initialize auth state and set up listener for auth changes
   useEffect(() => {
-    // First set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setLoading(true);
         
         if (session?.user) {
           try {
-            // Fetch user profile data from profiles table
             const { data, error } = await supabase
               .from('profiles')
               .select('*')
@@ -42,7 +41,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.error('Error fetching user profile:', error);
               setUser(null);
             } else if (data) {
-              // Transform the profile data to match our User type
               setUser({
                 id: data.id,
                 email: data.email,
@@ -64,13 +62,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Then check for existing session
     const initializeAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession();
         
         if (data.session?.user) {
-          // Fetch user profile data
           const { data: profileData, error } = await supabase
             .from('profiles')
             .select('*')
@@ -81,7 +77,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.error('Error fetching initial user profile:', error);
             setUser(null);
           } else if (profileData) {
-            // Transform the profile data to match our User type
             setUser({
               id: profileData.id,
               email: profileData.email,
@@ -101,7 +96,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
 
-    // Cleanup subscription
     return () => {
       subscription.unsubscribe();
     };
@@ -119,7 +113,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
       
-      // Profile data will be fetched by the auth state change listener
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
@@ -147,7 +140,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      // No need to set user here as auth state change will handle that
     } catch (error: any) {
       console.error('Google login error:', error);
       toast({
@@ -164,7 +156,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (email: string, password: string, name: string, phone?: string) => {
     setLoading(true);
     try {
-      // Create the user in Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -180,9 +171,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
       
-      // The profile will be created by the database trigger
-      // and then fetched by the auth state change listener
-
       toast({
         title: 'Account created',
         description: 'Your account has been created successfully.',
@@ -208,7 +196,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
       
-      // User will be set to null by the auth state change listener
     } catch (error: any) {
       console.error('Logout error:', error);
       toast({
@@ -226,13 +213,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     setLoading(true);
     try {
-      // Update profile data in Supabase
       const { error } = await supabase
         .from('profiles')
         .update({
           name: data.name,
           avatar: data.avatar,
-          // Don't update email or isAdmin here as these are more sensitive fields
         })
         .eq('id', user.id);
 
@@ -240,7 +225,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      // Update local state
       setUser({ ...user, ...data });
       
       toast({
@@ -264,10 +248,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     setLoading(true);
     try {
-      // Calculate new wallet amount
       const newAmount = user.wallet + amount;
       
-      // Update wallet in Supabase
       const { error } = await supabase
         .from('profiles')
         .update({ wallet: newAmount })
@@ -277,7 +259,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      // Update local state
       setUser({ ...user, wallet: newAmount });
       
       toast({
@@ -297,8 +278,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const clearCacheAndReload = () => {
+    queryClient.clear();
+    
+    toast({
+      title: 'Cache cleared',
+      description: 'Reloading application...',
+    });
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, signInWithGoogle, logout, updateProfile, addFunds }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      login, 
+      signup, 
+      signInWithGoogle, 
+      logout, 
+      updateProfile, 
+      addFunds,
+      clearCacheAndReload
+    }}>
       {children}
     </AuthContext.Provider>
   );
