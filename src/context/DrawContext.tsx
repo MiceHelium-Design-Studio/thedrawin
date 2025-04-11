@@ -250,12 +250,15 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // In a real app, we would upload to a storage solution here
-      // For now, we'll create a mock URL
+      // Create a URL for the uploaded file to show immediate preview
+      const objectUrl = URL.createObjectURL(file);
+      
+      // In a real app, we would upload to a storage solution here and get the real URL
+      // For our mock, we'll use the object URL for immediate preview
       const newMedia: MediaItem = {
         id: Date.now().toString(),
         name: file.name,
-        url: '/placeholder.svg', // Using placeholder as we can't really upload
+        url: objectUrl, // Using the object URL instead of a placeholder
         type: file.type.startsWith('image/') ? 'image' : 'document',
         size: file.size,
         uploadDate: new Date().toISOString(),

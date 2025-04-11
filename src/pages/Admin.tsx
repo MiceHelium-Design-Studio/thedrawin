@@ -767,11 +767,11 @@ const Admin: React.FC = () => {
                     </div>
                   </div>
                   {(editingBanner?.imageUrl || newBanner.imageUrl) && (
-                    <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200 relative group">
+                    <div className="mt-2 w-full h-40 overflow-hidden rounded-md border border-gray-200 relative group">
                       <img 
                         src={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl} 
                         alt="Banner preview" 
-                        className="w-full object-cover" 
+                        className="w-full h-full object-contain" 
                       />
                     </div>
                   )}
@@ -835,11 +835,11 @@ const Admin: React.FC = () => {
                 <Card key={banner.id}>
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row gap-4">
-                      <div className="w-full sm:w-24 h-24 bg-gray-100 rounded flex-shrink-0">
+                      <div className="w-full sm:w-24 h-24 rounded overflow-hidden flex-shrink-0 border border-gray-200">
                         <img
                           src={banner.imageUrl}
                           alt="Banner"
-                          className="w-full h-full object-cover rounded"
+                          className="w-full h-full object-contain"
                         />
                       </div>
                       
