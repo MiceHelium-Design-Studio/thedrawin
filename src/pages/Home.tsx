@@ -10,11 +10,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { RotateCcw } from 'lucide-react';
 
 const Home: React.FC = () => {
-  const { draws, banners, loading: drawsLoading } = useDraws();
-  const { user, loading: authLoading, clearCacheAndReload } = useAuth();
+  const { draws = [], banners = [], loading: drawsLoading = true } = useDraws();
+  const { user, loading: authLoading = true, clearCacheAndReload } = useAuth();
   const navigate = useNavigate();
   
-  // Simplify loading state handling
+  // Always initialize these variables
   const isLoading = authLoading || drawsLoading;
   
   // Get active draws first, then upcoming, then completed
@@ -29,6 +29,9 @@ const Home: React.FC = () => {
   const handleViewAll = () => {
     navigate('/draws');
   };
+
+  console.log("Home component rendering, loading state:", isLoading);
+  console.log("Draws data:", draws?.length || 0, "items");
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -62,7 +65,7 @@ const Home: React.FC = () => {
             <BannerSlider banners={banners} />
           )}
           
-          {activeDraws.length > 0 && (
+          {activeDraws && activeDraws.length > 0 && (
             <section className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-base font-semibold uppercase">Active Draws</h2>
@@ -82,7 +85,7 @@ const Home: React.FC = () => {
           <section>
             <h2 className="text-base font-semibold mb-4 uppercase">All Draws</h2>
             <div className="grid gap-4">
-              {sortedDraws.length > 0 ? (
+              {sortedDraws && sortedDraws.length > 0 ? (
                 sortedDraws.map(draw => (
                   <DrawCard key={draw.id} draw={draw} />
                 ))

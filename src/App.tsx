@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -21,12 +22,12 @@ import Admin from "./pages/Admin";
 import MediaLibrary from "./pages/MediaLibrary";
 import NotFound from "./pages/NotFound";
 
-// Create a new QueryClient instance
+// Create a new QueryClient instance with longer staleTime
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
-      staleTime: 30000,
+      retry: 2,
+      staleTime: 60000, // Increase stale time to reduce refetches
     },
   },
 });
@@ -35,17 +36,20 @@ const queryClient = new QueryClient({
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // Always render children while loading - each page handles its own loading state
+  // Show a basic loading state while checking auth
   if (loading) {
-    return <>{children}</>;
+    console.log("ProtectedRoute: Loading auth state");
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
   
   // If no user after loading completed, redirect to auth
   if (!user) {
-    return <Navigate to="/auth" />;
+    console.log("ProtectedRoute: No user, redirecting to auth");
+    return <Navigate to="/auth" replace />;
   }
   
   // User is authenticated, render children
+  console.log("ProtectedRoute: User authenticated, rendering content");
   return <>{children}</>;
 };
 
