@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
@@ -15,10 +15,26 @@ const Auth: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { authBackgroundImage } = useBackground();
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
-  // Redirect if user is already logged in
-  if (user) {
-    return <Navigate to="/" />;
+  // Redirect if user is already logged in or login was successful
+  useEffect(() => {
+    if (user) {
+      // Use a small delay to allow the toast to be shown before redirect
+      const timer = setTimeout(() => {
+        navigate('/');
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [user, navigate]);
+
+  // If we're still in loading state, don't render anything yet
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
+      </div>
+    );
   }
 
   const handleSubmit = async (data: { email: string; password: string; name?: string; phone?: string }) => {
@@ -26,14 +42,15 @@ const Auth: React.FC = () => {
       if (mode === 'login') {
         await login(data.email, data.password);
       } else {
-        // Now we pass the phone parameter correctly
         await signup(data.email, data.password, data.name || '', data.phone);
       }
-      navigate('/');
+      
       toast({
         title: mode === 'login' ? 'Welcome back!' : 'Account created!',
         description: mode === 'login' ? 'You are now signed in.' : 'Your account has been created successfully.',
       });
+      
+      setLoginSuccess(true);
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -68,6 +85,11 @@ const Auth: React.FC = () => {
   const toggleMode = () => {
     setMode(prev => (prev === 'login' ? 'signup' : 'login'));
   };
+
+  // Redirect if user is logged in
+  if (user || loginSuccess) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div 
