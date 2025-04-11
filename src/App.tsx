@@ -35,13 +35,9 @@ const queryClient = new QueryClient({
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // Show minimal loading indicator if authentication is still being checked
+  // If still loading, render children anyway and let the child component handle loading state
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
-      </div>
-    );
+    return <>{children}</>;
   }
   
   // If no user after loading completed, redirect to auth
