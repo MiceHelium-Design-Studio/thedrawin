@@ -1,26 +1,10 @@
-import React, { createContext, useContext, useState } from 'react';
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Notification } from '../types';
 import { useToast } from '@/components/ui/use-toast';
-
-// Mock data until we integrate with Supabase
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    userId: '1',
-    message: 'Welcome to Gold Coin Raffles!',
-    read: false,
-    type: 'system',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    userId: '1',
-    message: 'New draw available: Weekend Gold Coin Rush',
-    read: false,
-    type: 'draw',
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-  }
-];
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './AuthContext';
+import { Bell } from 'lucide-react';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -34,15 +18,84 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Fetch notifications on user login
+  useEffect(() => {
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+    
+    fetchNotifications();
+    
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('notifications-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newNotification = payload.new as Notification;
+          setNotifications(prev => [newNotification, ...prev]);
+          
+          // Show toast for new notification
+          toast({
+            title: "New Notification",
+            description: newNotification.message,
+            icon: <Bell className="h-4 w-4 text-gold" />,
+          });
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, toast]);
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setNotifications(data || []);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to load notifications.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const markAsRead = async (id: string) => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
       setNotifications(prev =>
         prev.map(notification =>
           notification.id === id ? { ...notification, read: true } : notification
@@ -59,8 +112,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const deleteNotification = async (id: string) => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
       setNotifications(prev => prev.filter(notification => notification.id !== id));
     } catch (error) {
       console.error('Delete notification error:', error);
@@ -71,10 +129,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const markAllAsRead = async () => {
+    if (!user || notifications.length === 0) return;
+    
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+      
+      if (error) throw error;
+      
       setNotifications(prev =>
         prev.map(notification => ({ ...notification, read: true }))
       );
@@ -87,36 +153,33 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const sendNotification = async (message: string, type: 'system' | 'win' | 'draw' | 'promotion', userIds?: string[]) => {
+    if (!user && !userIds) return;
+    
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newNotification: Notification = {
-        id: Date.now().toString(),
-        userId: userIds ? userIds[0] : 'all', // If userIds is provided, take the first one, otherwise 'all'
-        message,
-        read: false,
-        type: type as 'system' | 'win' | 'draw', // Cast to the valid types in Notification
-        createdAt: new Date().toISOString(),
-      };
-      
-      setNotifications(prev => [newNotification, ...prev]);
-      
-      toast({
-        title: "Notification sent",
-        description: userIds 
-          ? `Sent to ${userIds.length} specific user(s)` 
-          : "Sent to all users",
-      });
-      
+      if (userIds && userIds.length > 0) {
+        // Send to specific users
+        const promises = userIds.map(userId => 
+          supabase.from('notifications').insert({
+            user_id: userId,
+            message,
+            type
+          })
+        );
+        
+        await Promise.all(promises);
+      } else if (user) {
+        // Send to current user
+        const { error } = await supabase.from('notifications').insert({
+          user_id: user.id,
+          message,
+          type
+        });
+        
+        if (error) throw error;
+      }
     } catch (error) {
       console.error('Send notification error:', error);
-      toast({
-        variant: 'destructive',
-        title: "Failed to send notification",
-        description: "There was an error sending the notification.",
-      });
       throw error;
     } finally {
       setLoading(false);

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Draw, Ticket, Banner, MediaItem } from '../types';
+import { sendDrawEntryNotifications } from '../utils/notificationUtils';
+import { useAuth } from './AuthContext';
 
 // Mock data until we integrate with Supabase
 const MOCK_DRAWS: Draw[] = [
@@ -114,6 +116,7 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [banners, setBanners] = useState<Banner[]>(MOCK_BANNERS);
   const [media, setMedia] = useState<MediaItem[]>(MOCK_MEDIA);
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   const createDraw = async (draw: Omit<Draw, 'id'>) => {
     setLoading(true);
@@ -152,12 +155,18 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const buyTicket = async (drawId: string, number: number, price: number) => {
     setLoading(true);
     try {
+      // Find the current draw
+      const draw = draws.find(d => d.id === drawId);
+      if (!draw) {
+        throw new Error('Draw not found');
+      }
+      
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       const newTicket: Ticket = {
         id: Date.now().toString(),
         drawId,
-        userId: '1', // This would be the current user's ID
+        userId: user?.id || '1', // Use actual user ID if available
         number,
         price,
         purchaseDate: new Date().toISOString(),
@@ -172,6 +181,12 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
             : draw
         )
       );
+      
+      // Send entry and receipt notifications if user is logged in
+      if (user?.id) {
+        await sendDrawEntryNotifications(user.id, draw.title, number, price);
+      }
+      
     } catch (error) {
       console.error('Buy ticket error:', error);
       throw error;
