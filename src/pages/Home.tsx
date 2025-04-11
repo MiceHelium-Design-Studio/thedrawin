@@ -1,14 +1,23 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useDraws } from '../context/DrawContext';
+import { useAuth } from '../context/AuthContext';
 import DrawCard from '../components/draws/DrawCard';
 import BannerSlider from '../components/draws/BannerSlider';
 
 const Home: React.FC = () => {
-  const { draws, banners } = useDraws();
+  const { draws, banners, loading: drawsLoading } = useDraws();
+  const { loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  
+  const loading = authLoading || drawsLoading;
+  
+  useEffect(() => {
+    // Log loading states for debugging
+    console.log('Home page - Auth loading:', authLoading, 'Draws loading:', drawsLoading);
+  }, [authLoading, drawsLoading]);
   
   // Get active draws first, then upcoming, then completed
   const sortedDraws = [...draws].sort((a, b) => {
@@ -22,6 +31,17 @@ const Home: React.FC = () => {
   const handleViewAll = () => {
     navigate('/draws');
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold mx-auto mb-4"></div>
+          <p className="text-gold">Loading draws...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6">

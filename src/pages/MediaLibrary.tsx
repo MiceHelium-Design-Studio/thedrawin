@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Image, 
@@ -11,6 +10,7 @@ import {
   Filter
 } from 'lucide-react';
 import { useDraws } from '../context/DrawContext';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,13 +32,20 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 
 const MediaLibrary: React.FC = () => {
-  const { media, loading, uploadMedia, deleteMedia } = useDraws();
+  const { media, loading: mediaLoading, uploadMedia, deleteMedia } = useDraws();
+  const { loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  
+  const loading = authLoading || mediaLoading;
+
+  useEffect(() => {
+    console.log('Media page - Auth loading:', authLoading, 'Media loading:', mediaLoading);
+  }, [authLoading, mediaLoading]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -51,7 +58,6 @@ const MediaLibrary: React.FC = () => {
         description: `${uploadedItem.name} has been uploaded successfully.`,
       });
       
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -99,6 +105,17 @@ const MediaLibrary: React.FC = () => {
         return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
       }
     });
+
+  if (loading) {
+    return (
+      <div className="container mx-auto flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold mx-auto mb-4"></div>
+          <p className="text-gold">Loading media library...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 pb-20">
