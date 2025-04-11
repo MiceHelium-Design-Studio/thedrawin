@@ -17,10 +17,12 @@ const Auth: React.FC = () => {
   const { authBackgroundImage } = useBackground();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Simple redirect if user is already logged in
-  if (user) {
-    return <Navigate to="/" />;
-  }
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (data: { email: string; password: string; name?: string; phone?: string }) => {
     try {
@@ -36,7 +38,7 @@ const Auth: React.FC = () => {
         description: mode === 'login' ? 'You are now signed in.' : 'Your account has been created successfully.',
       });
       
-      // The redirect will be handled by the if(user) check on next render
+      // Navigate will be called by the useEffect when user changes
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -54,7 +56,7 @@ const Auth: React.FC = () => {
       setIsProcessing(true);
       if (provider === 'Google') {
         await signInWithGoogle();
-        // The redirect will be handled by Supabase
+        // The redirect will be handled by the useEffect when user changes
       } else {
         toast({
           title: 'Social login',
@@ -76,6 +78,9 @@ const Auth: React.FC = () => {
   const toggleMode = () => {
     setMode(prev => (prev === 'login' ? 'signup' : 'login'));
   };
+
+  // We no longer need this early return since we handle redirection in useEffect
+  // This allows the component to fully render and then redirect
 
   return (
     <div 
