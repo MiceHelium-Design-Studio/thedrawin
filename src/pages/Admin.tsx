@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit, 
   Users, UserCheck, UserX, Search, Filter, Bell, BellRing, MessageSquare, Send,
-  Type, Palette, Bold, Italic, Underline
+  Type, Palette, Bold, Italic, Underline, Save
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
@@ -121,6 +121,8 @@ const Admin: React.FC = () => {
   const [fontsList] = useState<string[]>([
     "Lato", "Arial", "Helvetica", "Verdana", "Georgia", "Times New Roman"
   ]);
+  
+  const [appearanceChanged, setAppearanceChanged] = useState(false);
   
   const handleNotificationTypeChange = (value: 'system' | 'win' | 'draw' | 'promotion') => {
     setNotificationType(value);
@@ -416,41 +418,74 @@ const Admin: React.FC = () => {
   
   const handleFontChange = (value: string) => {
     setFontFamily(value);
-    // In a real app, this would update a CSS variable or context
-    document.documentElement.style.setProperty('--font-sans', value);
-    toast({
-      title: 'Font updated',
-      description: `Font has been changed to ${value}.`,
-    });
+    setAppearanceChanged(true);
   };
   
   const handleColorChange = (colorType: 'primary' | 'secondary' | 'background', value: string) => {
     switch (colorType) {
       case 'primary':
         setPrimaryColor(value);
-        document.documentElement.style.setProperty('--primary', convertHexToHsl(value));
         break;
       case 'secondary':
         setSecondaryColor(value);
-        document.documentElement.style.setProperty('--secondary', convertHexToHsl(value));
         break;
       case 'background':
         setBackgroundColor(value);
-        document.documentElement.style.setProperty('--background', convertHexToHsl(value));
         break;
     }
     
+    setAppearanceChanged(true);
+  };
+  
+  const saveAppearanceSettings = () => {
+    document.documentElement.style.setProperty('--font-sans', fontFamily);
+    document.documentElement.style.setProperty('--primary', convertHexToHsl(primaryColor));
+    document.documentElement.style.setProperty('--secondary', convertHexToHsl(secondaryColor));
+    document.documentElement.style.setProperty('--background', convertHexToHsl(backgroundColor));
+    
+    localStorage.setItem('app-font-family', fontFamily);
+    localStorage.setItem('app-primary-color', primaryColor);
+    localStorage.setItem('app-secondary-color', secondaryColor);
+    localStorage.setItem('app-background-color', backgroundColor);
+    
+    setAppearanceChanged(false);
+    
     toast({
-      title: 'Color updated',
-      description: `${colorType.charAt(0).toUpperCase() + colorType.slice(1)} color has been updated.`,
+      title: 'Appearance settings saved',
+      description: 'Your font and color settings have been applied to the application.',
     });
   };
   
   const convertHexToHsl = (hex: string): string => {
-    // This is a simplified conversion - in a real app you'd use a more accurate conversion
-    // For now we'll just return the color name for demonstration
     return hex;
   };
+  
+  useEffect(() => {
+    const savedFontFamily = localStorage.getItem('app-font-family');
+    const savedPrimaryColor = localStorage.getItem('app-primary-color');
+    const savedSecondaryColor = localStorage.getItem('app-secondary-color');
+    const savedBackgroundColor = localStorage.getItem('app-background-color');
+    
+    if (savedFontFamily) {
+      setFontFamily(savedFontFamily);
+      document.documentElement.style.setProperty('--font-sans', savedFontFamily);
+    }
+    
+    if (savedPrimaryColor) {
+      setPrimaryColor(savedPrimaryColor);
+      document.documentElement.style.setProperty('--primary', convertHexToHsl(savedPrimaryColor));
+    }
+    
+    if (savedSecondaryColor) {
+      setSecondaryColor(savedSecondaryColor);
+      document.documentElement.style.setProperty('--secondary', convertHexToHsl(savedSecondaryColor));
+    }
+    
+    if (savedBackgroundColor) {
+      setBackgroundColor(savedBackgroundColor);
+      document.documentElement.style.setProperty('--background', convertHexToHsl(savedBackgroundColor));
+    }
+  }, []);
   
   return (
     <div className="container mx-auto px-4 py-6">
@@ -1266,6 +1301,18 @@ const Admin: React.FC = () => {
                     </div>
                   )}
                 </div>
+                
+                {appearanceChanged && (
+                  <div className="mt-6">
+                    <Button 
+                      onClick={saveAppearanceSettings} 
+                      className="w-full bg-gold hover:bg-gold-dark text-black"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Appearance Settings
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
