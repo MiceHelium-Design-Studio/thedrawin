@@ -1,8 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Draw, Ticket, Banner, MediaItem } from '../types';
 import { sendDrawEntryNotifications } from '../utils/notificationUtils';
 import { useAuth } from './AuthContext';
+import { getMediaItems, uploadToS3, deleteFromS3 } from '../utils/s3Utils';
 
 // Mock data until we integrate with Supabase
 const MOCK_DRAWS: Draw[] = [
@@ -66,34 +66,6 @@ const MOCK_BANNERS: Banner[] = [
   }
 ];
 
-// Mock media library data
-const MOCK_MEDIA: MediaItem[] = [
-  {
-    id: '1',
-    name: 'Gold Coin',
-    url: '/placeholder.svg',
-    type: 'image',
-    size: 1024 * 50, // 50KB
-    uploadDate: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    name: 'Banner Image',
-    url: '/placeholder.svg',
-    type: 'image',
-    size: 1024 * 120, // 120KB
-    uploadDate: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: '3',
-    name: 'Prize Photo',
-    url: '/placeholder.svg',
-    type: 'image',
-    size: 1024 * 85, // 85KB
-    uploadDate: new Date(Date.now() - 86400000 * 3).toISOString(),
-  }
-];
-
 interface DrawContextType {
   draws: Draw[];
   tickets: Ticket[];
@@ -116,10 +88,30 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [draws, setDraws] = useState<Draw[]>(MOCK_DRAWS);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [banners, setBanners] = useState<Banner[]>(MOCK_BANNERS);
-  const [media, setMedia] = useState<MediaItem[]>(MOCK_MEDIA);
+  const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true); // Start with loading true
   const { user } = useAuth();
   
+  // Load media items from S3
+  useEffect(() => {
+    if (user) {
+      fetchMediaItems();
+    }
+  }, [user]);
+  
+  const fetchMediaItems = async () => {
+    if (!user) return;
+    
+    try {
+      const mediaItems = await getMediaItems();
+      setMedia(mediaItems);
+    } catch (error) {
+      console.error('Error fetching media items:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Simulate initial loading with a timeout that ensures it eventually completes
   useEffect(() => {
     console.log("DrawContext initializing...");
@@ -260,20 +252,16 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const uploadMedia = async (file: File): Promise<MediaItem> => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Upload to S3
+      const { url, key, name, size } = await uploadToS3(file);
       
-      // Create a URL for the uploaded file to show immediate preview
-      const objectUrl = URL.createObjectURL(file);
-      
-      // In a real app, we would upload to a storage solution here and get the real URL
-      // For our mock, we'll use the object URL for immediate preview
+      // Create a new media item
       const newMedia: MediaItem = {
-        id: Date.now().toString(),
-        name: file.name,
-        url: objectUrl, // Using the object URL instead of a placeholder
+        id: key, // Use S3 key as ID
+        name: name,
+        url: url,
         type: file.type.startsWith('image/') ? 'image' : 'document',
-        size: file.size,
+        size: size,
         uploadDate: new Date().toISOString(),
       };
       
@@ -290,8 +278,10 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteMedia = async (id: string): Promise<void> => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Delete from S3
+      await deleteFromS3(id);
+      
+      // Remove from state
       setMedia(prev => prev.filter(item => item.id !== id));
     } catch (error) {
       console.error('Delete media error:', error);

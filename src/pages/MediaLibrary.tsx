@@ -1,6 +1,5 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Image, 
   Trash2, 
@@ -31,17 +30,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDistanceToNow } from 'date-fns';
+import { Textarea } from '@/components/ui/textarea';
 
 const MediaLibrary: React.FC = () => {
   const { media = [], loading: mediaLoading, uploadMedia, deleteMedia } = useDraws();
-  const { loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [forceRender, setForceRender] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Force render after 3 seconds no matter what
   useEffect(() => {
@@ -66,7 +66,14 @@ const MediaLibrary: React.FC = () => {
     if (!files || files.length === 0) return;
 
     try {
+      setIsUploading(true);
+      toast({
+        title: 'Uploading...',
+        description: `Uploading ${files[0].name} to S3 storage.`,
+      });
+      
       const uploadedItem = await uploadMedia(files[0]);
+      
       toast({
         title: 'File uploaded',
         description: `${uploadedItem.name} has been uploaded successfully.`,
@@ -79,15 +86,23 @@ const MediaLibrary: React.FC = () => {
       toast({
         variant: 'destructive',
         title: 'Upload failed',
-        description: 'There was an error uploading your file.',
+        description: 'There was an error uploading your file to S3.',
       });
       console.error(error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
     try {
+      toast({
+        title: 'Deleting...',
+        description: `Deleting ${name} from S3 storage.`,
+      });
+      
       await deleteMedia(id);
+      
       toast({
         title: 'File deleted',
         description: `${name} has been deleted successfully.`,
@@ -96,7 +111,7 @@ const MediaLibrary: React.FC = () => {
       toast({
         variant: 'destructive',
         title: 'Deletion failed',
-        description: 'There was an error deleting your file.',
+        description: 'There was an error deleting your file from S3.',
       });
       console.error(error);
     }
@@ -132,14 +147,14 @@ const MediaLibrary: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border-gold/30 focus:border-gold"
-            disabled={loading}
+            disabled={loading || isUploading}
           />
 
           <Button
             variant="outline"
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
             className="border-gold/30 text-gold"
-            disabled={loading}
+            disabled={loading || isUploading}
           >
             {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
           </Button>
@@ -148,7 +163,7 @@ const MediaLibrary: React.FC = () => {
             variant="outline"
             onClick={() => setView(view === 'grid' ? 'list' : 'grid')}
             className="border-gold/30 text-gold"
-            disabled={loading}
+            disabled={loading || isUploading}
           >
             {view === 'grid' ? (
               <Filter className="h-4 w-4" />
@@ -160,9 +175,13 @@ const MediaLibrary: React.FC = () => {
           <Button 
             onClick={() => fileInputRef.current?.click()} 
             className="bg-gold hover:bg-gold-dark text-black"
-            disabled={loading}
+            disabled={loading || isUploading}
           >
-            <UploadCloud className="h-4 w-4 mr-2" />
+            {isUploading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-black mr-2"></div>
+            ) : (
+              <UploadCloud className="h-4 w-4 mr-2" />
+            )}
             Upload
           </Button>
           <input 
@@ -171,6 +190,7 @@ const MediaLibrary: React.FC = () => {
             className="hidden"
             accept="image/*" 
             onChange={handleFileChange} 
+            disabled={isUploading}
           />
         </div>
       </div>
@@ -180,11 +200,34 @@ const MediaLibrary: React.FC = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
         </div>
       )}
+      
+      {isUploading && !loading && (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold"></div>
+              <div>
+                <h3 className="font-medium">Uploading your file to S3...</h3>
+                <p className="text-sm text-gray-500">Please wait while your file is being uploaded.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {!loading && filteredMedia.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
-            <p className="text-gray-500">No media files found.</p>
+            <p className="text-gray-500">No media files found in S3 storage.</p>
+            {!isUploading && (
+              <Button 
+                className="mt-4 bg-gold hover:bg-gold-dark text-black"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <UploadCloud className="h-4 w-4 mr-2" />
+                Upload your first file
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : !loading && view === 'grid' ? (
