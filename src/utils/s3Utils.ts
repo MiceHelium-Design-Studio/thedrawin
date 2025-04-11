@@ -10,7 +10,7 @@ export interface UploadResponse {
 export async function getMediaItems() {
   try {
     const { data, error } = await supabase.functions.invoke('s3-media', {
-      query: { action: 'list' }
+      body: { action: 'list' }
     });
 
     if (error) throw error;
@@ -24,7 +24,7 @@ export async function getMediaItems() {
 export async function getUploadUrl(fileName: string, contentType: string): Promise<UploadResponse> {
   try {
     const { data, error } = await supabase.functions.invoke('s3-media', {
-      query: { 
+      body: { 
         action: 'getUploadUrl',
         fileName,
         contentType
@@ -68,7 +68,7 @@ export async function uploadToS3(file: File): Promise<{ url: string; key: string
 export async function deleteFromS3(fileKey: string) {
   try {
     const { error } = await supabase.functions.invoke('s3-media', {
-      query: { 
+      body: { 
         action: 'delete',
         fileKey
       }

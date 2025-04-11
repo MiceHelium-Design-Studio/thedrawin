@@ -16,7 +16,8 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Create S3 client using environment variables
 const s3Client = new S3Client({
-  region: "us-east-1", // Default region, can be configured
+  region: "us-east-2", // Updated region
+  endpoint: "https://vfmulngualkzxwdzcbwb.supabase.co/storage/v1/s3", // Added endpoint
   credentials: {
     accessKeyId: Deno.env.get('S3_ACCESS_KEY') as string,
     secretAccessKey: Deno.env.get('S3_SECRET_ACCESS_KEY') as string,
