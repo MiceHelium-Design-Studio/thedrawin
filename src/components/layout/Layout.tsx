@@ -11,8 +11,8 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user } = useAuth();
-  const { notifications } = useNotifications();
+  const { user, loading: authLoading } = useAuth();
+  const { notifications, loading: notificationsLoading } = useNotifications();
   const location = useLocation();
   
   const unreadCount = notifications?.filter(n => !n.read)?.length || 0;
@@ -21,6 +21,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black">
       <main className="flex-grow pb-16 pattern-bg">{children}</main>
 
+      {/* Always show the navbar, even during loading */}
       <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20">
         <div className="grid grid-cols-5 h-16">
           <NavLink
@@ -70,7 +71,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/notifications' && "bg-black-light/50")}>
               <Bell className="h-5 w-5 mb-1" />
-              {unreadCount > 0 && (
+              {!notificationsLoading && unreadCount > 0 && (
                 <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center text-[10px] border border-black">
                   {unreadCount}
                 </span>
@@ -96,7 +97,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <span>Profile</span>
           </NavLink>
           
-          {user?.isAdmin && (
+          {!authLoading && user?.isAdmin && (
             <NavLink
               to="/admin"
               className={({ isActive }) =>

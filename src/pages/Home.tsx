@@ -10,12 +10,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { RotateCcw } from 'lucide-react';
 
 const Home: React.FC = () => {
-  const { draws = [], banners = [], loading: drawsLoading = true } = useDraws();
-  const { user, loading: authLoading = true, clearCacheAndReload } = useAuth();
+  const { draws = [], banners = [], loading: drawsLoading } = useDraws();
+  const { user, loading: authLoading, clearCacheAndReload } = useAuth();
   const navigate = useNavigate();
   
-  // Always initialize these variables
   const isLoading = authLoading || drawsLoading;
+  console.log("Home component rendering, loading state:", isLoading);
+  console.log("Draws loaded:", draws?.length || 0, "items");
   
   // Get active draws first, then upcoming, then completed
   const sortedDraws = [...(draws || [])].sort((a, b) => {
@@ -30,9 +31,6 @@ const Home: React.FC = () => {
     navigate('/draws');
   };
 
-  console.log("Home component rendering, loading state:", isLoading);
-  console.log("Draws data:", draws?.length || 0, "items");
-
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-6">
@@ -44,9 +42,10 @@ const Home: React.FC = () => {
           size="sm" 
           onClick={clearCacheAndReload}
           className="flex items-center gap-1"
+          disabled={isLoading}
         >
-          <RotateCcw className="h-3.5 w-3.5" />
-          <span>Refresh</span>
+          <RotateCcw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
+          <span>{isLoading ? "Loading..." : "Refresh"}</span>
         </Button>
       </div>
       
@@ -101,5 +100,8 @@ const Home: React.FC = () => {
     </div>
   );
 };
+
+// Import cn utility
+import { cn } from '@/lib/utils';
 
 export default Home;
