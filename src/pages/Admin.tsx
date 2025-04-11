@@ -85,7 +85,7 @@ const mockUsers: User[] = [
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
-  const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, deleteBanner, uploadMedia, loading } = useDraws();
+  const { draws, banners, media, createDraw, updateDraw, createBanner, updateBanner, deleteBanner, uploadMedia, deleteMedia, loading } = useDraws();
   const { authBackgroundImage, setAuthBackgroundImage } = useBackground();
   const { sendNotification, notifications } = useNotifications();
   const navigate = useNavigate();
@@ -266,7 +266,7 @@ const Admin: React.FC = () => {
     }
   };
   
-  const handleTicketPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDrawTicketPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const prices = value.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p));
     
@@ -524,12 +524,6 @@ const Admin: React.FC = () => {
     }
   };
   
-  const handleTicketPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const prices = value.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p));
-    setNewDraw(prev => ({ ...prev, ticketPrices: prices }));
-  };
-  
   const handleSendNotification = async () => {
     if (!notificationMessage.trim()) {
       toast({
@@ -736,7 +730,7 @@ const Admin: React.FC = () => {
                       <Input
                         id="ticketPrices"
                         value={editingDraw ? editingDraw.ticketPrices.join(', ') : newDraw.ticketPrices.join(', ')}
-                        onChange={handleTicketPriceChange}
+                        onChange={handleDrawTicketPriceChange}
                         placeholder="5, 10, 20"
                         className="border-gold/30 focus:border-gold"
                       />

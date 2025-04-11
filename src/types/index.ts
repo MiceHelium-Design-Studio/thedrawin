@@ -38,6 +38,8 @@ export interface Notification {
   read: boolean;
   type: 'win' | 'draw' | 'system' | 'promotion';
   createdAt: string;
+  toAll?: boolean;
+  toUserIds?: string[];
 }
 
 export interface Banner {
