@@ -1,15 +1,8 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
-
-// Mock data until we integrate with Supabase
-const MOCK_USER: User = {
-  id: '1',
-  email: 'user@example.com',
-  name: 'Test User',
-  avatar: '/placeholder.svg',
-  wallet: 50,
-  isAdmin: true
-};
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -26,34 +19,113 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Simulate authentication loading
+  // Initialize auth state and set up listener for auth changes
   useEffect(() => {
-    const checkAuth = async () => {
+    // First set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setLoading(true);
+        
+        if (session?.user) {
+          try {
+            // Fetch user profile data from profiles table
+            const { data, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+            
+            if (error) {
+              console.error('Error fetching user profile:', error);
+              setUser(null);
+            } else if (data) {
+              // Transform the profile data to match our User type
+              setUser({
+                id: data.id,
+                email: data.email,
+                name: data.name || undefined,
+                avatar: data.avatar || undefined,
+                wallet: data.wallet || 0,
+                isAdmin: data.is_admin || false
+              });
+            }
+          } catch (error) {
+            console.error('Error in auth state change handler:', error);
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+        
+        setLoading(false);
+      }
+    );
+
+    // Then check for existing session
+    const initializeAuth = async () => {
       try {
-        // In a real app, we would check if the user is already logged in
-        // For now, let's simulate a logged out state
-        setUser(null);
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session?.user) {
+          // Fetch user profile data
+          const { data: profileData, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.session.user.id)
+            .single();
+          
+          if (error) {
+            console.error('Error fetching initial user profile:', error);
+            setUser(null);
+          } else if (profileData) {
+            // Transform the profile data to match our User type
+            setUser({
+              id: profileData.id,
+              email: profileData.email,
+              name: profileData.name || undefined,
+              avatar: profileData.avatar || undefined,
+              wallet: profileData.wallet || 0,
+              isAdmin: profileData.is_admin || false
+            });
+          }
+        }
       } catch (error) {
-        console.error('Auth check error:', error);
-        setUser(null);
+        console.error('Auth initialization error:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuth();
+    initializeAuth();
+
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // For demonstration, we'll log in the mock user
-      setUser(MOCK_USER);
-    } catch (error) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        throw error;
+      }
+      
+      // Profile data will be fetched by the auth state change listener
+    } catch (error: any) {
       console.error('Login error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Login failed',
+        description: error.message || 'An error occurred during login',
+      });
       throw error;
     } finally {
       setLoading(false);
@@ -63,13 +135,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (email: string, password: string, name: string, phone?: string) => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // Create a new user based on the mock, now including phone if provided
-      const newUser = { ...MOCK_USER, email, name, phone };
-      setUser(newUser);
-    } catch (error) {
+      // Create the user in Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            phone
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+      
+      // The profile will be created by the database trigger
+      // and then fetched by the auth state change listener
+
+      toast({
+        title: 'Account created',
+        description: 'Your account has been created successfully.',
+      });
+    } catch (error: any) {
       console.error('Signup error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Signup failed',
+        description: error.message || 'An error occurred during signup',
+      });
       throw error;
     } finally {
       setLoading(false);
@@ -79,11 +174,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setUser(null);
-    } catch (error) {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      
+      // User will be set to null by the auth state change listener
+    } catch (error: any) {
       console.error('Logout error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Logout failed',
+        description: error.message || 'An error occurred during logout',
+      });
       throw error;
     } finally {
       setLoading(false);
@@ -94,11 +197,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Update profile data in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: data.name,
+          avatar: data.avatar,
+          // Don't update email or isAdmin here as these are more sensitive fields
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
       setUser({ ...user, ...data });
-    } catch (error) {
+      
+      toast({
+        title: 'Profile updated',
+        description: 'Your profile has been updated successfully.',
+      });
+    } catch (error: any) {
       console.error('Update profile error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Update failed',
+        description: error.message || 'An error occurred while updating your profile',
+      });
       throw error;
     } finally {
       setLoading(false);
@@ -109,11 +235,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setUser({ ...user, wallet: user.wallet + amount });
-    } catch (error) {
+      // Calculate new wallet amount
+      const newAmount = user.wallet + amount;
+      
+      // Update wallet in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({ wallet: newAmount })
+        .eq('id', user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setUser({ ...user, wallet: newAmount });
+      
+      toast({
+        title: 'Funds added',
+        description: `$${amount} has been added to your wallet.`,
+      });
+    } catch (error: any) {
       console.error('Add funds error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Transaction failed',
+        description: error.message || 'An error occurred while adding funds',
+      });
       throw error;
     } finally {
       setLoading(false);
