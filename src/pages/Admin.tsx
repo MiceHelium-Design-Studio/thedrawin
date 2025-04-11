@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit, 
   Users, UserCheck, UserX, Search, Filter, Bell, BellRing, MessageSquare, Send,
-  Type, Palette, Bold, Italic, Underline, Save, Trash, X
+  Type, Palette, Bold, Italic, Underline, Save, Trash, X, Check
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
@@ -36,6 +36,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { 
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage 
+} from "@/components/ui/form";
 
 const mockUsers: User[] = [
   {
@@ -82,6 +92,7 @@ const Admin: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
   const bgImageFileInputRef = useRef<HTMLInputElement>(null);
+  const drawFileInputRef = useRef<HTMLInputElement>(null);
   
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,6 +109,8 @@ const Admin: React.FC = () => {
     endDate: new Date(Date.now() + 86400000 * 7).toISOString(),
     bannerImage: '',
   });
+  
+  const [editingDraw, setEditingDraw] = useState<Draw | null>(null);
   
   const [newBanner, setNewBanner] = useState<Omit<Banner, 'id'>>({
     imageUrl: '',
@@ -239,6 +252,79 @@ const Admin: React.FC = () => {
     }
   };
   
+  const handleDrawInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    
+    if (editingDraw) {
+      setEditingDraw(prev => {
+        if (!prev) return prev;
+        return { ...prev, [name]: value };
+      });
+    } else {
+      setNewDraw(prev => ({ ...prev, [name]: value }));
+    }
+  };
+  
+  const handleTicketPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const prices = value.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p));
+    
+    if (editingDraw) {
+      setEditingDraw(prev => {
+        if (!prev) return prev;
+        return { ...prev, ticketPrices: prices };
+      });
+    } else {
+      setNewDraw(prev => ({ ...prev, ticketPrices: prices }));
+    }
+  };
+  
+  const handleDrawStatusChange = (value: string) => {
+    if (editingDraw) {
+      setEditingDraw(prev => {
+        if (!prev) return prev;
+        return { ...prev, status: value as 'active' | 'upcoming' | 'completed' };
+      });
+    }
+  };
+
+  const handleDrawFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      const uploadedItem = await uploadMedia(files[0]);
+      
+      if (editingDraw) {
+        setEditingDraw({
+          ...editingDraw,
+          bannerImage: uploadedItem.url
+        });
+      } else {
+        setNewDraw(prev => ({
+          ...prev,
+          bannerImage: uploadedItem.url
+        }));
+      }
+      
+      toast({
+        title: 'Draw image uploaded',
+        description: `${uploadedItem.name} has been uploaded successfully and set as the draw image.`,
+      });
+      
+      if (drawFileInputRef.current) {
+        drawFileInputRef.current.value = '';
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description: 'There was an error uploading your draw image.',
+      });
+      console.error(error);
+    }
+  };
+  
   const handleCreateDraw = async () => {
     try {
       await createDraw(newDraw);
@@ -265,6 +351,53 @@ const Admin: React.FC = () => {
       });
       console.error(error);
     }
+  };
+  
+  const handleUpdateDraw = async () => {
+    if (!editingDraw) return;
+    
+    try {
+      await updateDraw(editingDraw.id, editingDraw);
+      setEditingDraw(null);
+      toast({
+        title: 'Draw updated',
+        description: 'The draw has been updated successfully.',
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Update failed',
+        description: 'There was an error updating the draw.',
+      });
+      console.error(error);
+    }
+  };
+  
+  const handleEditDraw = (draw: Draw) => {
+    setEditingDraw(draw);
+  };
+  
+  const handleCancelEditDraw = () => {
+    setEditingDraw(null);
+  };
+  
+  const handleDeleteDrawImage = () => {
+    if (editingDraw) {
+      setEditingDraw({
+        ...editingDraw,
+        bannerImage: ''
+      });
+    } else {
+      setNewDraw(prev => ({
+        ...prev,
+        bannerImage: ''
+      }));
+    }
+    
+    toast({
+      title: 'Image removed',
+      description: 'The draw image has been removed.',
+    });
   };
   
   const handleCreateBanner = async () => {
@@ -372,11 +505,6 @@ const Admin: React.FC = () => {
       });
       console.error(error);
     }
-  };
-  
-  const handleDrawInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewDraw(prev => ({ ...prev, [name]: value }));
   };
   
   const handleBannerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -548,7 +676,7 @@ const Admin: React.FC = () => {
         <TabsContent value="draws">
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-lg">Create New Draw</CardTitle>
+              <CardTitle className="text-lg">{editingDraw ? 'Edit Draw' : 'Create New Draw'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -558,7 +686,7 @@ const Admin: React.FC = () => {
                     <Input
                       id="title"
                       name="title"
-                      value={newDraw.title}
+                      value={editingDraw ? editingDraw.title : newDraw.title}
                       onChange={handleDrawInputChange}
                       className="border-gold/30 focus:border-gold"
                     />
@@ -569,7 +697,7 @@ const Admin: React.FC = () => {
                     <Textarea
                       id="description"
                       name="description"
-                      value={newDraw.description}
+                      value={editingDraw ? editingDraw.description : newDraw.description}
                       onChange={handleDrawInputChange}
                       className="border-gold/30 focus:border-gold"
                     />
@@ -582,22 +710,55 @@ const Admin: React.FC = () => {
                         id="maxParticipants"
                         name="maxParticipants"
                         type="number"
-                        value={newDraw.maxParticipants}
+                        value={editingDraw ? editingDraw.maxParticipants : newDraw.maxParticipants}
                         onChange={handleDrawInputChange}
                         className="border-gold/30 focus:border-gold"
                       />
                     </div>
                     
+                    {editingDraw && (
+                      <div>
+                        <Label htmlFor="currentParticipants">Current Participants</Label>
+                        <Input
+                          id="currentParticipants"
+                          name="currentParticipants"
+                          type="number"
+                          value={editingDraw.currentParticipants}
+                          onChange={handleDrawInputChange}
+                          className="border-gold/30 focus:border-gold"
+                        />
+                      </div>
+                    )}
+                    
                     <div>
                       <Label htmlFor="ticketPrices">Ticket Prices (comma separated)</Label>
                       <Input
                         id="ticketPrices"
-                        value={newDraw.ticketPrices.join(', ')}
+                        value={editingDraw ? editingDraw.ticketPrices.join(', ') : newDraw.ticketPrices.join(', ')}
                         onChange={handleTicketPriceChange}
                         placeholder="5, 10, 20"
                         className="border-gold/30 focus:border-gold"
                       />
                     </div>
+                    
+                    {editingDraw && (
+                      <div>
+                        <Label htmlFor="status">Status</Label>
+                        <Select
+                          value={editingDraw.status}
+                          onValueChange={handleDrawStatusChange}
+                        >
+                          <SelectTrigger className="border-gold/30 focus:border-gold">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="upcoming">Upcoming</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -609,7 +770,7 @@ const Admin: React.FC = () => {
                           id="startDate"
                           name="startDate"
                           type="date"
-                          value={new Date(newDraw.startDate).toISOString().split('T')[0]}
+                          value={new Date(editingDraw ? editingDraw.startDate : newDraw.startDate).toISOString().split('T')[0]}
                           onChange={handleDrawInputChange}
                           className="pl-10 border-gold/30 focus:border-gold"
                         />
@@ -624,7 +785,7 @@ const Admin: React.FC = () => {
                           id="endDate"
                           name="endDate"
                           type="date"
-                          value={new Date(newDraw.endDate).toISOString().split('T')[0]}
+                          value={new Date(editingDraw ? editingDraw.endDate : newDraw.endDate).toISOString().split('T')[0]}
                           onChange={handleDrawInputChange}
                           className="pl-10 border-gold/30 focus:border-gold"
                         />
@@ -633,28 +794,91 @@ const Admin: React.FC = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="bannerImage">Banner Image URL (optional)</Label>
-                    <div className="relative">
-                      <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Label htmlFor="uploadDrawImage">Draw Image</Label>
+                    <div className="flex gap-2 items-center mt-1 mb-4">
+                      <Button 
+                        onClick={() => drawFileInputRef.current?.click()} 
+                        variant="outline" 
+                        className="flex-1 border-gold/30 text-gold hover:bg-gold/10"
+                        disabled={loading}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Draw Image
+                      </Button>
+                      <input 
+                        type="file" 
+                        ref={drawFileInputRef} 
+                        className="hidden"
+                        accept="image/*" 
+                        onChange={handleDrawFileUpload} 
+                      />
+                      
+                      {(editingDraw?.bannerImage || newDraw.bannerImage) && (
+                        <Button 
+                          variant="destructive" 
+                          size="icon" 
+                          onClick={handleDeleteDrawImage}
+                          title="Delete image"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {(editingDraw?.bannerImage || newDraw.bannerImage) && (
+                      <div className="mt-2 w-full h-40 overflow-hidden rounded-md border border-gray-200 relative group">
+                        <img 
+                          src={editingDraw ? editingDraw.bannerImage : newDraw.bannerImage} 
+                          alt="Draw image preview" 
+                          className="w-full h-full object-contain" 
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {editingDraw && editingDraw.status === 'completed' && (
+                    <div>
+                      <Label htmlFor="winner">Winner (for completed draws)</Label>
                       <Input
-                        id="bannerImage"
-                        name="bannerImage"
-                        value={newDraw.bannerImage || ''}
+                        id="winner"
+                        name="winner"
+                        value={editingDraw.winner || ''}
                         onChange={handleDrawInputChange}
-                        className="pl-10 border-gold/30 focus:border-gold"
+                        className="border-gold/30 focus:border-gold"
                       />
                     </div>
-                  </div>
+                  )}
                 </div>
                 
-                <Button
-                  onClick={handleCreateDraw}
-                  disabled={!newDraw.title || !newDraw.description || loading}
-                  className="w-full bg-gold hover:bg-gold-dark text-black"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Draw
-                </Button>
+                {editingDraw ? (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleUpdateDraw}
+                      disabled={!editingDraw.title || !editingDraw.description || loading}
+                      className="flex-1 bg-gold hover:bg-gold-dark text-black"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Draw
+                    </Button>
+                    <Button
+                      onClick={handleCancelEditDraw}
+                      variant="outline"
+                      className="border-gold/30 text-gold hover:bg-gold/10"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleCreateDraw}
+                    disabled={!newDraw.title || !newDraw.description || loading}
+                    className="w-full bg-gold hover:bg-gold-dark text-black"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Draw
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -672,15 +896,39 @@ const Admin: React.FC = () => {
               {draws.map(draw => (
                 <Card key={draw.id}>
                   <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium">{draw.title}</h3>
-                        <p className="text-sm text-gray-500">
-                          Status: {draw.status.charAt(0).toUpperCase() + draw.status.slice(1)}
-                        </p>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex gap-4">
+                        {draw.bannerImage && (
+                          <div className="hidden sm:block w-16 h-16 rounded overflow-hidden flex-shrink-0 border border-gray-200">
+                            <img
+                              src={draw.bannerImage}
+                              alt={draw.title}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="font-medium">{draw.title}</h3>
+                          <p className="text-sm text-gray-500">
+                            Status: {draw.status.charAt(0).toUpperCase() + draw.status.slice(1)}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Participants: {draw.currentParticipants}/{draw.maxParticipants}
+                          </p>
+                        </div>
                       </div>
                       
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 mt-2 sm:mt-0">
+                        <Button
+                          onClick={() => handleEditDraw(draw)}
+                          variant="outline"
+                          size="sm"
+                          className="text-xs border-gold/30 text-gold hover:bg-gold/10"
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                        
                         {draw.status === 'upcoming' && (
                           <Button
                             onClick={() => updateDraw(draw.id, { status: 'active' })}
@@ -688,6 +936,7 @@ const Admin: React.FC = () => {
                             size="sm"
                             className="text-xs border-green-500 text-green-500 hover:bg-green-50"
                           >
+                            <Check className="h-3 w-3 mr-1" />
                             Activate
                           </Button>
                         )}
@@ -699,6 +948,7 @@ const Admin: React.FC = () => {
                             size="sm"
                             className="text-xs border-blue-500 text-blue-500 hover:bg-blue-50"
                           >
+                            <Check className="h-3 w-3 mr-1" />
                             Complete
                           </Button>
                         )}
@@ -731,659 +981,4 @@ const Admin: React.FC = () => {
                       Upload Banner Image
                     </Button>
                     <input 
-                      type="file" 
-                      ref={bannerFileInputRef} 
-                      className="hidden"
-                      accept="image/*" 
-                      onChange={handleBannerFileUpload} 
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <div className="relative">
-                    <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <div className="flex gap-2">
-                      <Input
-                        id="imageUrl"
-                        name="imageUrl"
-                        value={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl}
-                        onChange={handleBannerInputChange}
-                        className="pl-10 border-gold/30 focus:border-gold w-full"
-                        placeholder="Image URL will appear here after upload"
-                        readOnly
-                      />
-                      {(editingBanner?.imageUrl || newBanner.imageUrl) && (
-                        <Button 
-                          variant="destructive" 
-                          size="icon" 
-                          onClick={handleDeleteBannerImage}
-                          title="Delete image"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  {(editingBanner?.imageUrl || newBanner.imageUrl) && (
-                    <div className="mt-2 w-full h-40 overflow-hidden rounded-md border border-gray-200 relative group">
-                      <img 
-                        src={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl} 
-                        alt="Banner preview" 
-                        className="w-full h-full object-contain" 
-                      />
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <Label htmlFor="linkUrl">Link URL</Label>
-                  <Input
-                    id="linkUrl"
-                    name="linkUrl"
-                    value={editingBanner ? editingBanner.linkUrl : newBanner.linkUrl}
-                    onChange={handleBannerInputChange}
-                    className="border-gold/30 focus:border-gold"
-                  />
-                </div>
-                
-                {editingBanner ? (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleUpdateBanner}
-                      disabled={!editingBanner.imageUrl || !editingBanner.linkUrl || loading}
-                      className="flex-1 bg-gold hover:bg-gold-dark text-black"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Update Banner
-                    </Button>
-                    <Button
-                      onClick={handleCancelEdit}
-                      variant="outline"
-                      className="border-gold/30 text-gold hover:bg-gold/10"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    onClick={handleCreateBanner}
-                    disabled={!newBanner.imageUrl || !newBanner.linkUrl || loading}
-                    className="w-full bg-gold hover:bg-gold-dark text-black"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Banner
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <h2 className="text-lg font-semibold mb-4">Manage Banners</h2>
-          
-          {banners.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <p className="text-gray-500">No banners created yet.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {banners.map(banner => (
-                <Card key={banner.id}>
-                  <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <div className="w-full sm:w-24 h-24 rounded overflow-hidden flex-shrink-0 border border-gray-200">
-                        <img
-                          src={banner.imageUrl}
-                          alt="Banner"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                      
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-500 mb-1">Link URL:</p>
-                        <p className="text-sm mb-3 truncate">{banner.linkUrl}</p>
-                        
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => handleToggleBannerStatus(banner)}
-                            variant="outline"
-                            size="sm"
-                            className={`text-xs ${
-                              banner.active
-                                ? 'border-red-500 text-red-500 hover:bg-red-50'
-                                : 'border-green-500 text-green-500 hover:bg-green-50'
-                            }`}
-                          >
-                            {banner.active ? 'Disable' : 'Enable'}
-                          </Button>
-                          
-                          <Button
-                            onClick={() => handleEditBanner(banner)}
-                            variant="outline"
-                            size="sm"
-                            className="text-xs border-gold/30 text-gold hover:bg-gold/10"
-                          >
-                            <Edit className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
-                          
-                          <Button
-                            onClick={() => handleDeleteBanner(banner.id)}
-                            variant="outline"
-                            size="sm"
-                            className="text-xs border-red-500 text-red-500 hover:bg-red-50"
-                          >
-                            <Trash className="h-3 w-3 mr-1" />
-                            Delete
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="users">
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">User Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6 flex gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search users by name or email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 border-gold/30 focus:border-gold"
-                  />
-                </div>
-              </div>
-              
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Wallet Balance</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="h-24 text-center">
-                          No users found
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full overflow-hidden bg-gold/10 flex items-center justify-center">
-                                {user.avatar ? (
-                                  <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
-                                ) : (
-                                  <Users className="h-5 w-5 text-gold/70" />
-                                )}
-                              </div>
-                              <div>
-                                <p className="font-medium">{user.name || 'Anonymous'}</p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <DollarSign className="h-4 w-4 mr-1 text-gold/70" />
-                              {user.wallet}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <Switch 
-                                checked={user.isAdmin} 
-                                onCheckedChange={() => toggleAdminStatus(user.id)}
-                                className={user.isAdmin ? "bg-gold" : ""}
-                              />
-                              <span>{user.isAdmin ? 'Admin' : 'User'}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleAdminStatus(user.id)}
-                              className="h-8 w-8 p-0 text-gold hover:text-gold-light"
-                            >
-                              {user.isAdmin ? (
-                                <UserX className="h-4 w-4" />
-                              ) : (
-                                <UserCheck className="h-4 w-4" />
-                              )}
-                              <span className="sr-only">
-                                {user.isAdmin ? 'Remove admin rights' : 'Make admin'}
-                              </span>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="notifications">
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Push Notifications</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="message">Notification Message</Label>
-                  <Textarea
-                    id="message"
-                    value={notificationMessage}
-                    onChange={(e) => setNotificationMessage(e.target.value)}
-                    placeholder="Enter your notification message..."
-                    className="border-gold/30 focus:border-gold"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="type">Notification Type</Label>
-                  <Select
-                    value={notificationType}
-                    onValueChange={handleNotificationTypeChange}
-                  >
-                    <SelectTrigger className="border-gold/30 focus:border-gold">
-                      <SelectValue placeholder="Select notification type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="system">
-                        <div className="flex items-center">
-                          <Bell className="h-4 w-4 mr-2 text-blue-500" />
-                          <span>System</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="draw">
-                        <div className="flex items-center">
-                          <BellRing className="h-4 w-4 mr-2 text-green-500" />
-                          <span>Draw</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="promotion">
-                        <div className="flex items-center">
-                          <DollarSign className="h-4 w-4 mr-2 text-gold" />
-                          <span>Promotion</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="sendToAll"
-                    checked={sendToAllUsers}
-                    onCheckedChange={toggleSendToAllUsers}
-                    className={sendToAllUsers ? "bg-gold" : ""}
-                  />
-                  <Label htmlFor="sendToAll">Send to all users</Label>
-                </div>
-                
-                {showUserSelector && (
-                  <div>
-                    <Label className="mb-2 block">Select recipients</Label>
-                    <div className="mb-2 flex justify-between">
-                      <p className="text-sm text-gray-500">
-                        {selectedUserIds.length} users selected
-                      </p>
-                      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="border-gold/30 text-gold hover:bg-gold/10"
-                          >
-                            <Users className="h-4 w-4 mr-2" />
-                            Select Users
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-md">
-                          <DialogHeader>
-                            <DialogTitle>Select Recipients</DialogTitle>
-                            <DialogDescription>
-                              Choose which users will receive this notification.
-                            </DialogDescription>
-                          </DialogHeader>
-                          
-                          <div className="max-h-80 overflow-y-auto py-4">
-                            <div className="space-y-2">
-                              {users.map(user => (
-                                <div key={user.id} className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    id={`user-${user.id}`}
-                                    checked={selectedUserIds.includes(user.id)}
-                                    onChange={() => handleUserSelectionChange(user.id)}
-                                    className="h-4 w-4 text-gold rounded border-gold/30 focus:ring-gold/30"
-                                  />
-                                  <label htmlFor={`user-${user.id}`} className="text-sm flex items-center space-x-2">
-                                    <div className="h-6 w-6 rounded-full overflow-hidden bg-gold/10">
-                                      {user.avatar ? (
-                                        <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
-                                      ) : (
-                                        <Users className="h-4 w-4 text-gold/70" />
-                                      )}
-                                    </div>
-                                    <span>{user.name || user.email}</span>
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <DialogFooter>
-                            <Button
-                              variant="outline"
-                              onClick={() => setDialogOpen(false)}
-                              className="border-gold/30 text-gold hover:bg-gold/10"
-                            >
-                              Cancel
-                            </Button>
-                            <Button 
-                              onClick={() => setDialogOpen(false)}
-                              className="bg-gold hover:bg-gold-dark text-black"
-                            >
-                              Confirm
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </div>
-                )}
-                
-                <Button
-                  onClick={handleSendNotification}
-                  disabled={!notificationMessage.trim() || (showUserSelector && selectedUserIds.length === 0)}
-                  className="w-full bg-gold hover:bg-gold-dark text-black"
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Send Notification
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="media">
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Media Library</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6">
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={() => fileInputRef.current?.click()} 
-                    className="flex-1 bg-gold hover:bg-gold-dark text-black"
-                    disabled={loading}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload New Media
-                  </Button>
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden"
-                    accept="image/*,video/*,application/pdf" 
-                    onChange={handleFileChange} 
-                  />
-                  
-                  <Button 
-                    variant="outline"
-                    className="border-gold/30 text-gold hover:bg-gold/10"
-                  >
-                    <FolderOpen className="h-4 w-4 mr-2" />
-                    Browse
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="appearance">
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Appearance Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-base font-medium mb-3 flex items-center">
-                    <Type className="h-4 w-4 mr-2" />
-                    Typography
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="fontFamily">Font Family</Label>
-                      <Select
-                        value={fontFamily}
-                        onValueChange={handleFontChange}
-                      >
-                        <SelectTrigger id="fontFamily" className="border-gold/30 focus:border-gold">
-                          <SelectValue placeholder="Select font" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {fontsList.map(font => (
-                            <SelectItem key={font} value={font} style={{ fontFamily: font }}>
-                              {font}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div>
-                        <Label className="flex items-center gap-1 mb-2">
-                          <Bold className="h-3.5 w-3.5" />
-                          Headings
-                        </Label>
-                        <div className="bg-black-light/30 p-3 rounded-md">
-                          <p className="text-xs mb-1 text-gold-light/70">Preview:</p>
-                          <h3 style={{ fontFamily }} className="mb-1">HEADING TEXT</h3>
-                          <p className="text-xs text-gold-light/70">
-                            Bold, capitalized
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <Label className="flex items-center gap-1 mb-2">
-                          <Bold className="h-3.5 w-3.5" />
-                          Buttons
-                        </Label>
-                        <div className="bg-black-light/30 p-3 rounded-md">
-                          <p className="text-xs mb-1 text-gold-light/70">Preview:</p>
-                          <div style={{ fontFamily }} className="text-sm font-bold uppercase tracking-wider text-white mb-1">
-                            BUTTON TEXT
-                          </div>
-                          <p className="text-xs text-gold-light/70">
-                            Bold, capitalized
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <Label className="flex items-center gap-1 mb-2">
-                          <Italic className="h-3.5 w-3.5" />
-                          Body Text
-                        </Label>
-                        <div className="bg-black-light/30 p-3 rounded-md">
-                          <p className="text-xs mb-1 text-gold-light/70">Preview:</p>
-                          <p style={{ fontFamily }} className="mb-1">Regular body text</p>
-                          <p className="text-xs text-gold-light/70">
-                            Regular weight
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-base font-medium mb-3 flex items-center">
-                    <Palette className="h-4 w-4 mr-2" />
-                    Colors
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="primaryColor">Primary Color (Gold)</Label>
-                      <div className="flex items-center space-x-2">
-                        <div 
-                          className="h-8 w-8 rounded-md border border-white/20" 
-                          style={{ backgroundColor: primaryColor }}
-                        />
-                        <Input
-                          id="primaryColor"
-                          type="color"
-                          value={primaryColor}
-                          onChange={(e) => handleColorChange('primary', e.target.value)}
-                          className="w-full border-gold/30 focus:border-gold h-10"
-                        />
-                      </div>
-                      <p className="text-xs text-gold-light/70 mt-1">
-                        Used for buttons, highlights, and accents
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="secondaryColor">Secondary Color (Dark Gray)</Label>
-                      <div className="flex items-center space-x-2">
-                        <div 
-                          className="h-8 w-8 rounded-md border border-white/20" 
-                          style={{ backgroundColor: secondaryColor }}
-                        />
-                        <Input
-                          id="secondaryColor"
-                          type="color"
-                          value={secondaryColor}
-                          onChange={(e) => handleColorChange('secondary', e.target.value)}
-                          className="w-full border-gold/30 focus:border-gold h-10"
-                        />
-                      </div>
-                      <p className="text-xs text-gold-light/70 mt-1">
-                        Used for cards, secondary buttons
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="backgroundColor">Background Color (Black)</Label>
-                      <div className="flex items-center space-x-2">
-                        <div 
-                          className="h-8 w-8 rounded-md border border-white/20" 
-                          style={{ backgroundColor: backgroundColor }}
-                        />
-                        <Input
-                          id="backgroundColor"
-                          type="color"
-                          value={backgroundColor}
-                          onChange={(e) => handleColorChange('background', e.target.value)}
-                          className="w-full border-gold/30 focus:border-gold h-10"
-                        />
-                      </div>
-                      <p className="text-xs text-gold-light/70 mt-1">
-                        Main background color
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 p-4 bg-black-light/30 rounded-md">
-                    <h4 className="text-sm font-medium mb-2">Preview</h4>
-                    <div style={{ backgroundColor }} className="p-4 rounded-md">
-                      <div style={{ backgroundColor: secondaryColor }} className="p-4 rounded-md mb-3">
-                        <h5 style={{ color: 'white', fontFamily }} className="text-sm font-bold uppercase mb-2">Card Title</h5>
-                        <p style={{ color: 'white', fontFamily }} className="text-xs">This is what content will look like on your site.</p>
-                      </div>
-                      <button 
-                        style={{ backgroundColor: primaryColor, color: 'black', fontFamily }} 
-                        className="px-3 py-1.5 rounded-md text-xs font-bold uppercase"
-                      >
-                        Sample Button
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-base font-medium mb-3">Login Background Image</h3>
-                  <div className="mb-4">
-                    <Button 
-                      onClick={() => bgImageFileInputRef.current?.click()} 
-                      variant="outline" 
-                      className="border-gold/30 text-gold hover:bg-gold/10 mb-4"
-                      disabled={loading}
-                    >
-                      <PaintBucket className="h-4 w-4 mr-2" />
-                      Upload Background Image
-                    </Button>
-                    <input 
-                      type="file" 
-                      ref={bgImageFileInputRef} 
-                      className="hidden"
-                      accept="image/*" 
-                      onChange={handleBgImageFileUpload} 
-                    />
-                  </div>
-                  
-                  {authBackgroundImage && (
-                    <div className="rounded-lg overflow-hidden border border-gray-200 mb-3 relative group">
-                      <img 
-                        src={authBackgroundImage} 
-                        alt="Auth background" 
-                        className="w-full h-48 object-cover" 
-                      />
-                    </div>
-                  )}
-                </div>
-                
-                {appearanceChanged && (
-                  <div className="mt-6">
-                    <Button 
-                      onClick={saveAppearanceSettings} 
-                      className="w-full bg-gold hover:bg-gold-dark text-black"
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Appearance Settings
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-};
-
-export default Admin;
+                      type="file"
