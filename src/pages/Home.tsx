@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useDraws } from '../context/DrawContext';
@@ -11,38 +11,38 @@ const Home: React.FC = () => {
   const { draws, banners, loading: drawsLoading } = useDraws();
   const { loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [forceRender, setForceRender] = useState(false);
   
   // Combine loading states
-  const loading = authLoading || drawsLoading;
+  const loading = (authLoading || drawsLoading) && !forceRender;
+  
+  // Force render after a timeout to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.log("Home page - Force rendering after timeout");
+      setForceRender(true);
+    }, 1000);
+    
+    return () => clearTimeout(timeout);
+  }, []);
   
   useEffect(() => {
     // Log loading states for debugging
-    console.log('Home page - Auth loading:', authLoading, 'Draws loading:', drawsLoading);
-  }, [authLoading, drawsLoading]);
+    console.log('Home page - Auth loading:', authLoading, 'Draws loading:', drawsLoading, 'Force render:', forceRender);
+  }, [authLoading, drawsLoading, forceRender]);
   
   // Get active draws first, then upcoming, then completed
-  const sortedDraws = [...draws].sort((a, b) => {
+  const sortedDraws = [...(draws || [])].sort((a, b) => {
     const statusOrder = { active: 0, upcoming: 1, completed: 2 };
     return statusOrder[a.status] - statusOrder[b.status];
   });
   
   // Filter active draws for the featured section
-  const activeDraws = draws.filter(draw => draw.status === 'active');
+  const activeDraws = (draws || []).filter(draw => draw.status === 'active');
   
   const handleViewAll = () => {
     navigate('/draws');
   };
-
-  // Timeout the loading state to prevent infinite loading
-  useEffect(() => {
-    if (loading) {
-      const timeout = setTimeout(() => {
-        console.log("Loading timeout reached - forcing render");
-      }, 5000);
-      
-      return () => clearTimeout(timeout);
-    }
-  }, [loading]);
 
   if (loading) {
     return (
@@ -61,7 +61,7 @@ const Home: React.FC = () => {
         <span className="bg-gold-gradient bg-clip-text text-transparent">THE DRAW WIN 2025</span>
       </h1>
       
-      <BannerSlider banners={banners} />
+      <BannerSlider banners={banners || []} />
       
       {activeDraws.length > 0 && (
         <section className="mb-8">

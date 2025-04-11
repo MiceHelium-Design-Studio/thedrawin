@@ -17,6 +17,16 @@ const Auth: React.FC = () => {
   const { authBackgroundImage } = useBackground();
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [forceRender, setForceRender] = useState(false);
+
+  // Force render after a short timeout to prevent infinite loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setForceRender(true);
+    }, 1000); // Shorter timeout for auth page
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Redirect if user is already logged in or login was successful
   useEffect(() => {
@@ -29,11 +39,14 @@ const Auth: React.FC = () => {
     }
   }, [user, navigate]);
 
-  // If we're still in loading state, don't render anything yet
-  if (loading) {
+  // If we're still in loading state but force render is true, don't show loader
+  if (loading && !forceRender) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
+          <p className="text-gold">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -118,7 +131,7 @@ const Auth: React.FC = () => {
           </p>
         </div>
 
-        <AuthForm mode={mode} onSubmit={handleSubmit} loading={isProcessing || loading} />
+        <AuthForm mode={mode} onSubmit={handleSubmit} loading={isProcessing || (loading && !forceRender)} />
 
         <div className="mt-6">
           <div className="relative flex items-center justify-center">
