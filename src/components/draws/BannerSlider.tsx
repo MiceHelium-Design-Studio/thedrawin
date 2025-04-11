@@ -45,7 +45,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
 
   return (
     <div className="w-full overflow-hidden mb-6 relative">
-      <Card className="shadow-md">
+      <Card className="shadow-md rounded-xl overflow-hidden">
         <div className="relative h-48 md:h-64">
           {activeBanners.map((banner, index) => (
             <a 
