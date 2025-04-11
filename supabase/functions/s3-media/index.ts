@@ -16,8 +16,8 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Create S3 client using environment variables
 const s3Client = new S3Client({
-  region: "us-east-2", // Updated region
-  endpoint: "https://vfmulngualkzxwdzcbwb.supabase.co/storage/v1/s3", // Added endpoint
+  region: "us-east-2",
+  endpoint: "https://vfmulngualkzxwdzcbwb.supabase.co/storage/v1/s3",
   credentials: {
     accessKeyId: Deno.env.get('S3_ACCESS_KEY') as string,
     secretAccessKey: Deno.env.get('S3_SECRET_ACCESS_KEY') as string,
@@ -26,6 +26,19 @@ const s3Client = new S3Client({
 
 // Configuration for the S3 bucket
 const BUCKET_NAME = "thedrawwin-media"
+
+// Media mimetype categories
+const imageMimeTypes = [
+  'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 
+  'image/webp', 'image/tiff', 'image/bmp'
+];
+
+const documentMimeTypes = [
+  'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain', 'text/csv'
+];
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -95,8 +108,10 @@ Deno.serve(async (req) => {
     // Handle different S3 operations based on action parameter
     if (action === 'list') {
       // List objects in the bucket
+      const prefix = user.id + '/';
       const command = new ListObjectsV2Command({
         Bucket: BUCKET_NAME,
+        Prefix: prefix, // Only list objects for the current user
       })
       
       const response = await s3Client.send(command)
@@ -126,7 +141,26 @@ Deno.serve(async (req) => {
         })
       }
       
-      const key = `${user.id}/${Date.now()}-${fileName}`
+      // Sanitize filename to prevent path traversal attacks
+      const sanitizedFileName = fileName.replace(/[^\w\s.-]/g, '');
+      if (sanitizedFileName !== fileName) {
+        console.warn('Filename sanitized:', fileName, '→', sanitizedFileName);
+      }
+      
+      const key = `${user.id}/${Date.now()}-${sanitizedFileName}`;
+      
+      // Validate content type against allowed types
+      const fileType = categorizeContentType(contentType);
+      if (fileType === 'unknown') {
+        return new Response(JSON.stringify({ 
+          error: 'Unsupported file type',
+          details: `Content type ${contentType} is not supported`
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
       const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
@@ -138,7 +172,8 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ 
         uploadUrl: presignedUrl,
         fileKey: key,
-        fileUrl: `https://${BUCKET_NAME}.s3.amazonaws.com/${key}`
+        fileUrl: `https://${BUCKET_NAME}.s3.amazonaws.com/${key}`,
+        fileType: fileType
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
@@ -154,6 +189,17 @@ Deno.serve(async (req) => {
         })
       }
       
+      // Security check: ensure users can only delete their own files
+      if (!fileKey.startsWith(user.id + '/')) {
+        return new Response(JSON.stringify({ 
+          error: 'Access denied',
+          details: 'You can only delete your own files'
+        }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
       const command = new DeleteObjectCommand({
         Bucket: BUCKET_NAME,
         Key: fileKey
@@ -161,9 +207,47 @@ Deno.serve(async (req) => {
       
       await s3Client.send(command)
       
-      return new Response(JSON.stringify({ success: true }), {
+      return new Response(JSON.stringify({ 
+        success: true,
+        message: 'File successfully deleted',
+        fileKey: fileKey
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
+    }
+    else if (action === 'getStats') {
+      // Get statistics about user's storage usage
+      const prefix = user.id + '/';
+      const command = new ListObjectsV2Command({
+        Bucket: BUCKET_NAME,
+        Prefix: prefix,
+      });
+      
+      const response = await s3Client.send(command);
+      
+      const totalFiles = response.Contents?.length || 0;
+      const totalSize = response.Contents?.reduce((acc, item) => acc + (item.Size || 0), 0) || 0;
+      
+      // Count files by type
+      const fileTypeCount = {
+        image: 0,
+        document: 0,
+        other: 0
+      };
+      
+      response.Contents?.forEach(item => {
+        const type = getFileType(item.Key || '');
+        fileTypeCount[type] += 1;
+      });
+      
+      return new Response(JSON.stringify({
+        totalFiles,
+        totalSize,
+        fileTypeCount,
+        averageSize: totalFiles > 0 ? totalSize / totalFiles : 0
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
     else if (actionData.name) {
       // This is for the test request
@@ -180,7 +264,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ 
       error: 'Invalid or missing action',
       receivedData: actionData,
-      supportedActions: ['list', 'getUploadUrl', 'delete']
+      supportedActions: ['list', 'getUploadUrl', 'delete', 'getStats']
     }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -189,7 +273,10 @@ Deno.serve(async (req) => {
   catch (error) {
     console.error('Error:', error)
     
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      stack: Deno.env.get('ENVIRONMENT') === 'development' ? error.stack : undefined
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
@@ -200,8 +287,8 @@ Deno.serve(async (req) => {
 function getFileType(key: string): string {
   const extension = key.split('.').pop()?.toLowerCase() || ''
   
-  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp']
-  const documentExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt']
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'tiff', 'bmp']
+  const documentExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv']
   
   if (imageExtensions.includes(extension)) {
     return 'image'
@@ -209,5 +296,16 @@ function getFileType(key: string): string {
     return 'document'
   } else {
     return 'other'
+  }
+}
+
+// Helper function to categorize content type
+function categorizeContentType(contentType: string): string {
+  if (imageMimeTypes.includes(contentType)) {
+    return 'image';
+  } else if (documentMimeTypes.includes(contentType)) {
+    return 'document';
+  } else {
+    return 'unknown';
   }
 }
