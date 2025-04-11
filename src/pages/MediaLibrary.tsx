@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -40,11 +41,22 @@ const MediaLibrary: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [isTimedOut, setIsTimedOut] = useState(false);
   
-  const loading = authLoading || mediaLoading;
+  const loading = (authLoading || mediaLoading) && !isTimedOut;
 
   useEffect(() => {
     console.log('Media page - Auth loading:', authLoading, 'Media loading:', mediaLoading);
+    
+    // Add a timeout to force rendering if loading takes too long
+    const timeout = setTimeout(() => {
+      if (authLoading || mediaLoading) {
+        console.log("Loading timeout reached in MediaLibrary - forcing render");
+        setIsTimedOut(true);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeout);
   }, [authLoading, mediaLoading]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

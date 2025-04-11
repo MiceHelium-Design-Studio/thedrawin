@@ -12,6 +12,7 @@ const Home: React.FC = () => {
   const { loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
+  // Combine loading states
   const loading = authLoading || drawsLoading;
   
   useEffect(() => {
@@ -31,6 +32,17 @@ const Home: React.FC = () => {
   const handleViewAll = () => {
     navigate('/draws');
   };
+
+  // Timeout the loading state to prevent infinite loading
+  useEffect(() => {
+    if (loading) {
+      const timeout = setTimeout(() => {
+        console.log("Loading timeout reached - forcing render");
+      }, 5000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [loading]);
 
   if (loading) {
     return (

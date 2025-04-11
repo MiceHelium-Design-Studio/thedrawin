@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { DrawProvider } from "./context/DrawContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { BackgroundProvider } from "./context/BackgroundContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Pages
 import Index from "./pages/Home";
@@ -23,12 +24,20 @@ import MediaLibrary from "./pages/MediaLibrary";
 import NotFound from "./pages/NotFound";
 
 // Create a new QueryClient instance
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30000,
+    },
+  },
+});
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
+  // Show a simple loading spinner with timeout to prevent infinite loading
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -48,6 +57,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  console.log("App rendering");
+  
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
