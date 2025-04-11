@@ -47,96 +47,141 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      return new Response(JSON.stringify({ error: 'Unauthorized', details: authError?.message || 'Invalid user token' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
-    // Parse request URL
-    const url = new URL(req.url)
-    const action = url.searchParams.get('action')
+    // Parse request body
+    let actionData = {}
+    let action = ''
+
+    if (req.method === 'POST') {
+      try {
+        const requestBody = await req.json()
+        console.log('Request body:', JSON.stringify(requestBody))
+        
+        // Extract action from body
+        if (requestBody && typeof requestBody === 'object') {
+          action = requestBody.action || ''
+          actionData = requestBody
+        }
+      } catch (e) {
+        console.error('Error parsing request body:', e)
+        return new Response(JSON.stringify({ error: 'Invalid request body' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+    } else if (req.method === 'GET') {
+      // Parse request URL for GET requests
+      const url = new URL(req.url)
+      action = url.searchParams.get('action') || ''
+      
+      // Convert URL params to object
+      url.searchParams.forEach((value, key) => {
+        actionData[key] = value
+      })
+    } else {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
+    console.log(`Processing action: ${action}`)
 
     // Handle different S3 operations based on action parameter
-    if (req.method === 'GET') {
-      if (action === 'list') {
-        // List objects in the bucket
-        const command = new ListObjectsV2Command({
-          Bucket: BUCKET_NAME,
-        })
-        
-        const response = await s3Client.send(command)
-        
-        const mediaItems = response.Contents?.map(item => ({
-          id: item.Key,
-          name: item.Key?.split('/').pop() || 'Untitled',
-          url: `https://${BUCKET_NAME}.s3.amazonaws.com/${item.Key}`,
-          size: item.Size || 0,
-          uploadDate: item.LastModified?.toISOString() || new Date().toISOString(),
-          type: getFileType(item.Key || '')
-        })) || []
-        
-        return new Response(JSON.stringify({ media: mediaItems }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      } 
-      else if (action === 'getUploadUrl') {
-        // Get a pre-signed URL for uploading a file
-        const fileName = url.searchParams.get('fileName')
-        const contentType = url.searchParams.get('contentType')
-        
-        if (!fileName || !contentType) {
-          return new Response(JSON.stringify({ error: 'Missing fileName or contentType' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          })
-        }
-        
-        const key = `${user.id}/${Date.now()}-${fileName}`
-        const command = new PutObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: key,
-          ContentType: contentType
-        })
-        
-        const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
-        
-        return new Response(JSON.stringify({ 
-          uploadUrl: presignedUrl,
-          fileKey: key,
-          fileUrl: `https://${BUCKET_NAME}.s3.amazonaws.com/${key}`
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
-      }
+    if (action === 'list') {
+      // List objects in the bucket
+      const command = new ListObjectsV2Command({
+        Bucket: BUCKET_NAME,
+      })
+      
+      const response = await s3Client.send(command)
+      
+      const mediaItems = response.Contents?.map(item => ({
+        id: item.Key,
+        name: item.Key?.split('/').pop() || 'Untitled',
+        url: `https://${BUCKET_NAME}.s3.amazonaws.com/${item.Key}`,
+        size: item.Size || 0,
+        uploadDate: item.LastModified?.toISOString() || new Date().toISOString(),
+        type: getFileType(item.Key || '')
+      })) || []
+      
+      return new Response(JSON.stringify({ media: mediaItems }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     } 
-    else if (req.method === 'DELETE') {
-      if (action === 'delete') {
-        // Delete an object from the bucket
-        const fileKey = url.searchParams.get('fileKey')
-        
-        if (!fileKey) {
-          return new Response(JSON.stringify({ error: 'Missing fileKey' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          })
-        }
-        
-        const command = new DeleteObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: fileKey
-        })
-        
-        await s3Client.send(command)
-        
-        return new Response(JSON.stringify({ success: true }), {
+    else if (action === 'getUploadUrl') {
+      // Get a pre-signed URL for uploading a file
+      const fileName = actionData.fileName
+      const contentType = actionData.contentType
+      
+      if (!fileName || !contentType) {
+        return new Response(JSON.stringify({ error: 'Missing fileName or contentType' }), {
+          status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
       }
+      
+      const key = `${user.id}/${Date.now()}-${fileName}`
+      const command = new PutObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+        ContentType: contentType
+      })
+      
+      const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
+      
+      return new Response(JSON.stringify({ 
+        uploadUrl: presignedUrl,
+        fileKey: key,
+        fileUrl: `https://${BUCKET_NAME}.s3.amazonaws.com/${key}`
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+    else if (action === 'delete') {
+      // Delete an object from the bucket
+      const fileKey = actionData.fileKey
+      
+      if (!fileKey) {
+        return new Response(JSON.stringify({ error: 'Missing fileKey' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+      
+      const command = new DeleteObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: fileKey
+      })
+      
+      await s3Client.send(command)
+      
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+    else if (actionData.name) {
+      // This is for the test request
+      return new Response(JSON.stringify({ 
+        message: `Hello ${actionData.name}!`, 
+        timestamp: new Date().toISOString(),
+        user: user.email || user.id
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
 
     // If no valid action was provided
-    return new Response(JSON.stringify({ error: 'Invalid action' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Invalid or missing action',
+      receivedData: actionData,
+      supportedActions: ['list', 'getUploadUrl', 'delete']
+    }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
