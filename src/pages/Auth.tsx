@@ -10,7 +10,7 @@ import { Facebook, Twitter, Linkedin, Mail } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const Auth: React.FC = () => {
-  const { user, loading, login, signup } = useAuth();
+  const { user, loading, login, signup, signInWithGoogle } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -44,11 +44,25 @@ const Auth: React.FC = () => {
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    toast({
-      title: 'Social login',
-      description: `${provider} login is not implemented yet.`,
-    });
+  const handleSocialLogin = async (provider: string) => {
+    try {
+      if (provider === 'Google') {
+        await signInWithGoogle();
+        // The redirect will be handled by Supabase, so no need to navigate here
+      } else {
+        toast({
+          title: 'Social login',
+          description: `${provider} login is not implemented yet.`,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: `${provider} login failed`,
+        description: 'An error occurred during login.',
+      });
+      console.error(error);
+    }
   };
 
   const toggleMode = () => {
@@ -111,7 +125,7 @@ const Auth: React.FC = () => {
             <Button 
               variant="outline" 
               size="icon" 
-              onClick={() => handleSocialLogin('Email')}
+              onClick={() => handleSocialLogin('Google')}
               className="rounded-full hover:bg-black/60"
             >
               <Mail className="h-5 w-5 text-gold" />

@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string, phone?: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   addFunds: (amount: number) => Promise<void>;
@@ -125,6 +126,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         variant: 'destructive',
         title: 'Login failed',
         description: error.message || 'An error occurred during login',
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // No need to set user here as auth state change will handle that
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Google login failed',
+        description: error.message || 'An error occurred during Google login',
       });
       throw error;
     } finally {
@@ -269,7 +298,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, updateProfile, addFunds }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, signInWithGoogle, logout, updateProfile, addFunds }}>
       {children}
     </AuthContext.Provider>
   );
