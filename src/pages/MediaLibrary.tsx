@@ -33,7 +33,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 
 const MediaLibrary: React.FC = () => {
-  const { media, loading: mediaLoading, uploadMedia, deleteMedia } = useDraws();
+  const { media = [], loading: mediaLoading, uploadMedia, deleteMedia } = useDraws();
   const { loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -41,23 +41,25 @@ const MediaLibrary: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [isTimedOut, setIsTimedOut] = useState(false);
+  const [forceRender, setForceRender] = useState(false);
   
-  const loading = (authLoading || mediaLoading) && !isTimedOut;
+  // Force render after 3 seconds no matter what
+  useEffect(() => {
+    console.log('Media Library mounted');
+    const timer = setTimeout(() => {
+      console.log('Force rendering Media Library');
+      setForceRender(true);
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // If we're still loading after 3 seconds, we'll force render
+  const loading = (authLoading || mediaLoading) && !forceRender;
 
   useEffect(() => {
-    console.log('Media page - Auth loading:', authLoading, 'Media loading:', mediaLoading);
-    
-    // Add a timeout to force rendering if loading takes too long
-    const timeout = setTimeout(() => {
-      if (authLoading || mediaLoading) {
-        console.log("Loading timeout reached in MediaLibrary - forcing render");
-        setIsTimedOut(true);
-      }
-    }, 5000);
-    
-    return () => clearTimeout(timeout);
-  }, [authLoading, mediaLoading]);
+    console.log('Media page - Auth loading:', authLoading, 'Media loading:', mediaLoading, 'Force render:', forceRender);
+  }, [authLoading, mediaLoading, forceRender]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -106,7 +108,7 @@ const MediaLibrary: React.FC = () => {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
-  const filteredMedia = media
+  const filteredMedia = (media || [])
     .filter(item => 
       item.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -118,17 +120,7 @@ const MediaLibrary: React.FC = () => {
       }
     });
 
-  if (loading) {
-    return (
-      <div className="container mx-auto flex items-center justify-center min-h-[50vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold mx-auto mb-4"></div>
-          <p className="text-gold">Loading media library...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Even if loading, we'll render the UI after 3 seconds with a visual loading indicator
   return (
     <div className="container mx-auto px-4 py-6 pb-20">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
@@ -140,12 +132,14 @@ const MediaLibrary: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border-gold/30 focus:border-gold"
+            disabled={loading}
           />
 
           <Button
             variant="outline"
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
             className="border-gold/30 text-gold"
+            disabled={loading}
           >
             {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
           </Button>
@@ -154,6 +148,7 @@ const MediaLibrary: React.FC = () => {
             variant="outline"
             onClick={() => setView(view === 'grid' ? 'list' : 'grid')}
             className="border-gold/30 text-gold"
+            disabled={loading}
           >
             {view === 'grid' ? (
               <Filter className="h-4 w-4" />
@@ -180,13 +175,19 @@ const MediaLibrary: React.FC = () => {
         </div>
       </div>
 
-      {filteredMedia.length === 0 ? (
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
+        </div>
+      )}
+
+      {!loading && filteredMedia.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
             <p className="text-gray-500">No media files found.</p>
           </CardContent>
         </Card>
-      ) : view === 'grid' ? (
+      ) : !loading && view === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredMedia.map(item => (
             <Card key={item.id} className="overflow-hidden">
@@ -229,7 +230,7 @@ const MediaLibrary: React.FC = () => {
             </Card>
           ))}
         </div>
-      ) : (
+      ) : !loading && (
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

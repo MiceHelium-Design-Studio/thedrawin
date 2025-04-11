@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Draw, Ticket, Banner, MediaItem } from '../types';
 import { sendDrawEntryNotifications } from '../utils/notificationUtils';
 import { useAuth } from './AuthContext';
@@ -116,8 +117,20 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [banners, setBanners] = useState<Banner[]>(MOCK_BANNERS);
   const [media, setMedia] = useState<MediaItem[]>(MOCK_MEDIA);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const { user } = useAuth();
+  
+  // Simulate initial loading with a timeout that ensures it eventually completes
+  useEffect(() => {
+    console.log("DrawContext initializing...");
+    
+    const timer = setTimeout(() => {
+      console.log("DrawContext loading completed");
+      setLoading(false);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const createDraw = async (draw: Omit<Draw, 'id'>) => {
     setLoading(true);

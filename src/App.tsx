@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,9 +35,21 @@ const queryClient = new QueryClient({
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  const [forceRender, setForceRender] = useState(false);
+  
+  // Force render after a timeout to prevent infinite loading
+  useEffect(() => {
+    console.log("ProtectedRoute - Auth loading:", loading, "User:", user ? "logged in" : "not logged in");
+    const timeout = setTimeout(() => {
+      console.log("ProtectedRoute - Force rendering after timeout");
+      setForceRender(true);
+    }, 2000);
+    
+    return () => clearTimeout(timeout);
+  }, [loading, user]);
   
   // Show a simple loading spinner with timeout to prevent infinite loading
-  if (loading) {
+  if (loading && !forceRender) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -49,7 +60,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  if (!user) {
+  // If still no user after force render timeout, redirect to auth
+  if (!user && forceRender) {
+    console.log("ProtectedRoute - No user after timeout, redirecting to /auth");
+    return <Navigate to="/auth" />;
+  }
+  
+  // If no user and still in normal loading state, keep showing loader
+  if (!user && !forceRender) {
     return <Navigate to="/auth" />;
   }
   
