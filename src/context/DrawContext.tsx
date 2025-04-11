@@ -104,6 +104,7 @@ interface DrawContextType {
   buyTicket: (drawId: string, number: number, price: number) => Promise<void>;
   createBanner: (banner: Omit<Banner, 'id'>) => Promise<void>;
   updateBanner: (id: string, banner: Partial<Banner>) => Promise<void>;
+  deleteBanner: (id: string) => Promise<void>;
   uploadMedia: (file: File) => Promise<MediaItem>;
   deleteMedia: (id: string) => Promise<void>;
 }
@@ -228,6 +229,20 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   };
+  
+  const deleteBanner = async (id: string): Promise<void> => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setBanners(prev => prev.filter(banner => banner.id !== id));
+    } catch (error) {
+      console.error('Delete banner error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const uploadMedia = async (file: File): Promise<MediaItem> => {
     setLoading(true);
@@ -283,6 +298,7 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         buyTicket,
         createBanner,
         updateBanner,
+        deleteBanner,
         uploadMedia,
         deleteMedia
       }}

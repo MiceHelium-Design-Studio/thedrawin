@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Image, Plus, DollarSign, Calendar, Upload, FolderOpen, PaintBucket, Edit, 
   Users, UserCheck, UserX, Search, Filter, Bell, BellRing, MessageSquare, Send,
-  Type, Palette, Bold, Italic, Underline, Save
+  Type, Palette, Bold, Italic, Underline, Save, Trash, X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
@@ -74,7 +74,7 @@ const mockUsers: User[] = [
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
-  const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, uploadMedia, loading } = useDraws();
+  const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, deleteBanner, uploadMedia, loading } = useDraws();
   const { authBackgroundImage, setAuthBackgroundImage } = useBackground();
   const { sendNotification, notifications } = useNotifications();
   const navigate = useNavigate();
@@ -309,6 +309,47 @@ const Admin: React.FC = () => {
     }
   };
   
+  const handleDeleteBanner = async (bannerId: string) => {
+    try {
+      await deleteBanner(bannerId);
+      
+      if (editingBanner?.id === bannerId) {
+        setEditingBanner(null);
+      }
+      
+      toast({
+        title: 'Banner deleted',
+        description: 'The banner has been deleted successfully.',
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Deletion failed',
+        description: 'There was an error deleting the banner.',
+      });
+      console.error(error);
+    }
+  };
+  
+  const handleDeleteBannerImage = () => {
+    if (editingBanner) {
+      setEditingBanner({
+        ...editingBanner,
+        imageUrl: ''
+      });
+    } else {
+      setNewBanner(prev => ({
+        ...prev,
+        imageUrl: ''
+      }));
+    }
+    
+    toast({
+      title: 'Image removed',
+      description: 'The banner image has been removed.',
+    });
+  };
+  
   const handleEditBanner = (banner: Banner) => {
     setEditingBanner(banner);
   };
@@ -385,7 +426,6 @@ const Admin: React.FC = () => {
         await sendNotification(notificationMessage, notificationType, selectedUserIds);
       }
       
-      // Reset form
       setNotificationMessage('');
       setNotificationType('system');
       setSelectedUserIds([]);
@@ -684,7 +724,7 @@ const Admin: React.FC = () => {
                     <Button 
                       onClick={() => bannerFileInputRef.current?.click()} 
                       variant="outline" 
-                      className="w-full border-gold/30 text-gold hover:bg-gold/10"
+                      className="flex-1 border-gold/30 text-gold hover:bg-gold/10"
                       disabled={loading}
                     >
                       <Upload className="h-4 w-4 mr-2" />
@@ -704,17 +744,30 @@ const Admin: React.FC = () => {
                   <Label htmlFor="imageUrl">Image URL</Label>
                   <div className="relative">
                     <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      id="imageUrl"
-                      name="imageUrl"
-                      value={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl}
-                      onChange={handleBannerInputChange}
-                      className="pl-10 border-gold/30 focus:border-gold"
-                      placeholder="Image URL will appear here after upload"
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        id="imageUrl"
+                        name="imageUrl"
+                        value={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl}
+                        onChange={handleBannerInputChange}
+                        className="pl-10 border-gold/30 focus:border-gold w-full"
+                        placeholder="Image URL will appear here after upload"
+                        readOnly
+                      />
+                      {(editingBanner?.imageUrl || newBanner.imageUrl) && (
+                        <Button 
+                          variant="destructive" 
+                          size="icon" 
+                          onClick={handleDeleteBannerImage}
+                          title="Delete image"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   {(editingBanner?.imageUrl || newBanner.imageUrl) && (
-                    <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200">
+                    <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200 relative group">
                       <img 
                         src={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl} 
                         alt="Banner preview" 
@@ -750,6 +803,7 @@ const Admin: React.FC = () => {
                       variant="outline"
                       className="border-gold/30 text-gold hover:bg-gold/10"
                     >
+                      <X className="h-4 w-4 mr-2" />
                       Cancel
                     </Button>
                   </div>
@@ -815,6 +869,16 @@ const Admin: React.FC = () => {
                           >
                             <Edit className="h-3 w-3 mr-1" />
                             Edit
+                          </Button>
+                          
+                          <Button
+                            onClick={() => handleDeleteBanner(banner.id)}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs border-red-500 text-red-500 hover:bg-red-50"
+                          >
+                            <Trash className="h-3 w-3 mr-1" />
+                            Delete
                           </Button>
                         </div>
                       </div>
