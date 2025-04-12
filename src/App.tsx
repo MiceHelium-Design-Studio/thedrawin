@@ -1,10 +1,10 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { DrawProvider } from "./context/DrawContext";
@@ -26,11 +26,11 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 3,
-      staleTime: 300000, // 5 minutes
+      retry: 2, // Reduced retries to avoid too many failed attempts
+      staleTime: 60000, // 1 minute
       refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      gcTime: 600000, // 10 minutes
+      refetchOnMount: false, // Changed to false to avoid excessive refetching
+      gcTime: 300000, // 5 minutes
     },
   },
 });
@@ -38,6 +38,12 @@ const queryClient = new QueryClient({
 // Improved protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
+  
+  // Add routing debug
+  useEffect(() => {
+    console.log("ProtectedRoute at path:", location.pathname, "user:", user?.id, "loading:", loading);
+  }, [location.pathname, user, loading]);
   
   // Show a loading state while checking auth
   if (loading) {
@@ -55,7 +61,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   // If no user after loading completed, redirect to auth
   if (!user) {
     console.log("ProtectedRoute: No user, redirecting to auth");
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" replace state={{ from: location }} />;
   }
   
   // User is authenticated, render children
@@ -88,6 +94,7 @@ const App = () => {
                       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                       <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
                       
+                      {/* Catch-all route */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Layout>

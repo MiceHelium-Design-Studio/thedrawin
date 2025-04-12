@@ -44,7 +44,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               .catch(error => {
                 console.error('Error fetching user profile on auth change:', error);
                 if (isSubscribed) {
-                  setUser(null);
+                  // Create a minimal user object when we can't fetch the profile
+                  setUser({
+                    id: session.user.id,
+                    email: session.user.email || '',
+                    wallet: 0,
+                    isAdmin: false
+                  });
                   setLoading(false);
                 }
               });
@@ -82,31 +88,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchUserProfile = async (userId: string) => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
         
-        if (error) {
-          console.error('Error fetching user profile:', error);
+        // Direct query to auth.users to avoid recursion issues with profiles table
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
+        
+        if (userError) {
+          console.error('Error fetching user data:', userError);
+          // Fallback to minimal user object
           if (isSubscribed) {
-            setUser(null);
+            setUser({
+              id: userId,
+              email: 'unknown',
+              wallet: 0,
+              isAdmin: false
+            });
           }
-        } else if (data && isSubscribed) {
+        } else if (userData && isSubscribed) {
           setUser({
-            id: data.id,
-            email: data.email,
-            name: data.name || undefined,
-            avatar: data.avatar || undefined,
-            wallet: data.wallet || 0,
-            isAdmin: data.is_admin || false
+            id: userId,
+            email: userData.user.email || 'unknown',
+            name: userData.user.user_metadata?.name,
+            avatar: userData.user.user_metadata?.avatar,
+            wallet: 0, // Default until we can properly fetch
+            isAdmin: userData.user.app_metadata?.is_admin || false
           });
         }
       } catch (error) {
         console.error('Error in fetchUserProfile:', error);
         if (isSubscribed) {
-          setUser(null);
+          // Create a minimal user object as fallback
+          setUser({
+            id: userId,
+            email: 'unknown',
+            wallet: 0,
+            isAdmin: false
+          });
         }
       } finally {
         if (isSubscribed) {

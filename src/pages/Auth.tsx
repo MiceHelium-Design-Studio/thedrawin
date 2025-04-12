@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
@@ -25,7 +24,7 @@ const Auth: React.FC = () => {
   useEffect(() => {
     if (user && !authLoading) {
       console.log("Auth: User is logged in, redirecting to:", from);
-      navigate(from, { replace: true });
+      navigate("/", { replace: true });
     }
   }, [user, authLoading, navigate, from]);
 
@@ -38,15 +37,15 @@ const Auth: React.FC = () => {
           title: 'Welcome back!',
           description: 'You are now signed in.',
         });
+        navigate("/", { replace: true });
       } else {
         await signup(data.email, data.password, data.name || '', data.phone);
         toast({
           title: 'Account created!',
           description: 'Your account has been created successfully.',
         });
+        navigate("/", { replace: true });
       }
-      
-      // Navigate will be handled by the useEffect when user state changes
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -64,7 +63,9 @@ const Auth: React.FC = () => {
       setIsProcessing(true);
       if (provider === 'Google') {
         await signInWithGoogle();
-        // The redirect will be handled by the useEffect when user changes
+        if (user) {
+          navigate("/", { replace: true });
+        }
       } else {
         toast({
           title: 'Social login',
@@ -87,7 +88,16 @@ const Auth: React.FC = () => {
     setMode(prev => (prev === 'login' ? 'signup' : 'login'));
   };
 
-  // Already showing loading state in the useEffect
+  // Clear loading state quickly
+  if (authLoading && user) {
+    return <Navigate to="/" replace />;
+  }
+
+  // If user is already logged in, redirect to home page immediately
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+
   if (authLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-black/90">
@@ -97,11 +107,6 @@ const Auth: React.FC = () => {
         </div>
       </div>
     );
-  }
-
-  // If user is already logged in, redirect to home page
-  if (user) {
-    return <Navigate to="/" replace />;
   }
 
   return (

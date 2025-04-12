@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useDraws } from '../context/DrawContext';
@@ -8,6 +8,7 @@ import DrawCard from '../components/draws/DrawCard';
 import BannerSlider from '../components/draws/BannerSlider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RotateCcw } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const Home: React.FC = () => {
   const { draws = [], banners = [], loading: drawsLoading } = useDraws();
@@ -15,8 +16,12 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   
   const isLoading = authLoading || drawsLoading;
-  console.log("Home component rendering, loading state:", isLoading);
-  console.log("Draws loaded:", draws?.length || 0, "items");
+  
+  useEffect(() => {
+    console.log("Home component rendering, loading state:", isLoading);
+    console.log("User in Home:", user?.id);
+    console.log("Draws loaded:", draws?.length || 0, "items");
+  }, [isLoading, user, draws]);
   
   // Get active draws first, then upcoming, then completed
   const sortedDraws = [...(draws || [])].sort((a, b) => {
@@ -100,8 +105,5 @@ const Home: React.FC = () => {
     </div>
   );
 };
-
-// Import cn utility
-import { cn } from '@/lib/utils';
 
 export default Home;
