@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,78 +26,99 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    let isSubscribed = true;
+    
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setLoading(true);
+      (event, session) => {
+        console.log("Auth state change event:", event);
+        
+        if (!isSubscribed) return;
         
         if (session?.user) {
-          try {
-            const { data, error } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
+          // Use setTimeout to prevent potential recursion
+          setTimeout(() => {
+            if (!isSubscribed) return;
             
-            if (error) {
-              console.error('Error fetching user profile:', error);
-              setUser(null);
-            } else if (data) {
-              setUser({
-                id: data.id,
-                email: data.email,
-                name: data.name || undefined,
-                avatar: data.avatar || undefined,
-                wallet: data.wallet || 0,
-                isAdmin: data.is_admin || false
+            fetchUserProfile(session.user.id)
+              .catch(error => {
+                console.error('Error fetching user profile on auth change:', error);
+                if (isSubscribed) {
+                  setUser(null);
+                  setLoading(false);
+                }
               });
-            }
-          } catch (error) {
-            console.error('Error in auth state change handler:', error);
-            setUser(null);
-          }
+          }, 0);
         } else {
-          setUser(null);
+          if (isSubscribed) {
+            setUser(null);
+            setLoading(false);
+          }
         }
-        
-        setLoading(false);
       }
     );
 
+    // Check for existing session
     const initializeAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession();
         
-        if (data.session?.user) {
-          const { data: profileData, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.session.user.id)
-            .single();
-          
-          if (error) {
-            console.error('Error fetching initial user profile:', error);
-            setUser(null);
-          } else if (profileData) {
-            setUser({
-              id: profileData.id,
-              email: profileData.email,
-              name: profileData.name || undefined,
-              avatar: profileData.avatar || undefined,
-              wallet: profileData.wallet || 0,
-              isAdmin: profileData.is_admin || false
-            });
-          }
+        if (data.session?.user && isSubscribed) {
+          await fetchUserProfile(data.session.user.id);
+        } else if (isSubscribed) {
+          setUser(null);
+          setLoading(false);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        if (isSubscribed) {
+          setUser(null);
+          setLoading(false);
+        }
+      }
+    };
+
+    // Helper function to fetch user profile
+    const fetchUserProfile = async (userId: string) => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching user profile:', error);
+          if (isSubscribed) {
+            setUser(null);
+          }
+        } else if (data && isSubscribed) {
+          setUser({
+            id: data.id,
+            email: data.email,
+            name: data.name || undefined,
+            avatar: data.avatar || undefined,
+            wallet: data.wallet || 0,
+            isAdmin: data.is_admin || false
+          });
+        }
+      } catch (error) {
+        console.error('Error in fetchUserProfile:', error);
+        if (isSubscribed) {
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (isSubscribed) {
+          setLoading(false);
+        }
       }
     };
 
     initializeAuth();
 
     return () => {
+      isSubscribed = false;
       subscription.unsubscribe();
     };
   }, []);

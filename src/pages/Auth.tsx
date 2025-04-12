@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../context/AuthContext';
@@ -10,35 +10,43 @@ import { Facebook, Twitter, Linkedin, Mail } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const Auth: React.FC = () => {
-  const { user, login, signup, signInWithGoogle } = useAuth();
+  const { user, login, signup, signInWithGoogle, loading: authLoading } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { authBackgroundImage } = useBackground();
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Get the intended destination from location state or default to "/"
+  const from = location.state?.from?.pathname || "/";
+
   // Redirect if user is already logged in
   useEffect(() => {
-    if (user) {
-      navigate('/', { replace: true });
+    if (user && !authLoading) {
+      console.log("Auth: User is logged in, redirecting to:", from);
+      navigate(from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate, from]);
 
   const handleSubmit = async (data: { email: string; password: string; name?: string; phone?: string }) => {
     try {
       setIsProcessing(true);
       if (mode === 'login') {
         await login(data.email, data.password);
+        toast({
+          title: 'Welcome back!',
+          description: 'You are now signed in.',
+        });
       } else {
         await signup(data.email, data.password, data.name || '', data.phone);
+        toast({
+          title: 'Account created!',
+          description: 'Your account has been created successfully.',
+        });
       }
       
-      toast({
-        title: mode === 'login' ? 'Welcome back!' : 'Account created!',
-        description: mode === 'login' ? 'You are now signed in.' : 'Your account has been created successfully.',
-      });
-      
-      // Navigate will be called by the useEffect when user changes
+      // Navigate will be handled by the useEffect when user state changes
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -79,8 +87,22 @@ const Auth: React.FC = () => {
     setMode(prev => (prev === 'login' ? 'signup' : 'login'));
   };
 
-  // We no longer need this early return since we handle redirection in useEffect
-  // This allows the component to fully render and then redirect
+  // Already showing loading state in the useEffect
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-black/90">
+        <div className="animate-pulse space-y-4 w-full max-w-md">
+          <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
+          <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is already logged in, redirect to home page
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div 
