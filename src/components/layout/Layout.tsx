@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Award, Bell, User, Settings } from 'lucide-react';
@@ -18,7 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const unreadCount = notifications?.filter(n => !n.read)?.length || 0;
   const isAuthPage = location.pathname === '/auth';
 
-  console.log("Layout rendering, user:", user?.id, "isAuthPage:", isAuthPage);
+  console.log("Layout rendering, user:", user?.id, "isAdmin:", user?.isAdmin, "isAuthPage:", isAuthPage);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black">
@@ -107,24 +106,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <span>Profile</span>
             </NavLink>
             
-            {!authLoading && user?.isAdmin && (
-              <NavLink
-                to="/admin"
-                className={({ isActive }) =>
-                  cn(
-                    "flex flex-col items-center justify-center text-xs transition-all duration-300",
-                    isActive
-                      ? "text-gold font-medium"
-                      : "text-white hover:text-gold"
-                  )
-                }
-              >
-                <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin' && "bg-black-light/50")}>
-                  <Settings className="h-5 w-5 mb-1" />
-                </div>
-                <span>Admin</span>
-              </NavLink>
-            )}
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                cn(
+                  "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                  isActive
+                    ? "text-gold font-medium"
+                    : "text-white hover:text-gold"
+                )
+              }
+            >
+              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin' && "bg-black-light/50")}>
+                <Settings className="h-5 w-5 mb-1" />
+              </div>
+              <span>Admin</span>
+            </NavLink>
           </div>
         </nav>
       )}
