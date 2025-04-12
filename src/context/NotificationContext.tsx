@@ -1,10 +1,10 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Notification } from '../types';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
-import { Bell } from 'lucide-react';
+import { BellRing } from 'lucide-react';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -32,7 +32,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     fetchNotifications();
     
-    // Set up real-time subscription
+    // Set up real-time subscription for new notifications
     const channel = supabase
       .channel('notifications-channel')
       .on(
@@ -44,14 +44,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          const newNotification = mapDatabaseNotificationToAppNotification(payload.new);
-          setNotifications(prev => [newNotification, ...prev]);
-          
-          // Show toast for new notification
-          toast({
-            title: "New Notification",
-            description: newNotification.message,
-          });
+          try {
+            const newNotification = mapDatabaseNotificationToAppNotification(payload.new);
+            setNotifications(prev => [newNotification, ...prev]);
+            
+            // Show toast for new notification
+            toast({
+              title: "New Notification",
+              description: newNotification.message,
+            });
+          } catch (error) {
+            console.error("Error processing real-time notification:", error);
+          }
         }
       )
       .subscribe();
@@ -78,9 +82,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     setLoading(true);
     try {
+      // Simple direct query that avoids profile relation
       const { data, error } = await supabase
         .from('notifications')
-        .select('*')
+        .select('id, user_id, message, read, type, created_at')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -90,23 +96,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications(mappedNotifications);
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to load notifications.',
-      });
+      // Don't show toast for this error as it would be annoying on every page load
+      setNotifications([]); // Set empty array to avoid undefined
     } finally {
       setLoading(false);
     }
   };
 
   const markAsRead = async (id: string) => {
-    setLoading(true);
+    if (!user) return;
+    
     try {
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
       
       if (error) throw error;
       
@@ -115,37 +120,46 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           notification.id === id ? { ...notification, read: true } : notification
         )
       );
+      return;
     } catch (error) {
       console.error('Mark as read error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to mark notification as read.',
+      });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const deleteNotification = async (id: string) => {
-    setLoading(true);
+    if (!user) return;
+    
     try {
       const { error } = await supabase
         .from('notifications')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
       
       if (error) throw error;
       
       setNotifications(prev => prev.filter(notification => notification.id !== id));
+      return;
     } catch (error) {
       console.error('Delete notification error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete notification.',
+      });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const markAllAsRead = async () => {
     if (!user || notifications.length === 0) return;
     
-    setLoading(true);
     try {
       const { error } = await supabase
         .from('notifications')
@@ -158,18 +172,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications(prev =>
         prev.map(notification => ({ ...notification, read: true }))
       );
+      return;
     } catch (error) {
       console.error('Mark all as read error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to mark all notifications as read.',
+      });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const sendNotification = async (message: string, type: 'system' | 'win' | 'draw' | 'promotion', userIds?: string[]) => {
     if (!user && !userIds) return;
     
-    setLoading(true);
     try {
       if (userIds && userIds.length > 0) {
         // Send to specific users
@@ -192,11 +209,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         
         if (error) throw error;
       }
+      return;
     } catch (error) {
       console.error('Send notification error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to send notification.',
+      });
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bell, Award, Calendar, CheckCircle, Trash2 } from 'lucide-react';
+import { Bell, Award, Calendar, CheckCircle, Trash2, Gift } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Notification } from '../../types';
 import { cn } from '../../lib/utils';
@@ -24,6 +24,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         return <Award className="h-5 w-5 text-green-500" />;
       case 'draw':
         return <Calendar className="h-5 w-5 text-blue-500" />;
+      case 'promotion':
+        return <Gift className="h-5 w-5 text-purple-500" />;
       case 'system':
       default:
         return <Bell className="h-5 w-5 text-gold" />;
@@ -36,20 +38,22 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   return (
     <Card className={cn(
-      "p-4 mb-3 transition-colors",
-      notification.read ? "bg-gray-50" : "bg-white border-l-4 border-l-gold"
+      "p-4 mb-3 transition-colors border border-gray-800",
+      notification.read 
+        ? "bg-gray-900/60"
+        : "bg-gray-800/80 border-l-4 border-l-gold shadow-md"
     )}>
       <div className="flex items-start gap-3">
-        <div className="mt-1">{getIcon()}</div>
+        <div className="mt-1 bg-black/40 p-2 rounded-full">{getIcon()}</div>
         
         <div className="flex-1">
           <p className={cn(
-            "mb-1",
+            "mb-1 text-white",
             !notification.read && "font-medium"
           )}>
             {notification.message}
           </p>
-          <p className="text-xs text-gray-500">{timeAgo}</p>
+          <p className="text-xs text-gray-400">{timeAgo}</p>
         </div>
         
         <div className="flex space-x-2">
@@ -57,7 +61,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-gray-500 hover:text-green-500"
+              className="h-8 w-8 text-gray-400 hover:text-green-500 hover:bg-green-500/10"
               onClick={() => onMarkAsRead(notification.id)}
               title="Mark as read"
             >
@@ -68,7 +72,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-gray-500 hover:text-red-500"
+            className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-500/10"
             onClick={() => onDelete(notification.id)}
             title="Delete"
           >

@@ -1,24 +1,25 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { CheckCheck } from 'lucide-react';
+import { CheckCheck, Bell } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
 import NotificationItem from '../components/notifications/NotificationItem';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Notifications: React.FC = () => {
   const { notifications, loading, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
   const { toast } = useToast();
   
+  useEffect(() => {
+    console.log("Notifications page loaded, count:", notifications.length);
+  }, [notifications]);
+  
   const handleMarkAsRead = async (id: string) => {
     try {
       await markAsRead(id);
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to mark notification as read.',
-      });
+      // Error is handled in context with toast
       console.error(error);
     }
   };
@@ -30,11 +31,7 @@ const Notifications: React.FC = () => {
         title: 'Notification deleted',
       });
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to delete notification.',
-      });
+      // Error is handled in context with toast
       console.error(error);
     }
   };
@@ -46,11 +43,7 @@ const Notifications: React.FC = () => {
         title: 'All notifications marked as read',
       });
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to mark all notifications as read.',
-      });
+      // Error is handled in context with toast
       console.error(error);
     }
   };
@@ -60,7 +53,7 @@ const Notifications: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Notifications</h1>
         
-        {notifications.some(n => !n.read) && (
+        {!loading && notifications.some(n => !n.read) && (
           <Button
             variant="outline"
             size="sm"
@@ -74,8 +67,15 @@ const Notifications: React.FC = () => {
         )}
       </div>
       
-      {notifications.length === 0 ? (
-        <div className="text-center py-12">
+      {loading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-20 w-full rounded-lg" />
+          <Skeleton className="h-20 w-full rounded-lg" />
+          <Skeleton className="h-20 w-full rounded-lg" />
+        </div>
+      ) : notifications.length === 0 ? (
+        <div className="text-center py-12 flex flex-col items-center gap-4">
+          <Bell className="h-12 w-12 text-gray-400" />
           <p className="text-white">You have no notifications.</p>
         </div>
       ) : (
