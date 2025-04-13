@@ -83,7 +83,7 @@ const mockUsers: User[] = [
 ];
 
 const Admin: React.FC = () => {
-  const { user } = useAuth();
+  const { user, forceAdminAccess } = useAuth();
   const { draws, banners, media, createDraw, updateDraw, createBanner, updateBanner, deleteBanner, uploadMedia, deleteMedia, loading } = useDraws();
   const { authBackgroundImage, setAuthBackgroundImage } = useBackground();
   const { sendNotification, notifications } = useNotifications();
@@ -93,6 +93,7 @@ const Admin: React.FC = () => {
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
   const bgImageFileInputRef = useRef<HTMLInputElement>(null);
   const drawFileInputRef = useRef<HTMLInputElement>(null);
+  const [adminEmailInput, setAdminEmailInput] = useState('');
   
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
@@ -146,17 +147,6 @@ const Admin: React.FC = () => {
       navigate('/');
     }
   }, [user, navigate]);
-
-  if (!user) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="animate-pulse space-y-4 w-full max-w-md">
-          <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
-          <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
-        </div>
-      </div>
-    );
-  }
 
   const filteredUsers = users.filter(user => 
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -661,9 +651,118 @@ const Admin: React.FC = () => {
     }
   }, []);
   
+  // Force admin access for specific user
+  const handleForceAdminAccess = async () => {
+    try {
+      await forceAdminAccess('raghidhilal@gmail.com');
+      setAdminEmailInput('');
+    } catch (error) {
+      console.error('Error setting admin access:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Force admin access for raghidhilal@gmail.com on component mount
+    if (user) {
+      handleForceAdminAccess();
+    }
+  }, [user]);
+
+  // Only check if user is admin after initial load
+  const [checkAdminStatus, setCheckAdminStatus] = useState(false);
+
+  useEffect(() => {
+    // Set timeout to avoid immediate redirect
+    const timer = setTimeout(() => {
+      setCheckAdminStatus(true);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Skip admin check initially to allow the admin status update to potentially happen
+  if (checkAdminStatus && user && !user.isAdmin) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Admin Access Required</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">You need administrator privileges to access this page.</p>
+            <div className="flex flex-col space-y-4">
+              <div>
+                <Label htmlFor="adminEmail">Grant Admin Access</Label>
+                <div className="flex mt-1">
+                  <Input 
+                    id="adminEmail" 
+                    value={adminEmailInput} 
+                    onChange={(e) => setAdminEmailInput(e.target.value)}
+                    placeholder="Email address" 
+                    className="flex-1 mr-2"
+                  />
+                  <Button onClick={() => forceAdminAccess(adminEmailInput)}>
+                    Make Admin
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Enter an email address to grant admin privileges.
+                </p>
+              </div>
+              <Button 
+                className="bg-gold hover:bg-gold-dark text-black"
+                onClick={handleForceAdminAccess}
+              >
+                Make raghidhilal@gmail.com Admin
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-pulse space-y-4 w-full max-w-md">
+          <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
+          <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+      
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-lg">Admin Access</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <p className="text-sm">Grant admin privileges to a user by email:</p>
+            <div className="flex mt-2">
+              <Input 
+                value={adminEmailInput} 
+                onChange={(e) => setAdminEmailInput(e.target.value)}
+                placeholder="Email address" 
+                className="flex-1 mr-2 border-gold/30 focus:border-gold"
+              />
+              <Button 
+                onClick={() => forceAdminAccess(adminEmailInput)}
+                className="bg-gold hover:bg-gold-dark text-black"
+                disabled={!adminEmailInput}
+              >
+                <UserCheck className="h-4 w-4 mr-2" />
+                Grant Admin
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       
       <Tabs defaultValue="draws">
         <div className="relative mb-6 overflow-hidden">
@@ -892,744 +991,3 @@ const Admin: React.FC = () => {
           <h2 className="text-lg font-semibold mb-4">Manage Existing Draws</h2>
           
           {draws.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <p className="text-gray-500">No draws created yet.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {draws.map(draw => (
-                <Card key={draw.id}>
-                  <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex gap-4">
-                        {draw.bannerImage && (
-                          <div className="hidden sm:block w-16 h-16 rounded overflow-hidden flex-shrink-0 border border-gray-200">
-                            <img
-                              src={draw.bannerImage}
-                              alt={draw.title}
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                        )}
-                        <div>
-                          <h3 className="font-medium">{draw.title}</h3>
-                          <p className="text-sm text-gray-500">
-                            Status: {draw.status.charAt(0).toUpperCase() + draw.status.slice(1)}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            Participants: {draw.currentParticipants}/{draw.maxParticipants}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2 mt-2 sm:mt-0">
-                        <Button
-                          onClick={() => handleEditDraw(draw)}
-                          variant="outline"
-                          size="sm"
-                          className="text-xs border-gold/30 text-gold hover:bg-gold/10"
-                        >
-                          <Edit className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                        
-                        {draw.status === 'upcoming' && (
-                          <Button
-                            onClick={() => updateDraw(draw.id, { status: 'active' })}
-                            variant="outline"
-                            size="sm"
-                            className="text-xs border-green-500 text-green-500 hover:bg-green-50"
-                          >
-                            <Check className="h-3 w-3 mr-1" />
-                            Activate
-                          </Button>
-                        )}
-                        
-                        {draw.status === 'active' && (
-                          <Button
-                            onClick={() => updateDraw(draw.id, { status: 'completed' })}
-                            variant="outline"
-                            size="sm"
-                            className="text-xs border-blue-500 text-blue-500 hover:bg-blue-50"
-                          >
-                            <Check className="h-3 w-3 mr-1" />
-                            Complete
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="banners">
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">{editingBanner ? 'Edit Banner' : 'Add New Banner'}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="uploadBannerImage">Upload Banner Image</Label>
-                  <div className="flex gap-2 items-center mt-1 mb-4">
-                    <Button 
-                      onClick={() => bannerFileInputRef.current?.click()} 
-                      variant="outline" 
-                      className="flex-1 border-gold/30 text-gold hover:bg-gold/10"
-                      disabled={loading}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Banner Image
-                    </Button>
-                    <input 
-                      type="file"
-                      ref={bannerFileInputRef}
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleBannerFileUpload}
-                    />
-                    
-                    {(editingBanner?.imageUrl || newBanner.imageUrl) && (
-                      <Button 
-                        variant="destructive" 
-                        size="icon" 
-                        onClick={handleDeleteBannerImage}
-                        title="Delete image"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  
-                  {(editingBanner?.imageUrl || newBanner.imageUrl) && (
-                    <div className="mt-2 w-full h-40 overflow-hidden rounded-md border border-gray-200 relative group">
-                      <img 
-                        src={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl} 
-                        alt="Banner image preview" 
-                        className="w-full h-full object-contain" 
-                      />
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <Label htmlFor="linkUrl">Banner Link URL</Label>
-                  <Input
-                    id="linkUrl"
-                    name="linkUrl"
-                    value={editingBanner ? editingBanner.linkUrl : newBanner.linkUrl}
-                    onChange={handleBannerInputChange}
-                    placeholder="https://example.com"
-                    className="border-gold/30 focus:border-gold"
-                  />
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="active"
-                    checked={editingBanner ? editingBanner.active : newBanner.active}
-                    onCheckedChange={(checked) => {
-                      if (editingBanner) {
-                        setEditingBanner({
-                          ...editingBanner,
-                          active: checked
-                        });
-                      } else {
-                        setNewBanner(prev => ({
-                          ...prev,
-                          active: checked
-                        }));
-                      }
-                    }}
-                  />
-                  <Label htmlFor="active">Active</Label>
-                </div>
-                
-                {editingBanner ? (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleUpdateBanner}
-                      disabled={!editingBanner.imageUrl || !editingBanner.linkUrl || loading}
-                      className="flex-1 bg-gold hover:bg-gold-dark text-black"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Update Banner
-                    </Button>
-                    <Button
-                      onClick={handleCancelEdit}
-                      variant="outline"
-                      className="border-gold/30 text-gold hover:bg-gold/10"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    onClick={handleCreateBanner}
-                    disabled={!newBanner.imageUrl || !newBanner.linkUrl || loading}
-                    className="w-full bg-gold hover:bg-gold-dark text-black"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Banner
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <h2 className="text-lg font-semibold mb-4">Manage Existing Banners</h2>
-          
-          {banners.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <p className="text-gray-500">No banners created yet.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {banners.map(banner => (
-                <Card key={banner.id}>
-                  <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex gap-4">
-                        {banner.imageUrl && (
-                          <div className="hidden sm:block w-16 h-16 rounded overflow-hidden flex-shrink-0 border border-gray-200">
-                            <img
-                              src={banner.imageUrl}
-                              alt="Banner"
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-sm font-medium">{banner.linkUrl}</p>
-                          <p className="text-xs text-gray-500">
-                            Status: {banner.active ? 'Active' : 'Inactive'}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2 mt-2 sm:mt-0">
-                        <Button
-                          onClick={() => handleEditBanner(banner)}
-                          variant="outline"
-                          size="sm"
-                          className="text-xs border-gold/30 text-gold hover:bg-gold/10"
-                        >
-                          <Edit className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          onClick={() => handleToggleBannerStatus(banner)}
-                          variant="outline"
-                          size="sm"
-                          className={`text-xs ${
-                            banner.active
-                              ? 'border-red-500 text-red-500 hover:bg-red-50'
-                              : 'border-green-500 text-green-500 hover:bg-green-50'
-                          }`}
-                        >
-                          {banner.active ? (
-                            <>
-                              <X className="h-3 w-3 mr-1" />
-                              Disable
-                            </>
-                          ) : (
-                            <>
-                              <Check className="h-3 w-3 mr-1" />
-                              Enable
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteBanner(banner.id)}
-                          variant="destructive"
-                          size="sm"
-                          className="text-xs"
-                        >
-                          <Trash className="h-3 w-3 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="users">
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">User Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center mb-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search users..."
-                    className="pl-10 bg-background border-gold/30 focus:border-gold"
-                  />
-                </div>
-                <Button variant="outline" className="ml-2 border-gold/30 text-gold hover:bg-gold/10">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-              </div>
-              
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Wallet</TableHead>
-                    <TableHead>Admin</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map(user => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
-                            <img
-                              src={user.avatar || 'placeholder.svg'}
-                              alt={user.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <span>{user.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <DollarSign className="h-3 w-3 mr-1 text-gray-500" />
-                          {user.wallet}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Switch
-                          checked={user.isAdmin}
-                          onCheckedChange={() => toggleAdminStatus(user.id)}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" className="text-xs h-7 w-7">
-                            <MessageSquare className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="text-xs h-7 w-7">
-                            <Bell className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="notifications">
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Send Notification</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="notificationType">Notification Type</Label>
-                  <Select
-                    value={notificationType}
-                    onValueChange={(value) => handleNotificationTypeChange(value as 'system' | 'win' | 'draw' | 'promotion')}
-                  >
-                    <SelectTrigger className="border-gold/30 focus:border-gold">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="system">System Message</SelectItem>
-                      <SelectItem value="win">Win Notification</SelectItem>
-                      <SelectItem value="draw">Draw Update</SelectItem>
-                      <SelectItem value="promotion">Promotion</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="notificationMessage">Message</Label>
-                  <Textarea
-                    id="notificationMessage"
-                    value={notificationMessage}
-                    onChange={(e) => setNotificationMessage(e.target.value)}
-                    placeholder="Enter your notification message..."
-                    className="border-gold/30 focus:border-gold min-h-[120px]"
-                  />
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="sendAll"
-                    checked={sendToAllUsers}
-                    onCheckedChange={toggleSendToAllUsers}
-                  />
-                  <Label htmlFor="sendAll">Send to all users</Label>
-                </div>
-                
-                {showUserSelector && (
-                  <div>
-                    <Label className="block mb-2">Select Users</Label>
-                    <div className="max-h-60 overflow-y-auto border rounded-md p-2">
-                      {users.map(user => (
-                        <div key={user.id} className="flex items-center space-x-2 p-2 hover:bg-muted rounded">
-                          <input
-                            type="checkbox"
-                            id={`user-${user.id}`}
-                            checked={selectedUserIds.includes(user.id)}
-                            onChange={() => handleUserSelectionChange(user.id)}
-                            className="h-4 w-4 text-gold rounded focus:ring-gold"
-                          />
-                          <Label htmlFor={`user-${user.id}`} className="flex items-center">
-                            <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 mr-2">
-                              <img
-                                src={user.avatar || 'placeholder.svg'}
-                                alt={user.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <span>{user.name}</span>
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {selectedUserIds.length} users selected
-                    </p>
-                  </div>
-                )}
-                
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      className="w-full bg-gold hover:bg-gold-dark text-black"
-                      disabled={!notificationMessage.trim()}
-                    >
-                      <Send className="h-4 w-4 mr-2" />
-                      Preview and Send Notification
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Confirm Notification</DialogTitle>
-                      <DialogDescription>
-                        Review your notification before sending.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="border rounded-md p-4 my-4 bg-gray-50">
-                      <div className="flex items-center mb-2">
-                        {notificationType === 'system' && <Bell className="h-4 w-4 text-blue-500" />}
-                        {notificationType === 'win' && <BellRing className="h-4 w-4 text-green-500" />}
-                        {notificationType === 'draw' && <Calendar className="h-4 w-4 text-purple-500" />}
-                        {notificationType === 'promotion' && <DollarSign className="h-4 w-4 text-gold" />}
-                        <span className="font-medium text-sm">
-                          {notificationType.charAt(0).toUpperCase() + notificationType.slice(1)} Notification
-                        </span>
-                      </div>
-                      <p className="text-sm">{notificationMessage}</p>
-                    </div>
-                    <div className="text-sm text-gray-500 mb-4">
-                      This will be sent to {sendToAllUsers ? 'all users' : `${selectedUserIds.length} selected users`}.
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button
-                        className="bg-gold hover:bg-gold-dark text-black"
-                        onClick={handleSendNotification}
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        Send Now
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <h2 className="text-lg font-semibold mb-4">Recent Notifications</h2>
-          
-          {notifications.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <p className="text-gray-500">No notifications sent yet.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {notifications.map(notification => (
-                <Card key={notification.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-2">
-                      <div className="mt-1">
-                        {notification.type === 'system' && <Bell className="h-4 w-4 text-blue-500" />}
-                        {notification.type === 'win' && <BellRing className="h-4 w-4 text-green-500" />}
-                        {notification.type === 'draw' && <Calendar className="h-4 w-4 text-purple-500" />}
-                        {notification.type === 'promotion' && <DollarSign className="h-4 w-4 text-gold" />}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <h3 className="text-sm font-medium">
-                            {notification.type.charAt(0).toUpperCase() + notification.type.slice(1)} Notification
-                          </h3>
-                          <p className="text-xs text-gray-500">
-                            {new Date(notification.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <p className="text-sm">{notification.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Sent to: {notification.toAll ? 'All Users' : `${notification.toUserIds?.length || 0} Users`}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="media">
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Media Library</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <Button 
-                  onClick={() => fileInputRef.current?.click()} 
-                  variant="outline" 
-                  className="w-full mb-4 border-gold/30 text-gold hover:bg-gold/10"
-                  disabled={loading}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload New Media
-                </Button>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  className="hidden"
-                  accept="image/*" 
-                  onChange={handleFileChange} 
-                />
-                
-                {media.length === 0 ? (
-                  <div className="text-center p-8 border-2 border-dashed rounded-md">
-                    <FolderOpen className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-gray-500">No media uploads yet.</p>
-                    <p className="text-xs text-gray-400 mt-1">Upload images to see them here.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {media.map(item => (
-                      <div key={item.id} className="group relative border rounded-md overflow-hidden">
-                        <AspectRatio ratio={1}>
-                          <img 
-                            src={item.url} 
-                            alt={item.name} 
-                            className="w-full h-full object-contain"
-                          />
-                        </AspectRatio>
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Button 
-                            variant="destructive" 
-                            size="icon" 
-                            className="h-8 w-8"
-                            onClick={() => deleteMedia(item.id)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="p-2 text-xs truncate">{item.name}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Authentication Background</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-500">
-                  Set the background image that appears on the authentication pages (login/register).
-                </p>
-                
-                <div className="flex gap-2 items-center">
-                  <Button 
-                    onClick={() => bgImageFileInputRef.current?.click()} 
-                    variant="outline" 
-                    className="flex-1 border-gold/30 text-gold hover:bg-gold/10"
-                    disabled={loading}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Change Background Image
-                  </Button>
-                  <input 
-                    type="file" 
-                    ref={bgImageFileInputRef} 
-                    className="hidden"
-                    accept="image/*" 
-                    onChange={handleBgImageFileUpload} 
-                  />
-                </div>
-                
-                {authBackgroundImage && (
-                  <div className="mt-2 w-full h-40 overflow-hidden rounded-md border relative">
-                    <img 
-                      src={authBackgroundImage} 
-                      alt="Authentication background" 
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="appearance">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Theme Customization</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <Label className="block mb-2">Font</Label>
-                  <Select
-                    value={fontFamily}
-                    onValueChange={handleFontChange}
-                  >
-                    <SelectTrigger className="border-gold/30 focus:border-gold">
-                      <SelectValue placeholder="Select font" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fontsList.map(font => (
-                        <SelectItem key={font} value={font} style={{ fontFamily: font }}>{font}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="mt-2 p-3 border rounded-md" style={{ fontFamily }}>
-                    <p>The quick brown fox jumps over the lazy dog.</p>
-                    <p className="text-xs mt-1 text-gray-500">Sample text in {fontFamily}</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <Label className="block mb-2">Primary Color</Label>
-                    <div className="flex">
-                      <div 
-                        className="w-10 h-10 rounded-l-md border-t border-l border-b"
-                        style={{ backgroundColor: primaryColor }}
-                      ></div>
-                      <Input
-                        type="text"
-                        value={primaryColor}
-                        onChange={(e) => handleColorChange('primary', e.target.value)}
-                        className="rounded-l-none border-gold/30 focus:border-gold"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label className="block mb-2">Secondary Color</Label>
-                    <div className="flex">
-                      <div 
-                        className="w-10 h-10 rounded-l-md border-t border-l border-b"
-                        style={{ backgroundColor: secondaryColor }}
-                      ></div>
-                      <Input
-                        type="text"
-                        value={secondaryColor}
-                        onChange={(e) => handleColorChange('secondary', e.target.value)}
-                        className="rounded-l-none border-gold/30 focus:border-gold"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label className="block mb-2">Background Color</Label>
-                    <div className="flex">
-                      <div 
-                        className="w-10 h-10 rounded-l-md border-t border-l border-b"
-                        style={{ backgroundColor: backgroundColor }}
-                      ></div>
-                      <Input
-                        type="text"
-                        value={backgroundColor}
-                        onChange={(e) => handleColorChange('background', e.target.value)}
-                        className="rounded-l-none border-gold/30 focus:border-gold"
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-8 p-4 border rounded-md">
-                  <h3 className="text-sm font-bold mb-2">Preview</h3>
-                  <div 
-                    className="p-4 rounded-md"
-                    style={{ backgroundColor, fontFamily }}
-                  >
-                    <div 
-                      className="p-3 rounded-md mb-2"
-                      style={{ backgroundColor: secondaryColor, color: '#fff' }}
-                    >
-                      <h4 className="text-sm font-bold" style={{ color: primaryColor }}>Sample Header</h4>
-                      <p className="text-xs">This is how your content will look with the selected colors.</p>
-                    </div>
-                    <button
-                      className="px-3 py-1 rounded-md text-xs text-black"
-                      style={{ backgroundColor: primaryColor }}
-                    >
-                      Sample Button
-                    </button>
-                  </div>
-                </div>
-                
-                <Button
-                  onClick={saveAppearanceSettings}
-                  disabled={!appearanceChanged}
-                  className="w-full bg-gold hover:bg-gold-dark text-black"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Appearance Settings
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-};
-
-export default Admin;

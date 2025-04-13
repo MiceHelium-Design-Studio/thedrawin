@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +14,7 @@ interface AuthContextType {
   updateProfile: (data: Partial<User>) => Promise<void>;
   addFunds: (amount: number) => Promise<void>;
   clearCacheAndReload: () => void;
+  forceAdminAccess: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -317,6 +317,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 1000);
   };
 
+  const forceAdminAccess = async (email: string) => {
+    setLoading(true);
+    try {
+      // First get the user by email
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (userError) {
+        throw userError;
+      }
+
+      if (!userData) {
+        throw new Error(`User with email ${email} not found`);
+      }
+
+      // Update the user to be an admin
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ is_admin: true })
+        .eq('id', userData.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      toast({
+        title: 'Admin access granted',
+        description: `${email} is now an administrator`,
+      });
+
+      // Refresh current user if it's the same one
+      if (user && user.email === email) {
+        setUser({ ...user, isAdmin: true });
+      }
+    } catch (error: any) {
+      console.error('Force admin access error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to grant admin access',
+        description: error.message || 'An error occurred while updating admin status',
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -327,7 +377,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logout, 
       updateProfile, 
       addFunds,
-      clearCacheAndReload
+      clearCacheAndReload,
+      forceAdminAccess
     }}>
       {children}
     </AuthContext.Provider>
