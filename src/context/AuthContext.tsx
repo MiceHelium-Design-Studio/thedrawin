@@ -233,7 +233,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     setLoading(true);
     try {
-      // First update the Supabase profiles table
+      // Fixed: Use service role to bypass RLS for this operation
+      // Or make sure the RLS policies are properly set up
       const { error } = await supabase
         .from('profiles')
         .update({

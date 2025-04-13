@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -142,9 +141,21 @@ const Admin: React.FC = () => {
     setNotificationType(value);
   };
   
-  if (!user?.isAdmin) {
-    navigate('/');
-    return null;
+  useEffect(() => {
+    if (!user?.isAdmin) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-pulse space-y-4 w-full max-w-md">
+          <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
+          <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
+        </div>
+      </div>
+    );
   }
 
   const filteredUsers = users.filter(user => 
@@ -1328,10 +1339,10 @@ const Admin: React.FC = () => {
                     </DialogHeader>
                     <div className="border rounded-md p-4 my-4 bg-gray-50">
                       <div className="flex items-center mb-2">
-                        {notificationType === 'system' && <Bell className="h-4 w-4 mr-2 text-blue-500" />}
-                        {notificationType === 'win' && <BellRing className="h-4 w-4 mr-2 text-green-500" />}
-                        {notificationType === 'draw' && <Calendar className="h-4 w-4 mr-2 text-purple-500" />}
-                        {notificationType === 'promotion' && <DollarSign className="h-4 w-4 mr-2 text-gold" />}
+                        {notificationType === 'system' && <Bell className="h-4 w-4 text-blue-500" />}
+                        {notificationType === 'win' && <BellRing className="h-4 w-4 text-green-500" />}
+                        {notificationType === 'draw' && <Calendar className="h-4 w-4 text-purple-500" />}
+                        {notificationType === 'promotion' && <DollarSign className="h-4 w-4 text-gold" />}
                         <span className="font-medium text-sm">
                           {notificationType.charAt(0).toUpperCase() + notificationType.slice(1)} Notification
                         </span>
