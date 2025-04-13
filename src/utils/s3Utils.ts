@@ -114,6 +114,95 @@ export async function uploadToS3(file: File): Promise<{ url: string; key: string
   }
 }
 
+export async function uploadFromUrl(imageUrl: string, fileName?: string): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
+  try {
+    console.log(`Attempting to upload image from URL: ${imageUrl}`);
+    
+    // Check if user is authenticated
+    const { data: authData } = await supabase.auth.getSession();
+    if (!authData.session) {
+      console.error('Upload failed: User is not authenticated');
+      throw new Error('You must be logged in to upload files');
+    }
+    
+    // Fetch the image from the URL
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
+    }
+    
+    // Get the image blob
+    const blob = await response.blob();
+    
+    // Determine filename - use provided filename or extract from URL
+    let sanitizedFileName = fileName || imageUrl.split('/').pop() || 'image';
+    sanitizedFileName = sanitizedFileName.replace(/[^\w\s.-]/g, '');
+    
+    // Add extension if none exists
+    if (!sanitizedFileName.includes('.')) {
+      const extension = blob.type.split('/').pop();
+      sanitizedFileName = `${sanitizedFileName}.${extension}`;
+    }
+    
+    // Create a File object (needed for the upload method)
+    const file = new File([blob], sanitizedFileName, { type: blob.type });
+    
+    // Now use the existing upload method
+    return await uploadToS3(file);
+  } catch (error) {
+    console.error('Error uploading from URL:', error);
+    throw error;
+  }
+}
+
+export async function updateMedia(fileKey: string, file: File): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
+  try {
+    console.log(`Attempting to update file: ${fileKey} in drawinmedialib bucket`);
+    console.log(`New file details: name=${file.name}, size=${file.size}, type=${file.type}`);
+    
+    // Check if user is authenticated
+    const { data: authData } = await supabase.auth.getSession();
+    if (!authData.session) {
+      console.error('Update failed: User is not authenticated');
+      throw new Error('You must be logged in to update files');
+    }
+    
+    // Upload file with upsert to overwrite the existing file
+    const { data, error } = await supabase
+      .storage
+      .from('drawinmedialib')
+      .upload(fileKey, file, {
+        cacheControl: '3600',
+        upsert: true // Use upsert to replace existing file
+      });
+    
+    if (error) {
+      console.error('Supabase storage update error:', error);
+      if (error.message.includes('Policy')) {
+        throw new Error('Permission denied. Please check your storage permissions.');
+      }
+      throw error;
+    }
+    
+    console.log('Update successful:', data);
+    
+    const fileUrl = getFileUrl(data?.path || fileKey);
+    const fileType = categorizeContentType(file.type);
+    
+    // Return updated file details
+    return {
+      url: fileUrl,
+      key: fileKey,
+      name: file.name,
+      size: file.size,
+      type: fileType
+    };
+  } catch (error) {
+    console.error('Error updating file:', error);
+    throw error;
+  }
+}
+
 export async function deleteFromS3(fileKey: string) {
   try {
     console.log(`Attempting to delete file: ${fileKey} from drawinmedialib bucket`);
