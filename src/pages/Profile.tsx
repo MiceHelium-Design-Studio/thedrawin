@@ -1,9 +1,8 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import AvatarWrapper from '@/components/ui/avatar-wrapper';
 import { Label } from '@/components/ui/label';
 import { 
   Wallet, 
@@ -19,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import {
   RadioGroup,
   RadioGroupItem
@@ -68,7 +67,6 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('regular');
   
-  // Update local state when user changes
   useEffect(() => {
     if (user) {
       setName(user.name || '');
@@ -236,12 +234,12 @@ const Profile: React.FC = () => {
         <CardContent className="p-6">
           <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
             <div className="relative">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={avatarUrl} alt={name} />
-                <AvatarFallback className="text-lg bg-gold/20">
-                  {name?.slice(0, 2) || user.email.slice(0, 2).toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
+              <AvatarWrapper 
+                src={avatarUrl} 
+                alt={name || user.email}
+                className="h-24 w-24"
+                fallback={name?.slice(0, 2) || user.email.slice(0, 2).toUpperCase() || 'U'}
+              />
               {isEditing && (
                 <div className="absolute -bottom-2 -right-2">
                   <Button 

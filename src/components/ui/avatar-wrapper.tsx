@@ -40,14 +40,12 @@ const AvatarWrapper: React.FC<AvatarWrapperProps> = ({
       {src && !imageError ? (
         <AvatarImage 
           src={src} 
-          alt={alt} 
+          alt={alt || ''} 
           onError={handleImageError} 
         />
       ) : null}
       <AvatarFallback className="bg-primary/10 text-primary">
-        {imageError || !src ? (
-          getFallbackText() || <User className="h-5 w-5" />
-        ) : null}
+        {getFallbackText() || <User className="h-5 w-5" />}
       </AvatarFallback>
     </Avatar>
   );
