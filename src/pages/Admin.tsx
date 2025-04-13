@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -991,3 +992,599 @@ const Admin: React.FC = () => {
           <h2 className="text-lg font-semibold mb-4">Manage Existing Draws</h2>
           
           {draws.length === 0 ? (
+            <div className="p-8 text-center border rounded-lg">
+              <p className="text-gray-500">No draws available. Create your first draw above.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {draws.map(draw => (
+                <Card key={draw.id} className="overflow-hidden">
+                  {draw.bannerImage && (
+                    <div className="h-48 relative">
+                      <img 
+                        src={draw.bannerImage} 
+                        alt={draw.title} 
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                  )}
+                  <CardContent className="p-4">
+                    <h3 className="font-bold text-lg mb-2">{draw.title}</h3>
+                    <p className="text-sm mb-4 line-clamp-2">{draw.description}</p>
+                    <div className="flex justify-between items-center">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditDraw(draw)}
+                        className="text-xs"
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <div className="text-xs">
+                        Status: <span className="font-semibold">{draw.status}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="banners">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">{editingBanner ? 'Edit Banner' : 'Create New Banner'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="bannerImage">Banner Image</Label>
+                  <div className="flex gap-2 items-center mt-1">
+                    <Button 
+                      onClick={() => bannerFileInputRef.current?.click()} 
+                      variant="outline" 
+                      className="flex-1"
+                      disabled={loading}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Banner Image
+                    </Button>
+                    <input 
+                      type="file" 
+                      ref={bannerFileInputRef} 
+                      className="hidden"
+                      accept="image/*" 
+                      onChange={handleBannerFileUpload} 
+                    />
+                    
+                    {(editingBanner?.imageUrl || newBanner.imageUrl) && (
+                      <Button 
+                        variant="destructive" 
+                        size="icon" 
+                        onClick={handleDeleteBannerImage}
+                        title="Delete image"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {(editingBanner?.imageUrl || newBanner.imageUrl) && (
+                    <div className="mt-4 mb-4 w-full h-40 overflow-hidden rounded-md border border-gray-200">
+                      <img 
+                        src={editingBanner ? editingBanner.imageUrl : newBanner.imageUrl} 
+                        alt="Banner preview" 
+                        className="w-full h-full object-contain" 
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <Label htmlFor="linkUrl">Link URL</Label>
+                  <Input
+                    id="linkUrl"
+                    name="linkUrl"
+                    placeholder="https://example.com"
+                    value={editingBanner ? editingBanner.linkUrl : newBanner.linkUrl}
+                    onChange={handleBannerInputChange}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Where users will be directed when they click the banner.</p>
+                </div>
+                
+                {editingBanner && (
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="banner-active"
+                      checked={editingBanner.active}
+                      onCheckedChange={(checked) => {
+                        setEditingBanner(prev => ({ ...prev!, active: checked }));
+                      }}
+                    />
+                    <Label htmlFor="banner-active">Active</Label>
+                  </div>
+                )}
+                
+                {editingBanner ? (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleUpdateBanner}
+                      disabled={!editingBanner.imageUrl || loading}
+                      className="flex-1"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Update Banner
+                    </Button>
+                    <Button
+                      onClick={handleCancelEdit}
+                      variant="outline"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleCreateBanner}
+                    disabled={!newBanner.imageUrl || loading}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Banner
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <h2 className="text-lg font-semibold mb-4">Manage Existing Banners</h2>
+          
+          {banners.length === 0 ? (
+            <div className="p-8 text-center border rounded-lg">
+              <p className="text-gray-500">No banners available. Create your first banner above.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {banners.map(banner => (
+                <Card key={banner.id} className="overflow-hidden">
+                  {banner.imageUrl && (
+                    <div className="h-32 relative">
+                      <img 
+                        src={banner.imageUrl} 
+                        alt="Banner" 
+                        className="w-full h-full object-cover" 
+                      />
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <Button 
+                          variant="secondary" 
+                          size="icon" 
+                          className="h-6 w-6 rounded-full"
+                          onClick={() => handleEditBanner(banner)}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="icon" 
+                          className="h-6 w-6 rounded-full"
+                          onClick={() => handleDeleteBanner(banner.id)}
+                        >
+                          <Trash className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  <CardContent className="p-3">
+                    <div className="flex justify-between items-center">
+                      <div className="truncate max-w-[70%]">
+                        <a href={banner.linkUrl} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline truncate block">
+                          {banner.linkUrl}
+                        </a>
+                      </div>
+                      <Button 
+                        variant={banner.active ? "default" : "outline"} 
+                        size="sm"
+                        onClick={() => handleToggleBannerStatus(banner)}
+                        className="text-xs"
+                      >
+                        {banner.active ? 'Active' : 'Inactive'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="users">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Manage Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input 
+                    placeholder="Search users by name or email..." 
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <Button variant="outline" size="icon" title="Filter users">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Wallet</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map(user => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.name || '--'}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>${user.wallet}</TableCell>
+                        <TableCell>
+                          {user.isAdmin ? 
+                            <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-gold/20 text-gold">Admin</span> : 
+                            <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-700">User</span>
+                          }
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => toggleAdminStatus(user.id)}
+                            className="h-8 text-xs"
+                          >
+                            {user.isAdmin ? 
+                              <><UserX className="h-3 w-3 mr-1" /> Remove Admin</> : 
+                              <><UserCheck className="h-3 w-3 mr-1" /> Make Admin</>
+                            }
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="notifications">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Send Notifications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="notificationType">Notification Type</Label>
+                  <Select 
+                    value={notificationType} 
+                    onValueChange={value => handleNotificationTypeChange(value as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select notification type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="system">System</SelectItem>
+                      <SelectItem value="win">Win</SelectItem>
+                      <SelectItem value="draw">Draw</SelectItem>
+                      <SelectItem value="promotion">Promotion</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="notificationMessage">Message</Label>
+                  <Textarea 
+                    id="notificationMessage" 
+                    value={notificationMessage}
+                    onChange={(e) => setNotificationMessage(e.target.value)}
+                    placeholder="Enter your notification message"
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="sendToAll"
+                    checked={sendToAllUsers}
+                    onCheckedChange={toggleSendToAllUsers}
+                  />
+                  <Label htmlFor="sendToAll">Send to all users</Label>
+                </div>
+                
+                {showUserSelector && (
+                  <div>
+                    <Label className="mb-2 block">Select Recipients</Label>
+                    <div className="border rounded-md max-h-60 overflow-y-auto p-2">
+                      {users.map(user => (
+                        <div key={user.id} className="flex items-center space-x-2 py-2 border-b last:border-0">
+                          <Switch 
+                            id={`user-${user.id}`}
+                            checked={selectedUserIds.includes(user.id)}
+                            onCheckedChange={() => handleUserSelectionChange(user.id)}
+                          />
+                          <Label htmlFor={`user-${user.id}`} className="flex-1 flex items-center">
+                            <span className="mr-2">{user.name || user.email}</span>
+                            {user.isAdmin && (
+                              <span className="text-xs bg-gold/20 text-gold px-2 py-0.5 rounded-full">Admin</span>
+                            )}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <Button
+                  onClick={handleSendNotification}
+                  disabled={!notificationMessage.trim() || (!sendToAllUsers && selectedUserIds.length === 0)}
+                  className="w-full"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Notification
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <h2 className="text-lg font-semibold mt-6 mb-4">Recent Notifications</h2>
+          
+          {notifications.length === 0 ? (
+            <div className="p-8 text-center border rounded-lg">
+              <p className="text-gray-500">No notifications have been sent yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {notifications.slice(0, 5).map(notification => (
+                <Card key={notification.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1">
+                        {notification.type === 'system' && <Bell className="h-5 w-5 text-blue-500" />}
+                        {notification.type === 'win' && <Check className="h-5 w-5 text-green-500" />}
+                        {notification.type === 'draw' && <Calendar className="h-5 w-5 text-gold" />}
+                        {notification.type === 'promotion' && <DollarSign className="h-5 w-5 text-purple-500" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between">
+                          <span className="font-medium">
+                            {notification.type.charAt(0).toUpperCase() + notification.type.slice(1)} Notification
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(notification.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="mt-1">{notification.message}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="media">
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Upload Media</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Button 
+                    onClick={() => fileInputRef.current?.click()} 
+                    variant="outline" 
+                    className="w-full h-24 flex flex-col items-center justify-center border-dashed"
+                    disabled={loading}
+                  >
+                    <Upload className="h-8 w-8 mb-2" />
+                    <span>Click to upload image</span>
+                    <span className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</span>
+                  </Button>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden"
+                    accept="image/*" 
+                    onChange={handleFileChange} 
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <h2 className="text-lg font-semibold mb-4">Media Library</h2>
+          
+          {media.length === 0 ? (
+            <div className="p-8 text-center border rounded-lg">
+              <p className="text-gray-500">No media available. Upload your first image above.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {media.map(item => (
+                <div key={item.id} className="group relative border rounded-md overflow-hidden">
+                  <AspectRatio ratio={1}>
+                    <img 
+                      src={item.url} 
+                      alt={item.name} 
+                      className="object-cover w-full h-full" 
+                    />
+                  </AspectRatio>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <Button 
+                      variant="secondary" 
+                      size="icon" 
+                      className="h-8 w-8 rounded-full"
+                      onClick={() => {
+                        navigator.clipboard.writeText(item.url);
+                        toast({ 
+                          title: "URL copied", 
+                          description: "Image URL copied to clipboard" 
+                        });
+                      }}
+                    >
+                      <FolderOpen className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="icon" 
+                      className="h-8 w-8 rounded-full"
+                      onClick={() => deleteMedia(item.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="appearance">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Appearance Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <Label className="mb-2 block">Background Image</Label>
+                  <div className="flex gap-2 items-center">
+                    <Button 
+                      onClick={() => bgImageFileInputRef.current?.click()} 
+                      variant="outline" 
+                      className="flex-1"
+                      disabled={loading}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Background Image
+                    </Button>
+                    <input 
+                      type="file" 
+                      ref={bgImageFileInputRef} 
+                      className="hidden"
+                      accept="image/*" 
+                      onChange={handleBgImageFileUpload} 
+                    />
+                  </div>
+                  
+                  {authBackgroundImage && (
+                    <div className="mt-4 mb-4 border rounded-md overflow-hidden">
+                      <AspectRatio ratio={16/9}>
+                        <img 
+                          src={authBackgroundImage} 
+                          alt="Background preview" 
+                          className="w-full h-full object-cover" 
+                        />
+                      </AspectRatio>
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <Label htmlFor="fontFamily" className="mb-2 block">Font Family</Label>
+                  <Select value={fontFamily} onValueChange={handleFontChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select font" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fontsList.map(font => (
+                        <SelectItem key={font} value={font} style={{ fontFamily: font }}>
+                          {font}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="primaryColor" className="mb-2 block">Primary Color</Label>
+                    <div className="flex gap-2">
+                      <div 
+                        className="w-8 h-8 rounded-md border"
+                        style={{ backgroundColor: primaryColor }}
+                      />
+                      <Input
+                        id="primaryColor"
+                        type="color"
+                        value={primaryColor}
+                        onChange={(e) => handleColorChange('primary', e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="secondaryColor" className="mb-2 block">Secondary Color</Label>
+                    <div className="flex gap-2">
+                      <div 
+                        className="w-8 h-8 rounded-md border"
+                        style={{ backgroundColor: secondaryColor }}
+                      />
+                      <Input
+                        id="secondaryColor"
+                        type="color"
+                        value={secondaryColor}
+                        onChange={(e) => handleColorChange('secondary', e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="backgroundColor" className="mb-2 block">Background Color</Label>
+                    <div className="flex gap-2">
+                      <div 
+                        className="w-8 h-8 rounded-md border"
+                        style={{ backgroundColor: backgroundColor }}
+                      />
+                      <Input
+                        id="backgroundColor"
+                        type="color"
+                        value={backgroundColor}
+                        onChange={(e) => handleColorChange('background', e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-4">
+                  <Button
+                    onClick={saveAppearanceSettings}
+                    disabled={!appearanceChanged}
+                    className="w-full"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Appearance Settings
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default Admin;
