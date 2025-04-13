@@ -2,7 +2,6 @@
 import { supabase } from '../integrations/supabase/client';
 
 export interface UploadResponse {
-  uploadUrl: string;
   fileKey: string;
   fileUrl: string;
   fileType: string;
@@ -21,12 +20,24 @@ export interface StorageStats {
 
 export async function getMediaItems() {
   try {
-    const { data, error } = await supabase.functions.invoke('s3-media', {
-      body: { action: 'list' }
-    });
+    const { data, error } = await supabase
+      .storage
+      .from('drawinmedialib')
+      .list();
 
     if (error) throw error;
-    return data.media || [];
+    
+    // Convert Supabase storage items to our application format
+    const media = data.map(item => ({
+      id: item.name,
+      name: item.name,
+      url: getFileUrl(item.name),
+      size: item.metadata?.size || 0,
+      uploadDate: item.created_at || new Date().toISOString(),
+      type: getFileType(item.name)
+    }));
+    
+    return media;
   } catch (error) {
     console.error('Error getting media items:', error);
     throw error;
@@ -34,59 +45,56 @@ export async function getMediaItems() {
 }
 
 export async function getUploadUrl(fileName: string, contentType: string): Promise<UploadResponse> {
-  try {
-    const { data, error } = await supabase.functions.invoke('s3-media', {
-      body: { 
-        action: 'getUploadUrl',
-        fileName,
-        contentType
-      }
-    });
+  // With Supabase Storage we don't need pre-signed URLs
+  // Instead we'll return a structure that's compatible with our existing code
+  return {
+    fileKey: fileName,
+    fileUrl: getFileUrl(fileName),
+    fileType: categorizeContentType(contentType)
+  };
+}
 
+export async function uploadToS3(file: File): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
+  try {
+    // Sanitize the filename to prevent path traversal
+    const sanitizedFileName = file.name.replace(/[^\w\s.-]/g, '');
+    const fileKey = `${Date.now()}-${sanitizedFileName}`;
+    
+    // Upload file directly to Supabase Storage
+    const { data, error } = await supabase
+      .storage
+      .from('drawinmedialib')
+      .upload(fileKey, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+    
     if (error) throw error;
-    return data as UploadResponse;
+    
+    const fileUrl = getFileUrl(data?.path || fileKey);
+    const fileType = categorizeContentType(file.type);
+    
+    // Return file details in the same format as before
+    return {
+      url: fileUrl,
+      key: fileKey,
+      name: file.name,
+      size: file.size,
+      type: fileType
+    };
   } catch (error) {
-    console.error('Error getting upload URL:', error);
+    console.error('Error uploading file:', error);
     throw error;
   }
 }
 
-export async function uploadToS3(file: File): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
-  // 1. Get a pre-signed URL
-  const { uploadUrl, fileKey, fileUrl, fileType } = await getUploadUrl(file.name, file.type);
-  
-  // 2. Upload the file directly to S3
-  const uploadResponse = await fetch(uploadUrl, {
-    method: 'PUT',
-    body: file,
-    headers: {
-      'Content-Type': file.type
-    }
-  });
-  
-  if (!uploadResponse.ok) {
-    throw new Error('Upload failed');
-  }
-  
-  // 3. Return the file details
-  return {
-    url: fileUrl,
-    key: fileKey,
-    name: file.name,
-    size: file.size,
-    type: fileType || 'other'
-  };
-}
-
 export async function deleteFromS3(fileKey: string) {
   try {
-    const { error } = await supabase.functions.invoke('s3-media', {
-      body: { 
-        action: 'delete',
-        fileKey
-      }
-    });
-
+    const { error } = await supabase
+      .storage
+      .from('drawinmedialib')
+      .remove([fileKey]);
+    
     if (error) throw error;
     return true;
   } catch (error) {
@@ -97,16 +105,86 @@ export async function deleteFromS3(fileKey: string) {
 
 export async function getStorageStats(): Promise<StorageStats> {
   try {
-    const { data, error } = await supabase.functions.invoke('s3-media', {
-      body: { 
-        action: 'getStats'
-      }
-    });
-
+    const { data, error } = await supabase
+      .storage
+      .from('drawinmedialib')
+      .list();
+    
     if (error) throw error;
-    return data as StorageStats;
+    
+    // Calculate storage statistics
+    let totalSize = 0;
+    const fileTypeCount = {
+      image: 0,
+      document: 0,
+      other: 0
+    };
+    
+    data.forEach(item => {
+      const size = item.metadata?.size || 0;
+      totalSize += size;
+      
+      const type = getFileType(item.name);
+      fileTypeCount[type] += 1;
+    });
+    
+    return {
+      totalFiles: data.length,
+      totalSize,
+      fileTypeCount,
+      averageSize: data.length > 0 ? totalSize / data.length : 0
+    };
   } catch (error) {
     console.error('Error getting storage stats:', error);
     throw error;
   }
+}
+
+// Helper function to determine file type based on extension
+function getFileType(key: string): 'image' | 'document' | 'other' {
+  const extension = key.split('.').pop()?.toLowerCase() || '';
+  
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'tiff', 'bmp'];
+  const documentExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'];
+  
+  if (imageExtensions.includes(extension)) {
+    return 'image';
+  } else if (documentExtensions.includes(extension)) {
+    return 'document';
+  } else {
+    return 'other';
+  }
+}
+
+// Helper function to categorize content type
+function categorizeContentType(contentType: string): 'image' | 'document' | 'other' {
+  const imageMimeTypes = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 
+    'image/webp', 'image/tiff', 'image/bmp'
+  ];
+
+  const documentMimeTypes = [
+    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain', 'text/csv'
+  ];
+  
+  if (imageMimeTypes.includes(contentType)) {
+    return 'image';
+  } else if (documentMimeTypes.includes(contentType)) {
+    return 'document';
+  } else {
+    return 'other';
+  }
+}
+
+// Helper function to get the public URL for a file
+function getFileUrl(path: string): string {
+  const { data } = supabase
+    .storage
+    .from('drawinmedialib')
+    .getPublicUrl(path);
+  
+  return data.publicUrl;
 }
