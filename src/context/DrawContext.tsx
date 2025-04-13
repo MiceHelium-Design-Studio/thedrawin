@@ -193,7 +193,18 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Send entry and receipt notifications if user is logged in
       if (user?.id) {
-        await sendDrawEntryNotifications(user.id, draw.title, number, price);
+        try {
+          const notifications = await sendDrawEntryNotifications(user.id, draw.title, number, price);
+          
+          // If we got local notifications back and they're not in Supabase, add them to the context
+          if (notifications && notifications.length > 0) {
+            console.log('Created draw entry notifications:', notifications);
+            // The notification context will handle displaying these
+          }
+        } catch (error) {
+          console.error('Error sending notifications:', error);
+          // Continue without notifications as it's not critical
+        }
       }
       
     } catch (error) {

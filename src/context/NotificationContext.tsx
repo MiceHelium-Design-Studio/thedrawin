@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { BellRing } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -13,6 +14,7 @@ interface NotificationContextType {
   deleteNotification: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
   sendNotification: (message: string, type: 'system' | 'win' | 'draw' | 'promotion', userIds?: string[]) => Promise<void>;
+  addLocalNotification: (notification: Notification) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -89,32 +91,52 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
-      
-      // Map database fields to app fields
-      const mappedNotifications = (data || []).map(mapDatabaseNotificationToAppNotification);
-      setNotifications(mappedNotifications);
+      if (error) {
+        console.error('Supabase error fetching notifications:', error);
+        // Continue with empty array to allow local notifications to work
+      } else {
+        // Map database fields to app fields
+        const mappedNotifications = (data || []).map(mapDatabaseNotificationToAppNotification);
+        setNotifications(mappedNotifications);
+      }
     } catch (error) {
       console.error('Error fetching notifications:', error);
       // Don't show toast for this error as it would be annoying on every page load
-      setNotifications([]); // Set empty array to avoid undefined
     } finally {
       setLoading(false);
     }
+  };
+
+  // Add a local notification (for when Supabase fails)
+  const addLocalNotification = (notification: Notification) => {
+    setNotifications(prev => [notification, ...prev]);
+    
+    // Show toast for the new local notification
+    toast({
+      title: "New Notification",
+      description: notification.message,
+    });
   };
 
   const markAsRead = async (id: string) => {
     if (!user) return;
     
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', id)
-        .eq('user_id', user.id);
+      // Check if it's a local notification (UUID v4 format)
+      const isLocalNotification = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
       
-      if (error) throw error;
+      if (!isLocalNotification) {
+        // Try to update in Supabase
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('id', id)
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+      }
       
+      // Always update local state
       setNotifications(prev =>
         prev.map(notification =>
           notification.id === id ? { ...notification, read: true } : notification
@@ -136,14 +158,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+      // Check if it's a local notification (UUID v4 format)
+      const isLocalNotification = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
       
-      if (error) throw error;
+      if (!isLocalNotification) {
+        // Try to delete from Supabase
+        const { error } = await supabase
+          .from('notifications')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+      }
       
+      // Always update local state
       setNotifications(prev => prev.filter(notification => notification.id !== id));
       return;
     } catch (error) {
@@ -161,14 +190,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user || notifications.length === 0) return;
     
     try {
+      // Try to update in Supabase
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
         .eq('user_id', user.id)
         .eq('read', false);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase mark all as read error:', error);
+      }
       
+      // Always update local state
       setNotifications(prev =>
         prev.map(notification => ({ ...notification, read: true }))
       );
@@ -190,24 +223,73 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       if (userIds && userIds.length > 0) {
         // Send to specific users
-        const promises = userIds.map(userId => 
-          supabase.from('notifications').insert({
-            user_id: userId,
-            message,
-            type
-          })
-        );
+        const promises = userIds.map(async (userId) => {
+          try {
+            const { error } = await supabase.from('notifications').insert({
+              user_id: userId,
+              message,
+              type
+            });
+            
+            if (error) {
+              console.error('Supabase error sending notification:', error);
+              // Create a local notification
+              const localNotification: Notification = {
+                id: uuidv4(),
+                userId,
+                message,
+                read: false,
+                type,
+                createdAt: new Date().toISOString()
+              };
+              
+              if (userId === user?.id) {
+                addLocalNotification(localNotification);
+              }
+            }
+          } catch (e) {
+            console.error(`Error sending notification to user ${userId}:`, e);
+          }
+        });
         
         await Promise.all(promises);
       } else if (user) {
         // Send to current user
-        const { error } = await supabase.from('notifications').insert({
-          user_id: user.id,
-          message,
-          type
-        });
-        
-        if (error) throw error;
+        try {
+          const { error } = await supabase.from('notifications').insert({
+            user_id: user.id,
+            message,
+            type
+          });
+          
+          if (error) {
+            console.error('Supabase error sending notification:', error);
+            // Create a local notification
+            const localNotification: Notification = {
+              id: uuidv4(),
+              userId: user.id,
+              message,
+              read: false,
+              type,
+              createdAt: new Date().toISOString()
+            };
+            
+            addLocalNotification(localNotification);
+          }
+        } catch (e) {
+          console.error('Error sending notification:', e);
+          // Create a local notification
+          const localNotification: Notification = {
+            id: uuidv4(),
+            userId: user.id,
+            message,
+            read: false,
+            type,
+            createdAt: new Date().toISOString()
+          };
+          
+          addLocalNotification(localNotification);
+        }
       }
       return;
     } catch (error) {
@@ -229,7 +311,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         markAsRead,
         deleteNotification,
         markAllAsRead,
-        sendNotification
+        sendNotification,
+        addLocalNotification
       }}
     >
       {children}
