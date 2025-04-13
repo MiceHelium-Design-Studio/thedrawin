@@ -35,7 +35,7 @@ export const sendNotificationToUser = async (
       userId: data.user_id,
       message: data.message,
       read: data.read,
-      type: data.type,
+      type: data.type as 'system' | 'win' | 'draw' | 'promotion',
       createdAt: data.created_at
     };
   } catch (error) {
