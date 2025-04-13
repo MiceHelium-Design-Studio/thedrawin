@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Award, Bell, User, Settings } from 'lucide-react';
@@ -106,22 +107,35 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <span>Profile</span>
             </NavLink>
             
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center justify-center text-xs transition-all duration-300",
-                  isActive
-                    ? "text-gold font-medium"
-                    : "text-white hover:text-gold"
-                )
-              }
-            >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin' && "bg-black-light/50")}>
-                <Settings className="h-5 w-5 mb-1" />
+            {/* Only show Admin link if user is an admin */}
+            {user?.isAdmin && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  cn(
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                    isActive
+                      ? "text-gold font-medium"
+                      : "text-white hover:text-gold"
+                  )
+                }
+              >
+                <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin' && "bg-black-light/50")}>
+                  <Settings className="h-5 w-5 mb-1" />
+                </div>
+                <span>Admin</span>
+              </NavLink>
+            )}
+            
+            {/* Add placeholder div if user is not admin to maintain grid layout */}
+            {!user?.isAdmin && (
+              <div className="flex flex-col items-center justify-center text-xs text-gray-500">
+                <div className="p-1.5">
+                  <div className="h-5 w-5 mb-1" />
+                </div>
+                <span>&nbsp;</span>
               </div>
-              <span>Admin</span>
-            </NavLink>
+            )}
           </div>
         </nav>
       )}

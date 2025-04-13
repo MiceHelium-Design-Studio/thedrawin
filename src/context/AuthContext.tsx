@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Move fetchUserProfile outside of useEffect to make it available to all functions
   const fetchUserProfile = async (userId: string) => {
     try {
       setLoading(true);
