@@ -20,12 +20,18 @@ export interface StorageStats {
 
 export async function getMediaItems() {
   try {
+    console.log('Fetching media items from Supabase storage');
     const { data, error } = await supabase
       .storage
       .from('drawinmedialib')
       .list();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error listing media items:', error);
+      throw error;
+    }
+    
+    console.log('Media items retrieved:', data?.length);
     
     // Convert Supabase storage items to our application format
     const media = data
@@ -62,7 +68,15 @@ export async function uploadToS3(file: File): Promise<{ url: string; key: string
     const sanitizedFileName = file.name.replace(/[^\w\s.-]/g, '');
     const fileKey = `${Date.now()}-${sanitizedFileName}`;
     
-    console.log(`Attempting to upload file: ${fileKey} to drawinmedialib`);
+    console.log(`Attempting to upload file: ${fileKey} to drawinmedialib bucket`);
+    console.log(`File details: name=${file.name}, size=${file.size}, type=${file.type}`);
+    
+    // Check if user is authenticated
+    const { data: authData } = await supabase.auth.getSession();
+    if (!authData.session) {
+      console.error('Upload failed: User is not authenticated');
+      throw new Error('You must be logged in to upload files');
+    }
     
     // Upload file directly to Supabase Storage
     const { data, error } = await supabase
@@ -75,6 +89,9 @@ export async function uploadToS3(file: File): Promise<{ url: string; key: string
     
     if (error) {
       console.error('Supabase storage upload error:', error);
+      if (error.message.includes('Policy')) {
+        throw new Error('Permission denied. Please check your storage permissions.');
+      }
       throw error;
     }
     
@@ -99,12 +116,19 @@ export async function uploadToS3(file: File): Promise<{ url: string; key: string
 
 export async function deleteFromS3(fileKey: string) {
   try {
+    console.log(`Attempting to delete file: ${fileKey} from drawinmedialib bucket`);
+    
     const { error } = await supabase
       .storage
       .from('drawinmedialib')
       .remove([fileKey]);
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error deleting file:', error);
+      throw error;
+    }
+    
+    console.log(`Successfully deleted file: ${fileKey}`);
     return true;
   } catch (error) {
     console.error('Error deleting file:', error);
