@@ -319,34 +319,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log(`Attempting to grant admin access to ${email}`);
       
-      // First get the user by email
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', email)
-        .single();
+      // Use our security definer function to update the admin status
+      // This bypasses RLS policies and prevents infinite recursion
+      const { error } = await supabase.rpc('update_user_admin_status', {
+        user_email: email,
+        is_admin_status: true
+      });
 
-      if (userError) {
-        console.error('Error finding user:', userError);
-        throw userError;
-      }
-
-      if (!userData) {
-        console.error(`User with email ${email} not found`);
-        throw new Error(`User with email ${email} not found`);
-      }
-
-      console.log(`Found user with ID: ${userData.id}, updating to admin status`);
-
-      // Update the user to be an admin
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ is_admin: true })
-        .eq('id', userData.id);
-
-      if (updateError) {
-        console.error('Error updating admin status:', updateError);
-        throw updateError;
+      if (error) {
+        console.error('Error updating admin status:', error);
+        throw error;
       }
 
       console.log(`Successfully granted admin access to ${email}`);
@@ -360,11 +342,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (user && user.email === email) {
         console.log('Updating current user to admin status');
         setUser({ ...user, isAdmin: true });
-      }
-      
-      // Force a data refresh by manually fetching the profile again if it's the current user
-      if (user && user.id === userData.id) {
-        fetchUserProfile(userData.id);
+        
+        // Refresh the user profile to ensure data is up to date
+        if (user.id) {
+          fetchUserProfile(user.id);
+        }
       }
     } catch (error: any) {
       console.error('Force admin access error:', error);
