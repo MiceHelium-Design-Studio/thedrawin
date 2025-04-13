@@ -25,6 +25,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        // Fallback to create a basic user object
+        setUser({
+          id: userId,
+          email: '',
+          wallet: 0,
+          isAdmin: false
+        });
+      } else if (data) {
+        // Map database fields to User type
+        const userProfile: User = {
+          id: data.id,
+          email: data.email || '',
+          name: data.name || undefined,
+          avatar: data.avatar || undefined,
+          wallet: data.wallet || 0,
+          isAdmin: data.is_admin || false
+        };
+        setUser(userProfile);
+      }
+    } catch (error) {
+      console.error('Profile fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let isSubscribed = true;
     
@@ -68,46 +105,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Auth initialization error:', error);
         if (isSubscribed) {
           setUser(null);
-          setLoading(false);
-        }
-      }
-    };
-
-    // Helper function to fetch user profile data
-    const fetchUserProfile = async (userId: string) => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-          // Fallback to create a basic user object
-          setUser({
-            id: userId,
-            email: '',
-            wallet: 0,
-            isAdmin: false
-          });
-        } else if (data) {
-          // Map database fields to User type
-          const userProfile: User = {
-            id: data.id,
-            email: data.email || '',
-            name: data.name || undefined,
-            avatar: data.avatar || undefined,
-            wallet: data.wallet || 0,
-            isAdmin: data.is_admin || false
-          };
-          setUser(userProfile);
-        }
-      } catch (error) {
-        console.error('Profile fetch error:', error);
-      } finally {
-        if (isSubscribed) {
           setLoading(false);
         }
       }
