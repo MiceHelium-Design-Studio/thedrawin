@@ -4,7 +4,6 @@ import { Notification } from '../types';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
-import { BellRing } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 interface NotificationContextType {
@@ -35,8 +34,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     fetchNotifications();
     
     // Set up real-time subscription for new notifications
+    console.log("Setting up real-time notifications subscription for user:", user.id);
+    
     const channel = supabase
-      .channel('notifications-channel')
+      .channel('notifications')
       .on(
         'postgres_changes',
         {
@@ -46,8 +47,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          console.log("Received real-time notification:", payload);
           try {
             const newNotification = mapDatabaseNotificationToAppNotification(payload.new);
+            console.log("Processed new notification:", newNotification);
+            
             setNotifications(prev => [newNotification, ...prev]);
             
             // Show toast for new notification
@@ -60,9 +64,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Supabase channel status:", status);
+      });
     
     return () => {
+      console.log("Cleaning up real-time subscription");
       supabase.removeChannel(channel);
     };
   }, [user, toast]);
@@ -225,6 +232,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Send to specific users
         const promises = userIds.map(async (userId) => {
           try {
+            console.log(`Sending notification to user ${userId}:`, message);
             const { error } = await supabase.from('notifications').insert({
               user_id: userId,
               message,
@@ -256,6 +264,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       } else if (user) {
         // Send to current user
         try {
+          console.log(`Sending notification to current user:`, message);
           const { error } = await supabase.from('notifications').insert({
             user_id: user.id,
             message,

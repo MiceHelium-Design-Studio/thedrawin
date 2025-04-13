@@ -9,6 +9,8 @@ export const sendNotificationToUser = async (
   type: 'system' | 'win' | 'draw' | 'promotion'
 ): Promise<Notification | null> => {
   try {
+    console.log(`Sending notification to user ${userId}: ${message} (${type})`);
+    
     // Try to send to Supabase
     const { data, error } = await supabase.from('notifications').insert({
       user_id: userId,
@@ -20,7 +22,7 @@ export const sendNotificationToUser = async (
       console.error('Supabase notification error:', error);
       
       // If Supabase fails, create a local notification object
-      return {
+      const localNotification: Notification = {
         id: uuidv4(),
         userId,
         message,
@@ -28,7 +30,12 @@ export const sendNotificationToUser = async (
         type,
         createdAt: new Date().toISOString()
       };
+      
+      console.log('Created local notification:', localNotification);
+      return localNotification;
     }
+    
+    console.log('Successfully sent notification to Supabase:', data);
     
     return {
       id: data.id,
@@ -42,7 +49,7 @@ export const sendNotificationToUser = async (
     console.error('Failed to send notification:', error);
     
     // Return a local notification object
-    return {
+    const localNotification: Notification = {
       id: uuidv4(),
       userId,
       message,
@@ -50,6 +57,9 @@ export const sendNotificationToUser = async (
       type,
       createdAt: new Date().toISOString()
     };
+    
+    console.log('Created local notification after error:', localNotification);
+    return localNotification;
   }
 };
 
@@ -84,6 +94,7 @@ export const sendDrawEntryNotifications = async (
       notifications.push(receiptNotification);
     }
     
+    console.log('Created draw entry notifications:', notifications);
     return notifications;
   } catch (error) {
     console.error('Failed to send draw notifications:', error);
