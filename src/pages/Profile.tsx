@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,7 +14,8 @@ import {
   CreditCard, 
   ArrowLeftRight, 
   Building, 
-  Banknote 
+  Banknote,
+  Link as LinkIcon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +32,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { Textarea } from "@/components/ui/textarea";
 
 const uploadMedia = async (file: File) => {
   return new Promise<{ url: string; name: string }>((resolve) => {
@@ -46,6 +49,10 @@ const uploadMedia = async (file: File) => {
   });
 };
 
+const uploadFromUrl = async (url: string) => {
+  return { url, name: 'From URL' };
+};
+
 type PaymentMethod = 'regular' | 'card' | 'whish' | 'western-union';
 
 const Profile: React.FC = () => {
@@ -56,9 +63,18 @@ const Profile: React.FC = () => {
   
   const [name, setName] = useState(user?.name || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar || '');
+  const [imageUrlInput, setImageUrlInput] = useState('');
   const [amount, setAmount] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('regular');
+  
+  // Update local state when user changes
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setAvatarUrl(user.avatar || '');
+    }
+  }, [user]);
   
   const form = useForm({
     defaultValues: {
@@ -98,6 +114,36 @@ const Profile: React.FC = () => {
         variant: 'destructive',
         title: 'Update failed',
         description: 'There was an error updating your profile.',
+      });
+      console.error(error);
+    }
+  };
+
+  const handleLoadImageFromUrl = async () => {
+    if (!imageUrlInput || !imageUrlInput.trim().startsWith('http')) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: 'Please enter a valid URL starting with http:// or https://',
+      });
+      return;
+    }
+    
+    try {
+      const uploadedItem = await uploadFromUrl(imageUrlInput);
+      setAvatarUrl(uploadedItem.url);
+      
+      toast({
+        title: 'Image loaded',
+        description: 'Image URL has been loaded successfully.',
+      });
+      
+      setImageUrlInput('');
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Load failed',
+        description: 'There was an error loading the image from URL.',
       });
       console.error(error);
     }
@@ -191,9 +237,9 @@ const Profile: React.FC = () => {
           <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
             <div className="relative">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={avatarUrl} alt={name} />
                 <AvatarFallback className="text-lg bg-gold/20">
-                  {user.name?.slice(0, 2) || 'U'}
+                  {name?.slice(0, 2) || user.email.slice(0, 2).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               {isEditing && (
@@ -251,6 +297,24 @@ const Profile: React.FC = () => {
                         onChange={handleFileUpload}
                       />
                     </div>
+                    
+                    <div className="mt-2 flex gap-2">
+                      <Input
+                        placeholder="Enter image URL"
+                        value={imageUrlInput}
+                        onChange={(e) => setImageUrlInput(e.target.value)}
+                        className="border-gold/30 focus:border-gold"
+                      />
+                      <Button
+                        variant="outline"
+                        className="border-gold/30 text-gold hover:text-gold-dark whitespace-nowrap"
+                        onClick={handleLoadImageFromUrl}
+                      >
+                        <LinkIcon className="h-4 w-4 mr-2" />
+                        Load URL
+                      </Button>
+                    </div>
+                    
                     {avatarUrl && isEditing && (
                       <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200">
                         <img src={avatarUrl} alt="Avatar preview" className="w-full object-cover" />

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,15 +40,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setTimeout(() => {
             if (!isSubscribed) return;
             
-            // FOR DEMO: Creating minimal user with admin rights
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              name: session.user?.user_metadata?.name || 'Demo User',
-              wallet: 500, // Give some funds to test
-              isAdmin: true // Make user admin
-            });
-            setLoading(false);
+            // Fetch profile data from the profiles table
+            fetchUserProfile(session.user.id);
           }, 0);
         } else {
           if (isSubscribed) {
@@ -64,15 +58,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data } = await supabase.auth.getSession();
         
         if (data.session?.user && isSubscribed) {
-          // FOR DEMO: Creating minimal user with admin rights
-          setUser({
-            id: data.session.user.id,
-            email: data.session.user.email || '',
-            name: data.session.user.user_metadata?.name || 'Demo User',
-            wallet: 500, // Give some funds to test
-            isAdmin: true // Make user admin
-          });
-          setLoading(false);
+          // Fetch profile data from the profiles table
+          fetchUserProfile(data.session.user.id);
         } else if (isSubscribed) {
           setUser(null);
           setLoading(false);
@@ -86,7 +73,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // Helper function to fetch user profile - removed to avoid recursion issues
+    // Helper function to fetch user profile data
+    const fetchUserProfile = async (userId: string) => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+          // Fallback to create a basic user object
+          setUser({
+            id: userId,
+            email: '',
+            wallet: 0,
+            isAdmin: false
+          });
+        } else if (data) {
+          // Map database fields to User type
+          const userProfile: User = {
+            id: data.id,
+            email: data.email || '',
+            name: data.name || undefined,
+            avatar: data.avatar || undefined,
+            wallet: data.wallet || 0,
+            isAdmin: data.is_admin || false
+          };
+          setUser(userProfile);
+        }
+      } catch (error) {
+        console.error('Profile fetch error:', error);
+      } finally {
+        if (isSubscribed) {
+          setLoading(false);
+        }
+      }
+    };
     
     initializeAuth();
 
@@ -208,18 +233,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     setLoading(true);
     try {
+      // First update the Supabase profiles table
       const { error } = await supabase
         .from('profiles')
         .update({
           name: data.name,
           avatar: data.avatar,
+          wallet: data.wallet !== undefined ? data.wallet : user.wallet,
+          is_admin: data.isAdmin !== undefined ? data.isAdmin : user.isAdmin
         })
         .eq('id', user.id);
 
       if (error) {
+        console.error("Profile update error:", error);
         throw error;
       }
 
+      // If successful, update local state
       setUser({ ...user, ...data });
       
       toast({
