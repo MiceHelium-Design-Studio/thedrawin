@@ -28,14 +28,16 @@ export async function getMediaItems() {
     if (error) throw error;
     
     // Convert Supabase storage items to our application format
-    const media = data.map(item => ({
-      id: item.name,
-      name: item.name,
-      url: getFileUrl(item.name),
-      size: item.metadata?.size || 0,
-      uploadDate: item.created_at || new Date().toISOString(),
-      type: getFileType(item.name)
-    }));
+    const media = data
+      .filter(item => !item.name.includes('.emptyFolderPlaceholder'))
+      .map(item => ({
+        id: item.name,
+        name: item.name,
+        url: getFileUrl(item.name),
+        size: item.metadata?.size || 0,
+        uploadDate: item.created_at || new Date().toISOString(),
+        type: getFileType(item.name)
+      }));
     
     return media;
   } catch (error) {
@@ -60,6 +62,8 @@ export async function uploadToS3(file: File): Promise<{ url: string; key: string
     const sanitizedFileName = file.name.replace(/[^\w\s.-]/g, '');
     const fileKey = `${Date.now()}-${sanitizedFileName}`;
     
+    console.log(`Attempting to upload file: ${fileKey} to drawinmedialib`);
+    
     // Upload file directly to Supabase Storage
     const { data, error } = await supabase
       .storage
@@ -69,7 +73,12 @@ export async function uploadToS3(file: File): Promise<{ url: string; key: string
         upsert: false
       });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase storage upload error:', error);
+      throw error;
+    }
+    
+    console.log('Upload successful:', data);
     
     const fileUrl = getFileUrl(data?.path || fileKey);
     const fileType = categorizeContentType(file.type);
@@ -120,13 +129,15 @@ export async function getStorageStats(): Promise<StorageStats> {
       other: 0
     };
     
-    data.forEach(item => {
-      const size = item.metadata?.size || 0;
-      totalSize += size;
-      
-      const type = getFileType(item.name);
-      fileTypeCount[type] += 1;
-    });
+    data
+      .filter(item => !item.name.includes('.emptyFolderPlaceholder'))
+      .forEach(item => {
+        const size = item.metadata?.size || 0;
+        totalSize += size;
+        
+        const type = getFileType(item.name);
+        fileTypeCount[type] += 1;
+      });
     
     return {
       totalFiles: data.length,
