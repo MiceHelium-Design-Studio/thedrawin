@@ -320,6 +320,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const forceAdminAccess = async (email: string) => {
     setLoading(true);
     try {
+      console.log(`Attempting to grant admin access to ${email}`);
+      
       // First get the user by email
       const { data: userData, error: userError } = await supabase
         .from('profiles')
@@ -328,12 +330,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (userError) {
+        console.error('Error finding user:', userError);
         throw userError;
       }
 
       if (!userData) {
+        console.error(`User with email ${email} not found`);
         throw new Error(`User with email ${email} not found`);
       }
+
+      console.log(`Found user with ID: ${userData.id}, updating to admin status`);
 
       // Update the user to be an admin
       const { error: updateError } = await supabase
@@ -342,9 +348,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userData.id);
 
       if (updateError) {
+        console.error('Error updating admin status:', updateError);
         throw updateError;
       }
 
+      console.log(`Successfully granted admin access to ${email}`);
+      
       toast({
         title: 'Admin access granted',
         description: `${email} is now an administrator`,
@@ -352,7 +361,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Refresh current user if it's the same one
       if (user && user.email === email) {
+        console.log('Updating current user to admin status');
         setUser({ ...user, isAdmin: true });
+      }
+      
+      // Force a data refresh by manually fetching the profile again if it's the current user
+      if (user && user.id === userData.id) {
+        fetchUserProfile(userData.id);
       }
     } catch (error: any) {
       console.error('Force admin access error:', error);
