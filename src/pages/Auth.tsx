@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
@@ -7,16 +6,14 @@ import { useAuth } from '../context/AuthContext';
 import { useBackground } from '../context/BackgroundContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Facebook, Twitter, Linkedin } from 'lucide-react';
-import dynamicIconImports from 'lucide-react/dynamicIconImports';
 import { Separator } from '@/components/ui/separator';
 
-// Dynamically import the Google icon
-const GoogleIcon = lazy(() => import('lucide-react/dynamicIconImports').then(
-  module => ({ default: (props: any) => {
-    const LucideIcon = module.default.google;
-    return <LucideIcon {...props} />;
-  }})
-));
+const GoogleIcon = lazy(() => import('lucide-react').then(module => ({
+  default: (props: any) => {
+    const Icon = module.icons.LucideGoogle;
+    return <Icon {...props} />;
+  }
+})));
 
 const Auth: React.FC = () => {
   const { user, login, signup, signInWithGoogle, loading: authLoading } = useAuth();
