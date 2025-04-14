@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '../context/AuthContext';
 import { useBackground } from '../context/BackgroundContext';
 import { useToast } from '@/components/ui/use-toast';
-import { Facebook, Twitter, Linkedin, Mail } from 'lucide-react';
+import { Facebook, Twitter, Linkedin, Google } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const Auth: React.FC = () => {
@@ -172,7 +173,7 @@ const Auth: React.FC = () => {
               className="rounded-full hover:bg-black/60"
               disabled={isProcessing}
             >
-              <Mail className="h-5 w-5 text-gold" />
+              <Google className="h-5 w-5 text-gold" />
             </Button>
           </div>
         </div>
