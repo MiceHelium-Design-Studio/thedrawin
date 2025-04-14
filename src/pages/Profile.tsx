@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
+import { uploadToS3 } from '@/utils/s3Utils';
 
 const uploadMedia = async (file: File) => {
   try {
