@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
@@ -6,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '../context/AuthContext';
 import { useBackground } from '../context/BackgroundContext';
 import { useToast } from '@/components/ui/use-toast';
-import { Facebook, Twitter, Linkedin, Google } from 'lucide-react';
+import { Facebook, Twitter, Linkedin } from 'lucide-react';
+import dynamicIconImports from 'lucide-react/dynamicIconImports';
 import { Separator } from '@/components/ui/separator';
 
 const Auth: React.FC = () => {
@@ -18,10 +18,8 @@ const Auth: React.FC = () => {
   const { authBackgroundImage } = useBackground();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Get the intended destination from location state or default to "/"
   const from = location.state?.from?.pathname || "/";
 
-  // Redirect if user is already logged in
   useEffect(() => {
     if (user && !authLoading) {
       console.log("Auth: User is logged in, redirecting to:", from);
@@ -89,12 +87,10 @@ const Auth: React.FC = () => {
     setMode(prev => (prev === 'login' ? 'signup' : 'login'));
   };
 
-  // Clear loading state quickly
   if (authLoading && user) {
     return <Navigate to="/" replace />;
   }
 
-  // If user is already logged in, redirect to home page immediately
   if (user) {
     return <Navigate to="/" replace />;
   }
@@ -173,7 +169,9 @@ const Auth: React.FC = () => {
               className="rounded-full hover:bg-black/60"
               disabled={isProcessing}
             >
-              <Google className="h-5 w-5 text-gold" />
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <DynamicGoogleIcon className="h-5 w-5 text-gold" />
+              </React.Suspense>
             </Button>
           </div>
         </div>
