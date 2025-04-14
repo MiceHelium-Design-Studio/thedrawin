@@ -17,18 +17,30 @@ const AvatarWrapper: React.FC<AvatarWrapperProps> = ({
   className 
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!src);
   const [key, setKey] = useState(Date.now()); // Add a key to force re-render when src changes
 
   // Reset error state when src changes
   useEffect(() => {
-    setImageError(false);
-    setKey(Date.now());
-    console.log("Avatar source changed:", src);
+    if (src) {
+      setImageError(false);
+      setIsLoading(true);
+      setKey(Date.now());
+      console.log("Avatar source changed:", src);
+    } else {
+      setIsLoading(false);
+    }
   }, [src]);
 
   const handleImageError = () => {
     console.log("Avatar image failed to load:", src);
     setImageError(true);
+    setIsLoading(false);
+  };
+
+  const handleImageLoad = () => {
+    console.log("Avatar image loaded successfully:", src);
+    setIsLoading(false);
   };
 
   const getFallbackText = (): string => {
@@ -51,10 +63,17 @@ const AvatarWrapper: React.FC<AvatarWrapperProps> = ({
           src={src} 
           alt={alt || ''} 
           onError={handleImageError}
+          onLoad={handleImageLoad}
         />
       ) : null}
       <AvatarFallback className="bg-primary/10 text-primary">
-        {getFallbackText() || <User className="h-5 w-5" />}
+        {isLoading ? (
+          <div className="animate-pulse h-full w-full flex items-center justify-center">
+            <div className="h-1/2 w-1/2 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+          </div>
+        ) : (
+          getFallbackText() || <User className="h-5 w-5" />
+        )}
       </AvatarFallback>
     </Avatar>
   );
