@@ -1,8 +1,19 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+
+// Define the type for Supabase auth users
+interface SupabaseAuthUser {
+  id: string;
+  email?: string;
+  app_metadata: Record<string, any>;
+  user_metadata: Record<string, any>;
+  aud: string;
+  created_at: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -366,7 +377,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         // Find the user in the auth users list
-        const userFound = authData?.users?.find(u => u.email === email);
+        // Properly type the users array to fix the TypeScript error
+        const userFound = authData?.users ? authData.users.find((u: SupabaseAuthUser) => u.email === email) : undefined;
         
         if (!userFound) {
           throw new Error('User not found with that email');
