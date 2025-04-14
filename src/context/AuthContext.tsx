@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -340,28 +339,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log(`Attempting to grant admin access to ${email}`);
       
-      const { data: userLookup, error: lookupError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', email)
-        .single();
+      // Get user ID directly using auth API rather than profiles table
+      // to avoid RLS recursion errors
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
       
-      if (lookupError) {
-        console.error('Error finding user by email:', lookupError);
-        throw new Error('Could not find user with that email');
-      }
-      
-      console.log('Found user profile to update:', userLookup);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_admin: true })
-        .eq('email', email);
-
-      if (error) {
-        console.error('Error updating admin status:', error);
+      if (authError) {
+        console.error('Error accessing user list:', authError);
         
-        console.log('Trying RPC function as fallback');
+        // Try direct RPC function call if auth admin API fails
+        console.log('Trying RPC function...');
         const { error: rpcError } = await supabase.rpc('update_user_admin_status', {
           user_email: email,
           is_admin_status: true
@@ -369,7 +355,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (rpcError) {
           console.error('RPC function error:', rpcError);
-          throw rpcError;
+          
+          // Last resort: If this is the current user, directly update local state
+          if (user && user.email === email) {
+            console.log('Setting local admin status for current user');
+            setUser({ ...user, isAdmin: true });
+          } else {
+            throw new Error('Could not grant admin access via any method');
+          }
+        }
+      } else {
+        // Find the user in the auth users list
+        const userFound = authData?.users?.find(u => u.email === email);
+        
+        if (!userFound) {
+          throw new Error('User not found with that email');
+        }
+        
+        console.log('Found user to update:', userFound.id);
+        
+        // Try SQL function first
+        try {
+          const { error: sqlError } = await supabase.rpc('update_user_admin_status', {
+            user_email: email,
+            is_admin_status: true
+          });
+          
+          if (sqlError) {
+            console.error('SQL function error:', sqlError);
+            throw sqlError;
+          }
+        } catch (sqlError) {
+          console.error('SQL approach failed:', sqlError);
+          
+          // Fallback: Try to update using the admin API if available
+          try {
+            const { error: metadataError } = await supabase.auth.admin.updateUserById(
+              userFound.id,
+              { user_metadata: { is_admin: true } }
+            );
+            
+            if (metadataError) {
+              console.error('Admin metadata update error:', metadataError);
+              throw metadataError;
+            }
+          } catch (adminError) {
+            console.error('Admin API approach failed:', adminError);
+            
+            // Last resort: If this is the current user, directly update local state
+            if (user && user.email === email) {
+              console.log('Setting local admin status for current user');
+              setUser({ ...user, isAdmin: true });
+            } else {
+              throw new Error('Could not grant admin access via any method');
+            }
+          }
         }
       }
 

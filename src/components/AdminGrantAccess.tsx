@@ -79,8 +79,9 @@ const AdminGrantAccess: React.FC = () => {
         description: 'You now have admin privileges. Redirecting to admin page...',
       });
       
+      // Force a page reload to ensure all permissions are refreshed
       setTimeout(() => {
-        navigate('/admin');
+        window.location.href = '/admin';
       }, 1500);
     } catch (error) {
       console.error('Failed to grant self admin access:', error);
