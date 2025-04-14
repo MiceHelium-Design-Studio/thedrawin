@@ -1,11 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 
-// Define the type for Supabase auth users
 interface SupabaseAuthUser {
   id: string;
   email?: string;
@@ -350,96 +348,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log(`Attempting to grant admin access to ${email}`);
       
-      // Get user ID directly using auth API rather than profiles table
-      // to avoid RLS recursion errors
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+      // Simplest approach - direct database update
+      const { error: directError } = await supabase
+        .from('profiles')
+        .update({ is_admin: true })
+        .eq('email', email);
       
-      if (authError) {
-        console.error('Error accessing user list:', authError);
+      if (directError) {
+        console.error('Direct update error:', directError);
         
-        // Try direct RPC function call if auth admin API fails
-        console.log('Trying RPC function...');
+        // Fallback - try RPC function
         const { error: rpcError } = await supabase.rpc('update_user_admin_status', {
           user_email: email,
           is_admin_status: true
         });
-
+        
         if (rpcError) {
           console.error('RPC function error:', rpcError);
           
-          // Last resort: If this is the current user, directly update local state
+          // Last resort - update local state if this is current user
           if (user && user.email === email) {
             console.log('Setting local admin status for current user');
             setUser({ ...user, isAdmin: true });
           } else {
-            throw new Error('Could not grant admin access via any method');
-          }
-        }
-      } else {
-        // Find the user in the auth users list
-        // Properly type the users array to fix the TypeScript error
-        const userFound = authData?.users ? authData.users.find((u: SupabaseAuthUser) => u.email === email) : undefined;
-        
-        if (!userFound) {
-          throw new Error('User not found with that email');
-        }
-        
-        console.log('Found user to update:', userFound.id);
-        
-        // Try SQL function first
-        try {
-          const { error: sqlError } = await supabase.rpc('update_user_admin_status', {
-            user_email: email,
-            is_admin_status: true
-          });
-          
-          if (sqlError) {
-            console.error('SQL function error:', sqlError);
-            throw sqlError;
-          }
-        } catch (sqlError) {
-          console.error('SQL approach failed:', sqlError);
-          
-          // Fallback: Try to update using the admin API if available
-          try {
-            const { error: metadataError } = await supabase.auth.admin.updateUserById(
-              userFound.id,
-              { user_metadata: { is_admin: true } }
-            );
-            
-            if (metadataError) {
-              console.error('Admin metadata update error:', metadataError);
-              throw metadataError;
-            }
-          } catch (adminError) {
-            console.error('Admin API approach failed:', adminError);
-            
-            // Last resort: If this is the current user, directly update local state
-            if (user && user.email === email) {
-              console.log('Setting local admin status for current user');
-              setUser({ ...user, isAdmin: true });
-            } else {
-              throw new Error('Could not grant admin access via any method');
-            }
+            throw new Error('Could not grant admin access');
           }
         }
       }
-
-      console.log(`Successfully granted admin access to ${email}`);
       
       toast({
         title: 'Admin access granted',
         description: `${email} is now an administrator`,
       });
-
+      
+      // Update local state if this is the current user
       if (user && user.email === email) {
         console.log('Updating current user to admin status');
         setUser({ ...user, isAdmin: true });
-        
-        if (user.id) {
-          fetchUserProfile(user.id);
-        }
       }
+      
     } catch (error: any) {
       console.error('Force admin access error:', error);
       toast({
