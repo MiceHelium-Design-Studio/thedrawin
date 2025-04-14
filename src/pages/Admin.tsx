@@ -1,24 +1,11 @@
 
-import React, { useState } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import AdminMenu from '../components/admin/AdminMenu';
-import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
-import { Menu } from 'lucide-react';
-
-// Placeholder components for admin sections
-const AdminDashboard = () => <div className="p-6"><h2 className="text-2xl font-bold mb-4">Dashboard</h2><p>Welcome to the admin dashboard. Select an option from the menu to manage your application.</p></div>;
-const AdminBanners = () => <div className="p-6"><h2 className="text-2xl font-bold mb-4">Banner Management</h2><p>Manage promotional banners here.</p></div>;
-const AdminDraws = () => <div className="p-6"><h2 className="text-2xl font-bold mb-4">Draw Management</h2><p>Manage draws and competitions here.</p></div>;
-const AdminUsers = () => <div className="p-6"><h2 className="text-2xl font-bold mb-4">User Management</h2><p>Manage user accounts here.</p></div>;
-const AdminContent = () => <div className="p-6"><h2 className="text-2xl font-bold mb-4">Content Management</h2><p>Manage site content here.</p></div>;
-const AdminSettings = () => <div className="p-6"><h2 className="text-2xl font-bold mb-4">Admin Settings</h2><p>Configure admin settings here.</p></div>;
+import { useNavigate } from 'react-router-dom';
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
 
   // Redirect non-admin users
   React.useEffect(() => {
@@ -27,64 +14,53 @@ const Admin: React.FC = () => {
     }
   }, [user, navigate]);
 
-  // Handle mobile menu
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
   if (!user || !user.isAdmin) {
     return null; // Don't render anything while checking admin status
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Mobile Menu Button */}
-      <div className="md:hidden p-4 bg-black-dark border-b border-gold/10">
-        <Menubar className="border-none bg-transparent p-0">
-          <MenubarMenu>
-            <MenubarTrigger className="text-white hover:text-gold p-0 cursor-pointer">
-              <Menu className="h-6 w-6" />
-              <span className="ml-2 font-bold">Admin Menu</span>
-            </MenubarTrigger>
-            <MenubarContent className="bg-black-light border border-gold/20 text-white">
-              <MenubarItem className="focus:bg-gold/10 focus:text-gold" onClick={() => navigate('/admin')}>
-                Dashboard
-              </MenubarItem>
-              <MenubarItem className="focus:bg-gold/10 focus:text-gold" onClick={() => navigate('/admin/banners')}>
-                Banners
-              </MenubarItem>
-              <MenubarItem className="focus:bg-gold/10 focus:text-gold" onClick={() => navigate('/admin/draws')}>
-                Draws
-              </MenubarItem>
-              <MenubarItem className="focus:bg-gold/10 focus:text-gold" onClick={() => navigate('/admin/users')}>
-                Users
-              </MenubarItem>
-              <MenubarItem className="focus:bg-gold/10 focus:text-gold" onClick={() => navigate('/admin/content')}>
-                Content
-              </MenubarItem>
-              <MenubarItem className="focus:bg-gold/10 focus:text-gold" onClick={() => navigate('/admin/settings')}>
-                Settings
-              </MenubarItem>
-            </MenubarContent>
-          </MenubarMenu>
-        </Menubar>
-      </div>
-
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block md:w-64 flex-shrink-0">
-        <AdminMenu />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <Routes>
-          <Route path="/" element={<AdminDashboard />} />
-          <Route path="/banners" element={<AdminBanners />} />
-          <Route path="/draws" element={<AdminDraws />} />
-          <Route path="/users" element={<AdminUsers />} />
-          <Route path="/content" element={<AdminContent />} />
-          <Route path="/settings" element={<AdminSettings />} />
-        </Routes>
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-2xl font-bold text-white mb-6">Admin Dashboard</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-black-light/50 border border-gold/10 p-6 rounded-lg">
+          <h2 className="text-lg font-semibold text-gold mb-2">Banners</h2>
+          <p className="text-gray-300 mb-4">Manage promotional banners</p>
+          <button className="px-4 py-2 bg-gold/20 hover:bg-gold/30 text-gold rounded-md transition-colors">
+            Manage Banners
+          </button>
+        </div>
+        
+        <div className="bg-black-light/50 border border-gold/10 p-6 rounded-lg">
+          <h2 className="text-lg font-semibold text-gold mb-2">Draws</h2>
+          <p className="text-gray-300 mb-4">Manage draws and competitions</p>
+          <button className="px-4 py-2 bg-gold/20 hover:bg-gold/30 text-gold rounded-md transition-colors">
+            Manage Draws
+          </button>
+        </div>
+        
+        <div className="bg-black-light/50 border border-gold/10 p-6 rounded-lg">
+          <h2 className="text-lg font-semibold text-gold mb-2">Users</h2>
+          <p className="text-gray-300 mb-4">Manage user accounts</p>
+          <button className="px-4 py-2 bg-gold/20 hover:bg-gold/30 text-gold rounded-md transition-colors">
+            Manage Users
+          </button>
+        </div>
+        
+        <div className="bg-black-light/50 border border-gold/10 p-6 rounded-lg">
+          <h2 className="text-lg font-semibold text-gold mb-2">Content</h2>
+          <p className="text-gray-300 mb-4">Manage site content</p>
+          <button className="px-4 py-2 bg-gold/20 hover:bg-gold/30 text-gold rounded-md transition-colors">
+            Manage Content
+          </button>
+        </div>
+        
+        <div className="bg-black-light/50 border border-gold/10 p-6 rounded-lg">
+          <h2 className="text-lg font-semibold text-gold mb-2">Settings</h2>
+          <p className="text-gray-300 mb-4">Configure admin settings</p>
+          <button className="px-4 py-2 bg-gold/20 hover:bg-gold/30 text-gold rounded-md transition-colors">
+            Manage Settings
+          </button>
+        </div>
       </div>
     </div>
   );
