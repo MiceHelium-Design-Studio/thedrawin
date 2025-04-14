@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { Facebook, Twitter, Linkedin } from 'lucide-react';
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
 import { Separator } from '@/components/ui/separator';
+
+// Dynamically import the Google icon
+const GoogleIcon = lazy(() => import('lucide-react/dynamicIconImports').then(
+  module => ({ default: (props: any) => {
+    const LucideIcon = module.default.google;
+    return <LucideIcon {...props} />;
+  }})
+));
 
 const Auth: React.FC = () => {
   const { user, login, signup, signInWithGoogle, loading: authLoading } = useAuth();
@@ -169,9 +178,9 @@ const Auth: React.FC = () => {
               className="rounded-full hover:bg-black/60"
               disabled={isProcessing}
             >
-              <React.Suspense fallback={<div>Loading...</div>}>
-                <DynamicGoogleIcon className="h-5 w-5 text-gold" />
-              </React.Suspense>
+              <Suspense fallback={<div className="h-5 w-5 rounded-full animate-pulse bg-gold/30"></div>}>
+                <GoogleIcon className="h-5 w-5 text-gold" />
+              </Suspense>
             </Button>
           </div>
         </div>
