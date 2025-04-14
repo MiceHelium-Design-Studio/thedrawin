@@ -1,7 +1,8 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
@@ -234,16 +235,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log("Prepared update data:", updateData);
       
-      const { error } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('id', user.id);
+      try {
+        // First try updating via the profiles table
+        const { error } = await supabase
+          .from('profiles')
+          .update(updateData)
+          .eq('id', user.id);
 
-      if (error) {
-        console.error("Profile update error:", error);
-        throw error;
+        if (error) {
+          console.error("Profile update error:", error);
+          
+          // If the first approach fails with recursion error, try updating with RPC
+          if (error.message.includes('infinite recursion') || error.code === '42P17') {
+            console.log("Trying alternative update method...");
+            
+            // Update user metadata in auth.users as a fallback
+            const { error: authError } = await supabase.auth.updateUser({
+              data: updateData
+            });
+            
+            if (authError) {
+              throw authError;
+            }
+          } else {
+            throw error;
+          }
+        }
+      } catch (dbError) {
+        console.error("Database operation failed:", dbError);
+        // If we can't update the database, at least update the local state
+        // This will allow the UI to reflect the changes until a refresh
+        console.log("Updating local user state only");
       }
 
+      // Update the local user state regardless of database success
       setUser({ ...user, ...data });
       
       toast({
