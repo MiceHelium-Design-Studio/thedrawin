@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +38,6 @@ import { uploadToS3 } from '@/utils/s3Utils';
 const uploadMedia = async (file: File) => {
   try {
     console.log("Uploading file to S3:", file.name);
-    // Use s3Utils to upload the file
     const { url } = await uploadToS3(file);
     console.log("Upload successful, URL:", url);
     return { url, name: file.name };
@@ -52,7 +50,6 @@ const uploadMedia = async (file: File) => {
 const uploadFromUrl = async (url: string) => {
   try {
     console.log("Loading image from URL:", url);
-    // For URL uploads, we'll just return the URL directly
     return { url, name: 'From URL' };
   } catch (error) {
     console.error("Error uploading from URL:", error);
@@ -75,8 +72,8 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('regular');
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
-  // Initialize form values from user data
   useEffect(() => {
     if (user) {
       setName(user.name || '');
@@ -115,6 +112,7 @@ const Profile: React.FC = () => {
       console.log("Updating profile with:", { name, avatar: avatarUrl });
       await updateProfile({ name, avatar: avatarUrl });
       setIsEditing(false);
+      setPreviewUrl(null);
       toast({
         title: 'Profile updated',
         description: 'Your profile has been updated successfully.',
@@ -143,6 +141,7 @@ const Profile: React.FC = () => {
     try {
       const uploadedItem = await uploadFromUrl(imageUrlInput);
       setAvatarUrl(uploadedItem.url);
+      setPreviewUrl(uploadedItem.url);
       
       toast({
         title: 'Image loaded',
@@ -193,17 +192,24 @@ const Profile: React.FC = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const file = files[0];
+    const localPreviewUrl = URL.createObjectURL(file);
+    setPreviewUrl(localPreviewUrl);
+
     setUploadLoading(true);
     try {
       console.log("Starting file upload:", files[0].name);
       const uploadedItem = await uploadMedia(files[0]);
       console.log("Setting avatar URL to:", uploadedItem.url);
       setAvatarUrl(uploadedItem.url);
+      setPreviewUrl(uploadedItem.url);
       
       toast({
         title: 'Image uploaded',
         description: `${uploadedItem.name} has been uploaded successfully.`,
       });
+      
+      URL.revokeObjectURL(localPreviewUrl);
       
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -215,6 +221,8 @@ const Profile: React.FC = () => {
         description: 'There was an error uploading your avatar.',
       });
       console.error(error);
+      URL.revokeObjectURL(localPreviewUrl);
+      setPreviewUrl(null);
     } finally {
       setUploadLoading(false);
     }
@@ -255,7 +263,7 @@ const Profile: React.FC = () => {
           <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
             <div className="relative">
               <AvatarWrapper 
-                src={avatarUrl} 
+                src={isEditing && previewUrl ? previewUrl : avatarUrl} 
                 alt={name || user.email}
                 className="h-24 w-24"
                 fallback={name?.slice(0, 2) || user.email.slice(0, 2).toUpperCase() || 'U'}
@@ -299,7 +307,10 @@ const Profile: React.FC = () => {
                         <Input
                           id="avatar"
                           value={avatarUrl}
-                          onChange={(e) => setAvatarUrl(e.target.value)}
+                          onChange={(e) => {
+                            setAvatarUrl(e.target.value);
+                            setPreviewUrl(e.target.value);
+                          }}
                           className="border-gold/30 focus:border-gold"
                           placeholder="URL will appear here after upload"
                         />
@@ -350,9 +361,12 @@ const Profile: React.FC = () => {
                       </Button>
                     </div>
                     
-                    {avatarUrl && isEditing && (
-                      <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200">
-                        <img src={avatarUrl} alt="Avatar preview" className="w-full object-cover" />
+                    {previewUrl && isEditing && (
+                      <div className="mt-2">
+                        <Label className="text-sm text-gray-500 mb-1 block">Image Preview</Label>
+                        <div className="w-full max-h-40 overflow-hidden rounded border border-gray-200">
+                          <img src={previewUrl} alt="Avatar preview" className="w-full object-cover" />
+                        </div>
                       </div>
                     )}
                   </div>
@@ -372,9 +386,9 @@ const Profile: React.FC = () => {
                       variant="outline"
                       onClick={() => {
                         setIsEditing(false);
-                        // Reset to original values
                         setName(user.name || '');
                         setAvatarUrl(user.avatar || '');
+                        setPreviewUrl(null);
                       }}
                       className="border-gold/30 text-gold hover:text-gold-dark"
                       disabled={loading || uploadLoading}
