@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
@@ -10,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 
 const GoogleIcon = lazy(() => import('lucide-react').then(module => ({
   default: (props: any) => {
-    const Icon = module.icons.LucideGoogle;
+    const Icon = module.icons.Google;
     return <Icon {...props} />;
   }
 })));
