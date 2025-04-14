@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Google } from 'lucide-react';
+import { icons } from 'lucide-react';
 import AuthForm from '../components/auth/AuthForm';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Facebook, Twitter, Linkedin } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
-const GoogleIcon = Google;
+const GoogleIcon = icons.google;
 
 const Auth: React.FC = () => {
   const { user, login, signup, signInWithGoogle, loading: authLoading } = useAuth();
