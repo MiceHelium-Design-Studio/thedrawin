@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Award, Bell, User, Settings, Shield } from 'lucide-react';
+import { Home, Award, Bell, User, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { cn } from '../../lib/utils';
@@ -107,23 +107,43 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <span>Profile</span>
             </NavLink>
             
-            {/* Always show Admin Access link for users who need to gain admin privileges */}
-            <NavLink
-              to="/admin-access"
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center justify-center text-xs transition-all duration-300",
-                  isActive
-                    ? "text-gold font-medium"
-                    : "text-white hover:text-gold"
-                )
-              }
-            >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin-access' && "bg-black-light/50")}>
-                <Shield className="h-5 w-5 mb-1" />
-              </div>
-              <span>Access</span>
-            </NavLink>
+            {/* Only show Admin link if user is an admin */}
+            {user?.isAdmin ? (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  cn(
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                    isActive
+                      ? "text-gold font-medium"
+                      : "text-white hover:text-gold"
+                  )
+                }
+              >
+                <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin' && "bg-black-light/50")}>
+                  <Settings className="h-5 w-5 mb-1" />
+                </div>
+                <span>Admin</span>
+              </NavLink>
+            ) : (
+              // Add placeholder div if user is not admin to maintain grid layout
+              <NavLink
+                to="/admin-access"
+                className={({ isActive }) =>
+                  cn(
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                    isActive
+                      ? "text-gold font-medium"
+                      : "text-white hover:text-gold/70"
+                  )
+                }
+              >
+                <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin-access' && "bg-black-light/50")}>
+                  <Settings className="h-5 w-5 mb-1 opacity-70" />
+                </div>
+                <span>Admin</span>
+              </NavLink>
+            )}
           </div>
         </nav>
       )}
