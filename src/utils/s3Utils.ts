@@ -84,7 +84,7 @@ export async function uploadToS3(file: File): Promise<{ url: string; key: string
       .from('drawinmedialib')
       .upload(fileKey, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: true // Changed to true to allow overwrites
       });
     
     if (error) {

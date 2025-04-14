@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,7 +25,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Move fetchUserProfile outside of useEffect to make it available to all functions
   const fetchUserProfile = async (userId: string) => {
     try {
       setLoading(true);
@@ -38,7 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching profile:', error);
-        // Fallback to create a basic user object
         setUser({
           id: userId,
           email: '',
@@ -46,7 +43,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isAdmin: false
         });
       } else if (data) {
-        // Map database fields to User type
         const userProfile: User = {
           id: data.id,
           email: data.email || '',
@@ -67,7 +63,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let isSubscribed = true;
     
-    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log("Auth state change event:", event);
@@ -75,11 +70,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!isSubscribed) return;
         
         if (session?.user) {
-          // Use setTimeout to prevent potential recursion
           setTimeout(() => {
             if (!isSubscribed) return;
             
-            // Fetch profile data from the profiles table
             fetchUserProfile(session.user.id);
           }, 0);
         } else {
@@ -91,13 +84,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Check for existing session
     const initializeAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession();
         
         if (data.session?.user && isSubscribed) {
-          // Fetch profile data from the profiles table
           fetchUserProfile(data.session.user.id);
         } else if (isSubscribed) {
           setUser(null);
@@ -232,16 +223,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     setLoading(true);
     try {
-      // Fixed: Use service role to bypass RLS for this operation
-      // Or make sure the RLS policies are properly set up
+      console.log("Updating profile with data:", data);
+      
+      const updateData: Record<string, any> = {};
+      
+      if (data.name !== undefined) updateData.name = data.name;
+      if (data.avatar !== undefined) updateData.avatar = data.avatar;
+      if (data.wallet !== undefined) updateData.wallet = data.wallet;
+      if (data.isAdmin !== undefined) updateData.is_admin = data.isAdmin;
+      
+      console.log("Prepared update data:", updateData);
+      
       const { error } = await supabase
         .from('profiles')
-        .update({
-          name: data.name,
-          avatar: data.avatar,
-          wallet: data.wallet !== undefined ? data.wallet : user.wallet,
-          is_admin: data.isAdmin !== undefined ? data.isAdmin : user.isAdmin
-        })
+        .update(updateData)
         .eq('id', user.id);
 
       if (error) {
@@ -249,7 +244,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
 
-      // If successful, update local state
       setUser({ ...user, ...data });
       
       toast({
@@ -321,16 +315,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log(`Attempting to grant admin access to ${email}`);
       
-      // Use our security definer function to update the admin status
-      // This bypasses RLS policies and prevents infinite recursion
-      const { error } = await supabase.rpc('update_user_admin_status', {
-        user_email: email,
-        is_admin_status: true
-      });
+      const { data: userLookup, error: lookupError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
+      
+      if (lookupError) {
+        console.error('Error finding user by email:', lookupError);
+        throw new Error('Could not find user with that email');
+      }
+      
+      console.log('Found user profile to update:', userLookup);
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_admin: true })
+        .eq('email', email);
 
       if (error) {
         console.error('Error updating admin status:', error);
-        throw error;
+        
+        console.log('Trying RPC function as fallback');
+        const { error: rpcError } = await supabase.rpc('update_user_admin_status', {
+          user_email: email,
+          is_admin_status: true
+        });
+
+        if (rpcError) {
+          console.error('RPC function error:', rpcError);
+          throw rpcError;
+        }
       }
 
       console.log(`Successfully granted admin access to ${email}`);
@@ -340,12 +355,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: `${email} is now an administrator`,
       });
 
-      // Refresh current user if it's the same one
       if (user && user.email === email) {
         console.log('Updating current user to admin status');
         setUser({ ...user, isAdmin: true });
         
-        // Refresh the user profile to ensure data is up to date
         if (user.id) {
           fetchUserProfile(user.id);
         }

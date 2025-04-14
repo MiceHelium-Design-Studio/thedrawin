@@ -34,22 +34,25 @@ import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
 
 const uploadMedia = async (file: File) => {
-  return new Promise<{ url: string; name: string }>((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      setTimeout(() => {
-        resolve({
-          url: reader.result as string,
-          name: file.name
-        });
-      }, 500);
-    };
-    reader.readAsDataURL(file);
-  });
+  try {
+    // Use s3Utils to upload the file
+    const { url } = await uploadToS3(file);
+    return { url, name: file.name };
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
 };
 
 const uploadFromUrl = async (url: string) => {
-  return { url, name: 'From URL' };
+  try {
+    // For URL uploads, we'll just return the URL directly
+    // In a real app, you might want to download and re-upload the image
+    return { url, name: 'From URL' };
+  } catch (error) {
+    console.error("Error uploading from URL:", error);
+    throw error;
+  }
 };
 
 type PaymentMethod = 'regular' | 'card' | 'whish' | 'western-union';
