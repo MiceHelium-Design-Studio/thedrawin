@@ -553,28 +553,6 @@ const Admin: React.FC = () => {
         const banner = row.original;
         const [isDeleting, setIsDeleting] = useState(false);
         
-        const handleDelete = async () => {
-          try {
-            setIsDeleting(true);
-            const fileKey = banner.imageUrl.split('/').pop() || '';
-            await deleteFromS3(fileKey, 'banners');
-            await deleteBanner(banner.id);
-            toast({
-              title: "Banner deleted",
-              description: "The banner has been successfully deleted.",
-            });
-          } catch (error) {
-            console.error('Error deleting banner:', error);
-            toast({
-              variant: 'destructive',
-              title: "Deletion failed",
-              description: "There was a problem deleting the banner.",
-            });
-          } finally {
-            setIsDeleting(false);
-          }
-        };
-        
         return (
           <div className="flex items-center space-x-2">
             <Button 
@@ -608,7 +586,30 @@ const Admin: React.FC = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                  <AlertDialogAction onClick={() => {
+                    const handleDelete = async () => {
+                      try {
+                        setIsDeleting(true);
+                        const fileKey = banner.imageUrl.split('/').pop() || '';
+                        await deleteFromS3(fileKey, 'banners');
+                        await deleteBanner(banner.id);
+                        toast({
+                          title: "Banner deleted",
+                          description: "The banner has been successfully deleted.",
+                        });
+                      } catch (error) {
+                        console.error('Error deleting banner:', error);
+                        toast({
+                          variant: 'destructive',
+                          title: "Deletion failed",
+                          description: "There was a problem deleting the banner.",
+                        });
+                      } finally {
+                        setIsDeleting(false);
+                      }
+                    };
+                    handleDelete();
+                  }}>
                     {isDeleting ? 'Deleting...' : 'Delete'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
