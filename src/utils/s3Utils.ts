@@ -1,4 +1,3 @@
-
 import { supabase } from '../integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -111,7 +110,7 @@ export async function getUploadUrl(fileName: string, contentType: string, bucket
 
 export async function uploadToS3(file: File, bucketType: BucketType = 'media'): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
   // Use native Storage API for dedicated buckets
-  if (bucketType !== 'media') {
+  if (bucketType === 'profile_images' || bucketType === 'banners' || bucketType === 'draw_images') {
     try {
       const uniqueFilePath = `${Date.now()}-${file.name}`;
       const fileType = determineFileType(file.name);

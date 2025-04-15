@@ -1,8 +1,9 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Draw, Ticket, Banner, MediaItem } from '../types';
 import { sendDrawEntryNotifications } from '../utils/notificationUtils';
 import { useAuth } from './AuthContext';
-import { getMediaItems, uploadToS3, deleteFromS3 } from '../utils/s3Utils';
+import { getMediaItems, uploadToS3, deleteFromS3, BucketType } from '../utils/s3Utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 
