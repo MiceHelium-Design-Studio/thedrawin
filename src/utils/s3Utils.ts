@@ -1,5 +1,6 @@
 
 import { supabase } from '../integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 export interface UploadResponse {
   uploadUrl: string;
@@ -21,6 +22,30 @@ export interface StorageStats {
 
 export async function getMediaItems() {
   try {
+    // Query the media_items table first
+    const { data: dbMedia, error: dbError } = await supabase
+      .from('media_items')
+      .select('*')
+      .order('upload_date', { ascending: false });
+    
+    if (dbError) {
+      console.error('Error fetching from database:', dbError);
+      throw dbError;
+    }
+    
+    if (dbMedia && dbMedia.length > 0) {
+      // Transform database format to app format
+      return dbMedia.map(item => ({
+        id: item.id,
+        name: item.name,
+        url: item.url,
+        type: item.type,
+        size: item.size,
+        uploadDate: item.upload_date
+      }));
+    }
+    
+    // If no items in database, fallback to S3 API
     const { data, error } = await supabase.functions.invoke('s3-media', {
       body: { action: 'list' }
     });
@@ -29,7 +54,12 @@ export async function getMediaItems() {
     return data.media || [];
   } catch (error) {
     console.error('Error getting media items:', error);
-    throw error;
+    toast({
+      variant: 'destructive',
+      title: 'Failed to load media',
+      description: 'There was a problem loading your media library.'
+    });
+    return [];
   }
 }
 
