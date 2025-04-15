@@ -86,6 +86,7 @@ const App = () => {
                     <Routes>
                       <Route path="/auth" element={<Auth />} />
                       
+                      {/* Make sure all protected routes are inside the providers */}
                       <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                       <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
                       <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />

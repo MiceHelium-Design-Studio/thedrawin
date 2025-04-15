@@ -87,6 +87,8 @@ interface DrawContextType {
 const DrawContext = createContext<DrawContextType | undefined>(undefined);
 
 export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  console.log("DrawProvider initializing..."); // Add this debug log
+  
   const [draws, setDraws] = useState<Draw[]>(MOCK_DRAWS);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [banners, setBanners] = useState<Banner[]>(MOCK_BANNERS);
@@ -354,14 +356,17 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteMedia
       }}
     >
+      {console.log("DrawProvider rendering with children")} {/* Add this debug log */}
       {children}
     </DrawContext.Provider>
   );
 };
 
 export const useDraws = () => {
+  console.log("useDraws hook called"); // Add this debug log
   const context = useContext(DrawContext);
   if (context === undefined) {
+    console.error("DrawContext is undefined in useDraws hook"); // Add more detailed error
     throw new Error('useDraws must be used within a DrawProvider');
   }
   return context;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,7 +80,7 @@ import {
   MenubarItem,
   MenubarSeparator
 } from "@/components/ui/menubar";
-import { createDraw, updateDraw, createBanner, updateBanner, deleteBanner } from '../server-actions';
+import { createDraw, updateDraw, createBanner, updateBanner, deleteBanner, uploadMedia, deleteMedia } from '../server-actions';
 import { Draw, Banner } from '../types';
 import { uploadToS3, deleteFromS3, BucketType } from '@/utils/s3Utils';
 import { useDraws } from '@/context/DrawContext';
@@ -132,7 +131,6 @@ const bannerFormSchema = z.object({
   active: z.boolean().default(true),
 });
 
-// Enhanced ImageUploader component
 const ImageUploader = ({ onImageSelected, previewUrl = '', isUploading = false }: { 
   onImageSelected: (file: File) => void; 
   previewUrl?: string;
@@ -206,7 +204,7 @@ const ImageUploader = ({ onImageSelected, previewUrl = '', isUploading = false }
 
 const Admin: React.FC = () => {
   const { toast } = useToast();
-  const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, deleteBanner } = useDraws();
+  const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, deleteBanner, uploadMedia, deleteMedia } = useDraws();
   const [isDrawDrawerOpen, setIsDrawDrawerOpen] = useState(false);
   const [isBannerDrawerOpen, setIsBannerDrawerOpen] = useState(false);
   const [selectedDraw, setSelectedDraw] = useState<Draw | null>(null);
@@ -340,7 +338,7 @@ const Admin: React.FC = () => {
     if (!drawToDelete) return;
     
     try {
-      // await deleteDraw(drawToDelete); // Assuming you have a deleteDraw function
+      await deleteDraw(drawToDelete);
       setIsDeleteDialogOpen(false);
       setDrawToDelete(null);
       toast({
@@ -423,7 +421,7 @@ const Admin: React.FC = () => {
     if (!bannerToDelete) return;
     
     try {
-      // await deleteBanner(bannerToDelete); // Assuming you have a deleteBanner function
+      await deleteBanner(bannerToDelete);
       setIsDeleteDialogOpen(false);
       setBannerToDelete(null);
       toast({
@@ -681,7 +679,6 @@ const Admin: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Top Menu */}
       <Menubar className="rounded-none border-b border-none px-2 lg:px-4 sticky top-0 z-10 bg-background">
         <div className="flex items-center mr-4">
           <h2 className="font-semibold text-lg">Admin Dashboard</h2>
@@ -715,7 +712,6 @@ const Admin: React.FC = () => {
         </div>
       </Menubar>
       
-      {/* Main Content */}
       <div className="container mx-auto py-8 flex-1 overflow-auto">
         {activeTab === 'draws' && (
           <section className="mb-8">
@@ -1093,4 +1089,3 @@ const Admin: React.FC = () => {
 };
 
 export default Admin;
-
