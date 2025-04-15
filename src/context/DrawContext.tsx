@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Draw, Ticket, Banner, MediaItem } from '../types';
 import { sendDrawEntryNotifications } from '../utils/notificationUtils';
@@ -76,6 +75,7 @@ interface DrawContextType {
   loading: boolean;
   createDraw: (draw: Omit<Draw, 'id'>) => Promise<void>;
   updateDraw: (id: string, draw: Partial<Draw>) => Promise<void>;
+  deleteDraw: (id: string) => Promise<void>;
   buyTicket: (drawId: string, number: number, price: number) => Promise<void>;
   createBanner: (banner: Omit<Banner, 'id'>) => Promise<void>;
   updateBanner: (id: string, banner: Partial<Banner>) => Promise<void>;
@@ -87,13 +87,13 @@ interface DrawContextType {
 const DrawContext = createContext<DrawContextType | undefined>(undefined);
 
 export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log("DrawProvider initializing..."); // Add this debug log
+  console.log("DrawProvider initializing...");
   
   const [draws, setDraws] = useState<Draw[]>(MOCK_DRAWS);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [banners, setBanners] = useState<Banner[]>(MOCK_BANNERS);
   const [media, setMedia] = useState<MediaItem[]>([]);
-  const [loading, setLoading] = useState(true); // Start with loading true
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   
   useEffect(() => {
@@ -206,6 +206,19 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
     } catch (error) {
       console.error('Update draw error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteDraw = async (id: string): Promise<void> => {
+    setLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setDraws(prev => prev.filter(draw => draw.id !== id));
+    } catch (error) {
+      console.error('Delete draw error:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -348,6 +361,7 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         createDraw,
         updateDraw,
+        deleteDraw,
         buyTicket,
         createBanner,
         updateBanner,
@@ -356,18 +370,17 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteMedia
       }}
     >
-      {/* Debug log properly handled as a comment */}
-      {console.log("DrawProvider rendering with children") || null}
+      {console.log("DrawProvider rendering with children"), null}
       {children}
     </DrawContext.Provider>
   );
 };
 
 export const useDraws = () => {
-  console.log("useDraws hook called"); // Add this debug log
+  console.log("useDraws hook called");
   const context = useContext(DrawContext);
   if (context === undefined) {
-    console.error("DrawContext is undefined in useDraws hook"); // Add more detailed error
+    console.error("DrawContext is undefined in useDraws hook");
     throw new Error('useDraws must be used within a DrawProvider');
   }
   return context;
