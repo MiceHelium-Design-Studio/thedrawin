@@ -20,6 +20,9 @@ export interface StorageStats {
   averageSize: number;
 }
 
+// Define bucket types
+export type BucketType = 'profile_images' | 'banners' | 'draw_images' | 'media';
+
 export async function getMediaItems() {
   try {
     // Query the media_items table first
@@ -63,8 +66,33 @@ export async function getMediaItems() {
   }
 }
 
-export async function getUploadUrl(fileName: string, contentType: string): Promise<UploadResponse> {
+export async function getUploadUrl(fileName: string, contentType: string, bucketType: BucketType = 'media'): Promise<UploadResponse> {
   try {
+    // If using native storage buckets
+    if (bucketType !== 'media') {
+      const uniqueFilePath = `${Date.now()}-${fileName}`;
+      
+      // Get a presigned URL directly from Storage API
+      const { data, error } = await supabase.storage
+        .from(bucketType)
+        .createSignedUploadUrl(uniqueFilePath);
+      
+      if (error) throw error;
+      
+      // Generate public URL
+      const { data: publicUrlData } = supabase.storage
+        .from(bucketType)
+        .getPublicUrl(uniqueFilePath);
+      
+      return {
+        uploadUrl: data.signedUrl,
+        fileKey: data.path,
+        fileUrl: publicUrlData.publicUrl,
+        fileType: determineFileType(fileName)
+      };
+    }
+    
+    // Fallback to edge function
     const { data, error } = await supabase.functions.invoke('s3-media', {
       body: { 
         action: 'getUploadUrl',
@@ -81,47 +109,112 @@ export async function getUploadUrl(fileName: string, contentType: string): Promi
   }
 }
 
-export async function uploadToS3(file: File): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
-  // 1. Get a pre-signed URL
-  const { uploadUrl, fileKey, fileUrl, fileType } = await getUploadUrl(file.name, file.type);
-  
-  // 2. Upload the file directly to S3
-  const uploadResponse = await fetch(uploadUrl, {
-    method: 'PUT',
-    body: file,
-    headers: {
-      'Content-Type': file.type
+export async function uploadToS3(file: File, bucketType: BucketType = 'media'): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
+  // Use native Storage API for dedicated buckets
+  if (bucketType !== 'media') {
+    try {
+      const uniqueFilePath = `${Date.now()}-${file.name}`;
+      const fileType = determineFileType(file.name);
+      
+      // Upload directly to Storage
+      const { data, error } = await supabase.storage
+        .from(bucketType)
+        .upload(uniqueFilePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      
+      if (error) throw error;
+      
+      // Get the public URL
+      const { data: publicUrlData } = supabase.storage
+        .from(bucketType)
+        .getPublicUrl(data.path);
+      
+      // Record in database
+      if (bucketType === 'media') {
+        await supabase
+          .from('media_items')
+          .insert({
+            id: data.path,
+            name: file.name,
+            url: publicUrlData.publicUrl,
+            type: fileType,
+            size: file.size,
+            user_id: (await supabase.auth.getUser()).data.user?.id
+          });
+      }
+      
+      return {
+        url: publicUrlData.publicUrl,
+        key: data.path,
+        name: file.name,
+        size: file.size,
+        type: fileType
+      };
+    } catch (error) {
+      console.error('Error uploading to Storage:', error);
+      throw error;
     }
-  });
-  
-  if (!uploadResponse.ok) {
-    throw new Error('Upload failed');
   }
   
-  // 3. Record the upload in the database
-  await supabase.functions.invoke('s3-media', {
-    body: {
-      action: 'recordUpload',
-      fileKey,
-      fileUrl,
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: fileType || 'other'
+  // Fallback to legacy edge function method
+  try {
+    // 1. Get a pre-signed URL
+    const { uploadUrl, fileKey, fileUrl, fileType } = await getUploadUrl(file.name, file.type);
+    
+    // 2. Upload the file directly to S3
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type
+      }
+    });
+    
+    if (!uploadResponse.ok) {
+      throw new Error('Upload failed');
     }
-  });
-  
-  // 4. Return the file details
-  return {
-    url: fileUrl,
-    key: fileKey,
-    name: file.name,
-    size: file.size,
-    type: fileType || 'other'
-  };
+    
+    // 3. Record the upload in the database
+    await supabase.functions.invoke('s3-media', {
+      body: {
+        action: 'recordUpload',
+        fileKey,
+        fileUrl,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: fileType || 'other'
+      }
+    });
+    
+    // 4. Return the file details
+    return {
+      url: fileUrl,
+      key: fileKey,
+      name: file.name,
+      size: file.size,
+      type: fileType || 'other'
+    };
+  } catch (error) {
+    console.error('Error in uploadToS3:', error);
+    throw error;
+  }
 }
 
-export async function deleteFromS3(fileKey: string) {
+export async function deleteFromS3(fileKey: string, bucketType: BucketType = 'media') {
   try {
+    // If using native storage buckets
+    if (bucketType !== 'media') {
+      const { error } = await supabase.storage
+        .from(bucketType)
+        .remove([fileKey]);
+      
+      if (error) throw error;
+      return true;
+    }
+    
+    // Fallback to edge function
     const { error } = await supabase.functions.invoke('s3-media', {
       body: { 
         action: 'delete',
@@ -150,5 +243,21 @@ export async function getStorageStats(): Promise<StorageStats> {
   } catch (error) {
     console.error('Error getting storage stats:', error);
     throw error;
+  }
+}
+
+// Helper function to determine file type based on file name
+function determineFileType(fileName: string): string {
+  const extension = fileName.split('.').pop()?.toLowerCase() || '';
+  
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'tiff', 'bmp'];
+  const documentExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'];
+  
+  if (imageExtensions.includes(extension)) {
+    return 'image';
+  } else if (documentExtensions.includes(extension)) {
+    return 'document';
+  } else {
+    return 'other';
   }
 }

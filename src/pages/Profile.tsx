@@ -30,6 +30,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { uploadToS3 } from '@/utils/s3Utils';
 
 const uploadMedia = async (file: File) => {
   return new Promise<{ url: string; name: string }>((resolve) => {
@@ -59,6 +60,7 @@ const Profile: React.FC = () => {
   const [amount, setAmount] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('regular');
+  const [isUploading, setIsUploading] = useState(false);
   
   const form = useForm({
     defaultValues: {
@@ -135,12 +137,15 @@ const Profile: React.FC = () => {
     if (!files || files.length === 0) return;
 
     try {
-      const uploadedItem = await uploadMedia(files[0]);
-      setAvatarUrl(uploadedItem.url);
+      setIsUploading(true);
+      
+      // Use the uploadToS3 function with the profile_images bucket
+      const { url, name } = await uploadToS3(files[0], 'profile_images');
+      setAvatarUrl(url);
       
       toast({
         title: 'Image uploaded',
-        description: `${uploadedItem.name} has been uploaded successfully.`,
+        description: `${name} has been uploaded successfully.`,
       });
       
       if (fileInputRef.current) {
@@ -153,6 +158,8 @@ const Profile: React.FC = () => {
         description: 'There was an error uploading your avatar.',
       });
       console.error(error);
+    } finally {
+      setIsUploading(false);
     }
   };
   

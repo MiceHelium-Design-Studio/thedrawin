@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Draw, Ticket, Banner, MediaItem } from '../types';
 import { sendDrawEntryNotifications } from '../utils/notificationUtils';
@@ -7,7 +6,6 @@ import { getMediaItems, uploadToS3, deleteFromS3 } from '../utils/s3Utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 
-// Mock data until we integrate with Supabase
 const MOCK_DRAWS: Draw[] = [
   {
     id: '1',
@@ -81,8 +79,8 @@ interface DrawContextType {
   createBanner: (banner: Omit<Banner, 'id'>) => Promise<void>;
   updateBanner: (id: string, banner: Partial<Banner>) => Promise<void>;
   deleteBanner: (id: string) => Promise<void>;
-  uploadMedia: (file: File) => Promise<MediaItem>;
-  deleteMedia: (id: string) => Promise<void>;
+  uploadMedia: (file: File, bucketType: BucketType) => Promise<MediaItem>;
+  deleteMedia: (id: string, bucketType: BucketType) => Promise<void>;
 }
 
 const DrawContext = createContext<DrawContextType | undefined>(undefined);
@@ -95,12 +93,10 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true); // Start with loading true
   const { user } = useAuth();
   
-  // Load media items from S3 and database
   useEffect(() => {
     if (user) {
       fetchMediaItems();
       
-      // Set up real-time subscription for media items
       const channel = supabase
         .channel('media-changes')
         .on(
@@ -114,16 +110,12 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
           (payload) => {
             console.log('Real-time update received:', payload);
             
-            // Handle different types of changes
             if (payload.eventType === 'INSERT') {
-              // Add the new media item
               const newItem = payload.new as any;
               setMedia(prevMedia => {
-                // Check if the item already exists (avoid duplicates)
                 const exists = prevMedia.some(item => item.id === newItem.id);
                 if (exists) return prevMedia;
                 
-                // Convert from database format to app format
                 const mediaItem: MediaItem = {
                   id: newItem.id,
                   name: newItem.name,
@@ -142,7 +134,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
               });
             } 
             else if (payload.eventType === 'DELETE') {
-              // Remove the deleted item
               setMedia(prevMedia => 
                 prevMedia.filter(item => item.id !== payload.old.id)
               );
@@ -151,7 +142,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         )
         .subscribe();
       
-      // Cleanup subscription on unmount or user change
       return () => {
         supabase.removeChannel(channel);
       };
@@ -176,7 +166,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Simulate initial loading with a timeout that ensures it eventually completes
   useEffect(() => {
     console.log("DrawContext initializing...");
     
@@ -191,7 +180,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const createDraw = async (draw: Omit<Draw, 'id'>) => {
     setLoading(true);
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       const newDraw: Draw = {
         ...draw,
@@ -209,7 +197,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateDraw = async (id: string, drawData: Partial<Draw>) => {
     setLoading(true);
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       setDraws(prev =>
         prev.map(draw => (draw.id === id ? { ...draw, ...drawData } : draw))
@@ -225,25 +212,22 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const buyTicket = async (drawId: string, number: number, price: number) => {
     setLoading(true);
     try {
-      // Find the current draw
       const draw = draws.find(d => d.id === drawId);
       if (!draw) {
         throw new Error('Draw not found');
       }
       
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       const newTicket: Ticket = {
         id: Date.now().toString(),
         drawId,
-        userId: user?.id || '1', // Use actual user ID if available
+        userId: user?.id || '1',
         number,
         price,
         purchaseDate: new Date().toISOString(),
       };
       setTickets(prev => [...prev, newTicket]);
       
-      // Update the draw's participant count
       setDraws(prev =>
         prev.map(draw =>
           draw.id === drawId
@@ -252,11 +236,9 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         )
       );
       
-      // Send entry and receipt notifications if user is logged in
       if (user?.id) {
         await sendDrawEntryNotifications(user.id, draw.title, number, price);
       }
-      
     } catch (error) {
       console.error('Buy ticket error:', error);
       throw error;
@@ -268,7 +250,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const createBanner = async (banner: Omit<Banner, 'id'>) => {
     setLoading(true);
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       const newBanner: Banner = {
         ...banner,
@@ -286,7 +267,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateBanner = async (id: string, bannerData: Partial<Banner>) => {
     setLoading(true);
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       setBanners(prev =>
         prev.map(banner => (banner.id === id ? { ...banner, ...bannerData } : banner))
@@ -302,7 +282,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteBanner = async (id: string): Promise<void> => {
     setLoading(true);
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       setBanners(prev => prev.filter(banner => banner.id !== id));
     } catch (error) {
@@ -313,15 +292,13 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const uploadMedia = async (file: File): Promise<MediaItem> => {
+  const uploadMedia = async (file: File, bucketType: BucketType = 'media'): Promise<MediaItem> => {
     setLoading(true);
     try {
-      // Upload to S3 and record in database
-      const { url, key, name, size, type } = await uploadToS3(file);
+      const { url, key, name, size, type } = await uploadToS3(file, bucketType);
       
-      // Create a new media item
       const newMedia: MediaItem = {
-        id: key, // Use S3 key as ID
+        id: key,
         name: name,
         url: url,
         type: file.type.startsWith('image/') ? 'image' : 'document',
@@ -329,9 +306,7 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         uploadDate: new Date().toISOString(),
       };
       
-      // Update state (the realtime subscription will also handle this)
       setMedia(prev => {
-        // Check if the item already exists
         const exists = prev.some(item => item.id === newMedia.id);
         if (exists) return prev;
         return [...prev, newMedia];
@@ -346,13 +321,11 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const deleteMedia = async (id: string): Promise<void> => {
+  const deleteMedia = async (id: string, bucketType: BucketType = 'media'): Promise<void> => {
     setLoading(true);
     try {
-      // Delete from S3 and database
-      await deleteFromS3(id);
+      await deleteFromS3(id, bucketType);
       
-      // Remove from state (the realtime subscription will also handle this)
       setMedia(prev => prev.filter(item => item.id !== id));
     } catch (error) {
       console.error('Delete media error:', error);

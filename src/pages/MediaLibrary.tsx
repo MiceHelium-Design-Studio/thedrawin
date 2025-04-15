@@ -74,7 +74,8 @@ const MediaLibrary: React.FC = () => {
         description: `Uploading ${files[0].name} to S3 storage.`,
       });
       
-      const uploadedItem = await uploadMedia(files[0]);
+      // Use the media bucket for the media library
+      const uploadedItem = await uploadMedia(files[0], 'media');
       
       toast({
         title: 'File uploaded',
@@ -103,7 +104,8 @@ const MediaLibrary: React.FC = () => {
         description: `Deleting ${name} from S3 storage.`,
       });
       
-      await deleteMedia(id);
+      // Use the media bucket for the media library
+      await deleteMedia(id, 'media');
       
       toast({
         title: 'File deleted',
