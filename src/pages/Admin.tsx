@@ -202,6 +202,98 @@ const ImageUploader = ({ onImageSelected, previewUrl = '', isUploading = false }
   );
 };
 
+// Define the BannerAction component outside the render function
+const BannerAction = ({ banner, onEdit }: { banner: Banner, onEdit: (banner: Banner) => void }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
+  const { deleteBanner } = useDraws();
+  
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      const fileKey = banner.imageUrl.split('/').pop() || '';
+      await deleteFromS3(fileKey, 'banners');
+      await deleteBanner(banner.id);
+      toast({
+        title: "Banner deleted",
+        description: "The banner has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting banner:', error);
+      toast({
+        variant: 'destructive',
+        title: "Deletion failed",
+        description: "There was a problem deleting the banner.",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  
+  return (
+    <div className="flex items-center space-x-2">
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={() => onEdit(banner)}
+      >
+        <Edit className="h-4 w-4 mr-2" />
+        Edit
+      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" size="sm" disabled={isDeleting}>
+            <Trash className="h-4 w-4 mr-2" />
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the banner from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
+// Define the DrawAction component outside the render function
+const DrawAction = ({ draw, onEdit, onDeleteConfirm }: { 
+  draw: Draw, 
+  onEdit: (draw: Draw) => void,
+  onDeleteConfirm: (id: string) => void
+}) => {
+  return (
+    <div className="flex items-center space-x-2">
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={() => onEdit(draw)}
+      >
+        <Edit className="h-4 w-4 mr-2" />
+        Edit
+      </Button>
+      <Button 
+        variant="destructive" 
+        size="sm"
+        onClick={() => onDeleteConfirm(draw.id)}
+      >
+        <Trash className="h-4 w-4 mr-2" />
+        Delete
+      </Button>
+    </div>
+  );
+};
+
 const Admin: React.FC = () => {
   const { toast } = useToast();
   const { draws, banners, createDraw, updateDraw, deleteDraw, createBanner, updateBanner, deleteBanner, uploadMedia, deleteMedia } = useDraws();
@@ -438,6 +530,29 @@ const Admin: React.FC = () => {
     }
   };
 
+  const handleEditDraw = (draw: Draw) => {
+    setSelectedDraw(draw);
+    drawForm.setValue('title', draw.title);
+    drawForm.setValue('description', draw.description);
+    drawForm.setValue('maxParticipants', draw.maxParticipants);
+    drawForm.setValue('ticketPrices', draw.ticketPrices.join(', '));
+    drawForm.setValue('startDate', new Date(draw.startDate));
+    drawForm.setValue('endDate', new Date(draw.endDate));
+    drawForm.setValue('bannerImage', draw.bannerImage || '');
+    drawForm.setValue('status', draw.status);
+    setDrawImageUrl(draw.bannerImage || '');
+    setIsDrawDrawerOpen(true);
+  };
+  
+  const handleEditBanner = (banner: Banner) => {
+    setSelectedBanner(banner);
+    bannerForm.setValue('imageUrl', banner.imageUrl);
+    bannerForm.setValue('linkUrl', banner.linkUrl);
+    bannerForm.setValue('active', banner.active);
+    setBannerImageUrl(banner.imageUrl);
+    setIsBannerDrawerOpen(true);
+  };
+
   const drawTableColumns = [
     {
       accessorKey: 'title',
@@ -458,17 +573,17 @@ const Admin: React.FC = () => {
     {
       accessorKey: 'ticketPrices',
       header: 'Ticket Prices',
-      cell: ({ row }) => row.original.ticketPrices.join(', '),
+      cell: ({ row }: { row: { original: Draw } }) => row.original.ticketPrices.join(', '),
     },
     {
       accessorKey: 'startDate',
       header: 'Start Date',
-      cell: ({ row }) => new Date(row.original.startDate).toLocaleDateString(),
+      cell: ({ row }: { row: { original: Draw } }) => new Date(row.original.startDate).toLocaleDateString(),
     },
     {
       accessorKey: 'endDate',
       header: 'End Date',
-      cell: ({ row }) => new Date(row.original.endDate).toLocaleDateString(),
+      cell: ({ row }: { row: { original: Draw } }) => new Date(row.original.endDate).toLocaleDateString(),
     },
     {
       accessorKey: 'status',
@@ -477,7 +592,7 @@ const Admin: React.FC = () => {
     {
       accessorKey: 'bannerImage',
       header: 'Image',
-      cell: ({ row }) => row.original.bannerImage ? (
+      cell: ({ row }: { row: { original: Draw } }) => row.original.bannerImage ? (
         <a href={row.original.bannerImage} target="_blank" rel="noopener noreferrer">
           <img src={row.original.bannerImage} alt="Draw banner" className="w-20 h-12 object-cover rounded" />
         </a>
@@ -487,42 +602,14 @@ const Admin: React.FC = () => {
     },
     {
       id: "actions",
-      cell: ({ row }) => {
-        const draw = row.original;
-        
-        return (
-          <div className="flex items-center space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                setSelectedDraw(draw);
-                drawForm.setValue('title', draw.title);
-                drawForm.setValue('description', draw.description);
-                drawForm.setValue('maxParticipants', draw.maxParticipants);
-                drawForm.setValue('ticketPrices', draw.ticketPrices.join(', '));
-                drawForm.setValue('startDate', new Date(draw.startDate));
-                drawForm.setValue('endDate', new Date(draw.endDate));
-                drawForm.setValue('bannerImage', draw.bannerImage || '');
-                drawForm.setValue('status', draw.status);
-                setDrawImageUrl(draw.bannerImage || '');
-                setIsDrawDrawerOpen(true);
-              }}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={() => confirmDeleteDraw(draw.id)}
-            >
-              <Trash className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
-          </div>
-        );
-      }
+      header: "Actions",
+      cell: ({ row }: { row: { original: Draw } }) => (
+        <DrawAction 
+          draw={row.original} 
+          onEdit={handleEditDraw} 
+          onDeleteConfirm={confirmDeleteDraw} 
+        />
+      )
     }
   ];
   
@@ -530,7 +617,7 @@ const Admin: React.FC = () => {
     {
       accessorKey: 'imageUrl',
       header: 'Image',
-      cell: ({ row }) => (
+      cell: ({ row }: { row: { original: Banner } }) => (
         <a href={row.original.imageUrl} target="_blank" rel="noopener noreferrer">
           <img src={row.original.imageUrl} alt="Banner" className="w-20 h-12 object-cover rounded" />
         </a>
@@ -543,81 +630,16 @@ const Admin: React.FC = () => {
     {
       accessorKey: 'active',
       header: 'Active',
-      cell: ({ row }) => (
+      cell: ({ row }: { row: { original: Banner } }) => (
         row.original.active ? <Eye className="h-4 w-4 text-green-500" /> : <EyeOff className="h-4 w-4 text-red-500" />
       ),
     },
     {
       id: "actions",
-      cell: ({ row }) => {
-        const banner = row.original;
-        const [isDeleting, setIsDeleting] = useState(false);
-        
-        return (
-          <div className="flex items-center space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                setSelectedBanner(banner);
-                bannerForm.setValue('imageUrl', banner.imageUrl);
-                bannerForm.setValue('linkUrl', banner.linkUrl);
-                bannerForm.setValue('active', banner.active);
-                setBannerImageUrl(banner.imageUrl);
-                setIsBannerDrawerOpen(true);
-              }}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" disabled={isDeleting}>
-                  <Trash className="h-4 w-4 mr-2" />
-                  {isDeleting ? 'Deleting...' : 'Delete'}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the banner from our servers.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => {
-                    const handleDelete = async () => {
-                      try {
-                        setIsDeleting(true);
-                        const fileKey = banner.imageUrl.split('/').pop() || '';
-                        await deleteFromS3(fileKey, 'banners');
-                        await deleteBanner(banner.id);
-                        toast({
-                          title: "Banner deleted",
-                          description: "The banner has been successfully deleted.",
-                        });
-                      } catch (error) {
-                        console.error('Error deleting banner:', error);
-                        toast({
-                          variant: 'destructive',
-                          title: "Deletion failed",
-                          description: "There was a problem deleting the banner.",
-                        });
-                      } finally {
-                        setIsDeleting(false);
-                      }
-                    };
-                    handleDelete();
-                  }}>
-                    {isDeleting ? 'Deleting...' : 'Delete'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        );
-      }
+      header: "Actions",
+      cell: ({ row }: { row: { original: Banner } }) => (
+        <BannerAction banner={row.original} onEdit={handleEditBanner} />
+      )
     }
   ];
   
@@ -965,128 +987,3 @@ const Admin: React.FC = () => {
                             </FormItem>
                           )}
                         />
-                        
-                        <FormField
-                          control={bannerForm.control}
-                          name="active"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                              <div className="space-y-0.5">
-                                <FormLabel className="text-base">Active</FormLabel>
-                                <FormDescription>
-                                  This banner will be displayed on the site.
-                                </FormDescription>
-                              </div>
-                              <FormControl>
-                                <Switch checked={field.value} onCheckedChange={field.onChange} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <DrawerFooter className="px-0">
-                          <Button 
-                            type="submit" 
-                            className="w-full" 
-                            disabled={isUploading || (!bannerImageUrl && !bannerForm.getValues('imageUrl'))}
-                          >
-                            {selectedBanner ? 'Update Banner' : 'Create Banner'}
-                          </Button>
-                          <DrawerClose asChild>
-                            <Button variant="outline">Cancel</Button>
-                          </DrawerClose>
-                        </DrawerFooter>
-                      </form>
-                    </Form>
-                  </div>
-                </DrawerContent>
-              </Drawer>
-            </div>
-
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  {bannerTableColumns.map((column) => (
-                    <TableHead key={column.accessorKey || column.id || column.header}>{column.header}</TableHead>
-                  ))}
-                </TableHeader>
-                <TableBody>
-                  {banners.map((banner) => (
-                    <TableRow key={banner.id}>
-                      {bannerTableColumns.map((column) => {
-                        const key = column.accessorKey || column.id || column.header;
-                        const value = column.cell
-                          ? column.cell({ row: { original: banner } })
-                          : banner[column.accessorKey as keyof Banner];
-                        return <TableCell key={key}>{value}</TableCell>;
-                      })}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </section>
-        )}
-        
-        {activeTab === 'stats' && (
-          <section>
-            <h2 className="text-2xl font-semibold mb-4">Statistics</h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardHeader className="pb-2">
-                  <h3 className="text-lg font-medium">Total Draws</h3>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-3xl font-bold">{draws.length}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <h3 className="text-lg font-medium">Active Draws</h3>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-3xl font-bold">{draws.filter(d => d.status === 'active').length}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <h3 className="text-lg font-medium">Banners</h3>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-3xl font-bold">{banners.length}</p>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-        )}
-      </div>
-
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the item from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setIsDeleteDialogOpen(false);
-              setDrawToDelete(null);
-              setBannerToDelete(null);
-            }}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              if (drawToDelete) {
-                handleDrawDelete();
-              } else if (bannerToDelete) {
-                handleBannerDelete();
-              }
-            }}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-};
-
-export default Admin;
