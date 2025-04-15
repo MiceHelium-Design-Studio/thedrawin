@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -20,7 +21,6 @@ import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import MediaLibrary from "./pages/MediaLibrary";
 import NotFound from "./pages/NotFound";
-import AdminAccessPage from "./pages/AdminAccessPage";
 
 // Create a new QueryClient instance with longer staleTime
 const queryClient = new QueryClient({
@@ -93,7 +93,6 @@ const App = () => {
                       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                       <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
-                      <Route path="/admin-access" element={<ProtectedRoute><AdminAccessPage /></ProtectedRoute>} />
                       
                       {/* Catch-all route */}
                       <Route path="*" element={<NotFound />} />
