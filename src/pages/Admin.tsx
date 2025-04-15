@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -987,3 +988,137 @@ const Admin: React.FC = () => {
                             </FormItem>
                           )}
                         />
+                        
+                        <FormField
+                          control={bannerForm.control}
+                          name="active"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">
+                                  Active
+                                </FormLabel>
+                                <FormDescription>
+                                  Make this banner visible on the site.
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <DrawerFooter>
+                          <Button type="submit" className="w-full">
+                            {selectedBanner ? 'Update Banner' : 'Create Banner'}
+                          </Button>
+                          <DrawerClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DrawerClose>
+                        </DrawerFooter>
+                      </form>
+                    </Form>
+                  </div>
+                </DrawerContent>
+              </Drawer>
+            </div>
+
+            <div className="rounded-md border overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  {bannerTableColumns.map((column) => (
+                    <TableHead key={column.accessorKey || column.id || column.header}>{column.header}</TableHead>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {banners.map((banner) => (
+                    <TableRow key={banner.id}>
+                      {bannerTableColumns.map((column) => {
+                        const key = column.accessorKey || column.id || column.header;
+                        const value = column.cell
+                          ? column.cell({ row: { original: banner } })
+                          : banner[column.accessorKey as keyof Banner];
+                        return <TableCell key={key}>{value}</TableCell>;
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </section>
+        )}
+        
+        {activeTab === 'stats' && (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-semibold">Stats</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Total Draws</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{draws.length}</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Active Draws</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{draws.filter(draw => draw.status === 'active').length}</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Completed Draws</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{draws.filter(draw => draw.status === 'completed').length}</div>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+        )}
+        
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete this item from our servers.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => {
+                setDrawToDelete(null);
+                setBannerToDelete(null);
+              }}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={() => {
+                if (drawToDelete) {
+                  handleDrawDelete();
+                } else if (bannerToDelete) {
+                  handleBannerDelete();
+                }
+              }}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </div>
+  );
+};
+
+export default Admin;
