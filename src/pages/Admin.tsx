@@ -15,7 +15,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -68,14 +68,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  createDraw as createDrawAction,
-  updateDraw as updateDrawAction,
-  createBanner as createBannerAction,
-  updateBanner as updateBannerAction,
-  deleteBanner as deleteBannerAction
+  createDraw,
+  updateDraw,
+  createBanner,
+  updateBanner,
+  deleteBanner
 } from '@/server-actions';
 import { Draw, Banner } from '../types';
-import { uploadToS3, deleteFromS3 } from '@/utils/s3Utils';
+import { uploadToS3, deleteFromS3, BucketType } from '@/utils/s3Utils';
 import { useDraws } from '@/context/DrawContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -140,7 +140,7 @@ const Admin: React.FC = () => {
   const { user } = useAuth();
   
   useEffect(() => {
-    if (!user?.is_admin) {
+    if (!user?.isAdmin) {
       toast({
         variant: 'destructive',
         title: 'Unauthorized',
@@ -150,7 +150,7 @@ const Admin: React.FC = () => {
     }
   }, [user, navigate, toast]);
   
-  if (!user?.is_admin) {
+  if (!user?.isAdmin) {
     return null;
   }
 
@@ -181,10 +181,16 @@ const Admin: React.FC = () => {
     try {
       const ticketPricesArray = values.ticketPrices.split(',').map(Number);
       
-      const newDraw = {
-        ...values,
-        ticketPrices: ticketPricesArray,
+      const newDraw: Omit<Draw, 'id'> = {
+        title: values.title,
+        description: values.description,
+        maxParticipants: values.maxParticipants,
         currentParticipants: 0,
+        ticketPrices: ticketPricesArray,
+        status: values.status,
+        startDate: values.startDate.toISOString(),
+        endDate: values.endDate.toISOString(),
+        bannerImage: values.bannerImage
       };
       
       await createDraw(newDraw);
@@ -210,9 +216,15 @@ const Admin: React.FC = () => {
     try {
       const ticketPricesArray = values.ticketPrices.split(',').map(Number);
       
-      const updatedDraw = {
-        ...values,
+      const updatedDraw: Partial<Draw> = {
+        title: values.title,
+        description: values.description,
+        maxParticipants: values.maxParticipants,
         ticketPrices: ticketPricesArray,
+        status: values.status,
+        startDate: values.startDate.toISOString(),
+        endDate: values.endDate.toISOString(),
+        bannerImage: values.bannerImage
       };
       
       await updateDraw(selectedDraw.id, updatedDraw);
@@ -261,8 +273,10 @@ const Admin: React.FC = () => {
 
   const handleBannerCreate = async (values: z.infer<typeof bannerFormSchema>) => {
     try {
-      const newBanner = {
-        ...values,
+      const newBanner: Omit<Banner, 'id'> = {
+        imageUrl: values.imageUrl,
+        linkUrl: values.linkUrl,
+        active: values.active
       };
       
       await createBanner(newBanner);
@@ -288,8 +302,10 @@ const Admin: React.FC = () => {
     if (!selectedBanner) return;
     
     try {
-      const updatedBanner = {
-        ...values,
+      const updatedBanner: Partial<Banner> = {
+        imageUrl: values.imageUrl,
+        linkUrl: values.linkUrl,
+        active: values.active
       };
       
       await updateBanner(selectedBanner.id, updatedBanner);
@@ -513,6 +529,7 @@ const Admin: React.FC = () => {
       const { url, key } = await uploadToS3(file, 'banners');
       setBannerImageUrl(url);
       setBannerFileKey(key);
+      bannerForm.setValue('imageUrl', url);
       toast({
         title: "Image uploaded",
         description: "Banner image has been uploaded successfully."
@@ -612,7 +629,11 @@ const Admin: React.FC = () => {
                         <FormItem>
                           <FormLabel>Start Date</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} onChange={(e) => field.onChange(new Date(e.target.value))} />
+                            <Input 
+                              type="date" 
+                              value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''} 
+                              onChange={(e) => field.onChange(new Date(e.target.value))} 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -625,7 +646,11 @@ const Admin: React.FC = () => {
                         <FormItem>
                           <FormLabel>End Date</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} onChange={(e) => field.onChange(new Date(e.target.value))} />
+                            <Input 
+                              type="date" 
+                              value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''} 
+                              onChange={(e) => field.onChange(new Date(e.target.value))} 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

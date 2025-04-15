@@ -68,7 +68,7 @@ export async function getMediaItems() {
 export async function getUploadUrl(fileName: string, contentType: string, bucketType: BucketType = 'media'): Promise<UploadResponse> {
   try {
     // If using native storage buckets
-    if (bucketType !== 'media') {
+    if (bucketType === 'profile_images' || bucketType === 'banners' || bucketType === 'draw_images') {
       const uniqueFilePath = `${Date.now()}-${fileName}`;
       
       // Get a presigned URL directly from Storage API
