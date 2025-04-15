@@ -80,7 +80,7 @@ import {
   MenubarItem,
   MenubarSeparator
 } from "@/components/ui/menubar";
-import { createDraw, updateDraw, createBanner, updateBanner, deleteBanner, uploadMedia, deleteMedia } from '../server-actions';
+import { createDraw, updateDraw, deleteDraw, createBanner, updateBanner, deleteBanner, uploadMedia, deleteMedia } from '../server-actions';
 import { Draw, Banner } from '../types';
 import { uploadToS3, deleteFromS3, BucketType } from '@/utils/s3Utils';
 import { useDraws } from '@/context/DrawContext';
@@ -204,7 +204,7 @@ const ImageUploader = ({ onImageSelected, previewUrl = '', isUploading = false }
 
 const Admin: React.FC = () => {
   const { toast } = useToast();
-  const { draws, banners, createDraw, updateDraw, createBanner, updateBanner, deleteBanner, uploadMedia, deleteMedia } = useDraws();
+  const { draws, banners, createDraw, updateDraw, deleteDraw, createBanner, updateBanner, deleteBanner, uploadMedia, deleteMedia } = useDraws();
   const [isDrawDrawerOpen, setIsDrawDrawerOpen] = useState(false);
   const [isBannerDrawerOpen, setIsBannerDrawerOpen] = useState(false);
   const [selectedDraw, setSelectedDraw] = useState<Draw | null>(null);

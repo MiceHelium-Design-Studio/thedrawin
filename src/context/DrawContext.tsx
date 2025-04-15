@@ -356,7 +356,8 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteMedia
       }}
     >
-      {console.log("DrawProvider rendering with children")} {/* Add this debug log */}
+      {/* Debug log properly handled as a comment */}
+      {console.log("DrawProvider rendering with children") || null}
       {children}
     </DrawContext.Provider>
   );
