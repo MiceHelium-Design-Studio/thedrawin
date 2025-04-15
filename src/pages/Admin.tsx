@@ -73,7 +73,7 @@ import {
   createBanner,
   updateBanner,
   deleteBanner
-} from '@/server-actions';
+} from '../server-actions';
 import { Draw, Banner } from '../types';
 import { uploadToS3, deleteFromS3, BucketType } from '@/utils/s3Utils';
 import { useDraws } from '@/context/DrawContext';
@@ -553,7 +553,7 @@ const Admin: React.FC = () => {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold">Draws</h2>
-          <Drawer>
+          <Drawer open={isDrawDrawerOpen} onOpenChange={setIsDrawDrawerOpen}>
             <DrawerTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -567,7 +567,7 @@ const Admin: React.FC = () => {
                   {selectedDraw ? 'Edit the draw details.' : 'Create a new draw for users to participate in.'}
                 </DrawerDescription>
               </DrawerHeader>
-              <CardContent className="pb-4">
+              <div className="p-4 pb-0">
                 <Form {...drawForm}>
                   <form onSubmit={drawForm.handleSubmit(selectedDraw ? handleDrawUpdate : handleDrawCreate)} className="space-y-4">
                     <FormField
@@ -603,7 +603,12 @@ const Admin: React.FC = () => {
                         <FormItem>
                           <FormLabel>Max Participants</FormLabel>
                           <FormControl>
-                            <Input type="number" placeholder="100" {...field} />
+                            <Input 
+                              type="number" 
+                              placeholder="100" 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -695,10 +700,13 @@ const Admin: React.FC = () => {
                       <Button type="submit" className="w-full">
                         {selectedDraw ? 'Update Draw' : 'Create Draw'}
                       </Button>
+                      <DrawerClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DrawerClose>
                     </DrawerFooter>
                   </form>
                 </Form>
-              </CardContent>
+              </div>
             </DrawerContent>
           </Drawer>
         </div>
@@ -743,7 +751,7 @@ const Admin: React.FC = () => {
                   {selectedBanner ? 'Edit the banner details.' : 'Create a new banner to display on the site.'}
                 </DrawerDescription>
               </DrawerHeader>
-              <CardContent className="pb-4">
+              <div className="p-4 pb-0">
                 <Form {...bannerForm}>
                   <form onSubmit={bannerForm.handleSubmit(selectedBanner ? handleBannerUpdate : handleBannerCreate)} className="space-y-4">
                     <FormField
@@ -755,27 +763,24 @@ const Admin: React.FC = () => {
                           <FormControl>
                             <div className="flex items-center space-x-2">
                               <Input placeholder="https://example.com/image.jpg" {...field} />
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                asChild
-                                onClick={() => document.getElementById('banner-image-upload')?.click()}
-                              >
-                                <Upload className="h-4 w-4 mr-2" />
-                                Upload
-                              </Button>
-                              <input
-                                type="file"
-                                id="banner-image-upload"
-                                className="hidden"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const files = e.target.files;
-                                  if (files && files.length > 0) {
-                                    handleBannerUpload(files[0]);
-                                  }
-                                }}
-                              />
+                              <label htmlFor="banner-image-upload" className="cursor-pointer">
+                                <div className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                                  <Upload className="h-4 w-4 mr-1" />
+                                  Upload
+                                </div>
+                                <input
+                                  type="file"
+                                  id="banner-image-upload"
+                                  className="hidden"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const files = e.target.files;
+                                    if (files && files.length > 0) {
+                                      handleBannerUpload(files[0]);
+                                    }
+                                  }}
+                                />
+                              </label>
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -821,10 +826,13 @@ const Admin: React.FC = () => {
                       <Button type="submit" className="w-full" disabled={isUploading}>
                         {selectedBanner ? 'Update Banner' : 'Create Banner'}
                       </Button>
+                      <DrawerClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DrawerClose>
                     </DrawerFooter>
                   </form>
                 </Form>
-              </CardContent>
+              </div>
             </DrawerContent>
           </Drawer>
         </div>
