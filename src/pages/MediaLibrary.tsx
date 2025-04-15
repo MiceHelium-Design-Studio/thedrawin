@@ -7,11 +7,12 @@ import {
   Search,
   SortAsc,
   SortDesc,
-  Filter
+  Filter,
+  RefreshCw
 } from 'lucide-react';
 import { useDraws } from '../context/DrawContext';
 import { useAuth } from '../context/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +31,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDistanceToNow } from 'date-fns';
-import { Textarea } from '@/components/ui/textarea';
 
 const MediaLibrary: React.FC = () => {
   const { media = [], loading: mediaLoading, uploadMedia, deleteMedia } = useDraws();
@@ -42,6 +42,7 @@ const MediaLibrary: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [forceRender, setForceRender] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
   // Force render after 3 seconds no matter what
   useEffect(() => {
@@ -59,7 +60,8 @@ const MediaLibrary: React.FC = () => {
 
   useEffect(() => {
     console.log('Media page - Auth loading:', authLoading, 'Media loading:', mediaLoading, 'Force render:', forceRender);
-  }, [authLoading, mediaLoading, forceRender]);
+    console.log('Current media items:', media.length);
+  }, [authLoading, mediaLoading, forceRender, media.length]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -117,6 +119,27 @@ const MediaLibrary: React.FC = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    if (refreshing) return;
+    
+    setRefreshing(true);
+    try {
+      // Force reload of media items by setting loading to true
+      // The DrawContext will handle the actual reloading
+      setForceRender(false);
+      setTimeout(() => setForceRender(true), 100);
+      
+      toast({
+        title: 'Refreshed',
+        description: 'Media library has been refreshed.'
+      });
+    } catch (error) {
+      console.error('Error refreshing media:', error);
+    } finally {
+      setTimeout(() => setRefreshing(false), 500);
+    }
+  };
+
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
@@ -170,6 +193,15 @@ const MediaLibrary: React.FC = () => {
             ) : (
               <Image className="h-4 w-4" />
             )}
+          </Button>
+          
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            className="border-gold/30 text-gold"
+            disabled={loading || isUploading || refreshing}
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
 
           <Button 

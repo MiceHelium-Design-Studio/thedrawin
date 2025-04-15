@@ -107,7 +107,26 @@ Deno.serve(async (req) => {
 
     // Handle different S3 operations based on action parameter
     if (action === 'list') {
-      // List objects in the bucket
+      // First check the database for media items
+      const { data: dbMedia, error: dbError } = await supabase
+        .from('media_items')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (dbError) {
+        console.error('Error fetching from DB:', dbError);
+        // Continue to fetch from S3 as fallback
+      } else if (dbMedia && dbMedia.length > 0) {
+        // If we have items in the database, return them
+        return new Response(JSON.stringify({ 
+          media: dbMedia,
+          source: 'database' 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Fallback to S3 listing if database retrieval fails or returns empty
       const prefix = user.id + '/';
       const command = new ListObjectsV2Command({
         Bucket: BUCKET_NAME,
@@ -118,6 +137,7 @@ Deno.serve(async (req) => {
       
       const mediaItems = response.Contents?.map(item => ({
         id: item.Key,
+        user_id: user.id,
         name: item.Key?.split('/').pop() || 'Untitled',
         url: `https://${BUCKET_NAME}.s3.amazonaws.com/${item.Key}`,
         size: item.Size || 0,
@@ -125,7 +145,34 @@ Deno.serve(async (req) => {
         type: getFileType(item.Key || '')
       })) || []
       
-      return new Response(JSON.stringify({ media: mediaItems }), {
+      // If we got items from S3 but not from DB, sync them to the database
+      if (mediaItems.length > 0 && (!dbMedia || dbMedia.length === 0)) {
+        try {
+          // Batch insert media items to database
+          const { error: insertError } = await supabase
+            .from('media_items')
+            .upsert(mediaItems.map(item => ({
+              id: item.id,
+              user_id: user.id,
+              name: item.name,
+              url: item.url,
+              type: item.type,
+              size: item.size,
+              upload_date: item.uploadDate
+            })));
+            
+          if (insertError) {
+            console.error('Error syncing S3 items to database:', insertError);
+          }
+        } catch (syncError) {
+          console.error('Error in sync operation:', syncError);
+        }
+      }
+      
+      return new Response(JSON.stringify({ 
+        media: mediaItems,
+        source: 's3' 
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     } 
@@ -169,14 +216,61 @@ Deno.serve(async (req) => {
       
       const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
       
-      return new Response(JSON.stringify({ 
+      // Prepare response with file details
+      const fileDetails = {
         uploadUrl: presignedUrl,
         fileKey: key,
         fileUrl: `https://${BUCKET_NAME}.s3.amazonaws.com/${key}`,
         fileType: fileType
+      };
+      
+      return new Response(JSON.stringify(fileDetails), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    else if (action === 'recordUpload') {
+      // Record an upload in the database after it's completed
+      const { fileKey, fileUrl, fileName, fileSize, fileType } = actionData;
+      
+      if (!fileKey || !fileUrl) {
+        return new Response(JSON.stringify({ error: 'Missing file information' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Insert record into database
+      const { data, error } = await supabase
+        .from('media_items')
+        .insert({
+          id: fileKey,
+          user_id: user.id,
+          name: fileName || fileKey.split('/').pop(),
+          url: fileUrl,
+          type: fileType || getFileType(fileKey),
+          size: fileSize || 0,
+          upload_date: new Date().toISOString()
+        })
+        .select();
+      
+      if (error) {
+        console.error('Error recording upload in database:', error);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to record upload',
+          details: error.message
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      return new Response(JSON.stringify({ 
+        success: true,
+        message: 'Upload recorded in database',
+        media: data[0]
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+      });
     }
     else if (action === 'delete') {
       // Delete an object from the bucket
@@ -200,12 +294,24 @@ Deno.serve(async (req) => {
         });
       }
       
+      // Delete from S3
       const command = new DeleteObjectCommand({
         Bucket: BUCKET_NAME,
         Key: fileKey
       })
       
-      await s3Client.send(command)
+      await s3Client.send(command);
+      
+      // Also remove from database
+      const { error: deleteError } = await supabase
+        .from('media_items')
+        .delete()
+        .eq('id', fileKey);
+      
+      if (deleteError) {
+        console.error('Error deleting from database:', deleteError);
+        // Continue anyway since the S3 deletion was successful
+      }
       
       return new Response(JSON.stringify({ 
         success: true,
@@ -264,7 +370,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ 
       error: 'Invalid or missing action',
       receivedData: actionData,
-      supportedActions: ['list', 'getUploadUrl', 'delete', 'getStats']
+      supportedActions: ['list', 'getUploadUrl', 'recordUpload', 'delete', 'getStats']
     }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

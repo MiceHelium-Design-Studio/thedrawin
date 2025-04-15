@@ -68,7 +68,19 @@ export async function uploadToS3(file: File): Promise<{ url: string; key: string
     throw new Error('Upload failed');
   }
   
-  // 3. Return the file details
+  // 3. Record the upload in the database
+  await supabase.functions.invoke('s3-media', {
+    body: {
+      action: 'recordUpload',
+      fileKey,
+      fileUrl,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: fileType || 'other'
+    }
+  });
+  
+  // 4. Return the file details
   return {
     url: fileUrl,
     key: fileKey,

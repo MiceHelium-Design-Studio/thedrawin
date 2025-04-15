@@ -1,8 +1,11 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Draw, Ticket, Banner, MediaItem } from '../types';
 import { sendDrawEntryNotifications } from '../utils/notificationUtils';
 import { useAuth } from './AuthContext';
 import { getMediaItems, uploadToS3, deleteFromS3 } from '../utils/s3Utils';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '../integrations/supabase/client';
 
 // Mock data until we integrate with Supabase
 const MOCK_DRAWS: Draw[] = [
@@ -92,10 +95,66 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true); // Start with loading true
   const { user } = useAuth();
   
-  // Load media items from S3
+  // Load media items from S3 and database
   useEffect(() => {
     if (user) {
       fetchMediaItems();
+      
+      // Set up real-time subscription for media items
+      const channel = supabase
+        .channel('media-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'media_items',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Real-time update received:', payload);
+            
+            // Handle different types of changes
+            if (payload.eventType === 'INSERT') {
+              // Add the new media item
+              const newItem = payload.new as any;
+              setMedia(prevMedia => {
+                // Check if the item already exists (avoid duplicates)
+                const exists = prevMedia.some(item => item.id === newItem.id);
+                if (exists) return prevMedia;
+                
+                // Convert from database format to app format
+                const mediaItem: MediaItem = {
+                  id: newItem.id,
+                  name: newItem.name,
+                  url: newItem.url,
+                  type: newItem.type,
+                  size: newItem.size,
+                  uploadDate: newItem.upload_date
+                };
+                
+                return [...prevMedia, mediaItem];
+              });
+              
+              toast({
+                title: "Media uploaded",
+                description: `${newItem.name} has been added to your library.`
+              });
+            } 
+            else if (payload.eventType === 'DELETE') {
+              // Remove the deleted item
+              setMedia(prevMedia => 
+                prevMedia.filter(item => item.id !== payload.old.id)
+              );
+            }
+          }
+        )
+        .subscribe();
+      
+      // Cleanup subscription on unmount or user change
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
   
@@ -107,6 +166,11 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setMedia(mediaItems);
     } catch (error) {
       console.error('Error fetching media items:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to load media',
+        description: 'There was a problem loading your media library.'
+      });
     } finally {
       setLoading(false);
     }
@@ -252,8 +316,8 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const uploadMedia = async (file: File): Promise<MediaItem> => {
     setLoading(true);
     try {
-      // Upload to S3
-      const { url, key, name, size } = await uploadToS3(file);
+      // Upload to S3 and record in database
+      const { url, key, name, size, type } = await uploadToS3(file);
       
       // Create a new media item
       const newMedia: MediaItem = {
@@ -265,7 +329,14 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         uploadDate: new Date().toISOString(),
       };
       
-      setMedia(prev => [...prev, newMedia]);
+      // Update state (the realtime subscription will also handle this)
+      setMedia(prev => {
+        // Check if the item already exists
+        const exists = prev.some(item => item.id === newMedia.id);
+        if (exists) return prev;
+        return [...prev, newMedia];
+      });
+      
       return newMedia;
     } catch (error) {
       console.error('Upload media error:', error);
@@ -278,10 +349,10 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteMedia = async (id: string): Promise<void> => {
     setLoading(true);
     try {
-      // Delete from S3
+      // Delete from S3 and database
       await deleteFromS3(id);
       
-      // Remove from state
+      // Remove from state (the realtime subscription will also handle this)
       setMedia(prev => prev.filter(item => item.id !== id));
     } catch (error) {
       console.error('Delete media error:', error);
