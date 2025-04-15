@@ -19,7 +19,7 @@ export interface StorageStats {
   averageSize: number;
 }
 
-// Define bucket types
+// Expand BucketType to include 'media'
 export type BucketType = 'profile_images' | 'banners' | 'draw_images' | 'media';
 
 export async function getMediaItems() {
@@ -110,7 +110,9 @@ export async function getUploadUrl(fileName: string, contentType: string, bucket
 
 export async function uploadToS3(file: File, bucketType: BucketType = 'media'): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
   // Use native Storage API for dedicated buckets
-  if (bucketType === 'profile_images' || bucketType === 'banners' || bucketType === 'draw_images') {
+  const dedicatedBuckets: BucketType[] = ['profile_images', 'banners', 'draw_images'];
+  
+  if (dedicatedBuckets.includes(bucketType)) {
     try {
       const uniqueFilePath = `${Date.now()}-${file.name}`;
       const fileType = determineFileType(file.name);
@@ -130,7 +132,7 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
         .from(bucketType)
         .getPublicUrl(data.path);
       
-      // Record in database
+      // Record in database if it's a media bucket
       if (bucketType === 'media') {
         await supabase
           .from('media_items')
@@ -157,7 +159,7 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
     }
   }
   
-  // Fallback to legacy edge function method
+  // Fallback to legacy edge function method for 'media'
   try {
     // 1. Get a pre-signed URL
     const { uploadUrl, fileKey, fileUrl, fileType } = await getUploadUrl(file.name, file.type);
