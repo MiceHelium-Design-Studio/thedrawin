@@ -11,17 +11,8 @@ interface BannerSliderProps {
 const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  // Replace the first banner with our new image
-  const modifiedBanners = [...banners];
-  if (modifiedBanners.length > 0) {
-    modifiedBanners[0] = {
-      ...modifiedBanners[0],
-      imageUrl: '/lovable-uploads/2c2655f0-2a53-4df4-ac6a-e95fa7632038.png'
-    };
-  }
-  
   // Filter active banners
-  const activeBanners = modifiedBanners.filter(banner => banner.active);
+  const activeBanners = banners.filter(banner => banner.active);
   
   if (activeBanners.length === 0) {
     return null;

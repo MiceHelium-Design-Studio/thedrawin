@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import AvatarWrapper from '@/components/ui/avatar-wrapper';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { 
   Wallet, 
@@ -13,13 +13,11 @@ import {
   CreditCard, 
   ArrowLeftRight, 
   Building, 
-  Banknote,
-  Link as LinkIcon,
-  Loader2
+  Banknote 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import {
   RadioGroup,
   RadioGroupItem
@@ -32,29 +30,20 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { Textarea } from "@/components/ui/textarea";
-import { uploadToS3 } from '@/utils/s3Utils';
 
 const uploadMedia = async (file: File) => {
-  try {
-    console.log("Uploading file to S3:", file.name);
-    const { url } = await uploadToS3(file);
-    console.log("Upload successful, URL:", url);
-    return { url, name: file.name };
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    throw error;
-  }
-};
-
-const uploadFromUrl = async (url: string) => {
-  try {
-    console.log("Loading image from URL:", url);
-    return { url, name: 'From URL' };
-  } catch (error) {
-    console.error("Error uploading from URL:", error);
-    throw error;
-  }
+  return new Promise<{ url: string; name: string }>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setTimeout(() => {
+        resolve({
+          url: reader.result as string,
+          name: file.name
+        });
+      }, 500);
+    };
+    reader.readAsDataURL(file);
+  });
 };
 
 type PaymentMethod = 'regular' | 'card' | 'whish' | 'western-union';
@@ -65,22 +54,11 @@ const Profile: React.FC = () => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [name, setName] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [imageUrlInput, setImageUrlInput] = useState('');
+  const [name, setName] = useState(user?.name || '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatar || '');
   const [amount, setAmount] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('regular');
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  
-  useEffect(() => {
-    if (user) {
-      setName(user.name || '');
-      setAvatarUrl(user.avatar || '');
-      console.log("Profile initialized with user data:", { name: user.name, avatar: user.avatar });
-    }
-  }, [user]);
   
   const form = useForm({
     defaultValues: {
@@ -109,10 +87,8 @@ const Profile: React.FC = () => {
   
   const handleUpdateProfile = async () => {
     try {
-      console.log("Updating profile with:", { name, avatar: avatarUrl });
       await updateProfile({ name, avatar: avatarUrl });
       setIsEditing(false);
-      setPreviewUrl(null);
       toast({
         title: 'Profile updated',
         description: 'Your profile has been updated successfully.',
@@ -124,40 +100,6 @@ const Profile: React.FC = () => {
         description: 'There was an error updating your profile.',
       });
       console.error(error);
-    }
-  };
-
-  const handleLoadImageFromUrl = async () => {
-    if (!imageUrlInput || !imageUrlInput.trim().startsWith('http')) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid URL',
-        description: 'Please enter a valid URL starting with http:// or https://',
-      });
-      return;
-    }
-    
-    setUploadLoading(true);
-    try {
-      const uploadedItem = await uploadFromUrl(imageUrlInput);
-      setAvatarUrl(uploadedItem.url);
-      setPreviewUrl(uploadedItem.url);
-      
-      toast({
-        title: 'Image loaded',
-        description: 'Image URL has been loaded successfully.',
-      });
-      
-      setImageUrlInput('');
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Load failed',
-        description: 'There was an error loading the image from URL.',
-      });
-      console.error(error);
-    } finally {
-      setUploadLoading(false);
     }
   };
   
@@ -192,24 +134,14 @@ const Profile: React.FC = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const file = files[0];
-    const localPreviewUrl = URL.createObjectURL(file);
-    setPreviewUrl(localPreviewUrl);
-
-    setUploadLoading(true);
     try {
-      console.log("Starting file upload:", files[0].name);
       const uploadedItem = await uploadMedia(files[0]);
-      console.log("Setting avatar URL to:", uploadedItem.url);
       setAvatarUrl(uploadedItem.url);
-      setPreviewUrl(uploadedItem.url);
       
       toast({
         title: 'Image uploaded',
         description: `${uploadedItem.name} has been uploaded successfully.`,
       });
-      
-      URL.revokeObjectURL(localPreviewUrl);
       
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -221,10 +153,6 @@ const Profile: React.FC = () => {
         description: 'There was an error uploading your avatar.',
       });
       console.error(error);
-      URL.revokeObjectURL(localPreviewUrl);
-      setPreviewUrl(null);
-    } finally {
-      setUploadLoading(false);
     }
   };
   
@@ -262,12 +190,12 @@ const Profile: React.FC = () => {
         <CardContent className="p-6">
           <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
             <div className="relative">
-              <AvatarWrapper 
-                src={isEditing && previewUrl ? previewUrl : avatarUrl} 
-                alt={name || user.email}
-                className="h-24 w-24"
-                fallback={name?.slice(0, 2) || user.email.slice(0, 2).toUpperCase() || 'U'}
-              />
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback className="text-lg bg-gold/20">
+                  {user.name?.slice(0, 2) || 'U'}
+                </AvatarFallback>
+              </Avatar>
               {isEditing && (
                 <div className="absolute -bottom-2 -right-2">
                   <Button 
@@ -275,13 +203,8 @@ const Profile: React.FC = () => {
                     variant="outline" 
                     className="rounded-full w-8 h-8 p-0 bg-background border-gold/30"
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadLoading}
                   >
-                    {uploadLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-gold" />
-                    ) : (
-                      <Upload className="h-4 w-4 text-gold" />
-                    )}
+                    <Upload className="h-4 w-4 text-gold" />
                   </Button>
                 </div>
               )}
@@ -307,10 +230,7 @@ const Profile: React.FC = () => {
                         <Input
                           id="avatar"
                           value={avatarUrl}
-                          onChange={(e) => {
-                            setAvatarUrl(e.target.value);
-                            setPreviewUrl(e.target.value);
-                          }}
+                          onChange={(e) => setAvatarUrl(e.target.value)}
                           className="border-gold/30 focus:border-gold"
                           placeholder="URL will appear here after upload"
                         />
@@ -319,13 +239,8 @@ const Profile: React.FC = () => {
                         variant="outline" 
                         className="border-gold/30 text-gold hover:text-gold-dark"
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={uploadLoading}
                       >
-                        {uploadLoading ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Upload className="h-4 w-4 mr-2" />
-                        )}
+                        <Upload className="h-4 w-4 mr-2" />
                         Upload
                       </Button>
                       <input 
@@ -334,39 +249,11 @@ const Profile: React.FC = () => {
                         className="hidden" 
                         accept="image/*"
                         onChange={handleFileUpload}
-                        disabled={uploadLoading}
                       />
                     </div>
-                    
-                    <div className="mt-2 flex gap-2">
-                      <Input
-                        placeholder="Enter image URL"
-                        value={imageUrlInput}
-                        onChange={(e) => setImageUrlInput(e.target.value)}
-                        className="border-gold/30 focus:border-gold"
-                        disabled={uploadLoading}
-                      />
-                      <Button
-                        variant="outline"
-                        className="border-gold/30 text-gold hover:text-gold-dark whitespace-nowrap"
-                        onClick={handleLoadImageFromUrl}
-                        disabled={uploadLoading}
-                      >
-                        {uploadLoading ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <LinkIcon className="h-4 w-4 mr-2" />
-                        )}
-                        Load URL
-                      </Button>
-                    </div>
-                    
-                    {previewUrl && isEditing && (
-                      <div className="mt-2">
-                        <Label className="text-sm text-gray-500 mb-1 block">Image Preview</Label>
-                        <div className="w-full max-h-40 overflow-hidden rounded border border-gray-200">
-                          <img src={previewUrl} alt="Avatar preview" className="w-full object-cover" />
-                        </div>
+                    {avatarUrl && isEditing && (
+                      <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200">
+                        <img src={avatarUrl} alt="Avatar preview" className="w-full object-cover" />
                       </div>
                     )}
                   </div>
@@ -374,24 +261,15 @@ const Profile: React.FC = () => {
                   <div className="flex gap-2">
                     <Button
                       onClick={handleUpdateProfile}
-                      disabled={loading || uploadLoading}
+                      disabled={loading}
                       className="bg-gold hover:bg-gold-dark text-black"
                     >
-                      {loading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : null}
                       Save
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setName(user.name || '');
-                        setAvatarUrl(user.avatar || '');
-                        setPreviewUrl(null);
-                      }}
+                      onClick={() => setIsEditing(false)}
                       className="border-gold/30 text-gold hover:text-gold-dark"
-                      disabled={loading || uploadLoading}
                     >
                       Cancel
                     </Button>
@@ -401,7 +279,7 @@ const Profile: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500">Name</p>
-                    <p className="font-medium">{user.name || 'Not set'}</p>
+                    <p className="font-medium">{user.name}</p>
                   </div>
                   
                   <div>

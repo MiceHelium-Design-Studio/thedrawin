@@ -53,7 +53,7 @@ export interface MediaItem {
   id: string;
   name: string;
   url: string;
-  type: 'image' | 'document' | 'video' | 'other';
+  type: 'image' | 'document' | 'video';
   size: number;
   uploadDate: string;
 }

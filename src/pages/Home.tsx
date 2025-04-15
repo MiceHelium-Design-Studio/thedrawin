@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,25 +11,10 @@ import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Home: React.FC = () => {
-  const navigate = useNavigate();
+  const { draws = [], banners = [], loading: drawsLoading } = useDraws();
   const { user, loading: authLoading, clearCacheAndReload } = useAuth();
+  const navigate = useNavigate();
   
-  // Safely access the DrawContext with error handling
-  let draws = [];
-  let banners = [];
-  let drawsLoading = true;
-  
-  try {
-    // Try to use the DrawContext 
-    const drawContext = useDraws();
-    draws = drawContext.draws || [];
-    banners = drawContext.banners || [];
-    drawsLoading = drawContext.loading;
-  } catch (error) {
-    console.error("Error accessing DrawContext:", error);
-    // Keep default values when DrawContext isn't available
-  }
-
   const isLoading = authLoading || drawsLoading;
   
   useEffect(() => {

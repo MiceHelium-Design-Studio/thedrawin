@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Award, Bell, User, Settings } from 'lucide-react';
@@ -107,28 +106,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <span>Profile</span>
             </NavLink>
             
-            {/* Show Admin link for all users, but navigate to admin only if admin */}
             <NavLink
-              to={user?.isAdmin ? "/admin" : "/"}
+              to="/admin"
               className={({ isActive }) =>
                 cn(
                   "flex flex-col items-center justify-center text-xs transition-all duration-300",
                   isActive
                     ? "text-gold font-medium"
-                    : "text-white hover:text-gold/70"
+                    : "text-white hover:text-gold"
                 )
               }
-              onClick={(e) => {
-                if (!user?.isAdmin) {
-                  e.preventDefault();
-                  alert("You need admin access to view this page.");
-                }
-              }}
             >
               <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin' && "bg-black-light/50")}>
-                <Settings className="h-5 w-5 mb-1" style={{ opacity: user?.isAdmin ? 1 : 0.7 }} />
+                <Settings className="h-5 w-5 mb-1" />
               </div>
-              <span style={{ opacity: user?.isAdmin ? 1 : 0.7 }}>Admin</span>
+              <span>Admin</span>
             </NavLink>
           </div>
         </nav>

@@ -2,6 +2,7 @@
 import { supabase } from '../integrations/supabase/client';
 
 export interface UploadResponse {
+  uploadUrl: string;
   fileKey: string;
   fileUrl: string;
   fileType: string;
@@ -20,32 +21,12 @@ export interface StorageStats {
 
 export async function getMediaItems() {
   try {
-    console.log('Fetching media items from Supabase storage');
-    const { data, error } = await supabase
-      .storage
-      .from('drawinmedialib')
-      .list();
+    const { data, error } = await supabase.functions.invoke('s3-media', {
+      body: { action: 'list' }
+    });
 
-    if (error) {
-      console.error('Error listing media items:', error);
-      throw error;
-    }
-    
-    console.log('Media items retrieved:', data?.length);
-    
-    // Convert Supabase storage items to our application format
-    const media = data
-      .filter(item => !item.name.includes('.emptyFolderPlaceholder'))
-      .map(item => ({
-        id: item.name,
-        name: item.name,
-        url: getFileUrl(item.name),
-        size: item.metadata?.size || 0,
-        uploadDate: item.created_at || new Date().toISOString(),
-        type: getFileType(item.name)
-      }));
-    
-    return media;
+    if (error) throw error;
+    return data.media || [];
   } catch (error) {
     console.error('Error getting media items:', error);
     throw error;
@@ -53,171 +34,60 @@ export async function getMediaItems() {
 }
 
 export async function getUploadUrl(fileName: string, contentType: string): Promise<UploadResponse> {
-  // With Supabase Storage we don't need pre-signed URLs
-  // Instead we'll return a structure that's compatible with our existing code
-  return {
-    fileKey: fileName,
-    fileUrl: getFileUrl(fileName),
-    fileType: categorizeContentType(contentType)
-  };
+  try {
+    const { data, error } = await supabase.functions.invoke('s3-media', {
+      body: { 
+        action: 'getUploadUrl',
+        fileName,
+        contentType
+      }
+    });
+
+    if (error) throw error;
+    return data as UploadResponse;
+  } catch (error) {
+    console.error('Error getting upload URL:', error);
+    throw error;
+  }
 }
 
 export async function uploadToS3(file: File): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
-  try {
-    // Sanitize the filename to prevent path traversal
-    const sanitizedFileName = file.name.replace(/[^\w\s.-]/g, '');
-    const fileKey = `${Date.now()}-${sanitizedFileName}`;
-    
-    console.log(`Attempting to upload file: ${fileKey} to drawinmedialib bucket`);
-    console.log(`File details: name=${file.name}, size=${file.size}, type=${file.type}`);
-    
-    // Check if user is authenticated
-    const { data: authData } = await supabase.auth.getSession();
-    if (!authData.session) {
-      console.error('Upload failed: User is not authenticated');
-      throw new Error('You must be logged in to upload files');
+  // 1. Get a pre-signed URL
+  const { uploadUrl, fileKey, fileUrl, fileType } = await getUploadUrl(file.name, file.type);
+  
+  // 2. Upload the file directly to S3
+  const uploadResponse = await fetch(uploadUrl, {
+    method: 'PUT',
+    body: file,
+    headers: {
+      'Content-Type': file.type
     }
-    
-    // Upload file directly to Supabase Storage
-    const { data, error } = await supabase
-      .storage
-      .from('drawinmedialib')
-      .upload(fileKey, file, {
-        cacheControl: '3600',
-        upsert: true // Changed to true to allow overwrites
-      });
-    
-    if (error) {
-      console.error('Supabase storage upload error:', error);
-      if (error.message.includes('Policy')) {
-        throw new Error('Permission denied. Please check your storage permissions.');
-      }
-      throw error;
-    }
-    
-    console.log('Upload successful:', data);
-    
-    const fileUrl = getFileUrl(data?.path || fileKey);
-    const fileType = categorizeContentType(file.type);
-    
-    // Return file details in the same format as before
-    return {
-      url: fileUrl,
-      key: fileKey,
-      name: file.name,
-      size: file.size,
-      type: fileType
-    };
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    throw error;
+  });
+  
+  if (!uploadResponse.ok) {
+    throw new Error('Upload failed');
   }
-}
-
-export async function uploadFromUrl(imageUrl: string, fileName?: string): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
-  try {
-    console.log(`Attempting to upload image from URL: ${imageUrl}`);
-    
-    // Check if user is authenticated
-    const { data: authData } = await supabase.auth.getSession();
-    if (!authData.session) {
-      console.error('Upload failed: User is not authenticated');
-      throw new Error('You must be logged in to upload files');
-    }
-    
-    // Fetch the image from the URL
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
-    }
-    
-    // Get the image blob
-    const blob = await response.blob();
-    
-    // Determine filename - use provided filename or extract from URL
-    let sanitizedFileName = fileName || imageUrl.split('/').pop() || 'image';
-    sanitizedFileName = sanitizedFileName.replace(/[^\w\s.-]/g, '');
-    
-    // Add extension if none exists
-    if (!sanitizedFileName.includes('.')) {
-      const extension = blob.type.split('/').pop();
-      sanitizedFileName = `${sanitizedFileName}.${extension}`;
-    }
-    
-    // Create a File object (needed for the upload method)
-    const file = new File([blob], sanitizedFileName, { type: blob.type });
-    
-    // Now use the existing upload method
-    return await uploadToS3(file);
-  } catch (error) {
-    console.error('Error uploading from URL:', error);
-    throw error;
-  }
-}
-
-export async function updateMedia(fileKey: string, file: File): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
-  try {
-    console.log(`Attempting to update file: ${fileKey} in drawinmedialib bucket`);
-    console.log(`New file details: name=${file.name}, size=${file.size}, type=${file.type}`);
-    
-    // Check if user is authenticated
-    const { data: authData } = await supabase.auth.getSession();
-    if (!authData.session) {
-      console.error('Update failed: User is not authenticated');
-      throw new Error('You must be logged in to update files');
-    }
-    
-    // Upload file with upsert to overwrite the existing file
-    const { data, error } = await supabase
-      .storage
-      .from('drawinmedialib')
-      .upload(fileKey, file, {
-        cacheControl: '3600',
-        upsert: true // Use upsert to replace existing file
-      });
-    
-    if (error) {
-      console.error('Supabase storage update error:', error);
-      if (error.message.includes('Policy')) {
-        throw new Error('Permission denied. Please check your storage permissions.');
-      }
-      throw error;
-    }
-    
-    console.log('Update successful:', data);
-    
-    const fileUrl = getFileUrl(data?.path || fileKey);
-    const fileType = categorizeContentType(file.type);
-    
-    // Return updated file details
-    return {
-      url: fileUrl,
-      key: fileKey,
-      name: file.name,
-      size: file.size,
-      type: fileType
-    };
-  } catch (error) {
-    console.error('Error updating file:', error);
-    throw error;
-  }
+  
+  // 3. Return the file details
+  return {
+    url: fileUrl,
+    key: fileKey,
+    name: file.name,
+    size: file.size,
+    type: fileType || 'other'
+  };
 }
 
 export async function deleteFromS3(fileKey: string) {
   try {
-    console.log(`Attempting to delete file: ${fileKey} from drawinmedialib bucket`);
-    
-    const { error } = await supabase
-      .storage
-      .from('drawinmedialib')
-      .remove([fileKey]);
-    
-    if (error) {
-      console.error('Error deleting file:', error);
-      throw error;
-    }
-    
-    console.log(`Successfully deleted file: ${fileKey}`);
+    const { error } = await supabase.functions.invoke('s3-media', {
+      body: { 
+        action: 'delete',
+        fileKey
+      }
+    });
+
+    if (error) throw error;
     return true;
   } catch (error) {
     console.error('Error deleting file:', error);
@@ -227,88 +97,16 @@ export async function deleteFromS3(fileKey: string) {
 
 export async function getStorageStats(): Promise<StorageStats> {
   try {
-    const { data, error } = await supabase
-      .storage
-      .from('drawinmedialib')
-      .list();
-    
+    const { data, error } = await supabase.functions.invoke('s3-media', {
+      body: { 
+        action: 'getStats'
+      }
+    });
+
     if (error) throw error;
-    
-    // Calculate storage statistics
-    let totalSize = 0;
-    const fileTypeCount = {
-      image: 0,
-      document: 0,
-      other: 0
-    };
-    
-    data
-      .filter(item => !item.name.includes('.emptyFolderPlaceholder'))
-      .forEach(item => {
-        const size = item.metadata?.size || 0;
-        totalSize += size;
-        
-        const type = getFileType(item.name);
-        fileTypeCount[type] += 1;
-      });
-    
-    return {
-      totalFiles: data.length,
-      totalSize,
-      fileTypeCount,
-      averageSize: data.length > 0 ? totalSize / data.length : 0
-    };
+    return data as StorageStats;
   } catch (error) {
     console.error('Error getting storage stats:', error);
     throw error;
   }
-}
-
-// Helper function to determine file type based on extension
-function getFileType(key: string): 'image' | 'document' | 'other' {
-  const extension = key.split('.').pop()?.toLowerCase() || '';
-  
-  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'tiff', 'bmp'];
-  const documentExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'];
-  
-  if (imageExtensions.includes(extension)) {
-    return 'image';
-  } else if (documentExtensions.includes(extension)) {
-    return 'document';
-  } else {
-    return 'other';
-  }
-}
-
-// Helper function to categorize content type
-function categorizeContentType(contentType: string): 'image' | 'document' | 'other' {
-  const imageMimeTypes = [
-    'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 
-    'image/webp', 'image/tiff', 'image/bmp'
-  ];
-
-  const documentMimeTypes = [
-    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'text/plain', 'text/csv'
-  ];
-  
-  if (imageMimeTypes.includes(contentType)) {
-    return 'image';
-  } else if (documentMimeTypes.includes(contentType)) {
-    return 'document';
-  } else {
-    return 'other';
-  }
-}
-
-// Helper function to get the public URL for a file
-function getFileUrl(path: string): string {
-  const { data } = supabase
-    .storage
-    .from('drawinmedialib')
-    .getPublicUrl(path);
-  
-  return data.publicUrl;
 }

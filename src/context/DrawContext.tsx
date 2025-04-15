@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Draw, Ticket, Banner, MediaItem } from '../types';
 import { sendDrawEntryNotifications } from '../utils/notificationUtils';
 import { useAuth } from './AuthContext';
-import { getMediaItems, uploadToS3, deleteFromS3, uploadFromUrl, updateMedia } from '../utils/s3Utils';
+import { getMediaItems, uploadToS3, deleteFromS3 } from '../utils/s3Utils';
 
 // Mock data until we integrate with Supabase
 const MOCK_DRAWS: Draw[] = [
@@ -80,8 +79,6 @@ interface DrawContextType {
   updateBanner: (id: string, banner: Partial<Banner>) => Promise<void>;
   deleteBanner: (id: string) => Promise<void>;
   uploadMedia: (file: File) => Promise<MediaItem>;
-  uploadMediaFromUrl: (url: string, fileName?: string) => Promise<MediaItem>;
-  updateMediaFile: (id: string, file: File) => Promise<MediaItem>;
   deleteMedia: (id: string) => Promise<void>;
 }
 
@@ -193,18 +190,7 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Send entry and receipt notifications if user is logged in
       if (user?.id) {
-        try {
-          const notifications = await sendDrawEntryNotifications(user.id, draw.title, number, price);
-          
-          // If we got local notifications back and they're not in Supabase, add them to the context
-          if (notifications && notifications.length > 0) {
-            console.log('Created draw entry notifications:', notifications);
-            // The notification context will handle displaying these
-          }
-        } catch (error) {
-          console.error('Error sending notifications:', error);
-          // Continue without notifications as it's not critical
-        }
+        await sendDrawEntryNotifications(user.id, draw.title, number, price);
       }
       
     } catch (error) {
@@ -289,61 +275,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const uploadMediaFromUrl = async (url: string, fileName?: string): Promise<MediaItem> => {
-    setLoading(true);
-    try {
-      // Upload from URL
-      const { url: fileUrl, key, name, size, type } = await uploadFromUrl(url, fileName);
-      
-      // Create a new media item
-      const newMedia: MediaItem = {
-        id: key, // Use S3 key as ID
-        name: name,
-        url: fileUrl,
-        type: type as 'image' | 'document' | 'other',
-        size: size,
-        uploadDate: new Date().toISOString(),
-      };
-      
-      setMedia(prev => [...prev, newMedia]);
-      return newMedia;
-    } catch (error) {
-      console.error('Upload media from URL error:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateMediaFile = async (id: string, file: File): Promise<MediaItem> => {
-    setLoading(true);
-    try {
-      // Update the file in S3
-      const { url, key, name, size, type } = await updateMedia(id, file);
-      
-      // Update the media item in state
-      const updatedMedia: MediaItem = {
-        id: key,
-        name: name,
-        url: url,
-        type: type as 'image' | 'document' | 'other',
-        size: size,
-        uploadDate: new Date().toISOString(), // Updated timestamp
-      };
-      
-      setMedia(prev => 
-        prev.map(item => item.id === id ? updatedMedia : item)
-      );
-      
-      return updatedMedia;
-    } catch (error) {
-      console.error('Update media error:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const deleteMedia = async (id: string): Promise<void> => {
     setLoading(true);
     try {
@@ -375,8 +306,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateBanner,
         deleteBanner,
         uploadMedia,
-        uploadMediaFromUrl,
-        updateMediaFile,
         deleteMedia
       }}
     >

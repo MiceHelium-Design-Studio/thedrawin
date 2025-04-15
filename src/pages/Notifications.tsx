@@ -13,15 +13,13 @@ const Notifications: React.FC = () => {
   
   useEffect(() => {
     console.log("Notifications page loaded, count:", notifications.length);
-    if (notifications.length > 0) {
-      console.log("First notification:", notifications[0]);
-    }
   }, [notifications]);
   
   const handleMarkAsRead = async (id: string) => {
     try {
       await markAsRead(id);
     } catch (error) {
+      // Error is handled in context with toast
       console.error(error);
     }
   };
@@ -33,6 +31,7 @@ const Notifications: React.FC = () => {
         title: 'Notification deleted',
       });
     } catch (error) {
+      // Error is handled in context with toast
       console.error(error);
     }
   };
@@ -44,6 +43,7 @@ const Notifications: React.FC = () => {
         title: 'All notifications marked as read',
       });
     } catch (error) {
+      // Error is handled in context with toast
       console.error(error);
     }
   };

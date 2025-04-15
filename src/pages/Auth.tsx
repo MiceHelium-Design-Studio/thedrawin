@@ -5,24 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '../context/AuthContext';
 import { useBackground } from '../context/BackgroundContext';
 import { useToast } from '@/components/ui/use-toast';
-import { Facebook, Twitter, Linkedin, LucideProps } from 'lucide-react';
+import { Facebook, Twitter, Linkedin, Mail } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-
-const GoogleIcon = (props: LucideProps) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" />
-    <path d="M17.7218 10.8511H12V13.4818H15.3608C15.104 14.6361 13.9616 15.5681 12 15.5681C9.76163 15.5681 7.93823 13.7447 7.93823 11.5053C7.93823 9.26596 9.76163 7.44255 12 7.44255C13.0264 7.44255 13.9584 7.83191 14.6679 8.47887L16.5679 6.57887C15.3395 5.43972 13.7627 4.77872 12 4.77872C8.29378 4.77872 5.27441 7.79915 5.27441 11.5053C5.27441 15.2115 8.29378 18.2319 12 18.2319C15.4065 18.2319 18.3722 15.6798 18.3722 11.5053C18.3722 11.2923 18.3401 11.0698 18.319 10.8511H17.7218Z" />
-  </svg>
-);
 
 const Auth: React.FC = () => {
   const { user, login, signup, signInWithGoogle, loading: authLoading } = useAuth();
@@ -33,8 +17,10 @@ const Auth: React.FC = () => {
   const { authBackgroundImage } = useBackground();
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Get the intended destination from location state or default to "/"
   const from = location.state?.from?.pathname || "/";
 
+  // Redirect if user is already logged in
   useEffect(() => {
     if (user && !authLoading) {
       console.log("Auth: User is logged in, redirecting to:", from);
@@ -102,10 +88,12 @@ const Auth: React.FC = () => {
     setMode(prev => (prev === 'login' ? 'signup' : 'login'));
   };
 
+  // Clear loading state quickly
   if (authLoading && user) {
     return <Navigate to="/" replace />;
   }
 
+  // If user is already logged in, redirect to home page immediately
   if (user) {
     return <Navigate to="/" replace />;
   }
@@ -184,7 +172,7 @@ const Auth: React.FC = () => {
               className="rounded-full hover:bg-black/60"
               disabled={isProcessing}
             >
-              <GoogleIcon className="h-5 w-5 text-gold" />
+              <Mail className="h-5 w-5 text-gold" />
             </Button>
           </div>
         </div>
