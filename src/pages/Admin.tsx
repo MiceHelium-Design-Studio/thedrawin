@@ -13,7 +13,8 @@ import {
   X,
   Upload,
   Eye,
-  EyeOff
+  EyeOff,
+  Image
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -25,7 +26,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,7 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -45,11 +46,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Switch } from "@/components/ui/switch"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+} from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   Drawer,
   DrawerClose,
@@ -59,27 +60,22 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer"
+} from "@/components/ui/drawer";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import {
-  createDraw,
-  updateDraw,
-  createBanner,
-  updateBanner,
-  deleteBanner
-} from '../server-actions';
+} from "@/components/ui/select";
+import { createDraw, updateDraw, createBanner, updateBanner, deleteBanner } from '../server-actions';
 import { Draw, Banner } from '../types';
 import { uploadToS3, deleteFromS3, BucketType } from '@/utils/s3Utils';
 import { useDraws } from '@/context/DrawContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
 
 const drawFormSchema = z.object({
   title: z.string().min(2, {
@@ -181,7 +177,7 @@ const Admin: React.FC = () => {
     try {
       const ticketPricesArray = values.ticketPrices.split(',').map(Number);
       
-      const newDraw: Omit<Draw, 'id'> = {
+      const newDraw = {
         title: values.title,
         description: values.description,
         maxParticipants: values.maxParticipants,
@@ -216,7 +212,7 @@ const Admin: React.FC = () => {
     try {
       const ticketPricesArray = values.ticketPrices.split(',').map(Number);
       
-      const updatedDraw: Partial<Draw> = {
+      const updatedDraw = {
         title: values.title,
         description: values.description,
         maxParticipants: values.maxParticipants,
@@ -273,7 +269,7 @@ const Admin: React.FC = () => {
 
   const handleBannerCreate = async (values: z.infer<typeof bannerFormSchema>) => {
     try {
-      const newBanner: Omit<Banner, 'id'> = {
+      const newBanner = {
         imageUrl: values.imageUrl,
         linkUrl: values.linkUrl,
         active: values.active
@@ -302,7 +298,7 @@ const Admin: React.FC = () => {
     if (!selectedBanner) return;
     
     try {
-      const updatedBanner: Partial<Banner> = {
+      const updatedBanner = {
         imageUrl: values.imageUrl,
         linkUrl: values.linkUrl,
         active: values.active
@@ -526,10 +522,16 @@ const Admin: React.FC = () => {
   const handleBannerUpload = async (file: File) => {
     try {
       setIsUploading(true);
+      toast({
+        title: "Uploading image...",
+        description: "Please wait while your image is being uploaded."
+      });
+      
       const { url, key } = await uploadToS3(file, 'banners');
       setBannerImageUrl(url);
       setBannerFileKey(key);
       bannerForm.setValue('imageUrl', url);
+      
       toast({
         title: "Image uploaded",
         description: "Banner image has been uploaded successfully."
@@ -544,6 +546,46 @@ const Admin: React.FC = () => {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const ImageUploader = ({ onImageSelected }: { onImageSelected: (file: File) => void }) => {
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        onImageSelected(files[0]);
+      }
+    };
+    
+    const triggerFileInput = () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    };
+    
+    return (
+      <div className="flex flex-col items-center">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={triggerFileInput}
+          className="w-full flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg"
+        >
+          <div className="flex flex-col items-center gap-2">
+            <Image className="h-10 w-10 text-gray-400" />
+            <span className="text-sm text-gray-500">Click to select an image</span>
+          </div>
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+      </div>
+    );
   };
 
   return (
@@ -636,7 +678,7 @@ const Admin: React.FC = () => {
                           <FormControl>
                             <Input 
                               type="date" 
-                              value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''} 
+                              value={field.value instanceof Date ? format(field.value, 'yyyy-MM-dd') : ''} 
                               onChange={(e) => field.onChange(new Date(e.target.value))} 
                             />
                           </FormControl>
@@ -653,7 +695,7 @@ const Admin: React.FC = () => {
                           <FormControl>
                             <Input 
                               type="date" 
-                              value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''} 
+                              value={field.value instanceof Date ? format(field.value, 'yyyy-MM-dd') : ''} 
                               onChange={(e) => field.onChange(new Date(e.target.value))} 
                             />
                           </FormControl>
@@ -751,9 +793,36 @@ const Admin: React.FC = () => {
                   {selectedBanner ? 'Edit the banner details.' : 'Create a new banner to display on the site.'}
                 </DrawerDescription>
               </DrawerHeader>
-              <div className="p-4 pb-0">
+              <div className="p-6">
                 <Form {...bannerForm}>
-                  <form onSubmit={bannerForm.handleSubmit(selectedBanner ? handleBannerUpdate : handleBannerCreate)} className="space-y-4">
+                  <form onSubmit={bannerForm.handleSubmit(selectedBanner ? handleBannerUpdate : handleBannerCreate)} className="space-y-6">
+                    <div className="mb-6">
+                      <FormLabel className="block mb-2">Banner Image</FormLabel>
+                      {!isUploading ? (
+                        <ImageUploader onImageSelected={handleBannerUpload} />
+                      ) : (
+                        <div className="flex items-center justify-center p-6 border border-gray-200 rounded-lg">
+                          <div className="text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                            <p className="text-sm text-gray-500">Uploading image...</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {bannerImageUrl && (
+                        <div className="mt-4">
+                          <p className="text-sm text-gray-500 mb-2">Image Preview:</p>
+                          <div className="relative rounded-lg overflow-hidden border border-gray-200">
+                            <img 
+                              src={bannerImageUrl} 
+                              alt="Banner Preview" 
+                              className="w-full h-40 object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
                     <FormField
                       control={bannerForm.control}
                       name="imageUrl"
@@ -761,37 +830,16 @@ const Admin: React.FC = () => {
                         <FormItem>
                           <FormLabel>Image URL</FormLabel>
                           <FormControl>
-                            <div className="flex items-center space-x-2">
-                              <Input placeholder="https://example.com/image.jpg" {...field} />
-                              <label htmlFor="banner-image-upload" className="cursor-pointer">
-                                <div className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-3 py-2 rounded-md text-sm font-medium flex items-center">
-                                  <Upload className="h-4 w-4 mr-1" />
-                                  Upload
-                                </div>
-                                <input
-                                  type="file"
-                                  id="banner-image-upload"
-                                  className="hidden"
-                                  accept="image/*"
-                                  onChange={(e) => {
-                                    const files = e.target.files;
-                                    if (files && files.length > 0) {
-                                      handleBannerUpload(files[0]);
-                                    }
-                                  }}
-                                />
-                              </label>
-                            </div>
+                            <Input placeholder="https://example.com/image.jpg" {...field} />
                           </FormControl>
+                          <FormDescription>
+                            This will be automatically filled when you upload an image above.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    {bannerImageUrl && (
-                      <div className="mt-2">
-                        <img src={bannerImageUrl} alt="Banner Preview" className="w-full h-auto rounded-md" />
-                      </div>
-                    )}
+                    
                     <FormField
                       control={bannerForm.control}
                       name="linkUrl"
@@ -801,10 +849,14 @@ const Admin: React.FC = () => {
                           <FormControl>
                             <Input placeholder="https://example.com" {...field} />
                           </FormControl>
+                          <FormDescription>
+                            Where users will be directed when they click the banner.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+                    
                     <FormField
                       control={bannerForm.control}
                       name="active"
@@ -822,8 +874,13 @@ const Admin: React.FC = () => {
                         </FormItem>
                       )}
                     />
-                    <DrawerFooter>
-                      <Button type="submit" className="w-full" disabled={isUploading}>
+                    
+                    <DrawerFooter className="px-0">
+                      <Button 
+                        type="submit" 
+                        className="w-full" 
+                        disabled={isUploading || (!bannerImageUrl && !bannerForm.getValues('imageUrl'))}
+                      >
                         {selectedBanner ? 'Update Banner' : 'Create Banner'}
                       </Button>
                       <DrawerClose asChild>
