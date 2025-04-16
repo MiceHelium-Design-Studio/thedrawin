@@ -22,15 +22,29 @@ export async function uploadAndUpdateBanner(imageUrl: string, position: number =
     
     console.log('Banner uploaded successfully:', url);
     
-    // Update the banners table or context with this new image
+    // Check if a banner with this position already exists
+    const { data: existingBanner } = await supabase
+      .from('media_items')
+      .select('*')
+      .eq('name', `banner-${position}`)
+      .single();
+    
+    // Generate a unique ID for the banner
+    const bannerId = existingBanner?.id || `banner-${position}`;
+    
+    // Store banner info in media_items table
+    const bannerData = {
+      id: bannerId,
+      name: `banner-${position}`,
+      type: 'banner',
+      url: url,
+      user_id: (await supabase.auth.getUser()).data.user?.id || 'system',
+      size: blob.size
+    };
+    
     const { error: updateError } = await supabase
-      .from('banners')
-      .upsert({
-        id: position.toString(), // Use position as the ID (or adapt as needed)
-        imageUrl: url,
-        linkUrl: '/draws', // Default link to the draws page
-        active: true
-      });
+      .from('media_items')
+      .upsert(bannerData);
     
     if (updateError) {
       console.error('Error updating banner in database:', updateError);
@@ -58,13 +72,14 @@ export async function uploadAndUpdateBanner(imageUrl: string, position: number =
 export async function initializeGoldBanner() {
   try {
     // Check if banner already exists
-    const { data: existingBanners } = await supabase
-      .from('banners')
+    const { data: existingBanner } = await supabase
+      .from('media_items')
       .select('*')
-      .eq('id', '1')
+      .eq('name', 'banner-1')
+      .eq('type', 'banner')
       .single();
     
-    if (existingBanners) {
+    if (existingBanner) {
       console.log('Banner already exists, skipping initialization');
       return;
     }

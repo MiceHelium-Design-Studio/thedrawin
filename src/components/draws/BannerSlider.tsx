@@ -1,20 +1,66 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Banner } from '../../types';
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
-interface BannerSliderProps {
-  banners: Banner[];
+interface Banner {
+  id: string;
+  url: string;
+  linkUrl?: string;
+  active?: boolean;
 }
 
-const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
+const BannerSlider: React.FC<{ banners?: Banner[] }> = ({ banners: propBanners }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
+  const [banners, setBanners] = useState<Banner[]>(propBanners || []);
+  
+  // Fetch banners if not provided as props
+  useEffect(() => {
+    if (propBanners) {
+      setBanners(propBanners);
+      return;
+    }
+    
+    async function fetchBanners() {
+      try {
+        const { data, error } = await supabase
+          .from('media_items')
+          .select('*')
+          .eq('type', 'banner');
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (data && data.length > 0) {
+          // Convert media_items to Banner format
+          const formattedBanners = data.map(item => ({
+            id: item.id,
+            url: item.url,
+            linkUrl: '/draws', // Default link
+            active: true // Default active status
+          }));
+          
+          setBanners(formattedBanners);
+        }
+      } catch (error) {
+        console.error('Error fetching banners:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Failed to load banners',
+          description: 'There was a problem loading the banner images.'
+        });
+      }
+    }
+    
+    fetchBanners();
+  }, [propBanners]);
   
   // Filter active banners
-  const activeBanners = banners.filter(banner => banner.active);
+  const activeBanners = banners.filter(banner => banner.active !== false);
   
   if (activeBanners.length === 0) {
     return null;
@@ -48,7 +94,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
   const handleImageError = (banner: Banner, e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.error('Failed to load banner image:', {
       bannerId: banner.id,
-      imageUrl: banner.imageUrl
+      imageUrl: banner.url
     });
     
     // Set this banner as having a load error
@@ -58,7 +104,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
     toast({
       variant: 'destructive',
       title: 'Image failed to load',
-      description: `Banner image couldn't be displayed. Please check the URL: ${banner.imageUrl}`
+      description: `Banner image couldn't be displayed. Please check the URL: ${banner.url}`
     });
     
     // Apply fallback styling
@@ -73,7 +119,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
           {activeBanners.map((banner, index) => (
             <a 
               key={banner.id} 
-              href={banner.linkUrl}
+              href={banner.linkUrl || '/draws'}
               target="_blank"
               rel="noopener noreferrer"
               className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ${
@@ -81,7 +127,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
               }`}
             >
               <img
-                src={banner.imageUrl}
+                src={banner.url}
                 alt={`Banner ${index + 1}`}
                 className="w-full h-full object-cover"
                 onError={(e) => handleImageError(banner, e)}
