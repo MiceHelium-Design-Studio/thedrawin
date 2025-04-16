@@ -49,7 +49,7 @@ export const ensureFullAdmin = async () => {
     // Note: In a production app, you'd use admin APIs, but for this demo we'll
     // use a workaround since we don't have access to admin.getUserByEmail
     try {
-      // Try to find user auth data - explicitly type the response
+      // Try to find user auth data with proper typings
       const { data, error: signInError } = await supabase.auth.signInWithOtp({
         email: adminEmail,
         options: {
@@ -62,15 +62,16 @@ export const ensureFullAdmin = async () => {
         return;
       }
       
-      // Check if user exists and has an id property
-      if (data && data.user && data.user.id) {
+      // Properly check and type the user object before accessing properties
+      const user = data?.user;
+      if (user && 'id' in user) {
         // User exists in auth, but not in profiles - create profile
         console.log(`Creating profile for ${adminEmail} with admin status...`);
         
         const { error: insertError } = await supabase
           .from('profiles')
           .insert({
-            id: data.user.id,
+            id: user.id,
             email: adminEmail,
             is_admin: true
           });
