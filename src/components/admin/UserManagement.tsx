@@ -25,6 +25,7 @@ import { User } from '@/types';
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -34,6 +35,7 @@ const UserManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      setFetchError(null);
       
       // Use a more direct query approach with a service role key
       // First, get all users from the profiles table without any filters that could trigger RLS
@@ -43,6 +45,7 @@ const UserManagement: React.FC = () => {
         .order('created_at', { ascending: false });
       
       if (error) {
+        setFetchError(error.message);
         throw error;
       }
       
@@ -68,6 +71,7 @@ const UserManagement: React.FC = () => {
       
       // Set empty users array to avoid showing stale data
       setUsers([]);
+      setFetchError(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }
@@ -187,7 +191,7 @@ const UserManagement: React.FC = () => {
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
-                  No users found. {error ? "An error occurred while loading users." : ""}
+                  No users found. {fetchError ? `An error occurred: ${fetchError}` : ""}
                 </TableCell>
               </TableRow>
             ) : (
