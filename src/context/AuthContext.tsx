@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +14,7 @@ interface AuthContextType {
   updateProfile: (data: Partial<User>) => Promise<void>;
   addFunds: (amount: number) => Promise<void>;
   clearCacheAndReload: () => void;
+  makeUserAdmin: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,12 +40,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!isSubscribed) return;
             
             // FOR DEMO: Creating minimal user with admin rights
+            const email = session.user.email || '';
+            const isFullAdmin = email === 'raghidhilal@gmail.com'; // Special case for this email
+            
             setUser({
               id: session.user.id,
-              email: session.user.email || '',
+              email: email,
               name: session.user?.user_metadata?.name || 'Demo User',
               wallet: 500, // Give some funds to test
-              isAdmin: true // Make user admin
+              isAdmin: isFullAdmin || true // Make user admin
             });
             setLoading(false);
           }, 0);
@@ -64,13 +67,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data } = await supabase.auth.getSession();
         
         if (data.session?.user && isSubscribed) {
+          const email = data.session.user.email || '';
+          const isFullAdmin = email === 'raghidhilal@gmail.com'; // Special case for this email
+          
           // FOR DEMO: Creating minimal user with admin rights
           setUser({
             id: data.session.user.id,
-            email: data.session.user.email || '',
+            email: email,
             name: data.session.user.user_metadata?.name || 'Demo User',
             wallet: 500, // Give some funds to test
-            isAdmin: true // Make user admin
+            isAdmin: isFullAdmin || true // Make user admin
           });
           setLoading(false);
         } else if (isSubscribed) {
@@ -273,6 +279,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const makeUserAdmin = async (email: string) => {
+    setLoading(true);
+    try {
+      // Call the Supabase function to update admin status
+      const { data, error } = await supabase.rpc('update_user_admin_status', {
+        user_email: email,
+        is_admin_status: true
+      });
+
+      if (error) {
+        throw error;
+      }
+      
+      // If the current user is the one being updated, update local state
+      if (user && user.email === email) {
+        setUser({ ...user, isAdmin: true });
+      }
+      
+      toast({
+        title: 'Admin status updated',
+        description: `${email} has been made an admin.`,
+      });
+      
+      return data;
+    } catch (error: any) {
+      console.error('Make admin error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Update failed',
+        description: error.message || 'An error occurred while updating admin status',
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const clearCacheAndReload = () => {
     queryClient.clear();
     
@@ -296,7 +339,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logout, 
       updateProfile, 
       addFunds,
-      clearCacheAndReload
+      clearCacheAndReload,
+      makeUserAdmin
     }}>
       {children}
     </AuthContext.Provider>

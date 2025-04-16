@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { DrawProvider } from "./context/DrawContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { BackgroundProvider } from "./context/BackgroundContext";
+import { ensureFullAdmin } from "./utils/adminSetup";
 
 // Pages
 import Home from "./pages/Home";
@@ -71,6 +72,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   console.log("App rendering");
+  
+  // Call ensureFullAdmin when the app initializes
+  useEffect(() => {
+    ensureFullAdmin()
+      .then(() => console.log('Admin check completed'))
+      .catch(err => console.error('Admin check failed:', err));
+  }, []);
   
   return (
     <QueryClientProvider client={queryClient}>
