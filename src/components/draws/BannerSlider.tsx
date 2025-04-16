@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Banner as AppBanner } from '@/types'; // Import the Banner type from our types file
+import { Banner as AppBanner } from '@/types';
 import { initializeGoldBanner } from '@/utils/bannerUtils';
 
 interface Banner {
@@ -19,14 +18,12 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
   const [banners, setBanners] = useState<Banner[]>([]);
   
-  // Unified useEffect for fetching banners - ensuring it always runs in the same order
   useEffect(() => {
     const fetchAndSetBanners = async () => {
       if (propBanners && propBanners.length > 0) {
-        // Map the AppBanner type to the internal Banner type
         const convertedBanners = propBanners.map(banner => ({
           id: banner.id,
-          url: banner.url || banner.imageUrl, // Use url if available, otherwise imageUrl
+          url: banner.url || banner.imageUrl,
           linkUrl: banner.linkUrl,
           active: banner.active
         }));
@@ -34,7 +31,6 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
         return;
       }
       
-      // Only fetch banners if none were provided as props
       try {
         const { data, error } = await supabase
           .from('media_items')
@@ -46,20 +42,17 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
         }
         
         if (data && data.length > 0) {
-          // Convert media_items to Banner format
           const formattedBanners = data.map(item => ({
             id: item.id,
             url: item.url,
-            linkUrl: '/draws', // Default link
-            active: true // Default active status
+            linkUrl: '/draws',
+            active: true
           }));
           
           setBanners(formattedBanners);
         } else {
-          // If no banners exist, initialize the default banner
           await initializeGoldBanner();
           
-          // Fetch again after initializing
           const { data: updatedData } = await supabase
             .from('media_items')
             .select('*')
@@ -89,12 +82,9 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
     fetchAndSetBanners();
   }, [propBanners]);
   
-  // Filter active banners after banners have been fetched
   const activeBanners = banners.filter(banner => banner.active !== false);
   
-  // Auto-rotation logic - maintaining consistent hook order is critical
   useEffect(() => {
-    // Always define the interval cleanup function, even if it does nothing
     let interval: number | undefined;
     
     if (activeBanners.length > 1) {
@@ -110,8 +100,8 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
         window.clearInterval(interval);
       }
     };
-  }, [activeBanners.length]); // Only dependency is the length of active banners
-
+  }, [activeBanners.length]);
+  
   const goToNext = () => {
     setCurrentIndex((prevIndex) => 
       prevIndex === activeBanners.length - 1 ? 0 : prevIndex + 1
@@ -130,29 +120,25 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
       imageUrl: banner.url
     });
     
-    // Set this banner as having a load error
     setLoadErrors(prev => ({ ...prev, [banner.id]: true }));
     
-    // Show a toast notification
     toast({
       variant: 'destructive',
       title: 'Image failed to load',
       description: `Banner image couldn't be displayed. Please check the URL: ${banner.url}`
     });
     
-    // Apply fallback styling
     e.currentTarget.src = '/placeholder.svg';
-    e.currentTarget.className = e.currentTarget.className + ' opacity-50';
+    e.currentTarget.className = e.currentTarget.className + ' opacity-50 bg-gradient-to-r from-gold/10 to-black';
   };
 
-  // Early return if no active banners after filtering
   if (activeBanners.length === 0) {
     return null;
   }
 
   return (
     <div className="w-full overflow-hidden mb-6 relative">
-      <Card className="shadow-md rounded-xl overflow-hidden">
+      <Card className="shadow-[0_0_20px_rgba(212,175,55,0.15)] rounded-xl overflow-hidden border-gold/20">
         <div className="relative h-48 md:h-64">
           {activeBanners.map((banner, index) => (
             <a 
@@ -171,10 +157,11 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
                 onError={(e) => handleImageError(banner, e)}
                 loading="lazy"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-40"></div>
               
               {loadErrors[banner.id] && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <div className="bg-red-500/80 text-white px-3 py-2 rounded-md flex items-center">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+                  <div className="bg-black/80 text-gold px-3 py-2 rounded-md flex items-center border border-gold/30 shadow-[0_0_10px_rgba(212,175,55,0.2)]">
                     <AlertTriangle className="h-4 w-4 mr-2" />
                     <span className="text-sm">Image failed to load</span>
                   </div>
@@ -188,14 +175,14 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
           <>
             <button 
               onClick={goToPrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full z-20 hover:bg-black/70 transition-colors"
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 text-gold p-2 rounded-full z-20 hover:bg-black/80 hover:text-gold-light transition-colors border border-gold/30"
               aria-label="Previous banner"
             >
               <ChevronLeft size={20} />
             </button>
             <button 
               onClick={goToNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full z-20 hover:bg-black/70 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 text-gold p-2 rounded-full z-20 hover:bg-black/80 hover:text-gold-light transition-colors border border-gold/30"
               aria-label="Next banner"
             >
               <ChevronRight size={20} />
@@ -205,8 +192,10 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full ${
-                    index === currentIndex ? 'bg-gold' : 'bg-white/50'
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex 
+                      ? 'bg-gold w-4 shadow-[0_0_5px_rgba(212,175,55,0.5)]' 
+                      : 'bg-white/50'
                   }`}
                   aria-label={`Go to banner ${index + 1}`}
                 />
