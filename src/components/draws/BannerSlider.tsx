@@ -18,21 +18,22 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
   const [banners, setBanners] = useState<Banner[]>([]);
   
-  // Convert AppBanner to internal Banner format
+  // Convert AppBanner to internal Banner format - always call this useEffect
   useEffect(() => {
-    if (propBanners) {
-      // Map the AppBanner type to the internal Banner type
-      const convertedBanners = propBanners.map(banner => ({
-        id: banner.id,
-        url: banner.url || banner.imageUrl, // Use url if available, otherwise imageUrl
-        linkUrl: banner.linkUrl,
-        active: banner.active
-      }));
-      setBanners(convertedBanners);
-      return;
-    }
-    
-    async function fetchBanners() {
+    const fetchAndSetBanners = async () => {
+      if (propBanners && propBanners.length > 0) {
+        // Map the AppBanner type to the internal Banner type
+        const convertedBanners = propBanners.map(banner => ({
+          id: banner.id,
+          url: banner.url || banner.imageUrl, // Use url if available, otherwise imageUrl
+          linkUrl: banner.linkUrl,
+          active: banner.active
+        }));
+        setBanners(convertedBanners);
+        return;
+      }
+      
+      // Only fetch banners if none were provided as props
       try {
         const { data, error } = await supabase
           .from('media_items')
@@ -62,9 +63,9 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
           description: 'There was a problem loading the banner images.'
         });
       }
-    }
+    };
     
-    fetchBanners();
+    fetchAndSetBanners();
   }, [propBanners]);
   
   // Filter active banners
@@ -74,7 +75,7 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
     return null;
   }
 
-  // Auto-rotation logic
+  // Auto-rotation logic - maintain this hook even when no banners
   useEffect(() => {
     if (activeBanners.length <= 1) return;
     
