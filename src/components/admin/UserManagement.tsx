@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, CheckCheck, UserCog, UserX, Shield, Mail, UserRound } from 'lucide-react';
+import { Check, CheckCheck, UserCog, UserX, Shield, Mail, UserRound, Wallet, PlusCircle, MinusCircle } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -16,8 +15,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types';
@@ -27,6 +30,9 @@ const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [walletAmount, setWalletAmount] = useState<string>('100');
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false);
   const { toast } = useToast();
   const { clearCacheAndReload } = useAuth();
 
@@ -39,10 +45,6 @@ const UserManagement: React.FC = () => {
       setLoading(true);
       setFetchError(null);
       
-      // Use client-side filtering approach (for demo)
-      // In production, this would use a separate API endpoint or function 
-      // that doesn't trigger infinite recursion
-      
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, email, name, avatar, wallet, is_admin, created_at');
@@ -52,7 +54,6 @@ const UserManagement: React.FC = () => {
         throw profilesError;
       }
       
-      // Map the database response to match our User interface
       const mappedUsers = profilesData?.map(user => ({
         id: user.id,
         email: user.email,
@@ -72,7 +73,6 @@ const UserManagement: React.FC = () => {
         description: 'There was a problem loading the user list. Please try again later.'
       });
       
-      // Set empty users array to avoid showing stale data
       setUsers([]);
       setFetchError(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
@@ -89,7 +89,6 @@ const UserManagement: React.FC = () => {
       
       if (error) throw error;
       
-      // Update local state
       setUsers(users.map(user => 
         user.id === userId ? { ...user, isAdmin: !currentStatus } : user
       ));
@@ -110,7 +109,6 @@ const UserManagement: React.FC = () => {
 
   const sendNotificationToUser = async (userId: string, email: string) => {
     try {
-      // Create a notification
       const { error } = await supabase
         .from('notifications')
         .insert({
@@ -143,6 +141,69 @@ const UserManagement: React.FC = () => {
     });
   };
 
+  const openWalletDialog = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsWalletDialogOpen(true);
+  };
+
+  const closeWalletDialog = () => {
+    setSelectedUserId(null);
+    setWalletAmount('100');
+    setIsWalletDialogOpen(false);
+  };
+
+  const handleWalletAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^\d]/g, '');
+    setWalletAmount(value);
+  };
+
+  const addWalletFunds = async () => {
+    if (!selectedUserId || !walletAmount || parseInt(walletAmount) <= 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid amount',
+        description: 'Please enter a valid amount to add.'
+      });
+      return;
+    }
+
+    try {
+      const amount = parseInt(walletAmount);
+      const userToUpdate = users.find(u => u.id === selectedUserId);
+      
+      if (!userToUpdate) {
+        throw new Error('User not found');
+      }
+
+      const newWalletAmount = userToUpdate.wallet + amount;
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({ wallet: newWalletAmount })
+        .eq('id', selectedUserId);
+      
+      if (error) throw error;
+      
+      setUsers(users.map(user => 
+        user.id === selectedUserId ? { ...user, wallet: newWalletAmount } : user
+      ));
+      
+      toast({
+        title: 'Wallet updated',
+        description: `Added ${amount} credits to user's wallet.`
+      });
+      
+      closeWalletDialog();
+    } catch (error) {
+      console.error('Error updating wallet:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Update failed',
+        description: 'There was a problem updating the wallet.'
+      });
+    }
+  };
+
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-4">
@@ -152,7 +213,7 @@ const UserManagement: React.FC = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardHeader>
             <CardTitle>Total Users</CardTitle>
@@ -182,6 +243,18 @@ const UserManagement: React.FC = () => {
             <p className="text-3xl font-bold">{users.filter(user => !user.isAdmin).length}</p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Balance</CardTitle>
+            <CardDescription>Combined wallet balances</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">
+              {users.reduce((total, user) => total + user.wallet, 0)}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="rounded-md border overflow-x-auto">
@@ -190,13 +263,14 @@ const UserManagement: React.FC = () => {
             <TableHead>User</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Created At</TableHead>
+            <TableHead>Wallet</TableHead>
             <TableHead>Admin Status</TableHead>
             <TableHead>Actions</TableHead>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
+                <TableCell colSpan={6} className="text-center py-4">
                   <div className="flex justify-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                   </div>
@@ -204,7 +278,7 @@ const UserManagement: React.FC = () => {
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">
+                <TableCell colSpan={6} className="text-center py-4">
                   No users found. {fetchError ? `An error occurred: ${fetchError}` : ""}
                 </TableCell>
               </TableRow>
@@ -230,6 +304,12 @@ const UserManagement: React.FC = () => {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
                   <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Wallet className="h-4 w-4 text-green-600" />
+                      <span className="font-medium">{user.wallet}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex items-center space-x-2">
                       <Switch 
                         checked={user.isAdmin} 
@@ -250,6 +330,14 @@ const UserManagement: React.FC = () => {
                         <Mail className="h-4 w-4 mr-1" />
                         Notify
                       </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => openWalletDialog(user.id)}
+                      >
+                        <PlusCircle className="h-4 w-4 mr-1" />
+                        Add Funds
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -258,6 +346,38 @@ const UserManagement: React.FC = () => {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={isWalletDialogOpen} onOpenChange={setIsWalletDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Wallet Funds</DialogTitle>
+            <DialogDescription>
+              Add credits to the user's wallet balance.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="amount" className="text-right">
+                Amount
+              </Label>
+              <div className="col-span-3 flex items-center">
+                <Input
+                  id="amount"
+                  type="text"
+                  value={walletAmount}
+                  onChange={handleWalletAmountChange}
+                  className="flex-1"
+                />
+                <span className="ml-2 text-sm text-gray-500">credits</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeWalletDialog}>Cancel</Button>
+            <Button onClick={addWalletFunds}>Add Funds</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
