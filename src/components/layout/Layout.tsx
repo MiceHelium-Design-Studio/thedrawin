@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Award, Bell, User, Settings } from 'lucide-react';
@@ -20,7 +21,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   console.log("Layout rendering, user:", user?.id, "isAdmin:", user?.isAdmin, "isAuthPage:", isAuthPage);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
       <main className="flex-grow pb-16 pattern-bg">{children}</main>
 
       {/* Only show navbar if not on auth page or if user is authenticated */}
