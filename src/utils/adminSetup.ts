@@ -45,12 +45,12 @@ export const ensureFullAdmin = async () => {
     // Step 3: If user not found in profiles but exists in auth, we need to find them
     console.log(`Profile for ${adminEmail} not found. Checking auth system...`);
     
-    // Find existing user by email (using auth.signInWithPassword with error handling)
+    // Find existing user by email (using auth.signInWithOtp with error handling)
     // Note: In a production app, you'd use admin APIs, but for this demo we'll
     // use a workaround since we don't have access to admin.getUserByEmail
     try {
-      // Try to find user auth data
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithOtp({
+      // Try to find user auth data - explicitly type the response
+      const { data, error: signInError } = await supabase.auth.signInWithOtp({
         email: adminEmail,
         options: {
           shouldCreateUser: false // Don't create new user
@@ -62,14 +62,15 @@ export const ensureFullAdmin = async () => {
         return;
       }
       
-      if (user) {
+      // Check if user exists and has an id property
+      if (data && data.user && data.user.id) {
         // User exists in auth, but not in profiles - create profile
         console.log(`Creating profile for ${adminEmail} with admin status...`);
         
         const { error: insertError } = await supabase
           .from('profiles')
           .insert({
-            id: user.id,
+            id: data.user.id,
             email: adminEmail,
             is_admin: true
           });
