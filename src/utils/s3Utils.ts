@@ -25,7 +25,8 @@ export type BucketType = 'profile_images' | 'banners' | 'draw_images' | 'media';
 
 export async function getMediaItems() {
   try {
-    // Query the media_items table first
+    console.log('Fetching media items...');
+    // First try to query the media_items table directly (preferred approach)
     const { data: dbMedia, error: dbError } = await supabase
       .from('media_items')
       .select('*')
@@ -33,10 +34,9 @@ export async function getMediaItems() {
     
     if (dbError) {
       console.error('Error fetching from database:', dbError);
-      throw dbError;
-    }
-    
-    if (dbMedia && dbMedia.length > 0) {
+      // Continue to attempt fallback methods
+    } else if (dbMedia && dbMedia.length > 0) {
+      console.log('Successfully fetched media items from database:', dbMedia.length);
       // Transform database format to app format
       return dbMedia.map(item => ({
         id: item.id,
@@ -46,22 +46,71 @@ export async function getMediaItems() {
         size: item.size,
         uploadDate: item.upload_date
       }));
+    } else {
+      console.log('No media items found in database, will use fallback methods');
     }
     
-    // If no items in database, fallback to S3 API
-    const { data, error } = await supabase.functions.invoke('s3-media', {
-      body: { action: 'list' }
-    });
+    // If no items in database or error, try direct bucket listing
+    try {
+      console.log('Attempting to list storage bucket items...');
+      // Try direct storage bucket listing as a fallback
+      const { data: storageData, error: storageError } = await supabase.storage
+        .from('media')
+        .list('', {
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+      
+      if (storageError) {
+        console.error('Error listing storage bucket:', storageError);
+        throw storageError;
+      }
+      
+      if (storageData && storageData.length > 0) {
+        console.log('Successfully listed items from storage bucket:', storageData.length);
+        // Transform storage format to app format
+        return storageData.map(item => {
+          const url = supabase.storage.from('media').getPublicUrl(item.name).data.publicUrl;
+          return {
+            id: item.id || item.name,
+            name: item.name,
+            url: url,
+            type: determineFileType(item.name),
+            size: item.metadata?.size || 0,
+            uploadDate: item.created_at || new Date().toISOString()
+          };
+        });
+      }
+    } catch (storageListError) {
+      console.error('Error in storage listing fallback:', storageListError);
+      // Continue to next fallback
+    }
+    
+    // Edge function fallback (last resort)
+    try {
+      console.log('Attempting to use edge function as last resort...');
+      const { data, error } = await supabase.functions.invoke('s3-media', {
+        body: { action: 'list' }
+      });
 
-    if (error) throw error;
-    return data.media || [];
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
+      
+      console.log('Successfully fetched media items from edge function');
+      return data.media || [];
+    } catch (edgeFunctionError) {
+      console.error('Edge function fallback failed:', edgeFunctionError);
+      throw edgeFunctionError;
+    }
   } catch (error) {
-    console.error('Error getting media items:', error);
+    console.error('Error getting media items (all methods failed):', error);
     toast({
       variant: 'destructive',
       title: 'Failed to load media',
-      description: 'There was a problem loading your media library.'
+      description: 'There was a problem loading your media library. Please try again later.'
     });
+    // Return empty array to prevent application crashes
     return [];
   }
 }
