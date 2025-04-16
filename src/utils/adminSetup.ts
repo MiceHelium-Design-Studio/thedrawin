@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
 
 export const ensureFullAdmin = async () => {
   try {
@@ -62,10 +63,11 @@ export const ensureFullAdmin = async () => {
         return;
       }
       
-      // Properly check and type the user object before accessing properties
-      const user = data?.user;
-      if (user && 'id' in user) {
-        // User exists in auth, but not in profiles - create profile
+      // Explicitly check and type the user object
+      if (data && data.user) {
+        const user = data.user as User;
+        
+        // Now we can safely access the id property
         console.log(`Creating profile for ${adminEmail} with admin status...`);
         
         const { error: insertError } = await supabase
