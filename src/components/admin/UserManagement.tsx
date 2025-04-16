@@ -20,15 +20,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-
-interface User {
-  id: string;
-  email: string;
-  name?: string;
-  avatar?: string;
-  isAdmin: boolean;
-  createdAt: string;
-}
+import { User } from '@/types';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -51,7 +43,18 @@ const UserManagement: React.FC = () => {
       
       if (error) throw error;
       
-      setUsers(data || []);
+      // Map the database response to match our User interface
+      const mappedUsers = data?.map(user => ({
+        id: user.id,
+        email: user.email,
+        name: user.name || undefined,
+        avatar: user.avatar || undefined,
+        wallet: user.wallet || 0,
+        isAdmin: user.is_admin || false,
+        createdAt: user.created_at
+      })) || [];
+      
+      setUsers(mappedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
