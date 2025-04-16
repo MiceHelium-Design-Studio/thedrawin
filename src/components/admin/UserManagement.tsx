@@ -204,7 +204,7 @@ const UserManagement: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <Switch 

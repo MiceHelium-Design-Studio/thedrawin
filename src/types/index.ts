@@ -5,6 +5,7 @@ export interface User {
   avatar?: string;
   wallet: number;
   isAdmin: boolean;
+  createdAt?: string;
 }
 
 export interface Draw {
