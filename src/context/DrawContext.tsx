@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Draw, Ticket, Banner, MediaItem } from '../types';
 import { sendDrawEntryNotifications } from '../utils/notificationUtils';
@@ -6,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { getMediaItems, uploadToS3, deleteFromS3, BucketType } from '../utils/s3Utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
+import { initializeGoldBanner } from '../utils/bannerUtils';
 
 const MOCK_DRAWS: Draw[] = [
   {
@@ -120,7 +120,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const exists = prevMedia.some(item => item.id === newItem.id);
                 if (exists) return prevMedia;
                 
-                // Ensure type is one of the allowed values
                 let mediaType: "image" | "document" | "video" = "document";
                 if (newItem.type === 'image' || newItem.type === 'document' || newItem.type === 'video') {
                   mediaType = newItem.type;
@@ -167,7 +166,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       const mediaItems = await getMediaItems();
-      // The getMediaItems function now properly validates types
       setMedia(mediaItems as MediaItem[]);
     } catch (error) {
       console.error('Error fetching media items:', error);
@@ -183,6 +181,10 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     console.log("DrawContext initializing...");
+    
+    initializeGoldBanner().catch(error => {
+      console.error("Error initializing banner:", error);
+    });
     
     const timer = setTimeout(() => {
       console.log("DrawContext loading completed");
@@ -325,7 +327,6 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { url, key, name, size, type } = await uploadToS3(file, bucketType);
       
-      // Ensure the type is one of the allowed types for MediaItem
       let mediaType: "image" | "document" | "video" = "document";
       if (type === 'image' || type === 'document' || type === 'video') {
         mediaType = type as "image" | "document" | "video";

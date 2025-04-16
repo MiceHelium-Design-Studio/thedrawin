@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Banner as AppBanner } from '@/types'; // Import the Banner type from our types file
+import { initializeGoldBanner } from '@/utils/bannerUtils';
 
 interface Banner {
   id: string;
@@ -54,6 +55,26 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
           }));
           
           setBanners(formattedBanners);
+        } else {
+          // If no banners exist, initialize the default banner
+          await initializeGoldBanner();
+          
+          // Fetch again after initializing
+          const { data: updatedData } = await supabase
+            .from('media_items')
+            .select('*')
+            .eq('type', 'banner');
+            
+          if (updatedData && updatedData.length > 0) {
+            const formattedBanners = updatedData.map(item => ({
+              id: item.id,
+              url: item.url,
+              linkUrl: '/draws',
+              active: true
+            }));
+            
+            setBanners(formattedBanners);
+          }
         }
       } catch (error) {
         console.error('Error fetching banners:', error);
