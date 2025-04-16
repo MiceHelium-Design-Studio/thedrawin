@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, CheckCheck, UserCog, UserX, Shield, Mail } from 'lucide-react';
@@ -37,8 +36,7 @@ const UserManagement: React.FC = () => {
       setLoading(true);
       setFetchError(null);
       
-      // Use a more direct query approach with a service role key
-      // First, get all users from the profiles table without any filters that could trigger RLS
+      // Fetch users with admin role check
       const { data, error } = await supabase
         .from('profiles')
         .select('id, email, name, avatar, wallet, is_admin, created_at')
