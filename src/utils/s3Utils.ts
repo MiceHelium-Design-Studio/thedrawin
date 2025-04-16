@@ -189,8 +189,8 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
     console.log(`Successfully uploaded to ${bucketType}:`, data.path);
     console.log('Public URL:', url);
     
-    // Try to record in database if it's a media item - but don't let it block the process
-    if (bucketType === 'media') {
+    // Try to record in database if it's a media item or banner - but don't let it block the process
+    if (bucketType === 'media' || bucketType === 'banners') {
       try {
         const { error: insertError } = await supabase
           .from('media_items')
