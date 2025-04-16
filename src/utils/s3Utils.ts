@@ -1,4 +1,3 @@
-
 import { supabase } from '../integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -37,12 +36,12 @@ export async function getMediaItems() {
       // Continue to attempt fallback methods
     } else if (dbMedia && dbMedia.length > 0) {
       console.log('Successfully fetched media items from database:', dbMedia.length);
-      // Transform database format to app format
+      // Transform database format to app format with proper type casting
       return dbMedia.map(item => ({
         id: item.id,
         name: item.name,
         url: item.url,
-        type: item.type,
+        type: validateMediaType(item.type),
         size: item.size,
         uploadDate: item.upload_date
       }));
@@ -74,7 +73,7 @@ export async function getMediaItems() {
             id: item.id || item.name,
             name: item.name,
             url: url,
-            type: determineFileType(item.name),
+            type: validateMediaType(determineFileType(item.name)),
             size: item.metadata?.size || 0,
             uploadDate: item.created_at || new Date().toISOString()
           };
@@ -97,6 +96,21 @@ export async function getMediaItems() {
     // Return empty array to prevent application crashes
     return [];
   }
+}
+
+// Helper function to validate that a media type matches the expected union type
+function validateMediaType(type: string): "image" | "document" | "video" {
+  if (type === 'image' || type === 'document' || type === 'video') {
+    return type as "image" | "document" | "video";
+  }
+  
+  // Default to the most appropriate type based on the string
+  if (type.includes('image')) return 'image';
+  if (type.includes('document')) return 'document';
+  if (type.includes('video')) return 'video';
+  
+  // Fallback to 'document' as default
+  return 'document';
 }
 
 export async function getUploadUrl(fileName: string, contentType: string, bucketType: BucketType = 'media'): Promise<UploadResponse> {
@@ -292,13 +306,16 @@ function determineFileType(fileName: string): string {
   
   const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'tiff', 'bmp'];
   const documentExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'];
+  const videoExtensions = ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm', 'mkv'];
   
   if (imageExtensions.includes(extension)) {
     return 'image';
   } else if (documentExtensions.includes(extension)) {
     return 'document';
+  } else if (videoExtensions.includes(extension)) {
+    return 'video';
   } else {
-    return 'other';
+    return 'document'; // Default to document for unknown types
   }
 }
 
