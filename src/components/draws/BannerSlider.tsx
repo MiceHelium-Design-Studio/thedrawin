@@ -18,7 +18,7 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
   const [banners, setBanners] = useState<Banner[]>([]);
   
-  // Convert AppBanner to internal Banner format - always call this useEffect
+  // Unified useEffect for fetching banners - ensuring it always runs in the same order
   useEffect(() => {
     const fetchAndSetBanners = async () => {
       if (propBanners && propBanners.length > 0) {
@@ -68,25 +68,28 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
     fetchAndSetBanners();
   }, [propBanners]);
   
-  // Filter active banners
+  // Filter active banners after banners have been fetched
   const activeBanners = banners.filter(banner => banner.active !== false);
   
-  if (activeBanners.length === 0) {
-    return null;
-  }
-
-  // Auto-rotation logic - maintain this hook even when no banners
+  // Auto-rotation logic - maintaining consistent hook order is critical
   useEffect(() => {
-    if (activeBanners.length <= 1) return;
+    // Always define the interval cleanup function, even if it does nothing
+    let interval: number | undefined;
     
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
-        prevIndex === activeBanners.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 5000);
+    if (activeBanners.length > 1) {
+      interval = window.setInterval(() => {
+        setCurrentIndex((prevIndex) => 
+          prevIndex === activeBanners.length - 1 ? 0 : prevIndex + 1
+        );
+      }, 5000);
+    }
     
-    return () => clearInterval(interval);
-  }, [activeBanners.length]);
+    return () => {
+      if (interval) {
+        window.clearInterval(interval);
+      }
+    };
+  }, [activeBanners.length]); // Only dependency is the length of active banners
 
   const goToNext = () => {
     setCurrentIndex((prevIndex) => 
@@ -120,6 +123,11 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
     e.currentTarget.src = '/placeholder.svg';
     e.currentTarget.className = e.currentTarget.className + ' opacity-50';
   };
+
+  // Early return if no active banners after filtering
+  if (activeBanners.length === 0) {
+    return null;
+  }
 
   return (
     <div className="w-full overflow-hidden mb-6 relative">
