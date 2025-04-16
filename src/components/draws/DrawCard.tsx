@@ -40,6 +40,13 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
     navigate(`/draw/${draw.id}`);
   };
 
+  // Image error handling to ensure UI doesn't break when images fail to load
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('Failed to load draw image:', draw.id);
+    e.currentTarget.src = '/placeholder.svg';
+    e.currentTarget.className = e.currentTarget.className + ' opacity-50';
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow border-gold/20 overflow-hidden">
       {draw.bannerImage && (
@@ -48,6 +55,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
             src={draw.bannerImage}
             alt={draw.title}
             className="h-full w-full object-cover"
+            onError={handleImageError}
           />
           {draw.status === 'completed' && draw.winner && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">

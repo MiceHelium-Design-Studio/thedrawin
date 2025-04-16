@@ -167,6 +167,8 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
       const uniqueFilePath = `${Date.now()}-${file.name}`;
       const fileType = determineFileType(file.name);
       
+      console.log(`Uploading ${file.name} to ${bucketType} bucket...`);
+      
       // Upload directly to Storage
       const { data, error } = await supabase.storage
         .from(bucketType)
@@ -175,7 +177,12 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
           upsert: false
         });
       
-      if (error) throw error;
+      if (error) {
+        console.error(`Error uploading to ${bucketType}:`, error);
+        throw error;
+      }
+      
+      console.log(`Successfully uploaded to ${bucketType}:`, data.path);
       
       // Get the public URL
       const { data: publicUrlData } = supabase.storage
@@ -184,7 +191,9 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
       
       // Record in database if it's a media bucket
       if (bucketType === 'media') {
-        await supabase
+        console.log('Recording upload in media_items table...');
+        
+        const { error: insertError } = await supabase
           .from('media_items')
           .insert({
             id: data.path,
@@ -194,7 +203,19 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
             size: file.size,
             user_id: (await supabase.auth.getUser()).data.user?.id
           });
+        
+        if (insertError) {
+          console.error('Error recording in database:', insertError);
+          // Don't throw here, since the upload was successful
+        } else {
+          console.log('Successfully recorded in database');
+        }
       }
+      
+      toast({
+        title: 'Upload complete',
+        description: `${file.name} has been successfully uploaded.`
+      });
       
       return {
         url: publicUrlData.publicUrl,
@@ -205,12 +226,19 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
       };
     } catch (error) {
       console.error('Error uploading to Storage:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description: `Failed to upload ${file.name}. Please try again.`
+      });
       throw error;
     }
   }
   
   // Fallback to legacy edge function method for 'media'
   try {
+    console.log('Using edge function method for media upload');
+    
     // 1. Get a pre-signed URL
     const { uploadUrl, fileKey, fileUrl, fileType } = await getUploadUrl(file.name, file.type);
     
@@ -224,11 +252,15 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
     });
     
     if (!uploadResponse.ok) {
-      throw new Error('Upload failed');
+      console.error('Error uploading via signed URL:', uploadResponse.statusText);
+      throw new Error(`Upload failed: ${uploadResponse.statusText}`);
     }
     
+    console.log('Successfully uploaded via signed URL');
+    
     // 3. Record the upload in the database
-    await supabase.functions.invoke('s3-media', {
+    console.log('Recording upload via edge function...');
+    const recordResponse = await supabase.functions.invoke('s3-media', {
       body: {
         action: 'recordUpload',
         fileKey,
@@ -237,6 +269,18 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
         fileSize: file.size,
         fileType: fileType || 'other'
       }
+    });
+    
+    if (recordResponse.error) {
+      console.error('Error recording upload:', recordResponse.error);
+      // Continue anyway since the upload was successful
+    } else {
+      console.log('Successfully recorded upload via edge function');
+    }
+    
+    toast({
+      title: 'Upload complete',
+      description: `${file.name} has been successfully uploaded.`
     });
     
     // 4. Return the file details
@@ -249,23 +293,36 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
     };
   } catch (error) {
     console.error('Error in uploadToS3:', error);
+    toast({
+      variant: 'destructive',
+      title: 'Upload failed',
+      description: `Failed to upload ${file.name}. Please try again.`
+    });
     throw error;
   }
 }
 
 export async function deleteFromS3(fileKey: string, bucketType: BucketType = 'media') {
   try {
+    console.log(`Deleting ${fileKey} from ${bucketType}...`);
+    
     // If using native storage buckets
     if (bucketType !== 'media') {
       const { error } = await supabase.storage
         .from(bucketType)
         .remove([fileKey]);
       
-      if (error) throw error;
+      if (error) {
+        console.error(`Error deleting from ${bucketType}:`, error);
+        throw error;
+      }
+      
+      console.log(`Successfully deleted from ${bucketType}`);
       return true;
     }
     
     // Fallback to edge function
+    console.log('Using edge function to delete media...');
     const { error } = await supabase.functions.invoke('s3-media', {
       body: { 
         action: 'delete',
@@ -273,10 +330,20 @@ export async function deleteFromS3(fileKey: string, bucketType: BucketType = 'me
       }
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error deleting via edge function:', error);
+      throw error;
+    }
+    
+    console.log('Successfully deleted via edge function');
     return true;
   } catch (error) {
     console.error('Error deleting file:', error);
+    toast({
+      variant: 'destructive',
+      title: 'Deletion failed',
+      description: 'There was a problem deleting the file. Please try again.'
+    });
     throw error;
   }
 }
