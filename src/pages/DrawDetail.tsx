@@ -123,7 +123,11 @@ const DrawDetail: React.FC = () => {
                 Ends {formatDistanceToNow(new Date(draw.endDate), { addSuffix: true })}
               </span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress 
+              value={progress} 
+              className="h-2" 
+              label={`${draw.title} entries progress: ${draw.currentParticipants} of ${draw.maxParticipants}`}
+            />
           </div>
           
           {draw.status === 'active' && (

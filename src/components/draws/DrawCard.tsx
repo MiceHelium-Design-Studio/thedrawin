@@ -76,7 +76,11 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
             <span>{timeLeft()}</span>
           </div>
           
-          <Progress value={progress} className="h-2" />
+          <Progress 
+            value={progress} 
+            className="h-2" 
+            label={`${draw.title} entries progress: ${draw.currentParticipants} of ${draw.maxParticipants}`}
+          />
           
           <div className="flex justify-between items-center pt-2">
             <div className="flex items-center">
