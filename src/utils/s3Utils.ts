@@ -1,3 +1,4 @@
+
 import { supabase } from '../integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -19,7 +20,7 @@ export interface StorageStats {
   averageSize: number;
 }
 
-// Expand BucketType to include 'media'
+// Expand BucketType to include all our available buckets
 export type BucketType = 'profile_images' | 'banners' | 'draw_images' | 'media';
 
 export async function getMediaItems() {
@@ -119,10 +120,10 @@ export async function getUploadUrl(fileName: string, contentType: string, bucket
     const sanitizedFileName = sanitizeFileName(fileName);
     console.log(`Getting upload URL for ${sanitizedFileName} in ${bucketType} bucket...`);
     
-    // Generate a unique file path
-    const uniqueFilePath = `${Date.now()}-${sanitizedFileName}`;
+    // Generate a unique file path using user ID when available
+    const userId = (await supabase.auth.getUser()).data.user?.id || 'anonymous';
+    const uniqueFilePath = `${userId}/${Date.now()}-${sanitizedFileName}`;
     
-    // Get a presigned URL directly from Storage API
     const { data, error } = await supabase.storage
       .from(bucketType)
       .createSignedUploadUrl(uniqueFilePath);
@@ -136,7 +137,7 @@ export async function getUploadUrl(fileName: string, contentType: string, bucket
     
     return {
       uploadUrl: data.signedUrl,
-      fileKey: data.path,
+      fileKey: uniqueFilePath,
       fileUrl: publicUrlData.publicUrl,
       fileType: determineFileType(sanitizedFileName)
     };
@@ -153,7 +154,9 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
     const sanitizedFileName = sanitizeFileName(originalFileName);
     console.log(`Uploading ${sanitizedFileName} to ${bucketType} bucket...`);
     
-    const uniqueFilePath = `${Date.now()}-${sanitizedFileName}`;
+    // Get user ID for folder structure
+    const userId = (await supabase.auth.getUser()).data.user?.id || 'anonymous';
+    const uniqueFilePath = `${userId}/${Date.now()}-${sanitizedFileName}`;
     const fileType = determineFileType(sanitizedFileName);
     
     // Upload directly to the storage bucket
@@ -200,7 +203,7 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
             url: url,
             type: fileType,
             size: file.size,
-            user_id: (await supabase.auth.getUser()).data.user?.id
+            user_id: userId
           });
         
         if (insertError) {
@@ -273,17 +276,38 @@ export async function deleteFromS3(fileKey: string, bucketType: BucketType = 'me
 
 export async function getStorageStats(): Promise<StorageStats> {
   try {
-    // Implement a simplified version that just returns mock data
-    // since the edge function is having issues
+    // Implement a simplified version with actual Supabase storage data
+    let totalFiles = 0;
+    let totalSize = 0;
+    const fileTypeCount = {
+      image: 0,
+      document: 0,
+      other: 0
+    };
+    
+    // Try to get media items stats
+    const mediaItems = await getMediaItems();
+    if (mediaItems && mediaItems.length > 0) {
+      totalFiles = mediaItems.length;
+      
+      mediaItems.forEach(item => {
+        totalSize += item.size || 0;
+        
+        if (item.type === 'image') {
+          fileTypeCount.image++;
+        } else if (item.type === 'document') {
+          fileTypeCount.document++;
+        } else {
+          fileTypeCount.other++;
+        }
+      });
+    }
+    
     return {
-      totalFiles: 0,
-      totalSize: 0,
-      fileTypeCount: {
-        image: 0,
-        document: 0,
-        other: 0
-      },
-      averageSize: 0
+      totalFiles,
+      totalSize,
+      fileTypeCount,
+      averageSize: totalFiles > 0 ? totalSize / totalFiles : 0
     };
   } catch (error) {
     console.error('Error getting storage stats:', error);
