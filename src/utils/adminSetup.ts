@@ -3,41 +3,29 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const ensureFullAdmin = async () => {
   try {
-    console.log('Checking if raghidhilal@gmail.com is an admin...');
+    const adminEmail = 'raghidhilal@gmail.com';
+    console.log(`Checking if ${adminEmail} is an admin...`);
     
-    // Step 1: Check if user exists in auth system first
-    const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail('raghidhilal@gmail.com');
-    
-    if (userError) {
-      console.error('Error checking user in auth system:', userError);
-      return;
-    }
-    
-    if (!userData || !userData.user) {
-      console.log('User raghidhilal@gmail.com not found in auth system');
-      return;
-    }
-    
-    const userId = userData.user.id;
-    
-    // Step 2: Check if user has a profile in the profiles table
-    const { data: profileData, error: profileError } = await supabase
+    // Step 1: Find the user by email using the available methods
+    const { data: usersData, error: usersError } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('id', userId)
+      .select('id, is_admin')
+      .eq('email', adminEmail)
       .maybeSingle();
     
-    if (profileError) {
-      console.error('Error checking profile:', profileError);
+    if (usersError) {
+      console.error('Error finding user by email:', usersError);
       return;
     }
     
-    // Step 3: If profile exists, update admin status if needed
-    if (profileData) {
-      if (!profileData.is_admin) {
-        console.log('Setting raghidhilal@gmail.com as admin...');
+    // Step 2: If user exists in profiles, check/update admin status
+    if (usersData) {
+      const userId = usersData.id;
+      
+      if (!usersData.is_admin) {
+        console.log(`Setting ${adminEmail} as admin...`);
         
-        // Direct update using the UUID rather than email
+        // Update admin status
         const { error: updateError } = await supabase
           .from('profiles')
           .update({ is_admin: true })
@@ -46,28 +34,54 @@ export const ensureFullAdmin = async () => {
         if (updateError) {
           console.error('Error setting admin status:', updateError);
         } else {
-          console.log('raghidhilal@gmail.com has been made an admin successfully');
+          console.log(`${adminEmail} has been made an admin successfully`);
         }
       } else {
-        console.log('raghidhilal@gmail.com is already an admin');
+        console.log(`${adminEmail} is already an admin`);
       }
-    } else {
-      // Step 4: If no profile, create one with admin status
-      console.log('Creating profile for raghidhilal@gmail.com with admin status...');
+      return;
+    }
+    
+    // Step 3: If user not found in profiles but exists in auth, we need to find them
+    console.log(`Profile for ${adminEmail} not found. Checking auth system...`);
+    
+    // Find existing user by email (using auth.signInWithPassword with error handling)
+    // Note: In a production app, you'd use admin APIs, but for this demo we'll
+    // use a workaround since we don't have access to admin.getUserByEmail
+    try {
+      // Try to find user auth data
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithOtp({
+        email: adminEmail,
+        options: {
+          shouldCreateUser: false // Don't create new user
+        }
+      });
       
-      const { error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          email: 'raghidhilal@gmail.com',
-          is_admin: true
-        });
-      
-      if (insertError) {
-        console.error('Error creating admin profile:', insertError);
-      } else {
-        console.log('Admin profile created successfully for raghidhilal@gmail.com');
+      if (signInError) {
+        console.error('User may not exist in auth system:', signInError);
+        return;
       }
+      
+      if (user) {
+        // User exists in auth, but not in profiles - create profile
+        console.log(`Creating profile for ${adminEmail} with admin status...`);
+        
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: adminEmail,
+            is_admin: true
+          });
+        
+        if (insertError) {
+          console.error('Error creating admin profile:', insertError);
+        } else {
+          console.log(`Admin profile created successfully for ${adminEmail}`);
+        }
+      }
+    } catch (authError) {
+      console.error('Error checking auth system:', authError);
     }
   } catch (error) {
     console.error('Error in ensureFullAdmin:', error);
