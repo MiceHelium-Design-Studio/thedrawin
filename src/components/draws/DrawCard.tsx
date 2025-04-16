@@ -100,6 +100,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
                   : 'bg-gold hover:bg-gold-dark text-black'
               }`}
               disabled={draw.status === 'completed'}
+              aria-label={draw.status === 'completed' ? 'View completed draw details' : `Enter ${draw.title} draw`}
             >
               {draw.status === 'completed' ? 'Completed' : 'Enter Draw'}
             </Button>
