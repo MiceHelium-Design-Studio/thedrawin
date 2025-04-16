@@ -72,8 +72,8 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
         
         <div className="space-y-3">
           <div className="flex justify-between text-xs">
-            <span>{draw.currentParticipants} of {draw.maxParticipants} entries</span>
-            <span>{timeLeft()}</span>
+            <span className="text-white">{draw.currentParticipants} of {draw.maxParticipants} entries</span>
+            <span className="text-white font-semibold">{timeLeft()}</span>
           </div>
           
           <Progress 
@@ -85,7 +85,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
           <div className="flex justify-between items-center pt-2">
             <div className="flex items-center">
               <Coins className="h-4 w-4 text-gold mr-1" />
-              <span className="text-xs">
+              <span className="text-xs text-white font-medium">
                 {draw.ticketPrices.length > 1
                   ? `$${Math.min(...draw.ticketPrices)} - $${Math.max(...draw.ticketPrices)}`
                   : `$${draw.ticketPrices[0]}`}
