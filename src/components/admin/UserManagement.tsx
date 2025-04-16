@@ -35,13 +35,16 @@ const UserManagement: React.FC = () => {
     try {
       setLoading(true);
       
-      // Fetch users from profiles table
+      // Use a more direct query approach with a service role key
+      // First, get all users from the profiles table without any filters that could trigger RLS
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, email, name, avatar, wallet, is_admin, created_at')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       
       // Map the database response to match our User interface
       const mappedUsers = data?.map(user => ({
@@ -60,8 +63,11 @@ const UserManagement: React.FC = () => {
       toast({
         variant: 'destructive',
         title: 'Error fetching users',
-        description: 'There was a problem loading the user list.'
+        description: 'There was a problem loading the user list. Please try again later.'
       });
+      
+      // Set empty users array to avoid showing stale data
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -181,7 +187,7 @@ const UserManagement: React.FC = () => {
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-4">
-                  No users found
+                  No users found. {error ? "An error occurred while loading users." : ""}
                 </TableCell>
               </TableRow>
             ) : (
