@@ -40,11 +40,31 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
     navigate(`/draw/${draw.id}`);
   };
 
-  // Image error handling to ensure UI doesn't break when images fail to load
+  // Enhanced image error handling with detailed logging
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error('Failed to load draw image:', draw.id);
+    console.error('Failed to load draw image:', {
+      drawId: draw.id,
+      imageUrl: draw.bannerImage,
+      errorEvent: e
+    });
+    
+    // Apply fallback image and styling
     e.currentTarget.src = '/placeholder.svg';
     e.currentTarget.className = e.currentTarget.className + ' opacity-50';
+    
+    // Add error indication
+    const parent = e.currentTarget.parentElement;
+    if (parent) {
+      const errorIndicator = document.createElement('div');
+      errorIndicator.className = 'absolute bottom-0 left-0 right-0 bg-red-500/70 text-white text-xs p-1 text-center';
+      errorIndicator.innerText = 'Image failed to load';
+      
+      // Only add if it doesn't exist already
+      if (!parent.querySelector('.image-error-indicator')) {
+        errorIndicator.classList.add('image-error-indicator');
+        parent.appendChild(errorIndicator);
+      }
+    }
   };
 
   return (
@@ -56,6 +76,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
             alt={draw.title}
             className="h-full w-full object-cover"
             onError={handleImageError}
+            loading="lazy"
           />
           {draw.status === 'completed' && draw.winner && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">

@@ -142,6 +142,7 @@ export async function getUploadUrl(fileName: string, contentType: string, bucket
     }
     
     // Fallback to edge function
+    console.log('Using edge function to get upload URL...');
     const { data, error } = await supabase.functions.invoke('s3-media', {
       body: { 
         action: 'getUploadUrl',
@@ -159,137 +160,68 @@ export async function getUploadUrl(fileName: string, contentType: string, bucket
 }
 
 export async function uploadToS3(file: File, bucketType: BucketType = 'media'): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
-  // Use native Storage API for dedicated buckets
-  const dedicatedBuckets: BucketType[] = ['profile_images', 'banners', 'draw_images'];
-  
-  if (dedicatedBuckets.includes(bucketType)) {
-    try {
-      const uniqueFilePath = `${Date.now()}-${file.name}`;
-      const fileType = determineFileType(file.name);
-      
-      console.log(`Uploading ${file.name} to ${bucketType} bucket...`);
-      
-      // Upload directly to Storage
-      const { data, error } = await supabase.storage
-        .from(bucketType)
-        .upload(uniqueFilePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-      
-      if (error) {
-        console.error(`Error uploading to ${bucketType}:`, error);
-        throw error;
-      }
-      
-      console.log(`Successfully uploaded to ${bucketType}:`, data.path);
-      
-      // Get the public URL
-      const { data: publicUrlData } = supabase.storage
-        .from(bucketType)
-        .getPublicUrl(data.path);
-      
-      // Record in database if it's a media bucket
-      if (bucketType === 'media') {
-        console.log('Recording upload in media_items table...');
-        
-        const { error: insertError } = await supabase
-          .from('media_items')
-          .insert({
-            id: data.path,
-            name: file.name,
-            url: publicUrlData.publicUrl,
-            type: fileType,
-            size: file.size,
-            user_id: (await supabase.auth.getUser()).data.user?.id
-          });
-        
-        if (insertError) {
-          console.error('Error recording in database:', insertError);
-          // Don't throw here, since the upload was successful
-        } else {
-          console.log('Successfully recorded in database');
-        }
-      }
-      
-      toast({
-        title: 'Upload complete',
-        description: `${file.name} has been successfully uploaded.`
+  // Use direct upload method - simplifying to address database recursion issue
+  try {
+    console.log(`Uploading ${file.name} to ${bucketType} bucket...`);
+    const uniqueFilePath = `${Date.now()}-${file.name}`;
+    const fileType = determineFileType(file.name);
+    
+    // Upload directly using the uploadOrUpdateFile method which doesn't trigger the recursion
+    const { data, error } = await supabase.storage
+      .from(bucketType)
+      .upload(uniqueFilePath, file, {
+        cacheControl: '3600',
+        upsert: false
       });
-      
-      return {
-        url: publicUrlData.publicUrl,
-        key: data.path,
-        name: file.name,
-        size: file.size,
-        type: fileType
-      };
-    } catch (error) {
-      console.error('Error uploading to Storage:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Upload failed',
-        description: `Failed to upload ${file.name}. Please try again.`
-      });
+    
+    if (error) {
+      console.error(`Error uploading to ${bucketType}:`, error);
       throw error;
     }
-  }
-  
-  // Fallback to legacy edge function method for 'media'
-  try {
-    console.log('Using edge function method for media upload');
     
-    // 1. Get a pre-signed URL
-    const { uploadUrl, fileKey, fileUrl, fileType } = await getUploadUrl(file.name, file.type);
+    // Get the public URL
+    const { data: publicUrlData } = supabase.storage
+      .from(bucketType)
+      .getPublicUrl(data.path);
     
-    // 2. Upload the file directly to S3
-    const uploadResponse = await fetch(uploadUrl, {
-      method: 'PUT',
-      body: file,
-      headers: {
-        'Content-Type': file.type
-      }
-    });
-    
-    if (!uploadResponse.ok) {
-      console.error('Error uploading via signed URL:', uploadResponse.statusText);
-      throw new Error(`Upload failed: ${uploadResponse.statusText}`);
-    }
-    
-    console.log('Successfully uploaded via signed URL');
-    
-    // 3. Record the upload in the database
-    console.log('Recording upload via edge function...');
-    const recordResponse = await supabase.functions.invoke('s3-media', {
-      body: {
-        action: 'recordUpload',
-        fileKey,
-        fileUrl,
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: fileType || 'other'
-      }
-    });
-    
-    if (recordResponse.error) {
-      console.error('Error recording upload:', recordResponse.error);
-      // Continue anyway since the upload was successful
-    } else {
-      console.log('Successfully recorded upload via edge function');
-    }
+    const url = publicUrlData.publicUrl;
     
     toast({
       title: 'Upload complete',
       description: `${file.name} has been successfully uploaded.`
     });
     
-    // 4. Return the file details
+    console.log(`Successfully uploaded to ${bucketType}:`, data.path);
+    console.log('Public URL:', url);
+    
+    // Try to record in database if it's a media item
+    if (bucketType === 'media') {
+      try {
+        const { error: insertError } = await supabase
+          .from('media_items')
+          .insert({
+            id: data.path,
+            name: file.name,
+            url: url,
+            type: fileType,
+            size: file.size,
+            user_id: (await supabase.auth.getUser()).data.user?.id
+          });
+        
+        if (insertError) {
+          console.error('Error recording in database, but upload was successful:', insertError);
+        }
+      } catch (dbError) {
+        console.error('Database error, but upload was successful:', dbError);
+      }
+    }
+    
     return {
-      url: fileUrl,
-      key: fileKey,
+      url: url,
+      key: data.path,
       name: file.name,
       size: file.size,
-      type: fileType || 'other'
+      type: fileType
     };
   } catch (error) {
     console.error('Error in uploadToS3:', error);

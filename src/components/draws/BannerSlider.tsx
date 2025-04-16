@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Banner } from '../../types';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 
 interface BannerSliderProps {
   banners: Banner[];
@@ -10,6 +10,7 @@ interface BannerSliderProps {
 
 const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
   
   // Filter active banners
   const activeBanners = banners.filter(banner => banner.active);
@@ -43,6 +44,20 @@ const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
     );
   };
 
+  const handleImageError = (banner: Banner, e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('Failed to load banner image:', {
+      bannerId: banner.id,
+      imageUrl: banner.imageUrl
+    });
+    
+    // Set this banner as having a load error
+    setLoadErrors(prev => ({ ...prev, [banner.id]: true }));
+    
+    // Apply fallback styling
+    e.currentTarget.src = '/placeholder.svg';
+    e.currentTarget.className = e.currentTarget.className + ' opacity-50';
+  };
+
   return (
     <div className="w-full overflow-hidden mb-6 relative">
       <Card className="shadow-md rounded-xl overflow-hidden">
@@ -61,7 +76,18 @@ const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
                 src={banner.imageUrl}
                 alt="Advertisement"
                 className="w-full h-full object-cover"
+                onError={(e) => handleImageError(banner, e)}
+                loading="lazy"
               />
+              
+              {loadErrors[banner.id] && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <div className="bg-red-500/80 text-white px-3 py-2 rounded-md flex items-center">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    <span className="text-sm">Image failed to load</span>
+                  </div>
+                </div>
+              )}
             </a>
           ))}
         </div>
