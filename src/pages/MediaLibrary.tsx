@@ -8,7 +8,8 @@ import {
   SortAsc,
   SortDesc,
   Filter,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle
 } from 'lucide-react';
 import { useDraws } from '../context/DrawContext';
 import { useAuth } from '../context/AuthContext';
@@ -43,6 +44,7 @@ const MediaLibrary: React.FC = () => {
   const [forceRender, setForceRender] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   
   // Force render after 3 seconds no matter what
   useEffect(() => {
@@ -61,6 +63,11 @@ const MediaLibrary: React.FC = () => {
   useEffect(() => {
     console.log('Media page - Auth loading:', authLoading, 'Media loading:', mediaLoading, 'Force render:', forceRender);
     console.log('Current media items:', media.length);
+    
+    // Reset load error when media loads successfully
+    if (media.length > 0) {
+      setLoadError(null);
+    }
   }, [authLoading, mediaLoading, forceRender, media.length]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +98,7 @@ const MediaLibrary: React.FC = () => {
         title: 'Upload failed',
         description: 'There was an error uploading your file to S3.',
       });
-      console.error(error);
+      console.error('Upload error:', error);
     } finally {
       setIsUploading(false);
     }
@@ -117,7 +124,7 @@ const MediaLibrary: React.FC = () => {
         title: 'Deletion failed',
         description: 'There was an error deleting your file from S3.',
       });
-      console.error(error);
+      console.error('Delete error:', error);
     }
   };
 
@@ -125,6 +132,7 @@ const MediaLibrary: React.FC = () => {
     if (refreshing) return;
     
     setRefreshing(true);
+    setLoadError(null);
     try {
       // Force reload of media items by setting loading to true
       // The DrawContext will handle the actual reloading
@@ -137,6 +145,7 @@ const MediaLibrary: React.FC = () => {
       });
     } catch (error) {
       console.error('Error refreshing media:', error);
+      setLoadError('Failed to refresh media library.');
     } finally {
       setTimeout(() => setRefreshing(false), 500);
     }
@@ -146,6 +155,15 @@ const MediaLibrary: React.FC = () => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('Image failed to load:', e.currentTarget.src);
+    e.currentTarget.src = '/placeholder.svg';
+    e.currentTarget.className = e.currentTarget.className + ' opacity-50';
+    if (!loadError) {
+      setLoadError('Some media files failed to load. This may be due to incorrect permissions or deleted files.');
+    }
   };
 
   const filteredMedia = (media || [])
@@ -229,6 +247,15 @@ const MediaLibrary: React.FC = () => {
         </div>
       </div>
 
+      {loadError && (
+        <Card className="mb-4 border-orange-300 bg-orange-50 dark:bg-orange-950/20">
+          <CardContent className="p-4 flex items-center text-orange-700 dark:text-orange-400">
+            <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
+            <p>{loadError}</p>
+          </CardContent>
+        </Card>
+      )}
+
       {loading && (
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
@@ -273,6 +300,7 @@ const MediaLibrary: React.FC = () => {
                   src={item.url}
                   alt={item.name}
                   className="w-full h-full object-cover"
+                  onError={handleImageError}
                 />
               </div>
               <CardContent className="p-3">
@@ -328,6 +356,7 @@ const MediaLibrary: React.FC = () => {
                         src={item.url}
                         alt={item.name}
                         className="w-full h-full object-cover rounded"
+                        onError={handleImageError}
                       />
                     </div>
                   </TableCell>
