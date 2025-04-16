@@ -68,7 +68,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
       </CardHeader>
       
       <CardContent>
-        <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{draw.description}</p>
+        <p className="text-gold-light font-medium text-xs mb-3">{draw.description}</p>
         
         <div className="space-y-3">
           <div className="flex justify-between text-xs">

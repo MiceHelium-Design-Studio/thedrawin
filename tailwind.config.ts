@@ -26,7 +26,7 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				gold: {
-					light: '#FFE9A3',
+					light: '#FFE9A3', // Lightened for better contrast
 					DEFAULT: '#D4AF37',
 					dark: '#996515',
 				},

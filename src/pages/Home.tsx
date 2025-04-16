@@ -94,7 +94,7 @@ const Home: React.FC = () => {
                   <DrawCard key={draw.id} draw={draw} />
                 ))
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gold-light font-medium">
                   No draws available
                 </div>
               )}
