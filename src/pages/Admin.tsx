@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,7 +10,8 @@ import {
   BellRing,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileImage
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -38,6 +38,7 @@ import BannersManagement from '@/components/admin/BannersManagement';
 import UserManagement from '@/components/admin/UserManagement';
 import AppSettings from '@/components/admin/AppSettings';
 import PushNotifications from '@/components/admin/PushNotifications';
+import MediaManager from '@/components/admin/MediaManager';
 
 const Admin: React.FC = () => {
   const { toast } = useToast();
@@ -47,7 +48,7 @@ const Admin: React.FC = () => {
   
   // Navigation arrows functionality
   const handleNavigation = (direction: 'prev' | 'next') => {
-    const tabs = ['draws', 'banners', 'users', 'settings', 'notifications', 'stats'];
+    const tabs = ['draws', 'banners', 'users', 'settings', 'notifications', 'stats', 'media'];
     const currentIndex = tabs.indexOf(activeTab);
     
     if (direction === 'prev' && currentIndex > 0) {
@@ -173,6 +174,22 @@ const Admin: React.FC = () => {
                     </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
+                
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-transparent">Media Library</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[200px] gap-2 p-2">
+                      <li onClick={() => setActiveTab('media')} className="cursor-pointer">
+                        <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 hover:bg-accent hover:text-accent-foreground">
+                          <div className="text-sm font-medium leading-none">Media Manager</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Manage uploaded media files
+                          </p>
+                        </NavigationMenuLink>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
               </div>
               
               <div className="flex items-center gap-2">
@@ -189,7 +206,7 @@ const Admin: React.FC = () => {
                   variant="outline" 
                   size="icon" 
                   onClick={() => handleNavigation('next')}
-                  disabled={activeTab === 'stats'}
+                  disabled={activeTab === 'media'}
                   className="size-8 rounded-full"
                 >
                   <ChevronRight className="size-4" />
@@ -248,6 +265,11 @@ const Admin: React.FC = () => {
                     <TabsTrigger value="stats" className="w-full justify-start data-[state=active]:bg-primary/20">
                       <BarChart3 className="w-4 h-4 mr-2" />
                       Statistics
+                    </TabsTrigger>
+                    
+                    <TabsTrigger value="media" className="w-full justify-start data-[state=active]:bg-primary/20">
+                      <FileImage className="w-4 h-4 mr-2" />
+                      Media Manager
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
@@ -309,6 +331,10 @@ const Admin: React.FC = () => {
                       </Card>
                     </div>
                   </section>
+                </TabsContent>
+                
+                <TabsContent value="media" className="mt-0">
+                  <MediaManager />
                 </TabsContent>
               </Tabs>
             </Card>
