@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -23,13 +22,11 @@ const Home: React.FC = () => {
     console.log("Draws loaded:", draws?.length || 0, "items");
   }, [isLoading, user, draws]);
   
-  // Get active draws first, then upcoming, then completed
   const sortedDraws = [...(draws || [])].sort((a, b) => {
     const statusOrder = { active: 0, upcoming: 1, completed: 2 };
     return statusOrder[a.status] - statusOrder[b.status];
   });
   
-  // Filter active draws for the featured section
   const activeDraws = (draws || []).filter(draw => draw.status === 'active');
   
   const handleViewAll = () => {

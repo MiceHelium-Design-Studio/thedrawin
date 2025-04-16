@@ -22,7 +22,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
-      <main className="flex-grow pb-16 pattern-bg">{children}</main>
+      <main className="flex-grow pb-16 pattern-bg" role="main" aria-label="Main content">
+        {children}
+      </main>
 
       {/* Only show navbar if not on auth page or if user is authenticated */}
       {(!isAuthPage || (user && !authLoading)) && (
