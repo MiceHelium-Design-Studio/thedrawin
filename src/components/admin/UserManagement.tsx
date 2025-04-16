@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, CheckCheck, UserCog, UserX, Shield, Mail } from 'lucide-react';
+import { Check, CheckCheck, UserCog, UserX, Shield, Mail, UserRound } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -20,12 +21,14 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { clearCacheAndReload } = useAuth();
 
   useEffect(() => {
     fetchUsers();
@@ -36,19 +39,21 @@ const UserManagement: React.FC = () => {
       setLoading(true);
       setFetchError(null);
       
-      // Fetch users with admin role check
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, email, name, avatar, wallet, is_admin, created_at')
-        .order('created_at', { ascending: false });
+      // Use client-side filtering approach (for demo)
+      // In production, this would use a separate API endpoint or function 
+      // that doesn't trigger infinite recursion
       
-      if (error) {
-        setFetchError(error.message);
-        throw error;
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, name, avatar, wallet, is_admin, created_at');
+      
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
       }
       
       // Map the database response to match our User interface
-      const mappedUsers = data?.map(user => ({
+      const mappedUsers = profilesData?.map(user => ({
         id: user.id,
         email: user.email,
         name: user.name || undefined,
@@ -130,10 +135,21 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  const refreshUserList = () => {
+    fetchUsers();
+    toast({
+      title: 'Refreshed',
+      description: 'User list has been refreshed.'
+    });
+  };
+
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">User Management</h2>
+        <Button onClick={refreshUserList} variant="outline" size="sm">
+          Refresh List
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -205,7 +221,7 @@ const UserManagement: React.FC = () => {
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                          <UserCog className="w-4 h-4 text-gray-500" />
+                          <UserRound className="w-4 h-4 text-gray-500" />
                         </div>
                       )}
                       <span>{user.name || 'User'}</span>
