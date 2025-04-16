@@ -17,6 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   
   const unreadCount = notifications?.filter(n => !n.read)?.length || 0;
   const isAuthPage = location.pathname === '/auth';
+  const isAdminPage = location.pathname === '/admin';
 
   console.log("Layout rendering, user:", user?.id, "isAdmin:", user?.isAdmin, "isAuthPage:", isAuthPage);
 
@@ -26,8 +27,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      {/* Only show navbar if not on auth page or if user is authenticated */}
-      {(!isAuthPage || (user && !authLoading)) && (
+      {/* Only show navbar if not on auth page or admin page */}
+      {(!isAuthPage && !isAdminPage) && (user && !authLoading) && (
         <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20">
           <div className="grid grid-cols-5 h-16">
             <NavLink
@@ -109,22 +110,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <span>Profile</span>
             </NavLink>
             
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center justify-center text-xs transition-all duration-300",
-                  isActive
-                    ? "text-gold font-medium"
-                    : "text-white hover:text-gold"
-                )
-              }
-            >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin' && "bg-black-light/50")}>
-                <Settings className="h-5 w-5 mb-1" />
-              </div>
-              <span>Admin</span>
-            </NavLink>
+            {user?.isAdmin && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  cn(
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                    isActive
+                      ? "text-gold font-medium"
+                      : "text-white hover:text-gold"
+                  )
+                }
+              >
+                <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin' && "bg-black-light/50")}>
+                  <Settings className="h-5 w-5 mb-1" />
+                </div>
+                <span>Admin</span>
+              </NavLink>
+            )}
           </div>
         </nav>
       )}
