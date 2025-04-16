@@ -188,8 +188,8 @@ Deno.serve(async (req) => {
         })
       }
       
-      // Sanitize filename to prevent path traversal attacks
-      const sanitizedFileName = fileName.replace(/[^\w\s.-]/g, '');
+      // Sanitize filename to prevent path traversal attacks and special character issues
+      const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
       if (sanitizedFileName !== fileName) {
         console.warn('Filename sanitized:', fileName, '→', sanitizedFileName);
       }

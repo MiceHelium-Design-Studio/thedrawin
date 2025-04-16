@@ -117,9 +117,13 @@ export async function getMediaItems() {
 
 export async function getUploadUrl(fileName: string, contentType: string, bucketType: BucketType = 'media'): Promise<UploadResponse> {
   try {
+    // Sanitize filename to prevent issues with special characters
+    const sanitizedFileName = sanitizeFileName(fileName);
+    console.log(`Getting upload URL for ${sanitizedFileName} in ${bucketType} bucket...`);
+    
     // If using native storage buckets
     if (bucketType === 'profile_images' || bucketType === 'banners' || bucketType === 'draw_images') {
-      const uniqueFilePath = `${Date.now()}-${fileName}`;
+      const uniqueFilePath = `${Date.now()}-${sanitizedFileName}`;
       
       // Get a presigned URL directly from Storage API
       const { data, error } = await supabase.storage
@@ -137,7 +141,7 @@ export async function getUploadUrl(fileName: string, contentType: string, bucket
         uploadUrl: data.signedUrl,
         fileKey: data.path,
         fileUrl: publicUrlData.publicUrl,
-        fileType: determineFileType(fileName)
+        fileType: determineFileType(sanitizedFileName)
       };
     }
     
@@ -146,7 +150,7 @@ export async function getUploadUrl(fileName: string, contentType: string, bucket
     const { data, error } = await supabase.functions.invoke('s3-media', {
       body: { 
         action: 'getUploadUrl',
-        fileName,
+        fileName: sanitizedFileName,
         contentType
       }
     });
@@ -160,48 +164,43 @@ export async function getUploadUrl(fileName: string, contentType: string, bucket
 }
 
 export async function uploadToS3(file: File, bucketType: BucketType = 'media'): Promise<{ url: string; key: string; name: string; size: number; type: string }> {
-  // Use direct upload method - simplifying to address database recursion issue
+  // Simplify and make more robust
   try {
-    console.log(`Uploading ${file.name} to ${bucketType} bucket...`);
-    const uniqueFilePath = `${Date.now()}-${file.name}`;
-    const fileType = determineFileType(file.name);
+    // Sanitize the filename
+    const originalFileName = file.name;
+    const sanitizedFileName = sanitizeFileName(originalFileName);
+    console.log(`Uploading ${sanitizedFileName} to ${bucketType} bucket...`);
     
-    // Upload directly using the uploadOrUpdateFile method which doesn't trigger the recursion
-    const { data, error } = await supabase.storage
-      .from(bucketType)
-      .upload(uniqueFilePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+    const uniqueFilePath = `${Date.now()}-${sanitizedFileName}`;
+    const fileType = determineFileType(sanitizedFileName);
     
-    if (error) {
-      console.error(`Error uploading to ${bucketType}:`, error);
-      throw error;
-    }
+    // Try a more direct approach to avoid recursion issues
+    const result = await directUpload(file, uniqueFilePath, bucketType);
     
     // Get the public URL
     const { data: publicUrlData } = supabase.storage
       .from(bucketType)
-      .getPublicUrl(data.path);
+      .getPublicUrl(result.path);
     
     const url = publicUrlData.publicUrl;
     
+    // Show success toast
     toast({
       title: 'Upload complete',
-      description: `${file.name} has been successfully uploaded.`
+      description: `${sanitizedFileName} has been successfully uploaded.`
     });
     
-    console.log(`Successfully uploaded to ${bucketType}:`, data.path);
+    console.log(`Successfully uploaded to ${bucketType}:`, result.path);
     console.log('Public URL:', url);
     
-    // Try to record in database if it's a media item
+    // Try to record in database if it's a media item - but don't let it block the process
     if (bucketType === 'media') {
       try {
         const { error: insertError } = await supabase
           .from('media_items')
           .insert({
-            id: data.path,
-            name: file.name,
+            id: result.path,
+            name: sanitizedFileName,
             url: url,
             type: fileType,
             size: file.size,
@@ -218,8 +217,8 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
     
     return {
       url: url,
-      key: data.path,
-      name: file.name,
+      key: result.path,
+      name: sanitizedFileName,
       size: file.size,
       type: fileType
     };
@@ -232,6 +231,43 @@ export async function uploadToS3(file: File, bucketType: BucketType = 'media'): 
     });
     throw error;
   }
+}
+
+// Helper function for direct upload to avoid recursion issues
+async function directUpload(file: File, filePath: string, bucketType: BucketType): Promise<{ path: string }> {
+  // Create a form data object for the upload
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  // Get the URL for the storage bucket
+  const bucketUrl = `https://vfmulngualkzxwdzcbwb.supabase.co/storage/v1/object/${bucketType}/${filePath}`;
+  
+  // Get the auth token
+  const { data: auth } = await supabase.auth.getSession();
+  const token = auth.session?.access_token;
+  
+  if (!token) {
+    throw new Error('Authentication required for upload');
+  }
+  
+  // Make a direct fetch request to avoid recursion
+  const response = await fetch(bucketUrl, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'x-upsert': 'false',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmbXVsbmd1YWxrenh3ZHpjYndiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzMjUyNzUsImV4cCI6MjA1OTkwMTI3NX0.4289VvjF4cN8B-f4-fRYXb7mSfau-r1xefFGwoJdUCI'
+    },
+    body: file
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Upload failed with status:', response.status, errorText);
+    throw new Error(`Upload failed: ${errorText}`);
+  }
+  
+  return { path: filePath };
 }
 
 export async function deleteFromS3(fileKey: string, bucketType: BucketType = 'media') {
@@ -310,4 +346,18 @@ function determineFileType(fileName: string): string {
   } else {
     return 'other';
   }
+}
+
+// Helper function to sanitize filenames to avoid issues with special characters
+function sanitizeFileName(fileName: string): string {
+  // Remove spaces, special characters, and replace with underscores
+  const sanitized = fileName
+    .replace(/[^a-zA-Z0-9._-]/g, '_')  // Replace any non-alphanumeric chars (except . _ -) with underscores
+    .replace(/_{2,}/g, '_');           // Replace multiple consecutive underscores with a single one
+  
+  if (sanitized !== fileName) {
+    console.log(`Sanitized filename from "${fileName}" to "${sanitized}"`);
+  }
+  
+  return sanitized;
 }

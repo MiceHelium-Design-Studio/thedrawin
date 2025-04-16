@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Banner } from '../../types';
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface BannerSliderProps {
   banners: Banner[];
@@ -53,6 +54,13 @@ const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
     // Set this banner as having a load error
     setLoadErrors(prev => ({ ...prev, [banner.id]: true }));
     
+    // Show a toast notification
+    toast({
+      variant: 'destructive',
+      title: 'Image failed to load',
+      description: `Banner image couldn't be displayed. Please check the URL: ${banner.imageUrl}`
+    });
+    
     // Apply fallback styling
     e.currentTarget.src = '/placeholder.svg';
     e.currentTarget.className = e.currentTarget.className + ' opacity-50';
@@ -74,7 +82,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({ banners }) => {
             >
               <img
                 src={banner.imageUrl}
-                alt="Advertisement"
+                alt={`Banner ${index + 1}`}
                 className="w-full h-full object-cover"
                 onError={(e) => handleImageError(banner, e)}
                 loading="lazy"
