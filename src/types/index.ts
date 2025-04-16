@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -45,8 +44,9 @@ export interface Notification {
 export interface Banner {
   id: string;
   imageUrl: string;
-  linkUrl: string;
-  active: boolean;
+  linkUrl?: string;
+  active?: boolean;
+  url?: string;
 }
 
 export interface MediaItem {

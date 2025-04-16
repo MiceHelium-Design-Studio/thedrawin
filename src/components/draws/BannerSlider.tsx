@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Banner as AppBanner } from '@/types'; // Import the Banner type from our types file
 
 interface Banner {
   id: string;
@@ -12,15 +13,22 @@ interface Banner {
   active?: boolean;
 }
 
-const BannerSlider: React.FC<{ banners?: Banner[] }> = ({ banners: propBanners }) => {
+const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanners }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
-  const [banners, setBanners] = useState<Banner[]>(propBanners || []);
+  const [banners, setBanners] = useState<Banner[]>([]);
   
-  // Fetch banners if not provided as props
+  // Convert AppBanner to internal Banner format
   useEffect(() => {
     if (propBanners) {
-      setBanners(propBanners);
+      // Map the AppBanner type to the internal Banner type
+      const convertedBanners = propBanners.map(banner => ({
+        id: banner.id,
+        url: banner.url || banner.imageUrl, // Use url if available, otherwise imageUrl
+        linkUrl: banner.linkUrl,
+        active: banner.active
+      }));
+      setBanners(convertedBanners);
       return;
     }
     

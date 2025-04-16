@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import BannerSlider from '../components/draws/BannerSlider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Banner } from '@/types';
 
 const Home: React.FC = () => {
   const { draws = [], banners = [], loading: drawsLoading } = useDraws();
