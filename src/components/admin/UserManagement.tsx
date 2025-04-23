@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { UserCog, Mail, UserRound, Wallet, PlusCircle } from 'lucide-react';
@@ -132,6 +133,12 @@ const UserManagement: React.FC = () => {
         description: 'There was a problem sending the notification.'
       });
     }
+  };
+
+  const closeWalletDialog = () => {
+    setSelectedUserId(null);
+    setWalletAmount('100');
+    setIsWalletDialogOpen(false);
   };
 
   const addWalletFunds = async (userId: string, amount: number) => {
