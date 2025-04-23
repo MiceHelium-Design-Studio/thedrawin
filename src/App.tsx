@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -11,6 +10,7 @@ import { DrawProvider } from "./context/DrawContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { BackgroundProvider } from "./context/BackgroundContext";
 import { ensureFullAdmin } from "./utils/adminSetup";
+import BannerUploader from './components/admin/BannerUploader';
 
 // Pages
 import Home from "./pages/Home";
@@ -19,7 +19,6 @@ import DrawDetail from "./pages/DrawDetail";
 import Winners from "./pages/Winners";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
-import Admin from "./pages/Admin";
 import MediaLibrary from "./pages/MediaLibrary";
 import NotFound from "./pages/NotFound";
 
@@ -64,6 +63,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+function AdminPage() {
+  return (
+    <div className="container mx-auto py-8">
+      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <BannerUploader />
+      </div>
+    </div>
+  );
+}
+
 const App = () => {
   console.log("App rendering");
   
@@ -92,7 +102,7 @@ const App = () => {
                       <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
                       <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                      <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
                       <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
                       
                       <Route path="*" element={<NotFound />} />
