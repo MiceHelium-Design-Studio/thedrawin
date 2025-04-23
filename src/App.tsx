@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -84,8 +83,8 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <TooltipProvider>
-          <AuthProvider>
-            <BackgroundProvider>
+          <BackgroundProvider>
+            <AuthProvider>
               <DrawProvider>
                 <NotificationProvider>
                   <Toaster />
@@ -109,8 +108,8 @@ const App = () => {
                   </Layout>
                 </NotificationProvider>
               </DrawProvider>
-            </BackgroundProvider>
-          </AuthProvider>
+            </AuthProvider>
+          </BackgroundProvider>
         </TooltipProvider>
       </BrowserRouter>
     </QueryClientProvider>
