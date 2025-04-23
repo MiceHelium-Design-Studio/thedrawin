@@ -1,19 +1,14 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { useDraws } from '../context/DrawContext';
 import { useAuth } from '../context/AuthContext';
 import DrawCard from '../components/draws/DrawCard';
 import BannerSlider from '../components/draws/BannerSlider';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RotateCcw } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Banner } from '@/types';
 
 const Home: React.FC = () => {
   const { draws = [], banners = [], loading: drawsLoading } = useDraws();
-  const { user, loading: authLoading, clearCacheAndReload } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
   const isLoading = authLoading || drawsLoading;
@@ -30,27 +25,17 @@ const Home: React.FC = () => {
   });
   
   const activeDraws = (draws || []).filter(draw => draw.status === 'active');
-  
+
   const handleViewAll = () => {
     navigate('/draws');
   };
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6">
         <h1 className="text-xl font-bold flex items-center uppercase">
           <span className="bg-gold-gradient bg-clip-text text-transparent">THE DRAW WIN 2025</span>
         </h1>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={clearCacheAndReload}
-          className="flex items-center gap-1"
-          disabled={isLoading}
-        >
-          <RotateCcw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
-          <span>{isLoading ? "Loading..." : "Refresh"}</span>
-        </Button>
       </div>
       
       {isLoading ? (

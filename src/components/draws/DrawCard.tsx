@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,18 +46,15 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
       errorEvent: e
     });
     
-    // Apply fallback styling with gold theme
-    e.currentTarget.src = '/placeholder.svg';
+    e.currentTarget.src = 'https://images.unsplash.com/photo-1610375461246-83df859d849d';
     e.currentTarget.className = e.currentTarget.className + ' opacity-50 bg-gradient-to-r from-gold/10 to-black';
     
-    // Add error indication
     const parent = e.currentTarget.parentElement;
     if (parent) {
       const errorIndicator = document.createElement('div');
       errorIndicator.className = 'absolute bottom-0 left-0 right-0 bg-black/70 border-t border-gold/30 text-gold text-xs p-1 text-center';
       errorIndicator.innerText = 'Image unavailable';
       
-      // Only add if it doesn't exist already
       if (!parent.querySelector('.image-error-indicator')) {
         errorIndicator.classList.add('image-error-indicator');
         parent.appendChild(errorIndicator);

@@ -18,6 +18,27 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
   const [banners, setBanners] = useState<Banner[]>([]);
   
+  const defaultBanners = [
+    {
+      id: 'default-1',
+      url: 'https://images.unsplash.com/photo-1610375461246-83df859d849d',
+      linkUrl: '/draws',
+      active: true
+    },
+    {
+      id: 'default-2',
+      url: 'https://images.unsplash.com/photo-1574362848149-11496d93a7c7',
+      linkUrl: '/draws',
+      active: true
+    },
+    {
+      id: 'default-3',
+      url: 'https://images.unsplash.com/photo-1543699936-c901ddbf0c05',
+      linkUrl: '/draws',
+      active: true
+    }
+  ];
+
   useEffect(() => {
     const fetchAndSetBanners = async () => {
       if (propBanners && propBanners.length > 0) {
