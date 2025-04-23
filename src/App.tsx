@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -10,6 +11,17 @@ import { DrawProvider } from "./context/DrawContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { BackgroundProvider } from "./context/BackgroundContext";
 import { ensureFullAdmin } from "./utils/adminSetup";
+
+// Pages
+import Home from "./pages/Home";
+import Auth from "./pages/Auth";
+import DrawDetail from "./pages/DrawDetail";
+import Winners from "./pages/Winners";
+import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
+import MediaLibrary from "./pages/MediaLibrary";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
   defaultOptions: {
