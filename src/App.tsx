@@ -11,41 +11,26 @@ import { NotificationProvider } from "./context/NotificationContext";
 import { BackgroundProvider } from "./context/BackgroundContext";
 import { ensureFullAdmin } from "./utils/adminSetup";
 
-// Pages
-import Home from "./pages/Home";
-import Auth from "./pages/Auth";
-import DrawDetail from "./pages/DrawDetail";
-import Winners from "./pages/Winners";
-import Notifications from "./pages/Notifications";
-import Profile from "./pages/Profile";
-import Admin from "./pages/Admin";
-import MediaLibrary from "./pages/MediaLibrary";
-import NotFound from "./pages/NotFound";
-
-// Create a new QueryClient instance with longer staleTime
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2, // Reduced retries to avoid too many failed attempts
-      staleTime: 60000, // 1 minute
+      retry: 2,
+      staleTime: 60000,
       refetchOnWindowFocus: false,
-      refetchOnMount: false, // Changed to false to avoid excessive refetching
-      gcTime: 300000, // 5 minutes
+      refetchOnMount: false,
+      gcTime: 300000,
     },
   },
 });
 
-// Improved protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
   
-  // Add routing debug
   useEffect(() => {
     console.log("ProtectedRoute at path:", location.pathname, "user:", user?.id, "loading:", loading);
   }, [location.pathname, user, loading]);
   
-  // Show a loading state while checking auth
   if (loading) {
     console.log("ProtectedRoute: Auth state is loading");
     return (
@@ -58,13 +43,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // If no user after loading completed, redirect to auth
   if (!user) {
     console.log("ProtectedRoute: No user, redirecting to auth");
     return <Navigate to="/auth" replace state={{ from: location }} />;
   }
   
-  // User is authenticated, render children
   console.log("ProtectedRoute: User authenticated, rendering content", user?.id);
   return <>{children}</>;
 };
@@ -72,7 +55,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const App = () => {
   console.log("App rendering");
   
-  // Call ensureFullAdmin when the app initializes
   useEffect(() => {
     ensureFullAdmin()
       .then(() => console.log('Admin check completed'))
@@ -82,8 +64,8 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <TooltipProvider>
-          <BackgroundProvider>
+        <BackgroundProvider>
+          <TooltipProvider>
             <AuthProvider>
               <DrawProvider>
                 <NotificationProvider>
@@ -93,7 +75,6 @@ const App = () => {
                     <Routes>
                       <Route path="/auth" element={<Auth />} />
                       
-                      {/* Make sure all protected routes are inside the providers */}
                       <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                       <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
                       <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
@@ -102,15 +83,14 @@ const App = () => {
                       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                       <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
                       
-                      {/* Catch-all route */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Layout>
                 </NotificationProvider>
               </DrawProvider>
             </AuthProvider>
-          </BackgroundProvider>
-        </TooltipProvider>
+          </TooltipProvider>
+        </BackgroundProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );
