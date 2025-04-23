@@ -11,7 +11,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ChevronLeft, Coins } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDraws } from '../context/DrawContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 const DrawDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -74,13 +74,19 @@ const DrawDetail: React.FC = () => {
     }
     
     try {
+      // Purchase the ticket
       await buyTicket(draw.id, selectedNumber, selectedPrice);
+      
+      // Success toast notification (immediate feedback)
       toast({
         title: 'Ticket purchased!',
-        description: `You've entered the draw with number ${selectedNumber}.`,
+        description: `You've entered the ${draw.title} draw with number ${selectedNumber}.`,
       });
+      
+      // Redirect to home page after successful purchase
       navigate('/');
     } catch (error) {
+      // Error handling
       toast({
         variant: 'destructive',
         title: 'Purchase failed',
