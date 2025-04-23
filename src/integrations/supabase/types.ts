@@ -108,6 +108,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       update_user_admin_status: {
         Args: { user_email: string; is_admin_status: boolean }
         Returns: undefined

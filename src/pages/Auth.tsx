@@ -1,99 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate, useNavigate, useLocation } from 'react-router-dom';
-import AuthForm from '../components/auth/AuthForm';
+
+import { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '../context/AuthContext';
-import { useBackground } from '../context/BackgroundContext';
-import { useToast } from '@/components/ui/use-toast';
-import { Facebook, Twitter, Linkedin, Mail } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useBackground } from '@/context/BackgroundContext';
 import { Separator } from '@/components/ui/separator';
+import AuthForm from '../components/auth/AuthForm';
+import AuthHeader from '../components/auth/AuthHeader';
+import SocialLoginButtons from '../components/auth/SocialLoginButtons';
+import { useAuthForm } from '@/hooks/useAuthForm';
 
-const Auth: React.FC = () => {
-  const { user, login, signup, signInWithGoogle, loading: authLoading } = useAuth();
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { toast } = useToast();
+const Auth = () => {
+  const { user, loading: authLoading } = useAuth();
   const { authBackgroundImage } = useBackground();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { 
+    mode, 
+    isProcessing, 
+    handleSubmit, 
+    handleSocialLogin, 
+    setMode 
+  } = useAuthForm();
 
-  // Get the intended destination from location state or default to "/"
-  const from = location.state?.from?.pathname || "/";
-
-  // Redirect if user is already logged in
-  useEffect(() => {
-    if (user && !authLoading) {
-      console.log("Auth: User is logged in, redirecting to:", from);
-      navigate("/", { replace: true });
-    }
-  }, [user, authLoading, navigate, from]);
-
-  const handleSubmit = async (data: { email: string; password: string; name?: string; phone?: string }) => {
-    try {
-      setIsProcessing(true);
-      if (mode === 'login') {
-        await login(data.email, data.password);
-        toast({
-          title: 'Welcome back!',
-          description: 'You are now signed in.',
-        });
-        navigate("/", { replace: true });
-      } else {
-        await signup(data.email, data.password, data.name || '', data.phone);
-        toast({
-          title: 'Account created!',
-          description: 'Your account has been created successfully.',
-        });
-        navigate("/", { replace: true });
-      }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication failed',
-        description: 'Please check your credentials and try again.',
-      });
-      console.error(error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleSocialLogin = async (provider: string) => {
-    try {
-      setIsProcessing(true);
-      if (provider === 'Google') {
-        await signInWithGoogle();
-        if (user) {
-          navigate("/", { replace: true });
-        }
-      } else {
-        toast({
-          title: 'Social login',
-          description: `${provider} login is not implemented yet.`,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: `${provider} login failed`,
-        description: 'An error occurred during login.',
-      });
-      console.error(error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const toggleMode = () => {
-    setMode(prev => (prev === 'login' ? 'signup' : 'login'));
-  };
-
-  // Clear loading state quickly
   if (authLoading && user) {
     return <Navigate to="/" replace />;
   }
 
-  // If user is already logged in, redirect to home page immediately
   if (user) {
     return <Navigate to="/" replace />;
   }
@@ -119,61 +50,19 @@ const Auth: React.FC = () => {
       }}
     >
       <div className="max-w-md w-full mx-auto glass-card rounded-xl backdrop-blur-md shadow-lg p-6 my-8">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold bg-gold-gradient bg-clip-text text-transparent inline-block tracking-tight uppercase">
-            THE DRAW WIN 2025
-          </h1>
-          <div className="h-1 w-24 mx-auto my-3 bg-gold/50 rounded-full"></div>
-          <p className="text-sm text-white mt-2 font-light tracking-wide uppercase">
-            ENTER DRAWS TO WIN VALUABLE PRIZES
-          </p>
-        </div>
-
+        <AuthHeader />
         <AuthForm mode={mode} onSubmit={handleSubmit} loading={isProcessing} />
 
         <div className="mt-6">
           <div className="relative flex items-center justify-center">
             <Separator className="bg-gold/20" />
-            <span className="px-2 text-xs text-white bg-black/50 relative z-10 font-medium tracking-wider uppercase">OR CONTINUE WITH</span>
+            <span className="px-2 text-xs text-white bg-black/50 relative z-10 font-medium tracking-wider uppercase">
+              OR CONTINUE WITH
+            </span>
           </div>
           
-          <div className="flex justify-center space-x-4 mt-4">
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={() => handleSocialLogin('Facebook')}
-              className="rounded-full hover:bg-black/60"
-              disabled={isProcessing}
-            >
-              <Facebook className="h-5 w-5 text-gold" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={() => handleSocialLogin('Twitter')}
-              className="rounded-full hover:bg-black/60"
-              disabled={isProcessing}
-            >
-              <Twitter className="h-5 w-5 text-gold" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={() => handleSocialLogin('LinkedIn')}
-              className="rounded-full hover:bg-black/60"
-              disabled={isProcessing}
-            >
-              <Linkedin className="h-5 w-5 text-gold" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={() => handleSocialLogin('Google')}
-              className="rounded-full hover:bg-black/60"
-              disabled={isProcessing}
-            >
-              <Mail className="h-5 w-5 text-gold" />
-            </Button>
+          <div className="mt-4">
+            <SocialLoginButtons onSocialLogin={handleSocialLogin} isProcessing={isProcessing} />
           </div>
         </div>
 
@@ -183,7 +72,7 @@ const Auth: React.FC = () => {
           </p>
           <Button 
             variant="outline" 
-            onClick={toggleMode}
+            onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
             className="text-white hover:text-white border border-gold/30 hover:border-gold/60 bg-black/50 hover:bg-black-light/70 transition-all duration-300 font-medium tracking-wide text-sm uppercase"
             disabled={isProcessing}
           >
