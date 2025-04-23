@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, CheckCheck, UserCog, UserX, Shield, Mail, UserRound, Wallet, PlusCircle, MinusCircle } from 'lucide-react';
+import { UserCog, Mail, UserRound, Wallet, PlusCircle } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -15,11 +15,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,21 +46,23 @@ const UserManagement: React.FC = () => {
       
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, name, avatar, wallet, is_admin, created_at');
+        .select('*');
       
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
         throw profilesError;
       }
       
-      const mappedUsers = profilesData?.map(user => ({
-        id: user.id,
-        email: user.email,
-        name: user.name || undefined,
-        avatar: user.avatar || undefined,
-        wallet: user.wallet || 0,
-        isAdmin: user.is_admin || false,
-        createdAt: user.created_at
+      console.log('Fetched profiles:', profilesData);
+      
+      const mappedUsers = profilesData?.map(profile => ({
+        id: profile.id,
+        email: profile.email,
+        name: profile.name || undefined,
+        avatar: profile.avatar || undefined,
+        wallet: profile.wallet || 0,
+        isAdmin: profile.is_admin || false,
+        createdAt: profile.created_at
       })) || [];
       
       setUsers(mappedUsers);
@@ -133,31 +134,7 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const refreshUserList = () => {
-    fetchUsers();
-    toast({
-      title: 'Refreshed',
-      description: 'User list has been refreshed.'
-    });
-  };
-
-  const openWalletDialog = (userId: string) => {
-    setSelectedUserId(userId);
-    setIsWalletDialogOpen(true);
-  };
-
-  const closeWalletDialog = () => {
-    setSelectedUserId(null);
-    setWalletAmount('100');
-    setIsWalletDialogOpen(false);
-  };
-
-  const handleWalletAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d]/g, '');
-    setWalletAmount(value);
-  };
-
-  const addWalletFunds = async () => {
+  const addWalletFunds = async (userId: string, amount: number) => {
     if (!selectedUserId || !walletAmount || parseInt(walletAmount) <= 0) {
       toast({
         variant: 'destructive',
@@ -168,8 +145,7 @@ const UserManagement: React.FC = () => {
     }
 
     try {
-      const amount = parseInt(walletAmount);
-      const userToUpdate = users.find(u => u.id === selectedUserId);
+      const userToUpdate = users.find(u => u.id === userId);
       
       if (!userToUpdate) {
         throw new Error('User not found');
@@ -208,7 +184,7 @@ const UserManagement: React.FC = () => {
     <section className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">User Management</h2>
-        <Button onClick={refreshUserList} variant="outline" size="sm">
+        <Button onClick={fetchUsers} variant="outline" size="sm">
           Refresh List
         </Button>
       </div>
@@ -251,7 +227,7 @@ const UserManagement: React.FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">
-              {users.reduce((total, user) => total + user.wallet, 0)}
+              {users.reduce((total, user) => total + (user.wallet || 0), 0)}
             </p>
           </CardContent>
         </Card>
@@ -260,12 +236,14 @@ const UserManagement: React.FC = () => {
       <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableHead>User</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Created At</TableHead>
-            <TableHead>Wallet</TableHead>
-            <TableHead>Admin Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableRow>
+              <TableHead>User</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Created At</TableHead>
+              <TableHead>Wallet</TableHead>
+              <TableHead>Admin Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
@@ -279,7 +257,7 @@ const UserManagement: React.FC = () => {
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-4">
-                  No users found. {fetchError ? `An error occurred: ${fetchError}` : ""}
+                  No users found. {fetchError ? `Error: ${fetchError}` : ""}
                 </TableCell>
               </TableRow>
             ) : (
@@ -333,7 +311,10 @@ const UserManagement: React.FC = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => openWalletDialog(user.id)}
+                        onClick={() => {
+                          setSelectedUserId(user.id);
+                          setIsWalletDialogOpen(true);
+                        }}
                       >
                         <PlusCircle className="h-4 w-4 mr-1" />
                         Add Funds
@@ -365,7 +346,10 @@ const UserManagement: React.FC = () => {
                   id="amount"
                   type="text"
                   value={walletAmount}
-                  onChange={handleWalletAmountChange}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^\d]/g, '');
+                    setWalletAmount(value);
+                  }}
                   className="flex-1"
                 />
                 <span className="ml-2 text-sm text-gray-500">credits</span>
@@ -373,8 +357,16 @@ const UserManagement: React.FC = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={closeWalletDialog}>Cancel</Button>
-            <Button onClick={addWalletFunds}>Add Funds</Button>
+            <Button variant="outline" onClick={() => {
+              setSelectedUserId(null);
+              setWalletAmount('100');
+              setIsWalletDialogOpen(false);
+            }}>Cancel</Button>
+            <Button onClick={() => {
+              if (selectedUserId) {
+                addWalletFunds(selectedUserId, parseInt(walletAmount));
+              }
+            }}>Add Funds</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
