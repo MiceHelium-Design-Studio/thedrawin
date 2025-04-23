@@ -18,6 +18,7 @@ interface WalletDialogProps {
   walletAmount: string;
   onWalletAmountChange: (value: string) => void;
   onAddFunds: () => void;
+  isProcessing?: boolean;
 }
 
 export const WalletDialog: React.FC<WalletDialogProps> = ({
@@ -26,6 +27,7 @@ export const WalletDialog: React.FC<WalletDialogProps> = ({
   walletAmount,
   onWalletAmountChange,
   onAddFunds,
+  isProcessing = false,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -51,14 +53,24 @@ export const WalletDialog: React.FC<WalletDialogProps> = ({
                   onWalletAmountChange(value);
                 }}
                 className="flex-1"
+                disabled={isProcessing}
               />
               <span className="ml-2 text-sm text-gray-500">credits</span>
             </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={onAddFunds}>Add Funds</Button>
+          <Button variant="outline" onClick={onClose} disabled={isProcessing}>Cancel</Button>
+          <Button onClick={onAddFunds} disabled={isProcessing}>
+            {isProcessing ? (
+              <>
+                <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                Processing...
+              </>
+            ) : (
+              'Add Funds'
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
