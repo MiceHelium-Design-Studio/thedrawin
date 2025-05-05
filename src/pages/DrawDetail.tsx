@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -36,7 +37,8 @@ const DrawDetail: React.FC = () => {
     }
 
     try {
-      await buyTicket(draw.id, number, price);
+      // Updated to match the buyTicket function signature in DrawContext
+      await buyTicket(draw.id, number);
       
       toast({
         title: 'Ticket purchased!',

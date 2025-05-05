@@ -19,15 +19,20 @@ export const BannerService = {
     return data?.map(item => ({
       id: item.id,
       imageUrl: item.url,
+      url: item.url, // Add url property for backwards compatibility
       linkUrl: item.url, // Default to the same URL
       active: true // Default to active
     })) || [];
   },
 
   async createBanner(banner: Omit<Banner, 'id'>, userId: string): Promise<Banner> {
+    // Generate a unique ID for the banner
+    const bannerId = `banner-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    
     const { data, error } = await supabase
       .from('media_items')
       .insert({
+        id: bannerId,
         name: `banner-${Date.now()}`,
         url: banner.imageUrl,
         type: 'banner',
@@ -48,6 +53,7 @@ export const BannerService = {
     return {
       id: data[0].id,
       imageUrl: banner.imageUrl,
+      url: banner.imageUrl, // Add url property for backwards compatibility
       linkUrl: banner.linkUrl,
       active: banner.active
     };

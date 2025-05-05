@@ -345,10 +345,14 @@ const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
   const createBanner = async (banner: Omit<Banner, 'id'>) => {
     setLoading(true);
     try {
+      // Generate a unique ID for the banner
+      const bannerId = `banner-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      
       // Create a new banner entry in the media_items table
       const { data, error } = await supabase
         .from('media_items')
         .insert({
+          id: bannerId,
           name: `banner-${Date.now()}`,
           url: banner.imageUrl,
           type: 'banner',
@@ -369,6 +373,7 @@ const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
         const newBanner: Banner = {
           id: data[0].id,
           imageUrl: banner.imageUrl,
+          url: banner.imageUrl, // Add url property for backwards compatibility
           linkUrl: banner.linkUrl,
           active: banner.active
         };

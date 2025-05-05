@@ -44,7 +44,7 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
       if (propBanners && propBanners.length > 0) {
         const convertedBanners = propBanners.map(banner => ({
           id: banner.id,
-          url: banner.url || banner.imageUrl,
+          url: banner.imageUrl, // Use imageUrl as url
           linkUrl: banner.linkUrl,
           active: banner.active
         }));

@@ -46,6 +46,7 @@ export interface Notification {
 export interface Banner {
   id: string;
   imageUrl: string;
+  url?: string; // Add this for compatibility with existing code
   linkUrl?: string;
   active?: boolean;
 }
