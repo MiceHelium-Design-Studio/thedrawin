@@ -3,7 +3,7 @@ const AuthHeader = () => {
   return <>
       <div className="mb-6 text-center">
         <div className="flex flex-col items-center justify-center">
-          <img src="/lovable-uploads/a3f55f49-2874-4022-824b-6b3cd22c8837.png" alt="DRAWIN Crown Logo" className="h-[5.28rem] mb-2 object-contain" />
+          <img src="/lovable-uploads/a3f55f49-2874-4022-824b-6b3cd22c8837.png" alt="DRAWIN Crown Logo" className="h-[6.34rem] mb-2 object-contain" />
           
         </div>
         
