@@ -1,4 +1,4 @@
-import { Coins } from 'lucide-react';
+
 const AuthHeader = () => {
   return <>
       <div className="mb-6 text-center">

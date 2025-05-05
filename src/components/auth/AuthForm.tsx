@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Coins } from 'lucide-react';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
@@ -30,7 +29,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, loading }) => {
     <div className="w-full max-w-md mx-auto px-8">
       <div className="flex justify-center mb-6">
         <div className="rounded-full bg-gold/20 p-3 shadow-[0_0_15px_rgba(212,175,55,0.3)] neo-glow">
-          <Coins className="h-8 w-8 text-gold" />
+          <img 
+            src="/lovable-uploads/20718937-5630-4106-a72c-45e89d7d0310.png" 
+            alt="DRAWIN logo" 
+            className="h-8 w-8"
+          />
         </div>
       </div>
       
