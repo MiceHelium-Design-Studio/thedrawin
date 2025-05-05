@@ -45,7 +45,7 @@ const BannerUploader: React.FC = () => {
       <CardContent>
         <div className="relative aspect-video overflow-hidden rounded-md bg-black-light border border-gold/20">
           <img 
-            src="/lovable-uploads/d2810e9f-1964-48c4-97be-48553adb004f.png" 
+            src="/lovable-uploads/3ba1bfaf-88ef-41ce-8abf-beb7e1144481.png" 
             alt="Premium Gold DRAWIN Bar" 
             className="w-full h-full object-cover"
           />
