@@ -3,17 +3,31 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types';
+import { testSupabaseConnection } from '@/utils/supabaseTest';
 
 export const useUserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const { toast } = useToast();
+  const [connectionStatus, setConnectionStatus] = useState<boolean | null>(null);
+
+  const testConnection = async () => {
+    const isConnected = await testSupabaseConnection();
+    setConnectionStatus(isConnected);
+    return isConnected;
+  };
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       setFetchError(null);
+      
+      // First test the connection
+      const isConnected = await testConnection();
+      if (!isConnected) {
+        throw new Error('Could not connect to Supabase database');
+      }
       
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
@@ -111,8 +125,10 @@ export const useUserManagement = () => {
     users,
     loading,
     fetchError,
+    connectionStatus,
     fetchUsers,
     toggleAdminStatus,
-    sendNotificationToUser
+    sendNotificationToUser,
+    testConnection
   };
 };
