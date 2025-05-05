@@ -42,7 +42,8 @@ export async function getMediaItems() {
         id: item.id,
         name: item.name,
         url: item.url,
-        type: validateMediaType(item.type),
+        // Convert JSON type to string using validateMediaType helper
+        type: validateMediaType(String(item.type)),
         size: item.size,
         uploadDate: item.upload_date
       }));
