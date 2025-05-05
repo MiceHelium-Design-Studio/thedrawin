@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Image, Trash2, Upload, RefreshCw, HardDrive, FileText, Video, AlertTriangle } from 'lucide-react';
+import { Image, Trash2, Upload, RefreshCw, HardDrive, FileText, Video, AlertTriangle, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { uploadToS3, getMediaItems, deleteFromS3, getStorageStats, StorageStats } from '@/utils/s3Utils';
+import ImageStorageGuide from '../guides/ImageStorageGuide';
 
 const MediaManager: React.FC = () => {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -21,6 +22,7 @@ const MediaManager: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const { toast } = useToast();
 
   // Get media items on component mount
@@ -189,10 +191,21 @@ const MediaManager: React.FC = () => {
     <section className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold">Media Manager</h2>
-        <Button onClick={refreshMediaList} variant="outline" size="sm" className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={refreshMediaList} variant="outline" size="sm" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+          <Button 
+            onClick={() => setShowGuide(true)} 
+            variant="outline" 
+            size="sm" 
+            className="gap-2"
+          >
+            <HelpCircle className="h-4 w-4" />
+            Storage Guide
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -383,6 +396,7 @@ const MediaManager: React.FC = () => {
         </div>
       </div>
 
+      {/* Image Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -402,6 +416,24 @@ const MediaManager: React.FC = () => {
           )}
           <DialogFooter>
             <Button onClick={() => setPreviewOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Storage Guide Dialog */}
+      <Dialog open={showGuide} onOpenChange={setShowGuide}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Image Storage Guide</DialogTitle>
+            <DialogDescription>
+              Learn how to access and display images from storage in your application
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <ImageStorageGuide />
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowGuide(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
