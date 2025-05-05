@@ -48,7 +48,6 @@ export interface Banner {
   imageUrl: string;
   linkUrl?: string;
   active?: boolean;
-  url?: string;
 }
 
 export interface MediaItem {

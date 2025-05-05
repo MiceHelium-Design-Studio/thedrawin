@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash, Plus, Eye, EyeOff } from 'lucide-react';
 import {
@@ -49,7 +49,6 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      const fileKey = banner.imageUrl.split('/').pop() || '';
       await deleteBanner(banner.id);
       toast({
         title: "Banner deleted",
@@ -104,11 +103,15 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
 };
 
 const BannersManagement: React.FC = () => {
-  const { banners } = useDraws();
+  const { banners, fetchBanners } = useDraws();
   const [isBannerDrawerOpen, setIsBannerDrawerOpen] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState<Banner | null>(null);
   const [bannerImageUrl, setBannerImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    fetchBanners();
+  }, []);
 
   const handleEditBanner = (banner: Banner) => {
     setSelectedBanner(banner);

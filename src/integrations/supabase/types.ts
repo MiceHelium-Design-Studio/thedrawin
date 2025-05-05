@@ -99,24 +99,6 @@ export type Database = {
         }
         Relationships: []
       }
-      todos: {
-        Row: {
-          created_at: string
-          id: number
-          task: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          task?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          task?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
