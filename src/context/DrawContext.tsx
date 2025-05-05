@@ -135,6 +135,7 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   url: newItem.url,
                   type: mediaType,
                   size: newItem.size || 0,
+                  user_id: newItem.user_id || user.id,
                   uploadDate: newItem.upload_date || new Date().toISOString()
                 };
                 
@@ -166,7 +167,19 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       const mediaItems = await getMediaItems();
-      setMedia(mediaItems as MediaItem[]);
+      
+      // Transform items to match MediaItem interface
+      const formattedItems: MediaItem[] = mediaItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        url: item.url,
+        type: validateMediaType(item.type),
+        size: item.size || 0,
+        user_id: item.user_id || user.id,
+        uploadDate: item.uploadDate || item.upload_date || new Date().toISOString()
+      }));
+      
+      setMedia(formattedItems);
     } catch (error) {
       console.error('Error fetching media items:', error);
       toast({
@@ -177,6 +190,23 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Helper function to validate media type
+  const validateMediaType = (type: any): "image" | "document" | "video" => {
+    if (type === 'image' || type === 'document' || type === 'video') {
+      return type as "image" | "document" | "video";
+    }
+    
+    // Default to the most appropriate type based on the string
+    if (typeof type === 'string') {
+      if (type.includes('image')) return 'image';
+      if (type.includes('document')) return 'document';
+      if (type.includes('video')) return 'video';
+    }
+    
+    // Fallback to 'document' as default
+    return 'document';
   };
 
   useEffect(() => {
@@ -342,6 +372,7 @@ export const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children
         url: url,
         type: mediaType,
         size: size,
+        user_id: user?.id || '',
         uploadDate: new Date().toISOString(),
       };
       
