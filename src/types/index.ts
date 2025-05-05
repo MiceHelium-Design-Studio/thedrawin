@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -56,5 +57,6 @@ export interface MediaItem {
   url: string;
   type: 'image' | 'document' | 'video';
   size: number;
+  user_id: string;
   uploadDate: string;
 }

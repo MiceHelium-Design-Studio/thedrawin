@@ -9,16 +9,7 @@ import { Upload, RefreshCw, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { uploadToS3, getMediaItems, deleteFromS3 } from '@/utils/s3Utils';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-
-interface MediaItem {
-  id: string;
-  name: string;
-  url: string;
-  type: string;
-  size: number;
-  user_id: string;
-  upload_date: string;
-}
+import { MediaItem } from '@/types';
 
 const MediaTester: React.FC = () => {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -33,7 +24,19 @@ const MediaTester: React.FC = () => {
       // Test if we can access our media items
       const items = await getMediaItems();
       console.log('Media items fetched:', items);
-      setMediaItems(items);
+      
+      // Convert the returned items to match the MediaItem interface
+      const formattedItems: MediaItem[] = items.map(item => ({
+        id: item.id,
+        name: item.name,
+        url: item.url,
+        type: item.type,
+        size: item.size,
+        user_id: item.user_id || user?.id || '',
+        uploadDate: item.uploadDate || new Date().toISOString()
+      }));
+      
+      setMediaItems(formattedItems);
       
       // Also test direct Supabase query to check RLS policies
       const { data, error } = await supabase
