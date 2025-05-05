@@ -14,7 +14,7 @@ export type Database = {
           id: string
           name: string
           size: number
-          type: string
+          type: Json
           upload_date: string
           url: string
           user_id: string
@@ -23,7 +23,7 @@ export type Database = {
           id: string
           name: string
           size?: number
-          type: string
+          type: Json
           upload_date?: string
           url: string
           user_id: string
@@ -32,7 +32,7 @@ export type Database = {
           id?: string
           name?: string
           size?: number
-          type?: string
+          type?: Json
           upload_date?: string
           url?: string
           user_id?: string
@@ -96,6 +96,24 @@ export type Database = {
           name?: string | null
           updated_at?: string | null
           wallet?: number | null
+        }
+        Relationships: []
+      }
+      todos: {
+        Row: {
+          created_at: string
+          id: number
+          task: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          task?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          task?: string | null
         }
         Relationships: []
       }

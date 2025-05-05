@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Trophy } from 'lucide-react';
+import { testSupabaseConnection } from '@/utils/supabaseTest';
 
 interface DrawCompleteProps {
   status: 'completed' | 'upcoming' | 'active';
@@ -9,6 +10,17 @@ interface DrawCompleteProps {
 }
 
 export const DrawComplete = ({ status, winner }: DrawCompleteProps) => {
+  useEffect(() => {
+    // Test the Supabase connection when the component mounts
+    testSupabaseConnection().then(isConnected => {
+      if (isConnected) {
+        console.log('✅ Supabase connection is working properly');
+      } else {
+        console.error('❌ Supabase connection test failed');
+      }
+    });
+  }, []);
+
   return (
     <Card className="text-center py-6 px-4 mt-6 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
       {status === 'completed' ? (
