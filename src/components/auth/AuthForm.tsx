@@ -33,11 +33,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
     });
   };
   return <div className="w-full max-w-md mx-auto px-8">
-      <div className="flex justify-center mb-6">
-        <div className="neo-glow bg-black-light">
-          <img src="/lovable-uploads/20718937-5630-4106-a72c-45e89d7d0310.png" alt="DRAWIN logo" className="h-8 w-8" />
-        </div>
-      </div>
+      
       
       <h2 className="text-xl font-serif text-center mb-6 text-gold tracking-wider uppercase font-bold">
         {mode === 'login' ? 'Sign In' : 'Create Account'}
