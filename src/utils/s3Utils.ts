@@ -1,4 +1,3 @@
-
 import { supabase } from '../integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -42,9 +41,9 @@ export async function getMediaItems() {
         id: item.id,
         name: item.name,
         url: item.url,
-        // Convert JSON type to string using validateMediaType helper
         type: validateMediaType(String(item.type)),
         size: item.size,
+        user_id: item.user_id,
         uploadDate: item.upload_date
       }));
     } else {
@@ -68,6 +67,11 @@ export async function getMediaItems() {
       
       if (storageData && storageData.length > 0) {
         console.log('Successfully listed items from storage bucket:', storageData.length);
+        
+        // Get current user ID for assigning ownership to items
+        const { data: { user } } = await supabase.auth.getUser();
+        const userId = user?.id || '';
+        
         // Transform storage format to app format
         return storageData.map(item => {
           const url = supabase.storage.from('media').getPublicUrl(item.name).data.publicUrl;
@@ -77,6 +81,7 @@ export async function getMediaItems() {
             url: url,
             type: validateMediaType(determineFileType(item.name)),
             size: item.metadata?.size || 0,
+            user_id: userId, // Assign current user ID as fallback
             uploadDate: item.created_at || new Date().toISOString()
           };
         });
