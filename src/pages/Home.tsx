@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import DrawCard from '../components/draws/DrawCard';
 import BannerSlider from '../components/draws/BannerSlider';
 import { Skeleton } from '@/components/ui/skeleton';
+import ImageStorageGuide from '../components/guides/ImageStorageGuide';
 
 const Home: React.FC = () => {
   const {
@@ -80,7 +80,7 @@ const Home: React.FC = () => {
             </section>
           )}
           
-          <section>
+          <section className="mb-8">
             <h2 className="text-base font-semibold mb-4 uppercase">All Draws</h2>
             <div className="grid gap-4">
               {sortedDraws && sortedDraws.length > 0 ? (
@@ -91,6 +91,11 @@ const Home: React.FC = () => {
                 </div>
               )}
             </div>
+          </section>
+          
+          <section>
+            <h2 className="text-base font-semibold mb-4 uppercase">Image Storage Guide</h2>
+            <ImageStorageGuide />
           </section>
         </>
       )}
