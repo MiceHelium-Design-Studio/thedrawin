@@ -7,6 +7,7 @@ import { StatsOverview } from './users/StatsOverview';
 import { UserTable } from './users/UserTable';
 import { WalletDialog } from './users/WalletDialog';
 import { useToast } from '@/hooks/use-toast';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 const UserManagement: React.FC = () => {
   const {
@@ -14,6 +15,7 @@ const UserManagement: React.FC = () => {
     loading,
     fetchError,
     connectionStatus,
+    connectionErrorDetails,
     fetchUsers,
     toggleAdminStatus,
     sendNotificationToUser,
@@ -38,10 +40,10 @@ const UserManagement: React.FC = () => {
       toast({
         variant: 'destructive',
         title: 'Connection Error',
-        description: 'Failed to connect to the database. Please check your network and try again.'
+        description: connectionErrorDetails || 'Failed to connect to the database. Please check your network and try again.'
       });
     }
-  }, [connectionStatus, toast]);
+  }, [connectionStatus, connectionErrorDetails, toast]);
 
   return (
     <section className="mb-8">
@@ -51,7 +53,8 @@ const UserManagement: React.FC = () => {
           <Button onClick={testConnection} variant="outline" size="sm">
             Test Connection
           </Button>
-          <Button onClick={fetchUsers} variant="outline" size="sm">
+          <Button onClick={fetchUsers} variant="outline" size="sm" disabled={connectionStatus === false}>
+            <RefreshCw className="h-4 w-4 mr-1" />
             Refresh List
           </Button>
         </div>
@@ -59,8 +62,24 @@ const UserManagement: React.FC = () => {
 
       {connectionStatus === false && (
         <div className="bg-destructive/20 text-destructive border border-destructive/50 rounded-md p-4 mb-4">
-          <p className="font-medium">Database connection error</p>
-          <p className="text-sm">Could not connect to the Supabase database. Please check your network connection and try again.</p>
+          <div className="flex items-start">
+            <AlertTriangle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium">Database connection error</p>
+              <p className="text-sm mt-1">{connectionErrorDetails || 'Could not connect to the Supabase database. Please check your network connection and try again.'}</p>
+              {connectionErrorDetails && connectionErrorDetails.includes('infinite recursion') && (
+                <div className="mt-2 text-sm p-2 bg-destructive/10 rounded">
+                  <p className="font-medium">Suggested Fix:</p>
+                  <p>This appears to be a Row Level Security (RLS) policy issue in the database. The policies on the profiles table may have a circular reference causing infinite recursion.</p>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mt-3">
+            <Button size="sm" variant="outline" onClick={testConnection} className="mr-2">
+              Test Again
+            </Button>
+          </div>
         </div>
       )}
 

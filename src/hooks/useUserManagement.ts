@@ -11,11 +11,13 @@ export const useUserManagement = () => {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const { toast } = useToast();
   const [connectionStatus, setConnectionStatus] = useState<boolean | null>(null);
+  const [connectionErrorDetails, setConnectionErrorDetails] = useState<string | null>(null);
 
   const testConnection = async () => {
-    const isConnected = await testSupabaseConnection();
-    setConnectionStatus(isConnected);
-    return isConnected;
+    const result = await testSupabaseConnection();
+    setConnectionStatus(result.isConnected);
+    setConnectionErrorDetails(result.errorDetails || null);
+    return result;
   };
 
   const fetchUsers = async () => {
@@ -24,9 +26,9 @@ export const useUserManagement = () => {
       setFetchError(null);
       
       // First test the connection
-      const isConnected = await testConnection();
-      if (!isConnected) {
-        throw new Error('Could not connect to Supabase database');
+      const connectionResult = await testConnection();
+      if (!connectionResult.isConnected) {
+        throw new Error(connectionResult.errorDetails || 'Could not connect to Supabase database');
       }
       
       const { data: profilesData, error: profilesError } = await supabase
@@ -54,7 +56,7 @@ export const useUserManagement = () => {
       toast({
         variant: 'destructive',
         title: 'Error fetching users',
-        description: 'There was a problem loading the user list. Please try again later.'
+        description: error instanceof Error ? error.message : 'There was a problem loading the user list. Please try again later.'
       });
       
       setUsers([]);
@@ -126,6 +128,7 @@ export const useUserManagement = () => {
     loading,
     fetchError,
     connectionStatus,
+    connectionErrorDetails,
     fetchUsers,
     toggleAdminStatus,
     sendNotificationToUser,
