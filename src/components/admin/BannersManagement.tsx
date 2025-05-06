@@ -8,7 +8,7 @@ import BannerSlider from '../draws/BannerSlider';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import BannerUploader from './BannerUploader';
-import { SlidersHorizontal, Gallery } from 'lucide-react';
+import { SlidersHorizontal, LayoutGrid } from 'lucide-react';
 
 const BannersManagement: React.FC = () => {
   const { banners, fetchBanners } = useDraws();
@@ -53,7 +53,7 @@ const BannersManagement: React.FC = () => {
       <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="list" className="flex items-center gap-1.5">
-            <Gallery className="h-4 w-4" />
+            <LayoutGrid className="h-4 w-4" />
             Banner List
           </TabsTrigger>
           <TabsTrigger value="preview" className="flex items-center gap-1.5">
