@@ -18,7 +18,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
   
   return (
     <aside className="h-fit">
-      <Card className="p-5 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl">
+      <Card className="p-5 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl flex flex-col">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0">
@@ -41,7 +41,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
               Exit Admin
             </Button>
           </div>
-          
+        </div>
+        
+        <div className="mt-4 flex-grow">
           <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
             <AdminSidebarMenu activeTab={activeTab} />
           </Tabs>
