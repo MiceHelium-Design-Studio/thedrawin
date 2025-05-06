@@ -42,14 +42,11 @@ const Home: React.FC = () => {
     navigate('/draws');
   };
 
-  // Sample banner image from Unsplash
-  const headerBannerUrl = "https://images.unsplash.com/photo-1616514169928-a1e40c6f791c";
-
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col items-center mb-8">
         <img 
-          src={headerBannerUrl}
+          src="/lovable-uploads/eb8560b4-61ba-46be-a7eb-ab1918ff22de.png"
           alt="DRAWIN - The First Draw & Win App" 
           className="max-w-[280px] md:max-w-[320px] mx-auto mb-2"
         />
