@@ -46,7 +46,7 @@ export const DrawContext = createContext<DrawContextType>({
   deleteDraw: async () => {},
   buyTicket: async () => {},
   markNotificationAsRead: async () => {},
-  uploadMedia: async () => {},
+  uploadMedia: async () => ({ id: '', name: '', url: '', type: 'image', size: 0, user_id: '', uploadDate: '' }),
   deleteMedia: async () => {},
   createBanner: async () => ({ id: '', imageUrl: '', linkUrl: '', active: true }),
   updateBanner: async () => {},
@@ -323,7 +323,7 @@ export const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
   };
 
   // Implement banner management functions 
-  const fetchBanners = async () => {
+  const fetchBanners = async (): Promise<void> => {
     try {
       const { data, error } = await supabase
         .from('banners')
@@ -346,7 +346,6 @@ export const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
 
       setBanners(fetchedBanners);
       console.log('Fetched banners:', fetchedBanners.length);
-      return fetchedBanners;
     } catch (error) {
       console.error('Error fetching banners:', error);
       toast({
@@ -354,11 +353,10 @@ export const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
         title: 'Failed to fetch banners',
         description: 'There was a problem fetching the banners.',
       });
-      return [];
     }
   };
 
-  const createBanner = async (banner: Omit<Banner, 'id'>) => {
+  const createBanner = async (banner: Omit<Banner, 'id'>): Promise<Banner> => {
     try {
       const { data, error } = await supabase
         .from('banners')
@@ -406,7 +404,7 @@ export const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
     }
   };
 
-  const updateBanner = async (id: string, banner: Partial<Banner>) => {
+  const updateBanner = async (id: string, banner: Partial<Banner>): Promise<void> => {
     try {
       const { error } = await supabase
         .from('banners')
@@ -444,7 +442,7 @@ export const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
     }
   };
 
-  const deleteBanner = async (id: string) => {
+  const deleteBanner = async (id: string): Promise<void> => {
     try {
       const { error } = await supabase
         .from('banners')
@@ -473,9 +471,8 @@ export const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
     }
   };
 
-  // within the DrawProvider component, update the loadMedia function:
-
-  const loadMedia = async () => {
+  // Update the loadMedia function:
+  const loadMedia = async (): Promise<void> => {
     if (!user) {
       console.log('No user, not loading media');
       return;
@@ -584,7 +581,7 @@ export const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
     }
   };
 
-  const deleteMedia = async (id: string, bucketType: BucketType = 'draw_images') => {
+  const deleteMedia = async (id: string, bucketType: BucketType = 'draw_images'): Promise<void> => {
     setLoading(true);
     try {
       await deleteFromS3(id, bucketType);

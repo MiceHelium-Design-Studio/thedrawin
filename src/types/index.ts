@@ -51,6 +51,7 @@ export interface Banner {
   title?: string;
   active?: boolean;
   position?: number;
+  url?: string; // Adding url property for compatibility
 }
 
 export interface MediaItem {

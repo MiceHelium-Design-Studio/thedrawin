@@ -19,7 +19,6 @@ export const BannerService = {
     return data?.map(item => ({
       id: item.id,
       imageUrl: item.url,
-      url: item.url, // Add url property for backwards compatibility
       linkUrl: item.url, // Default to the same URL
       active: true // Default to active
     })) || [];
@@ -53,7 +52,6 @@ export const BannerService = {
     return {
       id: data[0].id,
       imageUrl: banner.imageUrl,
-      url: banner.imageUrl, // Add url property for backwards compatibility
       linkUrl: banner.linkUrl,
       active: banner.active
     };
