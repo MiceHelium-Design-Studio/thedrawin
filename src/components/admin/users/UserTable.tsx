@@ -32,23 +32,33 @@ export const UserTable: React.FC<UserTableProps> = ({
 }) => {
   if (loading) {
     return (
-      <TableRow>
-        <TableCell colSpan={6} className="text-center py-4">
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-          </div>
-        </TableCell>
-      </TableRow>
+      <div className="w-full py-8">
+        <div className="flex justify-center items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+        <p className="text-center mt-4 text-sm text-muted-foreground">Loading users...</p>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="w-full py-8">
+        <div className="text-center text-red-500">
+          <p className="font-medium">Failed to load users</p>
+          <p className="text-sm mt-1">{fetchError}</p>
+        </div>
+      </div>
     );
   }
 
   if (users.length === 0) {
     return (
-      <TableRow>
-        <TableCell colSpan={6} className="text-center py-4">
-          No users found. {fetchError ? `Error: ${fetchError}` : ""}
-        </TableCell>
-      </TableRow>
+      <div className="w-full py-8">
+        <div className="text-center text-muted-foreground">
+          <p>No users found</p>
+        </div>
+      </div>
     );
   }
 

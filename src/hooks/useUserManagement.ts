@@ -32,18 +32,19 @@ export const useUserManagement = () => {
         throw new Error(connectionResult.errorDetails || 'Could not connect to Supabase database');
       }
       
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
+      // Updated to fetch from user_profile_view instead of profiles
+      const { data: usersData, error: usersError } = await supabase
+        .from('user_profile_view')
         .select('*');
       
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-        throw profilesError;
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        throw usersError;
       }
       
-      const mappedUsers = profilesData?.map(profile => ({
-        id: profile.id,
-        email: profile.email,
+      const mappedUsers = usersData?.map(profile => ({
+        id: profile.id || '',
+        email: profile.email || '',
         name: profile.name || undefined,
         avatar: profile.avatar || undefined,
         avatar_url: profile.avatar_url || undefined,
@@ -52,7 +53,7 @@ export const useUserManagement = () => {
         createdAt: profile.created_at
       })) || [];
       
-      console.log('Fetched users:', mappedUsers);
+      console.log('Fetched users from user_profile_view:', mappedUsers);
       setUsers(mappedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -135,7 +136,7 @@ export const useUserManagement = () => {
 
   return {
     users,
-    setUsers, // Export this so wallet management can update the users list
+    setUsers,
     loading,
     fetchError,
     connectionStatus,
