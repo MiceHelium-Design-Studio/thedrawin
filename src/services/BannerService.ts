@@ -20,7 +20,8 @@ export const BannerService = {
       id: item.id,
       imageUrl: item.url,
       linkUrl: item.url, // Default to the same URL
-      active: true // Default to active
+      active: true, // Default to active
+      url: item.url // Include url property to match Banner type
     })) || [];
   },
 
