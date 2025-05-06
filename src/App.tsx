@@ -21,6 +21,7 @@ import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import MediaLibrary from "./pages/MediaLibrary";
 import NotFound from "./pages/NotFound";
+import TodoList from "./pages/TodoList";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +94,7 @@ const App = () => {
                       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                       <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
+                      <Route path="/todos" element={<ProtectedRoute><TodoList /></ProtectedRoute>} />
                       
                       <Route path="*" element={<NotFound />} />
                     </Routes>
