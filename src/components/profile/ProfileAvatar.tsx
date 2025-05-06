@@ -85,7 +85,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     <div className="relative">
       <Avatar className="h-24 w-24">
         {/* Show Unsplash avatar if available, otherwise fall back to uploaded avatar */}
-        <AvatarImage src={unsplashUrl || user.avatar} alt={user.name} />
+        <AvatarImage src={unsplashUrl || user.avatar_url || user.avatar} alt={user.name} />
         <AvatarFallback className="text-lg bg-gold/20">
           {user.name?.slice(0, 2) || 'U'}
         </AvatarFallback>

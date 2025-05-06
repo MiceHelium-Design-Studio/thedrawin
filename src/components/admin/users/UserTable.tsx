@@ -69,9 +69,9 @@ export const UserTable: React.FC<UserTableProps> = ({
           <TableRow key={user.id}>
             <TableCell className="font-medium">
               <div className="flex items-center gap-2">
-                {user.avatar ? (
+                {user.avatar_url || user.avatar ? (
                   <img 
-                    src={user.avatar} 
+                    src={user.avatar_url || user.avatar} 
                     alt={user.name || user.email} 
                     className="w-8 h-8 rounded-full object-cover"
                   />
