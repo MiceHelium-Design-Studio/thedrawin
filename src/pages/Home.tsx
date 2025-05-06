@@ -7,7 +7,6 @@ import { useAuth } from '../context/AuthContext';
 import DrawCard from '../components/draws/DrawCard';
 import BannerSlider from '../components/draws/BannerSlider';
 import { Skeleton } from '@/components/ui/skeleton';
-import MediaTester from '@/components/media/MediaTester';
 
 const Home: React.FC = () => {
   const {
@@ -65,8 +64,6 @@ const Home: React.FC = () => {
       ) : (
         <>
           {banners && banners.length > 0 && <BannerSlider banners={banners} />}
-          
-          {user && <MediaTester />}
           
           {activeDraws && activeDraws.length > 0 && (
             <section className="mb-8">

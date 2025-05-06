@@ -14,7 +14,7 @@ export type Database = {
           id: string
           name: string
           size: number
-          type: Json
+          type: string
           upload_date: string
           url: string
           user_id: string
@@ -23,7 +23,7 @@ export type Database = {
           id: string
           name: string
           size?: number
-          type: Json
+          type: string
           upload_date?: string
           url: string
           user_id: string
@@ -32,7 +32,7 @@ export type Database = {
           id?: string
           name?: string
           size?: number
-          type?: Json
+          type?: string
           upload_date?: string
           url?: string
           user_id?: string
