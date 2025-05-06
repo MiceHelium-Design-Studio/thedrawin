@@ -16,7 +16,19 @@ export const fetchUser = async (userId: string): Promise<User | null> => {
       return null;
     }
 
-    return data as User;
+    if (!data) return null;
+
+    // Map the database fields to our User type
+    return {
+      id: data.id,
+      email: data.email,
+      name: data.name || undefined,
+      avatar: data.avatar || undefined,
+      avatar_url: data.avatar_url || undefined,
+      wallet: data.wallet || 0,
+      isAdmin: data.is_admin || false, // Convert is_admin to isAdmin
+      createdAt: data.created_at
+    };
   } catch (error) {
     console.error('Unexpected error in fetchUser:', error);
     return null;
@@ -80,6 +92,7 @@ export const addUserFunds = async (userId: string, amount: number): Promise<bool
 
 export const updateUserAdminStatus = async (email: string, isAdmin: boolean): Promise<boolean> => {
   try {
+    // Note: We need to map isAdmin to is_admin when updating the database
     const { data, error } = await supabase.rpc('update_user_admin_status', {
       user_email: email,
       is_admin_status: isAdmin
