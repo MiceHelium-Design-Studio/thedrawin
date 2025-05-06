@@ -35,21 +35,30 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
       url: 'https://images.unsplash.com/photo-1614028674026-a65e31bfd27c',
       linkUrl: '/draws',
       active: true
+    },
+    {
+      id: 'default-4',
+      url: 'https://images.unsplash.com/photo-1616514169928-a1e40c6f791c',
+      linkUrl: '/draws',
+      active: true
     }
   ];
 
   useEffect(() => {
+    console.log('BannerSlider received banners:', propBanners?.length || 0);
     // If we have banners from props, convert and use them
     if (propBanners && propBanners.length > 0) {
       const convertedBanners = propBanners.map(banner => ({
         id: banner.id,
         url: banner.imageUrl || defaultBanners[0].url, // Use the first default banner as fallback
-        linkUrl: banner.linkUrl,
-        active: banner.active
+        linkUrl: banner.linkUrl || '/draws',
+        active: banner.active !== false // Default to active if not specified
       }));
+      console.log('Converted banners:', convertedBanners.length);
       setBanners(convertedBanners);
     } else {
       // Otherwise use default banners
+      console.log('Using default banners');
       setBanners(defaultBanners);
     }
   }, [propBanners]);
@@ -100,12 +109,16 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
       description: 'Using fallback image instead.'
     });
     
+    // Use a different Unsplash image as fallback
     e.currentTarget.src = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead';
   };
 
   if (activeBanners.length === 0) {
+    console.log('No active banners to display');
     return null;
   }
+
+  console.log('Rendering banner slider with', activeBanners.length, 'active banners');
 
   return (
     <div className="w-full overflow-hidden mb-6 relative">

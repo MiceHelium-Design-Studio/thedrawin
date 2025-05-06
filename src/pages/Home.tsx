@@ -25,7 +25,8 @@ const Home: React.FC = () => {
     console.log("Home component rendering, loading state:", isLoading);
     console.log("User in Home:", user?.id);
     console.log("Draws loaded:", draws?.length || 0, "items");
-  }, [isLoading, user, draws]);
+    console.log("Banners loaded:", banners?.length || 0, "items");
+  }, [isLoading, user, draws, banners]);
 
   const sortedDraws = [...(draws || [])].sort((a, b) => {
     const statusOrder = {
@@ -41,6 +42,24 @@ const Home: React.FC = () => {
   const handleViewAll = () => {
     navigate('/draws');
   };
+
+  // Default Unsplash banner URLs to use if no banners from backend
+  const defaultBannerUrls = [
+    "https://images.unsplash.com/photo-1627843240167-b1f9d00c5880",
+    "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead",
+    "https://images.unsplash.com/photo-1614028674026-a65e31bfd27c",
+    "https://images.unsplash.com/photo-1616514169928-a1e40c6f791c"
+  ];
+  
+  // Use default banners if none available from backend
+  const displayBanners = banners && banners.length > 0 
+    ? banners 
+    : defaultBannerUrls.map((url, index) => ({
+        id: `default-${index}`,
+        imageUrl: url,
+        linkUrl: '/draws',
+        active: true
+      }));
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -63,7 +82,8 @@ const Home: React.FC = () => {
         </div>
       ) : (
         <>
-          {banners && banners.length > 0 && <BannerSlider banners={banners} />}
+          {/* Banner slider positioned between logo and Active Draws */}
+          <BannerSlider banners={displayBanners} />
           
           {activeDraws && activeDraws.length > 0 && (
             <section className="mb-8">
