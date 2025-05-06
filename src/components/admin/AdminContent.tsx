@@ -22,9 +22,27 @@ interface AdminContentProps {
 }
 
 const AdminContent: React.FC<AdminContentProps> = ({ activeTab }) => {
+  // Get tab name for the heading
+  const getTabName = () => {
+    switch(activeTab) {
+      case 'draws': return 'Draws Management';
+      case 'banners': return 'Banners Management';
+      case 'users': return 'User Management';
+      case 'settings': return 'Application Settings';
+      case 'notifications': return 'Push Notifications';
+      case 'alerts': return 'System Alerts';
+      case 'stats': return 'Statistics & Analytics';
+      case 'media': return 'Media Library';
+      case 'todos': return 'Tasks & Todos';
+      default: return 'Dashboard';
+    }
+  };
+
   return (
-    <div className="w-full">
-      <Card className="p-6 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl">
+    <div className="w-full h-full flex flex-col">
+      <h1 className="text-xl md:text-2xl font-bold mb-4 text-gold">{getTabName()}</h1>
+      
+      <Card className="p-6 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl flex-grow">
         <Tabs value={activeTab} className="w-full">
           <TabsContent value="draws" className="mt-0 animate-in fade-in-50">
             <DrawsManagement />

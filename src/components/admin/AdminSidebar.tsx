@@ -30,15 +30,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
             </div>
           </div>
           
-          <div className="mt-6">
+          <div className="mt-4">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 hover:bg-black-light/50 hover:text-gold transition-colors w-full justify-center"
+              className="flex items-center gap-1.5 hover:bg-black-light/50 hover:text-gold transition-colors w-full justify-start px-3 py-2"
             >
               <LogOut className="size-4" />
-              Exit
+              Exit Admin
             </Button>
           </div>
           
