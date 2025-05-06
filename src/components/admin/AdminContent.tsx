@@ -23,7 +23,7 @@ interface AdminContentProps {
 
 const AdminContent: React.FC<AdminContentProps> = ({ activeTab }) => {
   return (
-    <div className="flex-1 space-y-6">
+    <div className="w-full">
       <Card className="p-6 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl">
         <Tabs value={activeTab} className="w-full">
           <TabsContent value="draws" className="mt-0 animate-in fade-in-50">

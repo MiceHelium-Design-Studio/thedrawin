@@ -29,9 +29,11 @@ const Admin: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-background/80">
-      <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8 flex-1">
-        <h1 className="text-2xl font-bold mb-6 text-center md:text-left text-primary">Admin Dashboard</h1>
-        <div className="flex flex-col md:flex-row gap-6">
+      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-1">
+        <h1 className="text-3xl font-bold mb-8 text-center md:text-left text-gold-light">
+          Admin Dashboard
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
           <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
           <AdminContent activeTab={activeTab} />
         </div>

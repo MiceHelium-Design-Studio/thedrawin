@@ -17,9 +17,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
   const navigate = useNavigate();
   
   return (
-    <div className="md:w-64 space-y-2">
-      <Card className="p-4 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl">
-        <div className="space-y-4">
+    <aside className="h-fit">
+      <Card className="p-5 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl">
+        <div className="space-y-5">
           <div className="flex flex-col">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gold-light">Admin Panel</h2>
@@ -42,7 +42,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
           </Tabs>
         </div>
       </Card>
-    </div>
+    </aside>
   );
 };
 
