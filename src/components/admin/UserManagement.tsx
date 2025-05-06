@@ -111,7 +111,7 @@ const UserManagement: React.FC = () => {
         <div className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-300 dark:border-green-800 rounded-md p-3 mb-4">
           <div className="flex items-start">
             <CheckCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-            <p>Connected to Supabase database successfully. Showing users from user_profile_view.</p>
+            <p>Connected to Supabase database successfully. Showing users from profiles table.</p>
           </div>
         </div>
       )}

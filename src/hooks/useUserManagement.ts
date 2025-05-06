@@ -31,17 +31,17 @@ export const useUserManagement = () => {
         throw new Error(connectionResult.errorDetails || 'Could not connect to Supabase database');
       }
       
-      // Fetch from user_profile_view
-      const { data: usersData, error: usersError } = await supabase
-        .from('user_profile_view')
+      // Fetch directly from profiles table instead of user_profile_view
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
         .select('*');
       
-      if (usersError) {
-        console.error('Error fetching users:', usersError);
-        throw usersError;
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
       }
       
-      const mappedUsers = usersData?.map(profile => ({
+      const mappedUsers = profilesData?.map(profile => ({
         id: profile.id || '',
         email: profile.email || '',
         name: profile.name || undefined,
@@ -52,7 +52,7 @@ export const useUserManagement = () => {
         createdAt: profile.created_at
       })) || [];
       
-      console.log('Fetched users from user_profile_view:', mappedUsers);
+      console.log('Fetched users from profiles table:', mappedUsers);
       setUsers(mappedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
