@@ -32,6 +32,7 @@ const BannersManagement: React.FC = () => {
     setSelectedBanner(null);
     setBannerImageUrl('');
     setIsBannerDrawerOpen(false);
+    fetchBanners(); // Refresh banner data
   };
 
   return (

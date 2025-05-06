@@ -47,9 +47,10 @@ export interface Notification {
 export interface Banner {
   id: string;
   imageUrl: string; // URL to the image on Unsplash or other sources
-  url?: string; // Add this for compatibility with existing code
   linkUrl?: string;
+  title?: string;
   active?: boolean;
+  position?: number;
 }
 
 export interface MediaItem {

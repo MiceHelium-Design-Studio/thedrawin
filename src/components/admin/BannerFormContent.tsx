@@ -29,8 +29,10 @@ const bannerFormSchema = z.object({
   }),
   linkUrl: z.string().url({
     message: "Link URL must be a valid URL.",
-  }),
+  }).optional().or(z.literal('')).transform(val => val || '/draws'),
+  title: z.string().optional(),
   active: z.boolean().default(true),
+  position: z.number().optional(),
 });
 
 interface BannerFormContentProps {
@@ -51,14 +53,16 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
   onSuccess
 }) => {
   const { toast } = useToast();
-  const { createBanner, updateBanner } = useDraws();
+  const { createBanner, updateBanner, banners } = useDraws();
 
   const bannerForm = useForm<z.infer<typeof bannerFormSchema>>({
     resolver: zodResolver(bannerFormSchema),
     defaultValues: {
       imageUrl: bannerImageUrl || selectedBanner?.imageUrl || "",
-      linkUrl: selectedBanner?.linkUrl || "",
+      linkUrl: selectedBanner?.linkUrl || "/draws",
+      title: selectedBanner?.title || "",
       active: selectedBanner?.active ?? true,
+      position: selectedBanner?.position || banners.length + 1,
     },
   });
 
@@ -66,8 +70,10 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
     try {
       const newBanner = {
         imageUrl: values.imageUrl,
-        linkUrl: values.linkUrl,
-        active: values.active
+        linkUrl: values.linkUrl || '/draws',
+        title: values.title || '',
+        active: values.active,
+        position: values.position || banners.length + 1
       };
       
       await createBanner(newBanner);
@@ -93,8 +99,10 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
     try {
       const updatedBanner = {
         imageUrl: values.imageUrl,
-        linkUrl: values.linkUrl,
-        active: values.active
+        linkUrl: values.linkUrl || '/draws',
+        title: values.title || '',
+        active: values.active,
+        position: values.position || selectedBanner.position
       };
       
       await updateBanner(selectedBanner.id, updatedBanner);
@@ -188,6 +196,23 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
           
           <FormField
             control={bannerForm.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Banner Title" {...field} />
+                </FormControl>
+                <FormDescription>
+                  A descriptive title for the banner (for admin purposes).
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={bannerForm.control}
             name="linkUrl"
             render={({ field }) => (
               <FormItem>
@@ -197,6 +222,29 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
                 </FormControl>
                 <FormDescription>
                   Where users will be directed when they click the banner.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={bannerForm.control}
+            name="position"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Position</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    min={1} 
+                    placeholder="1" 
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Display order of the banner (lower numbers appear first).
                 </FormDescription>
                 <FormMessage />
               </FormItem>

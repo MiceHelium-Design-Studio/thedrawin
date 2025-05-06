@@ -24,19 +24,41 @@ interface DrawContextType {
   uploadMedia: (file: File, bucketType?: BucketType) => Promise<MediaItem>;
   deleteMedia: (id: string, bucketType?: BucketType) => Promise<void>;
   // Banner management functions
-  createBanner: (banner: Omit<Banner, 'id'>) => Promise<void>;
-  updateBanner: (id: string, updates: Partial<Banner>) => Promise<void>;
+  createBanner: (banner: Omit<Banner, 'id'>) => Promise<Banner>;
+  updateBanner: (id: string, banner: Partial<Banner>) => Promise<void>;
   deleteBanner: (id: string) => Promise<void>;
   fetchBanners: () => Promise<void>;
 }
 
-const DrawContext = createContext<DrawContextType | undefined>(undefined);
+export const DrawContext = createContext<DrawContextType>({
+  draws: [],
+  tickets: [],
+  notifications: [],
+  media: [],
+  banners: [],
+  loading: false,
+  error: null,
+  fetchDraws: async () => {},
+  fetchTickets: async () => {},
+  fetchNotifications: async () => {},
+  createDraw: async () => {},
+  updateDraw: async () => {},
+  deleteDraw: async () => {},
+  buyTicket: async () => {},
+  markNotificationAsRead: async () => {},
+  uploadMedia: async () => {},
+  deleteMedia: async () => {},
+  createBanner: async () => ({ id: '', imageUrl: '', linkUrl: '', active: true }),
+  updateBanner: async () => {},
+  deleteBanner: async () => {},
+  fetchBanners: async () => {},
+});
 
 interface DrawProviderProps {
   children: React.ReactNode;
 }
 
-const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
+export const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
   const [draws, setDraws] = useState<Draw[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -302,177 +324,152 @@ const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
 
   // Implement banner management functions 
   const fetchBanners = async () => {
-    setLoading(true);
     try {
-      // Look for banners in the media_items table with type='banner'
       const { data, error } = await supabase
-        .from('media_items')
+        .from('banners')
         .select('*')
-        .eq('type', 'banner');
+        .order('position', { ascending: true });
 
       if (error) {
-        setError(error.message);
-        console.error('Error fetching banners:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to load banners',
-          description: 'There was an error loading banners. Please try again later.'
-        });
-      } else {
-        // Map the database structure to our Banner interface
-        const mappedBanners: Banner[] = data?.map(item => ({
-          id: item.id,
-          imageUrl: item.url,
-          linkUrl: item.url, // This could be added as metadata or as a separate field
-          active: true // This could be added as metadata or as a separate field
-        })) || [];
-        
-        setBanners(mappedBanners);
+        throw error;
       }
-    } catch (err) {
-      setError('An unexpected error occurred.');
-      console.error('Unexpected error fetching banners:', err);
+
+      // Map database fields to our Banner interface
+      const fetchedBanners = data.map((banner) => ({
+        id: banner.id,
+        imageUrl: banner.image_url,
+        linkUrl: banner.link_url || '/draws',
+        title: banner.title || '',
+        active: banner.active,
+        position: banner.position
+      }));
+
+      setBanners(fetchedBanners);
+      console.log('Fetched banners:', fetchedBanners.length);
+      return fetchedBanners;
+    } catch (error) {
+      console.error('Error fetching banners:', error);
       toast({
         variant: 'destructive',
-        title: 'Failed to load banners',
-        description: 'An unexpected error occurred while loading banners.'
+        title: 'Failed to fetch banners',
+        description: 'There was a problem fetching the banners.',
       });
-    } finally {
-      setLoading(false);
+      return [];
     }
   };
 
   const createBanner = async (banner: Omit<Banner, 'id'>) => {
-    setLoading(true);
     try {
-      // Generate a unique ID for the banner
-      const bannerId = `banner-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      
-      // Create a new banner entry in the media_items table
       const { data, error } = await supabase
-        .from('media_items')
+        .from('banners')
         .insert({
-          id: bannerId,
-          name: `banner-${Date.now()}`,
-          url: banner.imageUrl,
-          type: 'banner',
-          user_id: user?.id || '',
-          size: 0 // This would need to be calculated in a real implementation
+          image_url: banner.imageUrl,
+          link_url: banner.linkUrl,
+          title: banner.title,
+          active: banner.active,
+          position: banner.position
         })
-        .select();
+        .select('*')
+        .single();
 
       if (error) {
-        setError(error.message);
-        console.error('Error creating banner:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to create banner',
-          description: 'There was an error creating the banner. Please try again later.'
-        });
-      } else if (data && data.length > 0) {
-        const newBanner: Banner = {
-          id: data[0].id,
-          imageUrl: banner.imageUrl,
-          url: banner.imageUrl, // Add url property for backwards compatibility
-          linkUrl: banner.linkUrl,
-          active: banner.active
-        };
-        
-        setBanners([...banners, newBanner]);
-        toast({
-          title: 'Banner created',
-          description: 'The banner has been successfully created.'
-        });
+        throw error;
       }
-    } catch (err) {
-      setError('An unexpected error occurred.');
-      console.error('Unexpected error creating banner:', err);
+
+      // Map the database response to our Banner interface
+      const newBanner: Banner = {
+        id: data.id,
+        imageUrl: data.image_url,
+        linkUrl: data.link_url || '/draws',
+        title: data.title || '',
+        active: data.active,
+        position: data.position
+      };
+
+      // Update the banners state with the new banner
+      setBanners(prev => [...prev, newBanner]);
+
+      toast({
+        title: 'Banner created',
+        description: 'The banner has been successfully created.',
+      });
+
+      return newBanner;
+    } catch (error) {
+      console.error('Error creating banner:', error);
       toast({
         variant: 'destructive',
         title: 'Failed to create banner',
-        description: 'An unexpected error occurred while creating the banner.'
+        description: 'There was a problem creating the banner.',
       });
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
-  const updateBanner = async (id: string, updates: Partial<Banner>) => {
-    setLoading(true);
+  const updateBanner = async (id: string, banner: Partial<Banner>) => {
     try {
-      // Update banner entry in media_items table
       const { error } = await supabase
-        .from('media_items')
+        .from('banners')
         .update({
-          url: updates.imageUrl
-          // Add other fields if needed
+          image_url: banner.imageUrl,
+          link_url: banner.linkUrl,
+          title: banner.title,
+          active: banner.active,
+          position: banner.position,
+          updated_at: new Date().toISOString()
         })
         .eq('id', id);
 
       if (error) {
-        setError(error.message);
-        console.error('Error updating banner:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to update banner',
-          description: 'There was an error updating the banner. Please try again later.'
-        });
-      } else {
-        setBanners(banners.map(banner => 
-          banner.id === id ? { ...banner, ...updates } : banner
-        ));
-        toast({
-          title: 'Banner updated',
-          description: 'The banner has been successfully updated.'
-        });
+        throw error;
       }
-    } catch (err) {
-      setError('An unexpected error occurred.');
-      console.error('Unexpected error updating banner:', err);
+
+      // Update the banners state
+      setBanners(prev => prev.map(b => 
+        b.id === id ? { ...b, ...banner } : b
+      ));
+
+      toast({
+        title: 'Banner updated',
+        description: 'The banner has been successfully updated.',
+      });
+    } catch (error) {
+      console.error('Error updating banner:', error);
       toast({
         variant: 'destructive',
         title: 'Failed to update banner',
-        description: 'An unexpected error occurred while updating the banner.'
+        description: 'There was a problem updating the banner.',
       });
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
   const deleteBanner = async (id: string) => {
-    setLoading(true);
     try {
-      // Delete banner from media_items table
       const { error } = await supabase
-        .from('media_items')
+        .from('banners')
         .delete()
         .eq('id', id);
 
       if (error) {
-        setError(error.message);
-        console.error('Error deleting banner:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to delete banner',
-          description: 'There was an error deleting the banner. Please try again later.'
-        });
-      } else {
-        setBanners(banners.filter(banner => banner.id !== id));
-        toast({
-          title: 'Banner deleted',
-          description: 'The banner has been successfully deleted.'
-        });
+        throw error;
       }
-    } catch (err) {
-      setError('An unexpected error occurred.');
-      console.error('Unexpected error deleting banner:', err);
+
+      // Update the banners state
+      setBanners(prev => prev.filter(b => b.id !== id));
+
+      toast({
+        title: 'Banner deleted',
+        description: 'The banner has been successfully deleted.',
+      });
+    } catch (error) {
+      console.error('Error deleting banner:', error);
       toast({
         variant: 'destructive',
         title: 'Failed to delete banner',
-        description: 'An unexpected error occurred while deleting the banner.'
+        description: 'There was a problem deleting the banner.',
       });
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
