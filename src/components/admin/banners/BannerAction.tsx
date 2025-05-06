@@ -16,6 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Banner } from '@/types';
 import { useDraws } from '@/context/DrawContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BannerActionProps {
   banner: Banner;
@@ -26,16 +27,29 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { deleteBanner } = useDraws();
+  const { fetchBanners } = useDraws();
   
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
       console.log('Attempting to delete banner with ID:', banner.id);
-      await deleteBanner(banner.id);
+      
+      // Direct database operation instead of using Context
+      const { error } = await supabase
+        .from('banners')
+        .delete()
+        .eq('id', banner.id);
+
+      if (error) {
+        console.error('Database error deleting banner:', error);
+        throw error;
+      }
       
       // Close dialog after successful deletion
       setIsDialogOpen(false);
+      
+      // Refresh the banners list
+      await fetchBanners();
       
       toast({
         title: 'Banner deleted',
