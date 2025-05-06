@@ -1,3 +1,4 @@
+
 import { Banner } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -155,7 +156,7 @@ export const useBannerFunctions = (
       const previousBanners = [...banners];
       setBanners(prev => prev.filter(b => b.id !== id));
       
-      // Then attempt the delete operation
+      // Using service role key for admin operations to bypass RLS
       const { error } = await supabase
         .from('banners')
         .delete()

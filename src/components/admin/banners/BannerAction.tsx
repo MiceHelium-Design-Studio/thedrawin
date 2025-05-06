@@ -32,8 +32,7 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
       setIsDeleting(true);
       console.log('Attempting to delete banner with ID:', banner.id);
       await deleteBanner(banner.id);
-      
-      // Toast notification is now handled in the deleteBanner function
+      // Toast notification is handled in the deleteBanner function
     } catch (error) {
       console.error('Error deleting banner:', error);
       toast({
