@@ -9,10 +9,11 @@ interface ConnectionTestResult {
 
 export async function testSupabaseConnection(): Promise<ConnectionTestResult> {
   try {
-    // Try to get a simple count from the profiles table
-    const { count, error } = await supabase
+    // Try a simpler test that's less likely to hit RLS policy issues
+    // Just check if we can connect at all
+    const { data, error } = await supabase
       .from('profiles')
-      .select('*', { count: 'exact', head: true });
+      .select('count(*)');
     
     if (error) {
       console.error('Supabase connection test failed:', error);
@@ -54,7 +55,7 @@ export async function testSupabaseConnection(): Promise<ConnectionTestResult> {
       };
     }
     
-    console.log('Supabase connection successful. Found', count, 'profiles.');
+    console.log('Supabase connection successful');
     return {
       isConnected: true
     };

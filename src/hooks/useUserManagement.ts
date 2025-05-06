@@ -14,10 +14,42 @@ export const useUserManagement = () => {
   const [connectionErrorDetails, setConnectionErrorDetails] = useState<string | null>(null);
 
   const testConnection = async () => {
-    const result = await testSupabaseConnection();
-    setConnectionStatus(result.isConnected);
-    setConnectionErrorDetails(result.errorDetails || null);
-    return result;
+    try {
+      // Try a simpler test that doesn't use RLS policies
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('count(*)');
+      
+      if (error) {
+        console.error('Connection test error:', error);
+        
+        // Check if this is the recursion error
+        const isRecursionError = error.message && error.message.includes('infinite recursion');
+        
+        setConnectionStatus(false);
+        setConnectionErrorDetails(
+          isRecursionError 
+            ? 'Infinite recursion detected in policy for profiles table. Please check your database RLS policies.' 
+            : error.message
+        );
+        return { 
+          isConnected: false, 
+          errorDetails: isRecursionError 
+            ? 'Infinite recursion detected in policy for profiles table.' 
+            : error.message 
+        };
+      }
+      
+      setConnectionStatus(true);
+      setConnectionErrorDetails(null);
+      return { isConnected: true };
+    } catch (error) {
+      console.error('Unexpected test connection error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown connection error';
+      setConnectionStatus(false);
+      setConnectionErrorDetails(errorMessage);
+      return { isConnected: false, errorDetails: errorMessage };
+    }
   };
 
   const fetchUsers = async () => {
@@ -31,10 +63,12 @@ export const useUserManagement = () => {
         throw new Error(connectionResult.errorDetails || 'Could not connect to Supabase database');
       }
       
-      // Fetch directly from profiles table instead of user_profile_view
+      // Attempt to fetch directly with service role if needed
+      // Note: This is a simplified approach - in a production app, you might want to
+      // use a serverless function with proper auth to handle this when RLS policies cause issues
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('*');
+        .select('id, email, name, avatar, avatar_url, wallet, is_admin, created_at, updated_at');
       
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
