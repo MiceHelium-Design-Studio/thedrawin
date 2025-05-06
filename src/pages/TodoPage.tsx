@@ -12,6 +12,7 @@ import {
 import { CheckCircle, Circle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 interface Todo {
   id: string;
@@ -26,6 +27,7 @@ function TodoPage() {
   const [error, setError] = useState<string | null>(null);
   const [newTask, setNewTask] = useState('');
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchTodos();
@@ -56,9 +58,22 @@ function TodoPage() {
     if (!newTask.trim()) return;
     
     try {
+      // Make sure we have a user ID before proceeding
+      if (!user?.id) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "You must be logged in to add a todo",
+        });
+        return;
+      }
+      
       const { error } = await supabase
         .from('todos')
-        .insert([{ task: newTask.trim() }]);
+        .insert({ 
+          task: newTask.trim(),
+          user_id: user.id 
+        });
       
       if (error) throw error;
       
