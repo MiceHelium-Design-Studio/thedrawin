@@ -6,7 +6,9 @@ import { StatsOverview } from './users/StatsOverview';
 import { UserTable } from './users/UserTable';
 import { WalletDialog } from './users/WalletDialog';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CheckCircle, RefreshCw, Image } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 const UserManagement: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const {
@@ -33,6 +35,7 @@ const UserManagement: React.FC = () => {
     handleAddFunds,
     closeWalletDialog
   } = useWalletManagement(users, fetchUsers);
+  
   useEffect(() => {
     if (connectionStatus === false) {
       toast({
@@ -47,6 +50,7 @@ const UserManagement: React.FC = () => {
       });
     }
   }, [connectionStatus, connectionErrorDetails, toast]);
+  
   const handleTestConnection = async () => {
     setIsTestingConnection(true);
     try {
@@ -59,11 +63,17 @@ const UserManagement: React.FC = () => {
       setIsTestingConnection(false);
     }
   };
+  
   return <section className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">User Management</h2>
         <div className="flex gap-2">
-          
+          <Link to="/media">
+            <Button variant="outline" size="sm" className="flex items-center gap-1.5">
+              <Image className="h-4 w-4" />
+              Media Library
+            </Button>
+          </Link>
           <Button onClick={fetchUsers} variant="outline" size="sm" disabled={connectionStatus === false || loading}>
             {loading ? <>
                 <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
@@ -97,4 +107,5 @@ const UserManagement: React.FC = () => {
       <WalletDialog isOpen={isWalletDialogOpen} onClose={closeWalletDialog} walletAmount={walletAmount} onWalletAmountChange={setWalletAmount} onAddFunds={handleAddFunds} />
     </section>;
 };
+
 export default UserManagement;
