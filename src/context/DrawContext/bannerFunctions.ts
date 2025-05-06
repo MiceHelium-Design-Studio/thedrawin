@@ -152,37 +152,28 @@ export const useBannerFunctions = (
     try {
       console.log('Deleting banner with ID:', id);
       
-      // First, update the state optimistically
+      // Store current banners before the delete operation
       const previousBanners = [...banners];
+      
+      // First, update the state optimistically
       setBanners(prev => prev.filter(b => b.id !== id));
       
-      // Using service role key for admin operations to bypass RLS
+      // Attempt the delete operation with proper admin access
       const { error } = await supabase
         .from('banners')
         .delete()
         .eq('id', id);
 
       if (error) {
-        // If there's an error, revert to the previous state
         console.error('Database error deleting banner:', error);
+        // Revert to previous state if there's an error
         setBanners(previousBanners);
         throw error;
       }
 
-      // We don't need to update state again since we did it optimistically
       console.log('Banner deleted successfully');
-
-      toast({
-        title: 'Banner deleted',
-        description: 'The banner has been successfully deleted.',
-      });
     } catch (error) {
       console.error('Error deleting banner:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to delete banner',
-        description: 'There was a problem deleting the banner. The banner list has been restored.',
-      });
       throw error;
     }
   };
