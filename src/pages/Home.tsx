@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import DrawCard from '../components/draws/DrawCard';
 import BannerSlider from '../components/draws/BannerSlider';
 import { Skeleton } from '@/components/ui/skeleton';
+import { initializeDemoImages, initializeDemoBanners } from '../utils/demoImageUtils';
 
 const Home: React.FC = () => {
   const {
@@ -25,6 +26,13 @@ const Home: React.FC = () => {
     console.log("Home component rendering, loading state:", isLoading);
     console.log("User in Home:", user?.id);
     console.log("Draws loaded:", draws?.length || 0, "items");
+    
+    // Initialize demo images and banners if needed
+    if (!isLoading) {
+      initializeDemoImages().then(() => {
+        initializeDemoBanners();
+      });
+    }
   }, [isLoading, user, draws]);
 
   const sortedDraws = [...(draws || [])].sort((a, b) => {

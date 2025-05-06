@@ -72,30 +72,30 @@ export type Database = {
           created_at: string | null
           email: string
           id: string
-          is_admin: boolean | null
-          name: string | null
+          is_admin: boolean
+          name: string
           updated_at: string | null
-          wallet: number | null
+          wallet: number
         }
         Insert: {
           avatar?: string | null
           created_at?: string | null
           email: string
           id: string
-          is_admin?: boolean | null
-          name?: string | null
+          is_admin?: boolean
+          name: string
           updated_at?: string | null
-          wallet?: number | null
+          wallet?: number
         }
         Update: {
           avatar?: string | null
           created_at?: string | null
           email?: string
           id?: string
-          is_admin?: boolean | null
-          name?: string | null
+          is_admin?: boolean
+          name?: string
           updated_at?: string | null
-          wallet?: number | null
+          wallet?: number
         }
         Relationships: []
       }

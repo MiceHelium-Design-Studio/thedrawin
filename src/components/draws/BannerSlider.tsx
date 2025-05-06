@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
@@ -5,6 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Banner as AppBanner } from '@/types';
 import { initializeGoldBanner } from '@/utils/bannerUtils';
+import { initializeDemoImages, initializeDemoBanners } from '@/utils/demoImageUtils';
 
 interface Banner {
   id: string;
@@ -21,19 +23,19 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
   const defaultBanners = [
     {
       id: 'default-1',
-      url: 'https://images.unsplash.com/photo-1610375461246-83df859d849d',
+      url: '/lovable-uploads/d2810e9f-1964-48c4-97be-48553adb004f.png',
       linkUrl: '/draws',
       active: true
     },
     {
       id: 'default-2',
-      url: 'https://images.unsplash.com/photo-1574362848149-11496d93a7c7',
+      url: '/lovable-uploads/3ba1bfaf-88ef-41ce-8abf-beb7e1144481.png',
       linkUrl: '/draws',
       active: true
     },
     {
       id: 'default-3',
-      url: 'https://images.unsplash.com/photo-1543699936-c901ddbf0c05',
+      url: '/lovable-uploads/a3f55f49-2874-4022-824b-6b3cd22c8837.png',
       linkUrl: '/draws',
       active: true
     }
@@ -72,8 +74,11 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
           
           setBanners(formattedBanners);
         } else {
-          await initializeGoldBanner();
+          // Initialize demo images and banners
+          await initializeDemoImages();
+          await initializeDemoBanners();
           
+          // Retry fetching banners after initialization
           const { data: updatedData } = await supabase
             .from('media_items')
             .select('*')
@@ -88,6 +93,9 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
             }));
             
             setBanners(formattedBanners);
+          } else {
+            // Fallback to default banners if we still don't have any
+            setBanners(defaultBanners);
           }
         }
       } catch (error) {
@@ -95,8 +103,11 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
         toast({
           variant: 'destructive',
           title: 'Failed to load banners',
-          description: 'There was a problem loading the banner images.'
+          description: 'Using default banners as fallback.'
         });
+        
+        // Use default banners as fallback
+        setBanners(defaultBanners);
       }
     };
     
