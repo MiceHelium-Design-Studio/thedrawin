@@ -56,9 +56,24 @@ function TodoList() {
     if (!newTask.trim()) return;
 
     try {
+      // Get the current user session
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        throw sessionError;
+      }
+      
+      if (!sessionData.session?.user?.id) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Insert the todo with the user_id
       const { error } = await supabase
         .from('todos')
-        .insert([{ task: newTask.trim() }]);
+        .insert([{ 
+          task: newTask.trim(),
+          user_id: sessionData.session.user.id 
+        }]);
 
       if (error) {
         throw error;
