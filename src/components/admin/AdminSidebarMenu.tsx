@@ -12,7 +12,7 @@ interface AdminSidebarMenuProps {
 
 const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ activeTab }) => {
   return (
-    <TabsList className="flex flex-col items-start space-y-2.5 w-full bg-transparent border-0 pt-1">
+    <TabsList className="flex flex-col items-start space-y-2.5 w-full bg-transparent border-0 pt-1 h-auto">
       <TabsTrigger 
         value="draws" 
         className="w-full justify-start rounded-md transition-colors px-3 py-2.5"

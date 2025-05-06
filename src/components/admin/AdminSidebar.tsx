@@ -18,35 +18,46 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
   
   return (
     <aside className="h-fit">
-      <Card className="p-5 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl flex flex-col">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <Medal className="size-6 text-gold" />
+      <Card className="p-5 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl overflow-hidden">
+        <div className="flex flex-col h-full space-y-6">
+          {/* Header Section */}
+          <div className="flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <Medal className="size-6 text-gold" />
+              </div>
+              <div className="flex-grow">
+                <h2 className="text-xl font-bold text-gold-light">Admin Panel</h2>
+                <Separator className="bg-gradient-to-r from-transparent via-gold/30 to-transparent mt-2" />
+              </div>
             </div>
-            <div className="flex-grow">
-              <h2 className="text-xl font-bold text-gold-light">Admin Panel</h2>
-              <Separator className="bg-gradient-to-r from-transparent via-gold/30 to-transparent mt-2" />
+            
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/')}
+                className="flex items-center gap-1.5 hover:bg-black-light/50 hover:text-gold transition-colors w-full justify-start px-3 py-2"
+              >
+                <LogOut className="size-4" />
+                Exit Admin
+              </Button>
             </div>
           </div>
           
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 hover:bg-black-light/50 hover:text-gold transition-colors w-full justify-start px-3 py-2"
+          {/* Navigation Menu - explicitly contained */}
+          <div className="flex-grow mt-2">
+            <Tabs 
+              value={activeTab} 
+              onValueChange={setActiveTab} 
+              orientation="vertical" 
+              className="w-full"
             >
-              <LogOut className="size-4" />
-              Exit Admin
-            </Button>
+              <div className="w-full">
+                <AdminSidebarMenu activeTab={activeTab} />
+              </div>
+            </Tabs>
           </div>
-        </div>
-        
-        <div className="mt-4 flex-grow">
-          <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
-            <AdminSidebarMenu activeTab={activeTab} />
-          </Tabs>
         </div>
       </Card>
     </aside>
