@@ -9,12 +9,14 @@ export const useBannerFunctions = (
 ) => {
   const fetchBanners = async () => {
     try {
+      console.log('Fetching banners from database...');
       const { data, error } = await supabase
         .from('banners')
         .select('*')
         .order('position', { ascending: true });
 
       if (error) {
+        console.error('Database error fetching banners:', error);
         throw error;
       }
 
@@ -30,7 +32,8 @@ export const useBannerFunctions = (
       }));
 
       setBanners(fetchedBanners);
-      console.log('Fetched banners:', fetchedBanners.length);
+      console.log('Successfully fetched banners:', fetchedBanners.length);
+      return fetchedBanners;
     } catch (error) {
       console.error('Error fetching banners:', error);
       toast({
@@ -44,6 +47,7 @@ export const useBannerFunctions = (
 
   const createBanner = async (banner: Omit<Banner, 'id'>): Promise<Banner> => {
     try {
+      console.log('Creating new banner:', banner);
       const { data, error } = await supabase
         .from('banners')
         .insert({
@@ -57,7 +61,12 @@ export const useBannerFunctions = (
         .single();
 
       if (error) {
+        console.error('Database error creating banner:', error);
         throw error;
+      }
+
+      if (!data) {
+        throw new Error('No data returned from banner creation');
       }
 
       // Map the database response to our Banner interface
@@ -73,6 +82,7 @@ export const useBannerFunctions = (
 
       // Update the banners state with the new banner
       setBanners(prev => [...prev, newBanner]);
+      console.log('Banner created successfully:', newBanner);
 
       toast({
         title: 'Banner created',
@@ -93,27 +103,37 @@ export const useBannerFunctions = (
 
   const updateBanner = async (id: string, banner: Partial<Banner>): Promise<void> => {
     try {
-      const { error } = await supabase
-        .from('banners')
-        .update({
-          image_url: banner.imageUrl,
-          link_url: banner.linkUrl,
-          title: banner.title,
-          active: banner.active,
-          position: banner.position,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
-
-      if (error) {
-        throw error;
-      }
-
-      // Update the banners state
+      console.log('Updating banner with ID:', id, 'Data:', banner);
+      
+      // First, update optimistically
+      const previousBanners = [...banners];
       setBanners(prev => prev.map(b => 
         b.id === id ? { ...b, ...banner } : b
       ));
+      
+      // Prepare database update object
+      const updateData: any = {};
+      if (banner.imageUrl !== undefined) updateData.image_url = banner.imageUrl;
+      if (banner.linkUrl !== undefined) updateData.link_url = banner.linkUrl;
+      if (banner.title !== undefined) updateData.title = banner.title;
+      if (banner.active !== undefined) updateData.active = banner.active;
+      if (banner.position !== undefined) updateData.position = banner.position;
+      updateData.updated_at = new Date().toISOString();
+      
+      const { error } = await supabase
+        .from('banners')
+        .update(updateData)
+        .eq('id', id);
 
+      if (error) {
+        console.error('Database error updating banner:', error);
+        // Revert to previous state
+        setBanners(previousBanners);
+        throw error;
+      }
+
+      console.log('Banner updated successfully');
+      
       toast({
         title: 'Banner updated',
         description: 'The banner has been successfully updated.',
@@ -123,7 +143,7 @@ export const useBannerFunctions = (
       toast({
         variant: 'destructive',
         title: 'Failed to update banner',
-        description: 'There was a problem updating the banner.',
+        description: 'There was a problem updating the banner. The changes have been reverted.',
       });
       throw error;
     }
@@ -131,6 +151,8 @@ export const useBannerFunctions = (
 
   const deleteBanner = async (id: string): Promise<void> => {
     try {
+      console.log('Deleting banner with ID:', id);
+      
       // First, update the state optimistically
       const previousBanners = [...banners];
       setBanners(prev => prev.filter(b => b.id !== id));
@@ -149,6 +171,7 @@ export const useBannerFunctions = (
       }
 
       // We don't need to update state again since we did it optimistically
+      console.log('Banner deleted successfully');
 
       toast({
         title: 'Banner deleted',

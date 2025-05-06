@@ -30,6 +30,7 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
+      console.log('Attempting to delete banner with ID:', banner.id);
       await deleteBanner(banner.id);
       
       toast({
@@ -41,7 +42,7 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
       toast({
         variant: 'destructive',
         title: "Deletion failed",
-        description: "There was a problem deleting the banner. Please try again later.",
+        description: "There was a problem deleting the banner. Please check console for details.",
       });
     } finally {
       setIsDeleting(false);
@@ -74,7 +75,7 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
               {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
