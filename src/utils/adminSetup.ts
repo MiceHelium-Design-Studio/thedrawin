@@ -70,12 +70,15 @@ export const ensureFullAdmin = async () => {
         // Now we can safely access the id property
         console.log(`Creating profile for ${adminEmail} with admin status...`);
         
+        // Fix: Include all required fields for the profiles table
         const { error: insertError } = await supabase
           .from('profiles')
           .insert({
             id: user.id,
             email: adminEmail,
-            is_admin: true
+            name: adminEmail.split('@')[0], // Use part before @ as a default name
+            is_admin: true,
+            wallet: 0 // Include default wallet value
           });
         
         if (insertError) {
