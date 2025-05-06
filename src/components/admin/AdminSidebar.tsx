@@ -20,8 +20,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
     <div className="md:w-64 space-y-2">
       <Card className="p-4 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl">
         <div className="space-y-4">
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center justify-between mb-1">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gold-light">Admin Panel</h2>
               <Button
                 variant="outline"
@@ -34,10 +34,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
               </Button>
             </div>
             
-            <Separator className="bg-gradient-to-r from-transparent via-gold/30 to-transparent my-2" />
+            <Separator className="bg-gradient-to-r from-transparent via-gold/30 to-transparent my-4" />
           </div>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full mt-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
             <AdminSidebarMenu activeTab={activeTab} />
           </Tabs>
         </div>

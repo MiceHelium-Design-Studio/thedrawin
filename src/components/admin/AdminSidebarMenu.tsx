@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -11,7 +12,7 @@ interface AdminSidebarMenuProps {
 
 const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ activeTab }) => {
   return (
-    <TabsList className="flex flex-col items-start space-y-1.5 w-full bg-transparent border-0">
+    <TabsList className="flex flex-col items-start space-y-2 w-full bg-transparent border-0 pt-1">
       <TabsTrigger 
         value="draws" 
         className="w-full justify-start rounded-md transition-colors"
