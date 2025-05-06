@@ -46,9 +46,10 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
 
   useEffect(() => {
     console.log('BannerSlider received banners:', propBanners?.length || 0);
-    // If we have banners from props, convert and use them
+    // If we have banners from props, convert and use them (skipping the first one)
     if (propBanners && propBanners.length > 0) {
-      const convertedBanners = propBanners.map(banner => ({
+      // Skip the first banner by starting from index 1
+      const convertedBanners = propBanners.slice(1).map(banner => ({
         id: banner.id,
         url: banner.imageUrl || defaultBanners[0].url, // Use the first default banner as fallback
         linkUrl: banner.linkUrl || '/draws',
@@ -57,9 +58,9 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
       console.log('Converted banners:', convertedBanners.length);
       setBanners(convertedBanners);
     } else {
-      // Otherwise use default banners
-      console.log('Using default banners');
-      setBanners(defaultBanners);
+      // Otherwise use default banners (skipping the first one)
+      console.log('Using default banners (skipping first)');
+      setBanners(defaultBanners.slice(1));
     }
   }, [propBanners]);
   
