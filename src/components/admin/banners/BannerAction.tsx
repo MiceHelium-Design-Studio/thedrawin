@@ -31,6 +31,7 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
     try {
       setIsDeleting(true);
       await deleteBanner(banner.id);
+      
       toast({
         title: "Banner deleted",
         description: "The banner has been successfully deleted.",
@@ -40,7 +41,7 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
       toast({
         variant: 'destructive',
         title: "Deletion failed",
-        description: "There was a problem deleting the banner.",
+        description: "There was a problem deleting the banner. Please try again later.",
       });
     } finally {
       setIsDeleting(false);
@@ -73,7 +74,7 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+            <AlertDialogAction onClick={handleDelete}>
               {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

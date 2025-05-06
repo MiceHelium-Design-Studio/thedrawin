@@ -131,17 +131,24 @@ export const useBannerFunctions = (
 
   const deleteBanner = async (id: string): Promise<void> => {
     try {
+      // First, update the state optimistically
+      const previousBanners = [...banners];
+      setBanners(prev => prev.filter(b => b.id !== id));
+      
+      // Then attempt the delete operation
       const { error } = await supabase
         .from('banners')
         .delete()
         .eq('id', id);
 
       if (error) {
+        // If there's an error, revert to the previous state
+        console.error('Database error deleting banner:', error);
+        setBanners(previousBanners);
         throw error;
       }
 
-      // Update the banners state
-      setBanners(prev => prev.filter(b => b.id !== id));
+      // We don't need to update state again since we did it optimistically
 
       toast({
         title: 'Banner deleted',
@@ -152,7 +159,7 @@ export const useBannerFunctions = (
       toast({
         variant: 'destructive',
         title: 'Failed to delete banner',
-        description: 'There was a problem deleting the banner.',
+        description: 'There was a problem deleting the banner. The banner list has been restored.',
       });
       throw error;
     }
