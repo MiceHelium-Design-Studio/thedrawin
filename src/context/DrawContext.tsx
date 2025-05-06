@@ -54,11 +54,7 @@ export const DrawContext = createContext<DrawContextType>({
   fetchBanners: async () => {},
 });
 
-interface DrawProviderProps {
-  children: React.ReactNode;
-}
-
-export const DrawProvider: React.FC<DrawProviderProps> = ({ children }) => {
+const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [draws, setDraws] = useState<Draw[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
