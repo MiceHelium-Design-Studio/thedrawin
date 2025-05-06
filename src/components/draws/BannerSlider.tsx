@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
@@ -46,22 +47,34 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
 
   useEffect(() => {
     console.log('BannerSlider received banners:', propBanners?.length || 0);
+    // Filter out any banners with broken image URLs that we've previously detected
+    const filterBrokenBanners = (banners: AppBanner[]) => {
+      return banners.filter(banner => !loadErrors[banner.id]);
+    };
+    
     // If we have banners from props, convert and use them
     if (propBanners && propBanners.length > 0) {
-      const convertedBanners = propBanners.map(banner => ({
-        id: banner.id,
-        url: banner.imageUrl || defaultBanners[0].url, // Use the first default banner as fallback
-        linkUrl: banner.linkUrl || '/draws',
-        active: banner.active !== false // Default to active if not specified
-      }));
-      console.log('Converted banners:', convertedBanners.length);
-      setBanners(convertedBanners);
+      const filteredBanners = filterBrokenBanners(propBanners);
+      
+      if (filteredBanners.length === 0) {
+        console.log('All provided banners have loading errors, using defaults');
+        setBanners(defaultBanners);
+      } else {
+        const convertedBanners = filteredBanners.map(banner => ({
+          id: banner.id,
+          url: banner.imageUrl || defaultBanners[0].url, // Use the first default banner as fallback
+          linkUrl: banner.linkUrl || '/draws',
+          active: banner.active !== false // Default to active if not specified
+        }));
+        console.log('Converted banners:', convertedBanners.length);
+        setBanners(convertedBanners);
+      }
     } else {
       // Otherwise use default banners
       console.log('Using default banners');
       setBanners(defaultBanners);
     }
-  }, [propBanners]);
+  }, [propBanners, loadErrors]);
   
   const activeBanners = banners.filter(banner => banner.active !== false);
   
@@ -103,14 +116,17 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
     
     setLoadErrors(prev => ({ ...prev, [banner.id]: true }));
     
-    toast({
-      variant: 'destructive',
-      title: 'Image failed to load',
-      description: 'Using fallback image instead.'
-    });
-    
     // Use a different Unsplash image as fallback
     e.currentTarget.src = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead';
+    
+    // Show toast only for non-default banners (user uploaded ones)
+    if (!banner.id.startsWith('default-')) {
+      toast({
+        variant: 'destructive',
+        title: 'Image failed to load',
+        description: 'Using fallback image instead. Please check or update this banner.'
+      });
+    }
   };
 
   if (activeBanners.length === 0) {

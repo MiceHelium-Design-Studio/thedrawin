@@ -8,7 +8,9 @@ import BannerSlider from '../draws/BannerSlider';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import BannerUploader from './BannerUploader';
-import { SlidersHorizontal, LayoutGrid } from 'lucide-react';
+import { SlidersHorizontal, LayoutGrid, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const BannersManagement: React.FC = () => {
   const { banners, fetchBanners } = useDraws();
@@ -17,6 +19,8 @@ const BannersManagement: React.FC = () => {
   const [bannerImageUrl, setBannerImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('list');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchBanners();
@@ -34,11 +38,55 @@ const BannersManagement: React.FC = () => {
     setIsBannerDrawerOpen(false);
     fetchBanners(); // Refresh banner data
   };
+  
+  const handleRefreshBanners = async () => {
+    try {
+      setIsRefreshing(true);
+      await fetchBanners();
+      toast({
+        title: "Banners refreshed",
+        description: "The banner list has been updated.",
+      });
+    } catch (error) {
+      console.error('Error refreshing banners:', error);
+      toast({
+        variant: 'destructive',
+        title: "Refresh failed",
+        description: "There was a problem refreshing the banners.",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">Banners</h2>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleRefreshBanners}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Refresh
+          </Button>
+          <Button 
+            onClick={() => {
+              setSelectedBanner(null);
+              setBannerImageUrl('');
+              setIsBannerDrawerOpen(true);
+            }}
+          >
+            Add Banner
+          </Button>
+        </div>
         <BannerDrawer
           isOpen={isBannerDrawerOpen}
           onOpenChange={setIsBannerDrawerOpen}
