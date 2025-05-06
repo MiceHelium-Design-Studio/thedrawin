@@ -3,7 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User } from '@/types';
+import { User as UserIcon } from 'lucide-react'; // Import the User icon from lucide-react
+import { User } from '@/types'; // Import the User type
 
 interface ProfileDetailsFormProps {
   user: User | null;
@@ -84,7 +85,7 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
             onClick={() => setIsEditing(true)}
             className="bg-gold hover:bg-gold-dark text-black"
           >
-            <User className="h-4 w-4 mr-2" />
+            <UserIcon className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
         </div>
