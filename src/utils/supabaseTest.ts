@@ -18,7 +18,12 @@ export async function testSupabaseConnection(): Promise<ConnectionTestResult> {
       console.error('Supabase connection test failed:', error);
       
       // Check for recursion error in the error message
-      const isRecursionError = error.message && error.message.includes('infinite recursion');
+      const isRecursionError = error.message && (
+        error.message.includes('infinite recursion') || 
+        error.message.includes('recursive') || 
+        error.message.includes('recursively')
+      );
+      
       if (isRecursionError) {
         return {
           isConnected: false,
@@ -26,6 +31,21 @@ export async function testSupabaseConnection(): Promise<ConnectionTestResult> {
           errorDetails: 'There is an issue with the database security policies. Please contact your administrator to fix the infinite recursion in the profiles table policies.'
         };
       }
+      
+      // Parse Postgres error codes
+      if (error.code === '28P01') {
+        return {
+          isConnected: false,
+          error: 'Authentication Error',
+          errorDetails: 'Invalid credentials. Please check your Supabase URL and API key.'
+        };
+      } else if (error.code === '42P01') {
+        return {
+          isConnected: false,
+          error: 'Table Not Found',
+          errorDetails: 'The profiles table does not exist in your database.'
+        };
+      } 
       
       return {
         isConnected: false,
@@ -41,6 +61,16 @@ export async function testSupabaseConnection(): Promise<ConnectionTestResult> {
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     console.error('Unexpected error testing Supabase connection:', err);
+    
+    // Network-related errors
+    if (errorMessage.includes('fetch failed') || errorMessage.includes('network')) {
+      return {
+        isConnected: false,
+        error: 'Network Error',
+        errorDetails: 'Unable to reach the Supabase service. Please check your internet connection.'
+      };
+    }
+    
     return {
       isConnected: false,
       error: 'Connection Error',
