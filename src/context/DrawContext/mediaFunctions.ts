@@ -2,6 +2,7 @@
 import { MediaItem } from '@/types';
 import { getMediaItems, uploadToS3, deleteFromS3, BucketType } from '@/utils/s3Utils';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useMediaFunctions = (
   setMedia: React.Dispatch<React.SetStateAction<MediaItem[]>>,
@@ -96,8 +97,29 @@ export const useMediaFunctions = (
 
   const deleteMedia = async (id: string, bucketType: BucketType = 'draw_images'): Promise<void> => {
     try {
+      // First attempt to delete from database if it's a media item
+      try {
+        // Direct database operation to ensure deletion regardless of context state
+        const { error } = await supabase
+          .from('media_items')
+          .delete()
+          .eq('id', id);
+          
+        if (error) {
+          console.log('Database delete error or item not found in database:', error);
+          // Continue with S3 deletion even if database deletion failed
+        }
+      } catch (dbError) {
+        console.log('Error attempting database deletion:', dbError);
+        // Continue with S3 deletion
+      }
+      
+      // Then delete from S3 storage
       await deleteFromS3(id, bucketType);
+      
+      // Update local state
       setMedia(media.filter(item => item.id !== id));
+      
       toast({
         title: 'Media deleted',
         description: 'The media file has been deleted successfully.'
