@@ -101,7 +101,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_profile_view: {
+        Row: {
+          avatar: string | null
+          created_at: string | null
+          email: string | null
+          id: string | null
+          is_admin: boolean | null
+          name: string | null
+          updated_at: string | null
+          wallet: number | null
+        }
+        Insert: {
+          avatar?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          is_admin?: boolean | null
+          name?: string | null
+          updated_at?: string | null
+          wallet?: number | null
+        }
+        Update: {
+          avatar?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          is_admin?: boolean | null
+          name?: string | null
+          updated_at?: string | null
+          wallet?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_current_user_role: {
