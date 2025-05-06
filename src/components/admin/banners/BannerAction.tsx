@@ -24,6 +24,7 @@ interface BannerActionProps {
 
 const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { deleteBanner } = useDraws();
   
@@ -33,17 +34,11 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
       console.log('Attempting to delete banner with ID:', banner.id);
       await deleteBanner(banner.id);
       
-      toast({
-        title: "Banner deleted",
-        description: "The banner has been successfully deleted.",
-      });
+      // Toast is handled in the deleteBanner function
+      setIsDialogOpen(false);
     } catch (error) {
       console.error('Error deleting banner:', error);
-      toast({
-        variant: 'destructive',
-        title: "Deletion failed",
-        description: "There was a problem deleting the banner. Please try again.",
-      });
+      // Error toast is handled in the deleteBanner function
     } finally {
       setIsDeleting(false);
     }
@@ -59,11 +54,11 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
         <Edit className="h-4 w-4 mr-2" />
         Edit
       </Button>
-      <AlertDialog>
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogTrigger asChild>
-          <Button variant="destructive" size="sm" disabled={isDeleting}>
+          <Button variant="destructive" size="sm">
             <Trash className="h-4 w-4 mr-2" />
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            Delete
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>

@@ -1,4 +1,3 @@
-
 import { Banner } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -168,12 +167,29 @@ export const useBannerFunctions = (
         console.error('Database error deleting banner:', error);
         // Revert to previous state if there's an error
         setBanners(previousBanners);
+        
+        toast({
+          variant: 'destructive',
+          title: 'Failed to delete banner',
+          description: 'There was a problem deleting the banner. Please try again.',
+        });
+        
         throw error;
       }
 
       console.log('Banner deleted successfully');
+      
+      toast({
+        title: 'Banner deleted',
+        description: 'The banner has been successfully deleted.',
+      });
     } catch (error) {
       console.error('Error deleting banner:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete banner',
+        description: 'There was a problem deleting the banner. Please try again.',
+      });
       throw error;
     }
   };
