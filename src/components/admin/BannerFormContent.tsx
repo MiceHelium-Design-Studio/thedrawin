@@ -35,11 +35,19 @@ const bannerFormSchema = z.object({
 
 interface BannerFormContentProps {
   selectedBanner: Banner | null;
+  bannerImageUrl: string;
+  isUploading: boolean;
+  setBannerImageUrl: React.Dispatch<React.SetStateAction<string>>;
+  setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
   onSuccess: () => void;
 }
 
 export const BannerFormContent: React.FC<BannerFormContentProps> = ({
   selectedBanner,
+  bannerImageUrl,
+  isUploading,
+  setBannerImageUrl,
+  setIsUploading,
   onSuccess
 }) => {
   const { toast } = useToast();
@@ -48,7 +56,7 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
   const bannerForm = useForm<z.infer<typeof bannerFormSchema>>({
     resolver: zodResolver(bannerFormSchema),
     defaultValues: {
-      imageUrl: selectedBanner?.imageUrl || "",
+      imageUrl: bannerImageUrl || selectedBanner?.imageUrl || "",
       linkUrl: selectedBanner?.linkUrl || "",
       active: selectedBanner?.active ?? true,
     },
@@ -106,6 +114,13 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
     }
   };
 
+  // Update form values when bannerImageUrl changes
+  React.useEffect(() => {
+    if (bannerImageUrl) {
+      bannerForm.setValue('imageUrl', bannerImageUrl);
+    }
+  }, [bannerImageUrl, bannerForm]);
+
   return (
     <div className="p-6">
       <Form {...bannerForm}>
@@ -125,7 +140,10 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
                 <div 
                   key={index} 
                   className="relative h-16 cursor-pointer rounded-md overflow-hidden border border-gold/20 hover:border-gold/50 transition-all"
-                  onClick={() => bannerForm.setValue('imageUrl', url)}
+                  onClick={() => {
+                    setBannerImageUrl(url);
+                    bannerForm.setValue('imageUrl', url);
+                  }}
                 >
                   <img src={url} alt={`Sample ${index+1}`} className="w-full h-full object-cover" />
                 </div>
@@ -209,7 +227,7 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
           />
           
           <DrawerFooter>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isUploading}>
               {selectedBanner ? 'Update Banner' : 'Create Banner'}
             </Button>
             <DrawerClose asChild>
