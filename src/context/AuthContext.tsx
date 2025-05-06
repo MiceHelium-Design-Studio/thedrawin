@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,7 +49,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               email: email,
               name: session.user?.user_metadata?.name || 'Demo User',
               wallet: 500, // Give some funds to test
-              isAdmin: isFullAdmin || true // Make user admin
+              isAdmin: isFullAdmin || true, // Make user admin
+              avatar: session.user?.user_metadata?.avatar || null,
+              avatar_url: null // Initialize the new field
             });
             setLoading(false);
           }, 0);
@@ -76,7 +79,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: email,
             name: data.session.user.user_metadata?.name || 'Demo User',
             wallet: 500, // Give some funds to test
-            isAdmin: isFullAdmin || true // Make user admin
+            isAdmin: isFullAdmin || true, // Make user admin
+            avatar: data.session.user?.user_metadata?.avatar || null,
+            avatar_url: null // Initialize the new field
           });
           setLoading(false);
         } else if (isSubscribed) {
@@ -214,12 +219,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     setLoading(true);
     try {
+      // Update profile data including the new avatar_url field if present
+      const updateData: any = {
+        name: data.name,
+        avatar: data.avatar,
+      };
+      
+      // Only add avatar_url if it's provided in the update data
+      if (data.avatar_url) {
+        updateData.avatar_url = data.avatar_url;
+      }
+      
       const { error } = await supabase
         .from('profiles')
-        .update({
-          name: data.name,
-          avatar: data.avatar,
-        })
+        .update(updateData)
         .eq('id', user.id);
 
       if (error) {

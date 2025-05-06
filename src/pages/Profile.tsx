@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +14,8 @@ import {
   ArrowLeftRight, 
   Building, 
   Banknote,
-  Bitcoin
+  Bitcoin,
+  Image
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -55,15 +56,26 @@ const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const unsplashInputRef = useRef<HTMLInputElement>(null);
   
   const [name, setName] = useState(user?.name || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar || '');
+  const [unsplashUrl, setUnsplashUrl] = useState(user?.avatar_url || '');
   const [amount, setAmount] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('regular');
   const [isUploading, setIsUploading] = useState(false);
   const [cryptoAddress, setCryptoAddress] = useState('');
   const [showCryptoDetails, setShowCryptoDetails] = useState(false);
+  
+  // Update local state when user data changes
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setAvatarUrl(user.avatar || '');
+      setUnsplashUrl(user.avatar_url || '');
+    }
+  }, [user]);
   
   const form = useForm({
     defaultValues: {
@@ -92,7 +104,11 @@ const Profile: React.FC = () => {
   
   const handleUpdateProfile = async () => {
     try {
-      await updateProfile({ name, avatar: avatarUrl });
+      await updateProfile({ 
+        name, 
+        avatar: avatarUrl,
+        avatar_url: unsplashUrl
+      });
       setIsEditing(false);
       toast({
         title: 'Profile updated',
@@ -200,6 +216,23 @@ const Profile: React.FC = () => {
     }
   };
   
+  const handleUnsplashUrlUpdate = () => {
+    if (!unsplashInputRef.current?.value) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: 'Please enter a valid Unsplash image URL.',
+      });
+      return;
+    }
+    
+    setUnsplashUrl(unsplashInputRef.current.value);
+    toast({
+      title: 'Unsplash URL added',
+      description: 'The Unsplash image URL has been saved.',
+    });
+  };
+  
   const getPaymentMethodLabel = (method: PaymentMethod): string => {
     switch (method) {
       case 'card':
@@ -283,7 +316,8 @@ const Profile: React.FC = () => {
           <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
             <div className="relative">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                {/* Show Unsplash avatar if available, otherwise fall back to uploaded avatar */}
+                <AvatarImage src={unsplashUrl || user.avatar} alt={user.name} />
                 <AvatarFallback className="text-lg bg-gold/20">
                   {user.name?.slice(0, 2) || 'U'}
                 </AvatarFallback>
@@ -343,9 +377,60 @@ const Profile: React.FC = () => {
                         onChange={handleFileUpload}
                       />
                     </div>
-                    {avatarUrl && isEditing && (
-                      <div className="mt-2 w-full max-h-40 overflow-hidden rounded border border-gray-200">
-                        <img src={avatarUrl} alt="Avatar preview" className="w-full object-cover" />
+                  </div>
+                  
+                  {/* New Unsplash URL input */}
+                  <div>
+                    <Label htmlFor="unsplashUrl">Unsplash Image URL</Label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          id="unsplashUrl"
+                          ref={unsplashInputRef}
+                          defaultValue={unsplashUrl}
+                          className="border-gold/30 focus:border-gold"
+                          placeholder="Enter Unsplash image URL"
+                        />
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="border-gold/30 text-gold hover:text-gold-dark"
+                        onClick={handleUnsplashUrlUpdate}
+                      >
+                        <Image className="h-4 w-4 mr-2" />
+                        Add URL
+                      </Button>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-400">
+                      Example: https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead
+                    </p>
+                  </div>
+                  
+                  {/* Preview section for both types of images */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {avatarUrl && (
+                      <div className="mt-2 w-full overflow-hidden rounded border border-gray-200">
+                        <p className="text-xs text-gray-400 p-1 bg-black-light/30">Uploaded Avatar</p>
+                        <img src={avatarUrl} alt="Uploaded avatar preview" className="w-full object-cover max-h-40" />
+                      </div>
+                    )}
+                    
+                    {unsplashUrl && (
+                      <div className="mt-2 w-full overflow-hidden rounded border border-gray-200">
+                        <p className="text-xs text-gray-400 p-1 bg-black-light/30">Unsplash Avatar</p>
+                        <img 
+                          src={unsplashUrl} 
+                          alt="Unsplash avatar preview" 
+                          className="w-full object-cover max-h-40"
+                          onError={(e) => {
+                            toast({
+                              variant: 'destructive',
+                              title: 'Invalid image URL',
+                              description: 'Could not load the Unsplash image. Please check the URL and try again.'
+                            });
+                            e.currentTarget.src = "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead";
+                          }} 
+                        />
                       </div>
                     )}
                   </div>
@@ -378,6 +463,13 @@ const Profile: React.FC = () => {
                     <p className="text-sm text-gray-500">Email</p>
                     <p className="font-medium">{user.email}</p>
                   </div>
+                  
+                  {user.avatar_url && (
+                    <div>
+                      <p className="text-sm text-gray-500">Using Unsplash Avatar</p>
+                      <p className="font-medium text-xs text-gold truncate">{user.avatar_url}</p>
+                    </div>
+                  )}
                   
                   <Button
                     onClick={() => setIsEditing(true)}

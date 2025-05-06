@@ -4,6 +4,7 @@ export interface User {
   email: string;
   name?: string;
   avatar?: string;
+  avatar_url?: string; // Added new field for Unsplash avatar URL
   wallet: number;
   isAdmin: boolean;
   createdAt?: string;
