@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { Draw } from '../../types';
 import { useNavigate } from 'react-router-dom';
-import { Coins } from 'lucide-react';
+import { Coins, Image } from 'lucide-react';
 
 interface DrawCardProps {
   draw: Draw;
@@ -14,6 +14,7 @@ interface DrawCardProps {
 
 const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
   const navigate = useNavigate();
+  const defaultImage = "https://images.unsplash.com/photo-1610375461246-83df859d849d";
   
   const progress = (draw.currentParticipants / draw.maxParticipants) * 100;
   
@@ -46,44 +47,30 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
       errorEvent: e
     });
     
-    e.currentTarget.src = 'https://images.unsplash.com/photo-1610375461246-83df859d849d';
-    e.currentTarget.className = e.currentTarget.className + ' opacity-50 bg-gradient-to-r from-gold/10 to-black';
-    
-    const parent = e.currentTarget.parentElement;
-    if (parent) {
-      const errorIndicator = document.createElement('div');
-      errorIndicator.className = 'absolute bottom-0 left-0 right-0 bg-black/70 border-t border-gold/30 text-gold text-xs p-1 text-center';
-      errorIndicator.innerText = 'Image unavailable';
-      
-      if (!parent.querySelector('.image-error-indicator')) {
-        errorIndicator.classList.add('image-error-indicator');
-        parent.appendChild(errorIndicator);
-      }
-    }
+    e.currentTarget.src = defaultImage;
+    e.currentTarget.className = e.currentTarget.className + ' opacity-80 bg-gradient-to-r from-gold/10 to-black';
   };
 
   return (
     <Card className="hover:shadow-[0_0_15px_rgba(212,175,55,0.2)] transition-all duration-300 border-gold/20 bg-black-light overflow-hidden">
-      {draw.bannerImage && (
-        <div className="h-32 w-full bg-black-light relative">
-          <img
-            src={draw.bannerImage}
-            alt={draw.title}
-            className="h-full w-full object-cover"
-            onError={handleImageError}
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
-          {draw.status === 'completed' && draw.winner && (
-            <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-              <div className="text-center bg-black/80 px-4 py-3 rounded-lg border border-gold/30 backdrop-blur-sm">
-                <h3 className="text-gold-light font-bold text-sm uppercase tracking-wider">Winner</h3>
-                <p className="text-gold text-base font-semibold">{draw.winner}</p>
-              </div>
+      <div className="h-32 w-full bg-black-light relative">
+        <img
+          src={draw.bannerImage || defaultImage}
+          alt={draw.title}
+          className="h-full w-full object-cover"
+          onError={handleImageError}
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
+        {draw.status === 'completed' && draw.winner && (
+          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+            <div className="text-center bg-black/80 px-4 py-3 rounded-lg border border-gold/30 backdrop-blur-sm">
+              <h3 className="text-gold-light font-bold text-sm uppercase tracking-wider">Winner</h3>
+              <p className="text-gold text-base font-semibold">{draw.winner}</p>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
       
       <CardHeader className="pb-2 pt-3">
         <div className="flex justify-between items-start">

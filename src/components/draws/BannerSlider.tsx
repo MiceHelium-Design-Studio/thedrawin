@@ -1,12 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { Banner as AppBanner } from '@/types';
-import { initializeGoldBanner } from '@/utils/bannerUtils';
-import { initializeDemoImages, initializeDemoBanners } from '@/utils/demoImageUtils';
 
 interface Banner {
   id: string;
@@ -20,98 +16,42 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
   const [banners, setBanners] = useState<Banner[]>([]);
   
+  // Default Unsplash banner images
   const defaultBanners = [
     {
       id: 'default-1',
-      url: '/lovable-uploads/d2810e9f-1964-48c4-97be-48553adb004f.png',
+      url: 'https://images.unsplash.com/photo-1627843240167-b1f9d00c5880',
       linkUrl: '/draws',
       active: true
     },
     {
       id: 'default-2',
-      url: '/lovable-uploads/3ba1bfaf-88ef-41ce-8abf-beb7e1144481.png',
+      url: 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead',
       linkUrl: '/draws',
       active: true
     },
     {
       id: 'default-3',
-      url: '/lovable-uploads/a3f55f49-2874-4022-824b-6b3cd22c8837.png',
+      url: 'https://images.unsplash.com/photo-1614028674026-a65e31bfd27c',
       linkUrl: '/draws',
       active: true
     }
   ];
 
   useEffect(() => {
-    const fetchAndSetBanners = async () => {
-      if (propBanners && propBanners.length > 0) {
-        const convertedBanners = propBanners.map(banner => ({
-          id: banner.id,
-          url: banner.imageUrl, // Use imageUrl as url
-          linkUrl: banner.linkUrl,
-          active: banner.active
-        }));
-        setBanners(convertedBanners);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('media_items')
-          .select('*')
-          .eq('type', 'banner');
-          
-        if (error) {
-          throw error;
-        }
-        
-        if (data && data.length > 0) {
-          const formattedBanners = data.map(item => ({
-            id: item.id,
-            url: item.url,
-            linkUrl: '/draws',
-            active: true
-          }));
-          
-          setBanners(formattedBanners);
-        } else {
-          // Initialize demo images and banners
-          await initializeDemoImages();
-          await initializeDemoBanners();
-          
-          // Retry fetching banners after initialization
-          const { data: updatedData } = await supabase
-            .from('media_items')
-            .select('*')
-            .eq('type', 'banner');
-            
-          if (updatedData && updatedData.length > 0) {
-            const formattedBanners = updatedData.map(item => ({
-              id: item.id,
-              url: item.url,
-              linkUrl: '/draws',
-              active: true
-            }));
-            
-            setBanners(formattedBanners);
-          } else {
-            // Fallback to default banners if we still don't have any
-            setBanners(defaultBanners);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching banners:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to load banners',
-          description: 'Using default banners as fallback.'
-        });
-        
-        // Use default banners as fallback
-        setBanners(defaultBanners);
-      }
-    };
-    
-    fetchAndSetBanners();
+    // If we have banners from props, convert and use them
+    if (propBanners && propBanners.length > 0) {
+      const convertedBanners = propBanners.map(banner => ({
+        id: banner.id,
+        url: banner.imageUrl || defaultBanners[0].url, // Use the first default banner as fallback
+        linkUrl: banner.linkUrl,
+        active: banner.active
+      }));
+      setBanners(convertedBanners);
+    } else {
+      // Otherwise use default banners
+      setBanners(defaultBanners);
+    }
   }, [propBanners]);
   
   const activeBanners = banners.filter(banner => banner.active !== false);
@@ -157,11 +97,10 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
     toast({
       variant: 'destructive',
       title: 'Image failed to load',
-      description: `Banner image couldn't be displayed. Please check the URL: ${banner.url}`
+      description: 'Using fallback image instead.'
     });
     
-    e.currentTarget.src = '/placeholder.svg';
-    e.currentTarget.className = e.currentTarget.className + ' opacity-50 bg-gradient-to-r from-gold/10 to-black';
+    e.currentTarget.src = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead';
   };
 
   if (activeBanners.length === 0) {
@@ -176,8 +115,6 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
             <a 
               key={banner.id} 
               href={banner.linkUrl || '/draws'}
-              target="_blank"
-              rel="noopener noreferrer"
               className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ${
                 index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
               }`}
@@ -195,7 +132,7 @@ const BannerSlider: React.FC<{ banners?: AppBanner[] }> = ({ banners: propBanner
                 <div className="absolute inset-0 flex items-center justify-center bg-black/70">
                   <div className="bg-black/80 text-gold px-3 py-2 rounded-md flex items-center border border-gold/30 shadow-[0_0_10px_rgba(212,175,55,0.2)]">
                     <AlertTriangle className="h-4 w-4 mr-2" />
-                    <span className="text-sm">Image failed to load</span>
+                    <span className="text-sm">Using fallback image</span>
                   </div>
                 </div>
               )}

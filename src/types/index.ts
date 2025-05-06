@@ -20,7 +20,7 @@ export interface Draw {
   startDate: string;
   endDate: string;
   winner?: string;
-  bannerImage?: string;
+  bannerImage?: string; // URL to the image on Unsplash or other sources
 }
 
 export interface Ticket {
@@ -45,7 +45,7 @@ export interface Notification {
 
 export interface Banner {
   id: string;
-  imageUrl: string;
+  imageUrl: string; // URL to the image on Unsplash or other sources
   url?: string; // Add this for compatibility with existing code
   linkUrl?: string;
   active?: boolean;
@@ -54,7 +54,7 @@ export interface Banner {
 export interface MediaItem {
   id: string;
   name: string;
-  url: string;
+  url: string; // URL to the image on Unsplash or other sources
   type: 'image' | 'document' | 'video';
   size: number;
   user_id: string;

@@ -7,7 +7,6 @@ import { useAuth } from '../context/AuthContext';
 import DrawCard from '../components/draws/DrawCard';
 import BannerSlider from '../components/draws/BannerSlider';
 import { Skeleton } from '@/components/ui/skeleton';
-import { initializeDemoImages, initializeDemoBanners } from '../utils/demoImageUtils';
 
 const Home: React.FC = () => {
   const {
@@ -26,13 +25,6 @@ const Home: React.FC = () => {
     console.log("Home component rendering, loading state:", isLoading);
     console.log("User in Home:", user?.id);
     console.log("Draws loaded:", draws?.length || 0, "items");
-    
-    // Initialize demo images and banners if needed
-    if (!isLoading) {
-      initializeDemoImages().then(() => {
-        initializeDemoBanners();
-      });
-    }
   }, [isLoading, user, draws]);
 
   const sortedDraws = [...(draws || [])].sort((a, b) => {
@@ -50,11 +42,14 @@ const Home: React.FC = () => {
     navigate('/draws');
   };
 
+  // Sample banner image from Unsplash
+  const headerBannerUrl = "https://images.unsplash.com/photo-1616514169928-a1e40c6f791c";
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col items-center mb-8">
         <img 
-          src="/lovable-uploads/e0c90449-0e21-4fa2-8656-efdf3f993ce8.png" 
+          src={headerBannerUrl}
           alt="DRAWIN - The First Draw & Win App" 
           className="max-w-[280px] md:max-w-[320px] mx-auto mb-2"
         />

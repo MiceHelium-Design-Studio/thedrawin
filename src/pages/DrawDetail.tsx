@@ -19,6 +19,9 @@ const DrawDetail: React.FC = () => {
   
   const draw = draws.find(d => d.id === id);
   
+  // Default image in case the draw doesn't have one
+  const defaultBannerImage = "https://images.unsplash.com/photo-1610375461246-83df859d849d";
+  
   if (!draw) {
     return (
       <div className="container mx-auto px-4 py-6 text-center">
@@ -61,7 +64,7 @@ const DrawDetail: React.FC = () => {
       <DrawHeader
         title={draw.title}
         description={draw.description}
-        bannerImage={draw.bannerImage}
+        bannerImage={draw.bannerImage || defaultBannerImage}
       />
       
       <DrawProgress

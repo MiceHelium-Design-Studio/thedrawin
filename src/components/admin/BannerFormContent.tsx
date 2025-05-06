@@ -6,8 +6,6 @@ import * as z from "zod";
 import { useToast } from '@/hooks/use-toast';
 import { Banner } from '../../types';
 import { useDraws } from '@/context/DrawContext';
-import { ImageUploader } from './ImageUploader';
-import { uploadToS3 } from '@/utils/s3Utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch";
@@ -37,19 +35,11 @@ const bannerFormSchema = z.object({
 
 interface BannerFormContentProps {
   selectedBanner: Banner | null;
-  bannerImageUrl: string;
-  isUploading: boolean;
-  setBannerImageUrl: (url: string) => void;
-  setIsUploading: (isUploading: boolean) => void;
   onSuccess: () => void;
 }
 
 export const BannerFormContent: React.FC<BannerFormContentProps> = ({
   selectedBanner,
-  bannerImageUrl,
-  isUploading,
-  setBannerImageUrl,
-  setIsUploading,
   onSuccess
 }) => {
   const { toast } = useToast();
@@ -116,46 +106,50 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
     }
   };
 
-  const handleBannerUpload = async (file: File) => {
-    try {
-      setIsUploading(true);
-      toast({
-        title: "Uploading image...",
-        description: "Please wait while your image is being uploaded."
-      });
-      
-      const { url } = await uploadToS3(file, 'banners');
-      setBannerImageUrl(url);
-      bannerForm.setValue('imageUrl', url);
-      
-      toast({
-        title: "Image uploaded",
-        description: "Banner image has been uploaded successfully."
-      });
-    } catch (error) {
-      console.error('Error uploading banner:', error);
-      toast({
-        variant: 'destructive',
-        title: "Upload failed",
-        description: "There was a problem uploading the banner image."
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   return (
     <div className="p-6">
       <Form {...bannerForm}>
         <form onSubmit={bannerForm.handleSubmit(selectedBanner ? handleBannerUpdate : handleBannerCreate)} className="space-y-6">
-          <div className="mb-6">
-            <FormLabel className="block mb-2">Banner Image</FormLabel>
-            <ImageUploader 
-              onImageSelected={handleBannerUpload} 
-              previewUrl={bannerImageUrl}
-              isUploading={isUploading}
-            />
+          <div className="mb-4 p-4 bg-black-light rounded-md border border-gold/10">
+            <h3 className="text-sm font-medium mb-2">Unsplash Images</h3>
+            <p className="text-xs text-gold-light mb-3">
+              Use any of these sample Unsplash images or paste your own URL:
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                "https://images.unsplash.com/photo-1627843240167-b1f9d00c5880",
+                "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead",
+                "https://images.unsplash.com/photo-1614028674026-a65e31bfd27c",
+                "https://images.unsplash.com/photo-1616514169928-a1e40c6f791c"
+              ].map((url, index) => (
+                <div 
+                  key={index} 
+                  className="relative h-16 cursor-pointer rounded-md overflow-hidden border border-gold/20 hover:border-gold/50 transition-all"
+                  onClick={() => bannerForm.setValue('imageUrl', url)}
+                >
+                  <img src={url} alt={`Sample ${index+1}`} className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
           </div>
+          
+          {bannerForm.watch('imageUrl') && (
+            <div className="relative w-full mb-4">
+              <p className="text-sm mb-1">Preview:</p>
+              <img 
+                src={bannerForm.watch('imageUrl')} 
+                alt="Banner preview" 
+                className="w-full h-40 object-cover rounded-md border border-gold/20"
+                onError={() => {
+                  toast({
+                    variant: 'destructive',
+                    title: "Invalid image URL",
+                    description: "The image URL could not be loaded."
+                  });
+                }}
+              />
+            </div>
+          )}
           
           <FormField
             control={bannerForm.control}
@@ -167,7 +161,7 @@ export const BannerFormContent: React.FC<BannerFormContentProps> = ({
                   <Input placeholder="https://example.com/image.jpg" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This will be automatically filled when you upload an image above.
+                  Paste an Unsplash image URL or any other image URL.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

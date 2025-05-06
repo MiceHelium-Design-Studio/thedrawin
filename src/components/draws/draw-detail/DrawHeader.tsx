@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, AlertTriangle, Image } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,12 +17,15 @@ export const DrawHeader = ({ title, description, bannerImage }: DrawHeaderProps)
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
   
+  // Default Unsplash image to use if no banner is provided or if there's an error
+  const defaultImage = "https://images.unsplash.com/photo-1610375461246-83df859d849d";
+  
   const handleImageError = () => {
     setImageError(true);
     toast({
       variant: 'destructive',
       title: 'Image failed to load',
-      description: 'The banner image could not be displayed.'
+      description: 'Using default image as fallback.'
     });
   };
   
@@ -38,30 +41,15 @@ export const DrawHeader = ({ title, description, bannerImage }: DrawHeaderProps)
       </Button>
       
       <Card className="overflow-hidden">
-        {bannerImage && !imageError ? (
-          <div className="h-48 bg-gray-100 relative">
-            <img
-              src={bannerImage}
-              alt={title}
-              className="h-full w-full object-cover"
-              onError={handleImageError}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-40"></div>
-          </div>
-        ) : (
-          <div className="h-48 bg-gradient-to-r from-gold/20 to-black/40 flex items-center justify-center">
-            {imageError ? (
-              <div className="text-center text-white p-4">
-                <AlertTriangle className="h-10 w-10 mx-auto mb-2 text-gold/60" />
-                <p>Banner image could not be loaded</p>
-              </div>
-            ) : (
-              <div className="text-center text-white p-4">
-                <p>No banner image available</p>
-              </div>
-            )}
-          </div>
-        )}
+        <div className="h-48 bg-gray-100 relative">
+          <img
+            src={bannerImage || defaultImage}
+            alt={title}
+            className="h-full w-full object-cover"
+            onError={handleImageError}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-40"></div>
+        </div>
         
         <CardContent className="p-4">
           <h1 className="text-2xl font-bold mb-2">{title}</h1>
