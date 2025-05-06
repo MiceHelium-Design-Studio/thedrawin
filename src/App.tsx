@@ -22,6 +22,7 @@ import Admin from "./pages/Admin";
 import MediaLibrary from "./pages/MediaLibrary";
 import NotFound from "./pages/NotFound";
 import TodoList from "./pages/TodoList";
+import TodoPage from "./pages/TodoPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -95,6 +96,7 @@ const App = () => {
                       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                       <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
                       <Route path="/todos" element={<ProtectedRoute><TodoList /></ProtectedRoute>} />
+                      <Route path="/todo-page" element={<ProtectedRoute><TodoPage /></ProtectedRoute>} />
                       
                       <Route path="*" element={<NotFound />} />
                     </Routes>
