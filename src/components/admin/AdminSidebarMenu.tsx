@@ -1,65 +1,53 @@
 
 import React from 'react';
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  LayoutDashboard,
-  Images,
-  BarChart3,
-  Users,
-  Settings,
-  BellRing,
-  FileImage,
-  ListTodo
+  BarChart, Settings, Users, Image, ListTodo, 
+  BellRing, PanelRight, Layout, Medal, BellAlert
 } from 'lucide-react';
-import { 
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 
 interface AdminSidebarMenuProps {
-  activeTab: string;
+  activeTab?: string;
 }
 
 const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ activeTab }) => {
   return (
-    <TabsList className="flex flex-col h-auto w-full bg-muted/50">
-      <TabsTrigger value="draws" className="w-full justify-start data-[state=active]:bg-primary/20">
-        <LayoutDashboard className="w-4 h-4 mr-2" />
-        Draw Management
+    <TabsList className="flex flex-col items-start space-y-1 w-full bg-transparent border-0">
+      <TabsTrigger value="draws" className="w-full justify-start">
+        <Medal className="h-4 w-4 mr-2" />
+        Draws
       </TabsTrigger>
-      
-      <TabsTrigger value="banners" className="w-full justify-start data-[state=active]:bg-primary/20">
-        <Images className="w-4 h-4 mr-2" />
-        Banner Management
+      <TabsTrigger value="banners" className="w-full justify-start">
+        <Layout className="h-4 w-4 mr-2" />
+        Banners
       </TabsTrigger>
-      
-      <TabsTrigger value="users" className="w-full justify-start data-[state=active]:bg-primary/20">
-        <Users className="w-4 h-4 mr-2" />
-        User Management
+      <TabsTrigger value="users" className="w-full justify-start">
+        <Users className="h-4 w-4 mr-2" />
+        Users
       </TabsTrigger>
-      
-      <TabsTrigger value="settings" className="w-full justify-start data-[state=active]:bg-primary/20">
-        <Settings className="w-4 h-4 mr-2" />
-        App Settings
-      </TabsTrigger>
-      
-      <TabsTrigger value="notifications" className="w-full justify-start data-[state=active]:bg-primary/20">
-        <BellRing className="w-4 h-4 mr-2" />
+      <TabsTrigger value="notifications" className="w-full justify-start">
+        <BellRing className="h-4 w-4 mr-2" />
         Push Notifications
       </TabsTrigger>
-      
-      <TabsTrigger value="stats" className="w-full justify-start data-[state=active]:bg-primary/20">
-        <BarChart3 className="w-4 h-4 mr-2" />
+      <TabsTrigger value="alerts" className="w-full justify-start">
+        <BellAlert className="h-4 w-4 mr-2" />
+        Alerts
+      </TabsTrigger>
+      <TabsTrigger value="stats" className="w-full justify-start">
+        <BarChart className="h-4 w-4 mr-2" />
         Statistics
       </TabsTrigger>
-      
-      <TabsTrigger value="media" className="w-full justify-start data-[state=active]:bg-primary/20">
-        <FileImage className="w-4 h-4 mr-2" />
-        Media Manager
+      <TabsTrigger value="media" className="w-full justify-start">
+        <Image className="h-4 w-4 mr-2" />
+        Media
       </TabsTrigger>
-      
-      <TabsTrigger value="todos" className="w-full justify-start data-[state=active]:bg-primary/20">
-        <ListTodo className="w-4 h-4 mr-2" />
-        To Do List
+      <TabsTrigger value="todos" className="w-full justify-start">
+        <ListTodo className="h-4 w-4 mr-2" />
+        Tasks
+      </TabsTrigger>
+      <TabsTrigger value="settings" className="w-full justify-start">
+        <Settings className="h-4 w-4 mr-2" />
+        Settings
       </TabsTrigger>
     </TabsList>
   );

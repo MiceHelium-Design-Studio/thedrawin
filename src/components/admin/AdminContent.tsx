@@ -15,6 +15,7 @@ import PushNotifications from '@/components/admin/PushNotifications';
 import MediaManager from '@/components/admin/MediaManager';
 import StatisticsContent from './StatisticsContent';
 import TodoPage from '@/pages/TodoPage';
+import AdminNotifications from './AdminNotifications';
 
 interface AdminContentProps {
   activeTab: string;
@@ -44,6 +45,10 @@ const AdminContent: React.FC<AdminContentProps> = ({ activeTab }) => {
           
           <TabsContent value="notifications" className="mt-0">
             <PushNotifications />
+          </TabsContent>
+          
+          <TabsContent value="alerts" className="mt-0">
+            <AdminNotifications />
           </TabsContent>
           
           <TabsContent value="stats" className="mt-0">
