@@ -33,16 +33,13 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
       console.log('Attempting to delete banner with ID:', banner.id);
       await deleteBanner(banner.id);
       
-      toast({
-        title: "Banner deleted",
-        description: "The banner has been successfully deleted.",
-      });
+      // Toast notification is now handled in the deleteBanner function
     } catch (error) {
       console.error('Error deleting banner:', error);
       toast({
         variant: 'destructive',
         title: "Deletion failed",
-        description: "There was a problem deleting the banner. Please check console for details.",
+        description: "There was a problem deleting the banner. Please try again.",
       });
     } finally {
       setIsDeleting(false);

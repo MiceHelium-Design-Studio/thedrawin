@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext } from 'react';
 import { Draw, Ticket, Notification, MediaItem, Banner } from '@/types';
 import { useAuth } from '../AuthContext';
@@ -107,7 +106,20 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const { createDraw, updateDraw, deleteDraw } = drawFunctions;
   const { buyTicket } = ticketFunctions;
   const { markNotificationAsRead } = notificationFunctions;
-  const { createBanner, updateBanner, deleteBanner, fetchBanners } = bannerFunctions;
+  const { createBanner, updateBanner, deleteBanner } = bannerFunctions;
+
+  // Define fetchBanners as a wrapper function to match the expected void return type
+  const fetchBanners = async (): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      await bannerFunctions.fetchBanners();
+    } catch (err) {
+      setError('An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Media functions with user ID
   const uploadMedia = async (file: File, bucketType?: BucketType): Promise<MediaItem> => {

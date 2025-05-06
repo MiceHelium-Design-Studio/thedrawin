@@ -1,4 +1,3 @@
-
 import { Banner } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -7,7 +6,7 @@ export const useBannerFunctions = (
   setBanners: React.Dispatch<React.SetStateAction<Banner[]>>,
   banners: Banner[]
 ) => {
-  const fetchBanners = async () => {
+  const fetchBanners = async (): Promise<void> => {
     try {
       console.log('Fetching banners from database...');
       const { data, error } = await supabase
@@ -33,7 +32,6 @@ export const useBannerFunctions = (
 
       setBanners(fetchedBanners);
       console.log('Successfully fetched banners:', fetchedBanners.length);
-      return fetchedBanners;
     } catch (error) {
       console.error('Error fetching banners:', error);
       toast({
