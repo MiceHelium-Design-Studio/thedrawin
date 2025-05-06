@@ -3,7 +3,7 @@ import React from 'react';
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart, Settings, Users, Image, ListTodo, 
-  BellRing, PanelRight, Layout, Medal, BellAlert
+  BellRing, PanelRight, Layout, Medal, Bell
 } from 'lucide-react';
 
 interface AdminSidebarMenuProps {
@@ -30,7 +30,7 @@ const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ activeTab }) => {
         Push Notifications
       </TabsTrigger>
       <TabsTrigger value="alerts" className="w-full justify-start">
-        <BellAlert className="h-4 w-4 mr-2" />
+        <Bell className="h-4 w-4 mr-2" />
         Alerts
       </TabsTrigger>
       <TabsTrigger value="stats" className="w-full justify-start">
