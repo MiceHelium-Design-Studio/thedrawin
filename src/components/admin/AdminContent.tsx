@@ -14,6 +14,7 @@ import AppSettings from '@/components/admin/AppSettings';
 import PushNotifications from '@/components/admin/PushNotifications';
 import MediaManager from '@/components/admin/MediaManager';
 import StatisticsContent from './StatisticsContent';
+import TodoPage from '@/pages/TodoPage';
 
 interface AdminContentProps {
   activeTab: string;
@@ -51,6 +52,10 @@ const AdminContent: React.FC<AdminContentProps> = ({ activeTab }) => {
           
           <TabsContent value="media" className="mt-0">
             <MediaManager />
+          </TabsContent>
+          
+          <TabsContent value="todos" className="mt-0">
+            <TodoPage />
           </TabsContent>
         </Tabs>
       </Card>

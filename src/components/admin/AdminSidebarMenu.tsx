@@ -7,7 +7,8 @@ import {
   Users,
   Settings,
   BellRing,
-  FileImage
+  FileImage,
+  ListTodo
 } from 'lucide-react';
 import { 
   TabsList,
@@ -54,6 +55,11 @@ const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ activeTab }) => {
       <TabsTrigger value="media" className="w-full justify-start data-[state=active]:bg-primary/20">
         <FileImage className="w-4 h-4 mr-2" />
         Media Manager
+      </TabsTrigger>
+      
+      <TabsTrigger value="todos" className="w-full justify-start data-[state=active]:bg-primary/20">
+        <ListTodo className="w-4 h-4 mr-2" />
+        To Do List
       </TabsTrigger>
     </TabsList>
   );
