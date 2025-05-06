@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { Search, SortAsc, SortDesc, Filter, RefreshCw, UploadCloud } from 'lucide-react';
+import { Search, SortAsc, SortDesc, Filter, RefreshCw, UploadCloud, LayoutGrid } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -62,7 +62,7 @@ const MediaToolbar: React.FC<MediaToolbarProps> = ({
           {view === 'grid' ? (
             <Filter className="h-4 w-4" />
           ) : (
-            <Image className="h-4 w-4" />
+            <LayoutGrid className="h-4 w-4" />
           )}
         </Button>
         
