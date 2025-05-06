@@ -158,7 +158,7 @@ export const useBannerFunctions = (
       // First, update the state optimistically
       setBanners(prev => prev.filter(b => b.id !== id));
       
-      // Attempt the delete operation with proper admin access
+      // Attempt the delete operation
       const { error } = await supabase
         .from('banners')
         .delete()
