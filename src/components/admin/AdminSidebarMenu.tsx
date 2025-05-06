@@ -3,7 +3,7 @@ import React from 'react';
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart, Settings, Users, Image, ListTodo, 
-  BellRing, PanelRight, Layout, Medal, BellAlert
+  BellRing, PanelRight, Layout, Medal, Bell
 } from 'lucide-react';
 
 interface AdminSidebarMenuProps {
@@ -12,41 +12,68 @@ interface AdminSidebarMenuProps {
 
 const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ activeTab }) => {
   return (
-    <TabsList className="flex flex-col items-start space-y-1 w-full bg-transparent border-0">
-      <TabsTrigger value="draws" className="w-full justify-start">
-        <Medal className="h-4 w-4 mr-2" />
+    <TabsList className="flex flex-col items-start space-y-2 w-full bg-transparent border-0">
+      <TabsTrigger 
+        value="draws" 
+        className="w-full justify-start rounded-md transition-colors"
+      >
+        <Medal className="h-4 w-4 mr-2.5" />
         Draws
       </TabsTrigger>
-      <TabsTrigger value="banners" className="w-full justify-start">
-        <Layout className="h-4 w-4 mr-2" />
+      <TabsTrigger 
+        value="banners" 
+        className="w-full justify-start rounded-md transition-colors"
+      >
+        <Layout className="h-4 w-4 mr-2.5" />
         Banners
       </TabsTrigger>
-      <TabsTrigger value="users" className="w-full justify-start">
-        <Users className="h-4 w-4 mr-2" />
+      <TabsTrigger 
+        value="users" 
+        className="w-full justify-start rounded-md transition-colors"
+      >
+        <Users className="h-4 w-4 mr-2.5" />
         Users
       </TabsTrigger>
-      <TabsTrigger value="notifications" className="w-full justify-start">
-        <BellRing className="h-4 w-4 mr-2" />
+      <TabsTrigger 
+        value="notifications" 
+        className="w-full justify-start rounded-md transition-colors"
+      >
+        <BellRing className="h-4 w-4 mr-2.5" />
         Push Notifications
       </TabsTrigger>
-      <TabsTrigger value="alerts" className="w-full justify-start">
-        <BellAlert className="h-4 w-4 mr-2" />
+      <TabsTrigger 
+        value="alerts" 
+        className="w-full justify-start rounded-md transition-colors"
+      >
+        <Bell className="h-4 w-4 mr-2.5" />
         Alerts
       </TabsTrigger>
-      <TabsTrigger value="stats" className="w-full justify-start">
-        <BarChart className="h-4 w-4 mr-2" />
+      <TabsTrigger 
+        value="stats" 
+        className="w-full justify-start rounded-md transition-colors"
+      >
+        <BarChart className="h-4 w-4 mr-2.5" />
         Statistics
       </TabsTrigger>
-      <TabsTrigger value="media" className="w-full justify-start">
-        <Image className="h-4 w-4 mr-2" />
+      <TabsTrigger 
+        value="media" 
+        className="w-full justify-start rounded-md transition-colors"
+      >
+        <Image className="h-4 w-4 mr-2.5" />
         Media
       </TabsTrigger>
-      <TabsTrigger value="todos" className="w-full justify-start">
-        <ListTodo className="h-4 w-4 mr-2" />
+      <TabsTrigger 
+        value="todos" 
+        className="w-full justify-start rounded-md transition-colors"
+      >
+        <ListTodo className="h-4 w-4 mr-2.5" />
         Tasks
       </TabsTrigger>
-      <TabsTrigger value="settings" className="w-full justify-start">
-        <Settings className="h-4 w-4 mr-2" />
+      <TabsTrigger 
+        value="settings" 
+        className="w-full justify-start rounded-md transition-colors"
+      >
+        <Settings className="h-4 w-4 mr-2.5" />
         Settings
       </TabsTrigger>
     </TabsList>

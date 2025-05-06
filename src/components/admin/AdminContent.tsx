@@ -24,42 +24,41 @@ interface AdminContentProps {
 const AdminContent: React.FC<AdminContentProps> = ({ activeTab }) => {
   return (
     <div className="flex-1 space-y-6">
-      <Card className="p-6 backdrop-blur-sm bg-card/90 shadow-md border-0">
-        {/* IMPORTANT: We're wrapping all TabsContent components within a Tabs component */}
+      <Card className="p-6 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl">
         <Tabs value={activeTab} className="w-full">
-          <TabsContent value="draws" className="mt-0">
+          <TabsContent value="draws" className="mt-0 animate-in fade-in-50">
             <DrawsManagement />
           </TabsContent>
           
-          <TabsContent value="banners" className="mt-0">
+          <TabsContent value="banners" className="mt-0 animate-in fade-in-50">
             <BannersManagement />
           </TabsContent>
           
-          <TabsContent value="users" className="mt-0">
+          <TabsContent value="users" className="mt-0 animate-in fade-in-50">
             <UserManagement />
           </TabsContent>
           
-          <TabsContent value="settings" className="mt-0">
+          <TabsContent value="settings" className="mt-0 animate-in fade-in-50">
             <AppSettings />
           </TabsContent>
           
-          <TabsContent value="notifications" className="mt-0">
+          <TabsContent value="notifications" className="mt-0 animate-in fade-in-50">
             <PushNotifications />
           </TabsContent>
           
-          <TabsContent value="alerts" className="mt-0">
+          <TabsContent value="alerts" className="mt-0 animate-in fade-in-50">
             <AdminNotifications />
           </TabsContent>
           
-          <TabsContent value="stats" className="mt-0">
+          <TabsContent value="stats" className="mt-0 animate-in fade-in-50">
             <StatisticsContent />
           </TabsContent>
           
-          <TabsContent value="media" className="mt-0">
+          <TabsContent value="media" className="mt-0 animate-in fade-in-50">
             <MediaManager />
           </TabsContent>
           
-          <TabsContent value="todos" className="mt-0">
+          <TabsContent value="todos" className="mt-0 animate-in fade-in-50">
             <TodoPage />
           </TabsContent>
         </Tabs>

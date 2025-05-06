@@ -29,8 +29,7 @@ const Admin: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-background/80">
-      {/* Main Content */}
-      <div className="container mx-auto py-6 flex-1">
+      <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8 flex-1">
         <div className="flex flex-col md:flex-row gap-6">
           <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
           <AdminContent activeTab={activeTab} />

@@ -17,20 +17,22 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
   
   return (
     <div className="md:w-64 space-y-2">
-      <Card className="p-4 backdrop-blur-sm bg-card/90 shadow-md border-0">
-        <div className="space-y-2">
+      <Card className="p-4 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl">
+        <div className="space-y-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Admin Dashboard</h2>
+            <h2 className="text-xl font-bold text-gold-light">Admin Panel</h2>
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate('/')}
-              className="flex items-center gap-1.5"
+              className="flex items-center gap-1.5 hover:bg-black-light/50 hover:text-gold transition-colors"
             >
               <LogOut className="size-4" />
               Exit
             </Button>
           </div>
+          
+          <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent my-2"></div>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
             <AdminSidebarMenu activeTab={activeTab} />
