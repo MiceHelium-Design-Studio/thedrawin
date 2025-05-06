@@ -4,7 +4,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types';
 import { testSupabaseConnection } from '@/utils/supabaseTest';
-import { fetchUser } from '@/utils/authUtils';
 
 export const useUserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -32,7 +31,7 @@ export const useUserManagement = () => {
         throw new Error(connectionResult.errorDetails || 'Could not connect to Supabase database');
       }
       
-      // Updated to fetch from user_profile_view instead of profiles
+      // Fetch from user_profile_view
       const { data: usersData, error: usersError } = await supabase
         .from('user_profile_view')
         .select('*');

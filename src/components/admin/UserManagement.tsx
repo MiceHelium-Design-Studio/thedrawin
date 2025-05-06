@@ -13,7 +13,6 @@ const UserManagement: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const {
     users,
-    setUsers,
     loading,
     fetchError,
     connectionStatus,
