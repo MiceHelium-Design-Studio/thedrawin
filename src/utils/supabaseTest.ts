@@ -10,10 +10,11 @@ interface ConnectionTestResult {
 export async function testSupabaseConnection(): Promise<ConnectionTestResult> {
   try {
     // Try a simpler test that's less likely to hit RLS policy issues
-    // Just check if we can connect at all
+    // Just check if we can connect at all and perform a simple query
     const { data, error } = await supabase
       .from('profiles')
-      .select('count(*)');
+      .select('id')
+      .limit(1);
     
     if (error) {
       console.error('Supabase connection test failed:', error);

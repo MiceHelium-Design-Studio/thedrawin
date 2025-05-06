@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,42 +13,10 @@ export const useUserManagement = () => {
   const [connectionErrorDetails, setConnectionErrorDetails] = useState<string | null>(null);
 
   const testConnection = async () => {
-    try {
-      // Try a simpler test that doesn't use RLS policies
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('count(*)');
-      
-      if (error) {
-        console.error('Connection test error:', error);
-        
-        // Check if this is the recursion error
-        const isRecursionError = error.message && error.message.includes('infinite recursion');
-        
-        setConnectionStatus(false);
-        setConnectionErrorDetails(
-          isRecursionError 
-            ? 'Infinite recursion detected in policy for profiles table. Please check your database RLS policies.' 
-            : error.message
-        );
-        return { 
-          isConnected: false, 
-          errorDetails: isRecursionError 
-            ? 'Infinite recursion detected in policy for profiles table.' 
-            : error.message 
-        };
-      }
-      
-      setConnectionStatus(true);
-      setConnectionErrorDetails(null);
-      return { isConnected: true };
-    } catch (error) {
-      console.error('Unexpected test connection error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown connection error';
-      setConnectionStatus(false);
-      setConnectionErrorDetails(errorMessage);
-      return { isConnected: false, errorDetails: errorMessage };
-    }
+    const result = await testSupabaseConnection();
+    setConnectionStatus(result.isConnected);
+    setConnectionErrorDetails(result.errorDetails || null);
+    return result;
   };
 
   const fetchUsers = async () => {
