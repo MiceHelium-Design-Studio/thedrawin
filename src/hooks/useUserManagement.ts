@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types';
 import { testSupabaseConnection } from '@/utils/supabaseTest';
+import { fetchUser } from '@/utils/authUtils';
 
 export const useUserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -45,11 +46,13 @@ export const useUserManagement = () => {
         email: profile.email,
         name: profile.name || undefined,
         avatar: profile.avatar || undefined,
+        avatar_url: profile.avatar_url || undefined,
         wallet: profile.wallet || 0,
         isAdmin: profile.is_admin || false,
         createdAt: profile.created_at
       })) || [];
       
+      console.log('Fetched users:', mappedUsers);
       setUsers(mappedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -68,6 +71,13 @@ export const useUserManagement = () => {
 
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
+      // First get user email
+      const user = users.find(u => u.id === userId);
+      
+      if (!user?.email) {
+        throw new Error('User email not found');
+      }
+      
       const { error } = await supabase
         .from('profiles')
         .update({ is_admin: !currentStatus })
@@ -125,6 +135,7 @@ export const useUserManagement = () => {
 
   return {
     users,
+    setUsers, // Export this so wallet management can update the users list
     loading,
     fetchError,
     connectionStatus,

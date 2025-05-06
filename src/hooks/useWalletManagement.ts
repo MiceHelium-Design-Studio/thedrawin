@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types';
 
-export const useWalletManagement = (users: User[], setUsers: (users: User[]) => void) => {
+export const useWalletManagement = (users: User[], onUserUpdated: () => void) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [walletAmount, setWalletAmount] = useState<string>('100');
   const [isWalletDialogOpen, setIsWalletDialogOpen] = useState(false);
@@ -36,14 +36,13 @@ export const useWalletManagement = (users: User[], setUsers: (users: User[]) => 
       
       if (error) throw error;
       
-      setUsers(users.map(user => 
-        user.id === selectedUserId ? { ...user, wallet: newWalletAmount } : user
-      ));
-      
       toast({
         title: 'Wallet updated',
         description: `Added ${walletAmount} credits to user's wallet.`
       });
+      
+      // Call the callback to refetch users instead of trying to update the state directly
+      onUserUpdated();
       
       closeWalletDialog();
     } catch (error) {

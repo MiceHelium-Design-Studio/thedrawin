@@ -12,6 +12,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 const UserManagement: React.FC = () => {
   const {
     users,
+    setUsers,
     loading,
     fetchError,
     connectionStatus,
@@ -33,7 +34,7 @@ const UserManagement: React.FC = () => {
     setIsWalletDialogOpen,
     handleAddFunds,
     closeWalletDialog
-  } = useWalletManagement(users, () => fetchUsers());
+  } = useWalletManagement(users, fetchUsers); // Pass fetchUsers as the callback
 
   useEffect(() => {
     if (connectionStatus === false) {
