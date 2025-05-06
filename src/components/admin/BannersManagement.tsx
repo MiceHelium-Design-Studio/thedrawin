@@ -4,6 +4,11 @@ import { useDraws } from '@/context/DrawContext';
 import { Banner } from '../../types';
 import BannerTable from './banners/BannerTable';
 import BannerDrawer from './banners/BannerDrawer';
+import BannerSlider from '../draws/BannerSlider';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import BannerUploader from './BannerUploader';
+import { SlidersHorizontal, Gallery } from 'lucide-react';
 
 const BannersManagement: React.FC = () => {
   const { banners, fetchBanners } = useDraws();
@@ -11,6 +16,7 @@ const BannersManagement: React.FC = () => {
   const [selectedBanner, setSelectedBanner] = useState<Banner | null>(null);
   const [bannerImageUrl, setBannerImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('list');
 
   useEffect(() => {
     fetchBanners();
@@ -44,7 +50,46 @@ const BannersManagement: React.FC = () => {
         />
       </div>
 
-      <BannerTable banners={banners} onEdit={handleEditBanner} />
+      <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="list" className="flex items-center gap-1.5">
+            <Gallery className="h-4 w-4" />
+            Banner List
+          </TabsTrigger>
+          <TabsTrigger value="preview" className="flex items-center gap-1.5">
+            <SlidersHorizontal className="h-4 w-4" />
+            Preview
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="list" className="space-y-6">
+          <BannerTable banners={banners} onEdit={handleEditBanner} />
+          
+          <div className="mt-8">
+            <h3 className="text-lg font-medium mb-3">Premium Banner</h3>
+            <BannerUploader />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="preview" className="space-y-4">
+          <Card className="p-5 bg-black/50 border-gold/10 backdrop-blur-sm">
+            <div className="mb-3">
+              <h3 className="text-lg font-medium mb-1">Banner Preview</h3>
+              <p className="text-sm text-muted-foreground">
+                This shows how banners will appear on the home page.
+              </p>
+            </div>
+            
+            <div className="relative max-w-3xl mx-auto">
+              <BannerSlider banners={banners} />
+            </div>
+            
+            <p className="text-xs text-muted-foreground mt-4">
+              Note: Only active banners are displayed in the preview and on the home page.
+            </p>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </section>
   );
 };
