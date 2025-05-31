@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string | null
+          value: string | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string | null
+          value?: string | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string | null
+          value?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -78,6 +96,33 @@ export type Database = {
           position?: number | null
           title?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      draws: {
+        Row: {
+          created_at: string | null
+          draw_date: string | null
+          gold_weight_grams: number | null
+          id: string
+          status: string | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          draw_date?: string | null
+          gold_weight_grams?: number | null
+          id?: string
+          status?: string | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          draw_date?: string | null
+          gold_weight_grams?: number | null
+          id?: string
+          status?: string | null
+          title?: string | null
         }
         Relationships: []
       }
@@ -201,6 +246,62 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          created_at: string | null
+          id: string
+          referral_code: string | null
+          referred_id: string | null
+          referrer_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          referral_code?: string | null
+          referred_id?: string | null
+          referrer_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          referral_code?: string | null
+          referred_id?: string | null
+          referrer_id?: string | null
+        }
+        Relationships: []
+      }
+      tickets: {
+        Row: {
+          draw_id: string | null
+          id: string
+          purchased_at: string | null
+          ticket_number: string | null
+          user_id: string | null
+        }
+        Insert: {
+          draw_id?: string | null
+          id?: string
+          purchased_at?: string | null
+          ticket_number?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          draw_id?: string | null
+          id?: string
+          purchased_at?: string | null
+          ticket_number?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_draw_id_fkey"
+            columns: ["draw_id"]
+            isOneToOne: false
+            referencedRelation: "draws"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       todos: {
         Row: {
           completed: boolean
@@ -222,6 +323,33 @@ export type Database = {
           id?: string
           task?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          id: string
+          reference: string | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string
+          reference?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string
+          reference?: string | null
+          type?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -248,6 +376,59 @@ export type Database = {
           phone_number?: string | null
         }
         Relationships: []
+      }
+      wallets: {
+        Row: {
+          balance: number | null
+          id: string
+          last_updated: string | null
+          user_id: string | null
+        }
+        Insert: {
+          balance?: number | null
+          id?: string
+          last_updated?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number | null
+          id?: string
+          last_updated?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      winners: {
+        Row: {
+          awarded_at: string | null
+          draw_id: string | null
+          id: string
+          prize: string | null
+          user_id: string | null
+        }
+        Insert: {
+          awarded_at?: string | null
+          draw_id?: string | null
+          id?: string
+          prize?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          awarded_at?: string | null
+          draw_id?: string | null
+          id?: string
+          prize?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "winners_draw_id_fkey"
+            columns: ["draw_id"]
+            isOneToOne: false
+            referencedRelation: "draws"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -295,6 +476,12 @@ export type Database = {
       }
       cleanup_old_rate_limits: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      draw_random_winners: {
+        Args:
+          | Record<PropertyKey, never>
+          | { draw_uuid: string; num_winners?: number }
         Returns: undefined
       }
       get_current_user_role: {
