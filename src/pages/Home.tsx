@@ -6,6 +6,8 @@ import { useDraws } from '../context/DrawContext';
 import { useAuth } from '../context/AuthContext';
 import DrawCard from '../components/draws/DrawCard';
 import BannerSlider from '../components/draws/BannerSlider';
+import HowItWorksSection from '../components/home/HowItWorksSection';
+import RecentWinnersSection from '../components/home/RecentWinnersSection';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Home: React.FC = () => {
@@ -62,58 +64,102 @@ const Home: React.FC = () => {
       }));
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col items-center mb-8">
-        <img 
-          src="/lovable-uploads/eb8560b4-61ba-46be-a7eb-ab1918ff22de.png"
-          alt="DRAWIN - The First Draw & Win App" 
-          className="max-w-[280px] md:max-w-[320px] mx-auto mb-2"
-        />
-      </div>
-      
-      {isLoading ? (
-        <div className="space-y-4">
-          <Skeleton className="h-48 w-full rounded-lg" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-48 rounded-md" />
-            <Skeleton className="h-24 w-full rounded-md" />
-            <Skeleton className="h-24 w-full rounded-md" />
-          </div>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col items-center mb-8 text-center">
+          <img 
+            src="/lovable-uploads/eb8560b4-61ba-46be-a7eb-ab1918ff22de.png"
+            alt="DRAWIN - The First Draw & Win App" 
+            className="max-w-[280px] md:max-w-[320px] lg:max-w-[400px] mx-auto mb-4"
+          />
+          <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            Join exciting draws, win amazing prizes, and be part of the ultimate gaming experience
+          </p>
         </div>
-      ) : (
-        <>
-          {/* Banner slider positioned between logo and Active Draws */}
-          <BannerSlider banners={displayBanners} />
-          
-          {activeDraws && activeDraws.length > 0 && (
+        
+        {isLoading ? (
+          <div className="space-y-8">
+            <Skeleton className="h-48 w-full rounded-lg" />
+            <div className="grid md:grid-cols-3 gap-6">
+              <Skeleton className="h-32 w-full rounded-md" />
+              <Skeleton className="h-32 w-full rounded-md" />
+              <Skeleton className="h-32 w-full rounded-md" />
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-48 rounded-md" />
+              <Skeleton className="h-24 w-full rounded-md" />
+              <Skeleton className="h-24 w-full rounded-md" />
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Banner slider */}
+            <BannerSlider banners={displayBanners} />
+            
+            {/* How It Works Section */}
+            <HowItWorksSection />
+            
+            {/* Active Draws Section */}
+            {activeDraws && activeDraws.length > 0 && (
+              <section className="mb-12">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                  <h2 className="text-2xl font-bold uppercase tracking-wide">
+                    <span className="bg-gold-gradient bg-clip-text text-transparent">
+                      Active Draws
+                    </span>
+                  </h2>
+                  <Button variant="outline" size="sm" onClick={handleViewAll}>
+                    View All Draws
+                  </Button>
+                </div>
+                
+                <div className="grid gap-4 md:gap-6">
+                  {activeDraws.slice(0, 3).map(draw => (
+                    <DrawCard key={draw.id} draw={draw} />
+                  ))}
+                </div>
+              </section>
+            )}
+            
+            {/* Recent Winners Section */}
+            <RecentWinnersSection />
+            
+            {/* All Draws Section */}
             <section className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-base font-semibold uppercase">Active Draws</h2>
-                <Button variant="ghost" size="sm" onClick={handleViewAll}>
-                  View All
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <h2 className="text-2xl font-bold uppercase tracking-wide">
+                  <span className="bg-gold-gradient bg-clip-text text-transparent">
+                    All Draws
+                  </span>
+                </h2>
+                <Button variant="outline" size="sm" onClick={handleViewAll}>
+                  Browse All
                 </Button>
               </div>
               
-              <div className="grid gap-4">
-                {activeDraws.map(draw => <DrawCard key={draw.id} draw={draw} />)}
+              <div className="grid gap-4 md:gap-6">
+                {sortedDraws && sortedDraws.length > 0 ? (
+                  sortedDraws.slice(0, 4).map(draw => (
+                    <DrawCard key={draw.id} draw={draw} />
+                  ))
+                ) : (
+                  <div className="text-center py-12 bg-black-light/30 rounded-xl">
+                    <div className="text-6xl mb-4">🎯</div>
+                    <h3 className="text-xl font-bold mb-2 text-gold">No Draws Available</h3>
+                    <p className="text-white/60 mb-6">
+                      New exciting draws are coming soon. Stay tuned!
+                    </p>
+                    <Button variant="outline" onClick={() => navigate('/notifications')}>
+                      Get Notified
+                    </Button>
+                  </div>
+                )}
               </div>
             </section>
-          )}
-          
-          <section className="mb-8">
-            <h2 className="text-base font-semibold mb-4 uppercase">All Draws</h2>
-            <div className="grid gap-4">
-              {sortedDraws && sortedDraws.length > 0 ? (
-                sortedDraws.map(draw => <DrawCard key={draw.id} draw={draw} />)
-              ) : (
-                <div className="text-center py-8 text-gold-light font-medium">
-                  No draws available
-                </div>
-              )}
-            </div>
-          </section>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

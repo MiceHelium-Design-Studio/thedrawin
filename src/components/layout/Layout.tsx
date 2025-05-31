@@ -5,6 +5,7 @@ import { Home, Award, Bell, User, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { cn } from '../../lib/utils';
+import TopNavigation from './TopNavigation';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -23,11 +24,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
+      {/* Top Navigation - show on all pages except auth and admin */}
+      {(!isAuthPage && !isAdminPage) && (user && !authLoading) && (
+        <TopNavigation />
+      )}
+
       <main className="flex-grow pb-16 pattern-bg" role="main" aria-label="Main content">
         {children}
       </main>
 
-      {/* Only show navbar if not on auth page or admin page */}
+      {/* Bottom navbar - show on all pages except auth and admin */}
       {(!isAuthPage && !isAdminPage) && (user && !authLoading) && (
         <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20">
           <div className="grid grid-cols-5 h-16">
