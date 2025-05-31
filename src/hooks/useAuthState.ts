@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchUser } from '@/utils/authUtils';
+import type { AuthChangeEvent } from '@supabase/supabase-js';
 
 export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -22,7 +23,7 @@ export const useAuthState = () => {
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: AuthChangeEvent, session) => {
         console.log("Auth state change event:", event, "Session user:", session?.user?.id);
         
         if (!isSubscribed) return;
