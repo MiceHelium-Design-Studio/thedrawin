@@ -113,36 +113,25 @@ export const checkRateLimit = async (action: string, limit?: number, windowMinut
 };
 
 /**
- * Client-side input validation
+ * Server-side input validation using the secure database function
  */
 export const validateInput = async (params: ValidationParams): Promise<boolean> => {
   try {
     const { input, type = 'general', maxLength = 1000 } = params;
 
-    // Check length
-    if (input.length > maxLength) {
-      return false;
+    // Use the secure validate_input database function
+    const { data, error } = await supabase.rpc('validate_input', {
+      p_input: input,
+      p_type: type,
+      p_max_length: maxLength
+    });
+
+    if (error) {
+      console.error('Error validating input:', error);
+      return false; // Default to invalid if there's an error
     }
 
-    // Check for null or empty
-    if (!input || input.trim() === '') {
-      return false;
-    }
-
-    // Type-specific validation
-    switch (type) {
-      case 'email':
-        return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(input);
-      case 'url':
-        return /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(input);
-      case 'alphanumeric':
-        return /^[A-Za-z0-9\s]+$/.test(input);
-      case 'no_script':
-        return !/<script|javascript:|vbscript:|onload|onerror|onclick/i.test(input);
-      default:
-        // General validation - no malicious patterns
-        return !/<script|javascript:|vbscript:|onload|onerror|onclick|<iframe|<object|<embed/i.test(input);
-    }
+    return data as boolean;
   } catch (error) {
     console.error('Unexpected error validating input:', error);
     return false; // Default to invalid if there's an error
