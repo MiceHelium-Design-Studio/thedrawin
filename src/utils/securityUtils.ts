@@ -10,12 +10,6 @@ export interface AuditLogParams {
   newValues?: Record<string, any>;
 }
 
-export interface RateLimitParams {
-  action: string;
-  limit?: number;
-  windowMinutes?: number;
-}
-
 export interface ValidationParams {
   input: string;
   type?: 'general' | 'email' | 'url' | 'alphanumeric' | 'no_script';
@@ -23,7 +17,7 @@ export interface ValidationParams {
 }
 
 /**
- * Log an audit event to the database
+ * Log an audit event to the database using the secure function
  */
 export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
   try {
@@ -34,16 +28,14 @@ export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
       return;
     }
     
-    const { error } = await supabase
-      .from('audit_logs')
-      .insert({
-        action: params.action,
-        table_name: params.tableName,
-        record_id: params.recordId || null,
-        old_values: params.oldValues ? JSON.parse(JSON.stringify(params.oldValues)) : null,
-        new_values: params.newValues ? JSON.parse(JSON.stringify(params.newValues)) : null,
-        user_id: user?.id || null,
-      });
+    // Use the secure log_audit_event function
+    const { error } = await supabase.rpc('log_audit_event', {
+      p_action: params.action,
+      p_table_name: params.tableName,
+      p_record_id: params.recordId || null,
+      p_old_values: params.oldValues ? JSON.parse(JSON.stringify(params.oldValues)) : null,
+      p_new_values: params.newValues ? JSON.parse(JSON.stringify(params.newValues)) : null,
+    });
 
     if (error) {
       console.error('Error logging audit event:', error);
@@ -54,80 +46,7 @@ export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
 };
 
 /**
- * Check if the current user has exceeded the rate limit for a specific action
- */
-export const checkRateLimit = async (params: RateLimitParams): Promise<boolean> => {
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError) {
-      console.error('Error getting user for rate limit check:', userError);
-      return false;
-    }
-    
-    if (!user) {
-      console.log('No user found for rate limiting');
-      return false; // Block if no user
-    }
-
-    const limit = params.limit || 10;
-    const windowMinutes = params.windowMinutes || 60;
-    const now = new Date();
-    const windowStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      now.getHours(),
-      Math.floor(now.getMinutes() / windowMinutes) * windowMinutes
-    );
-
-    // Get current count for this user, action, and window
-    const { data: existingLimit, error } = await supabase
-      .from('rate_limits')
-      .select('count')
-      .eq('action', params.action)
-      .eq('user_id', user.id)
-      .eq('window_start', windowStart.toISOString())
-      .single();
-
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-      console.error('Error checking rate limit:', error);
-      return false; // Default to blocking if there's an error
-    }
-
-    const currentCount = existingLimit?.count || 0;
-
-    // Check if limit exceeded
-    if (currentCount >= limit) {
-      return false;
-    }
-
-    // Update or insert rate limit record
-    const { error: upsertError } = await supabase
-      .from('rate_limits')
-      .upsert({
-        user_id: user.id,
-        action: params.action,
-        count: currentCount + 1,
-        window_start: windowStart.toISOString(),
-      }, {
-        onConflict: 'user_id,action,window_start'
-      });
-
-    if (upsertError) {
-      console.error('Error updating rate limit:', upsertError);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Unexpected error checking rate limit:', error);
-    return false; // Default to blocking if there's an error
-  }
-};
-
-/**
- * Validate user input using client-side validation
+ * Client-side input validation
  */
 export const validateInput = async (params: ValidationParams): Promise<boolean> => {
   try {
@@ -164,47 +83,15 @@ export const validateInput = async (params: ValidationParams): Promise<boolean> 
 };
 
 /**
- * Enhanced security wrapper for sensitive operations
+ * Simple security wrapper for operations
  */
 export const withSecurityChecks = async <T>(
   operation: () => Promise<T>,
   options: {
-    rateLimitAction?: string;
     auditAction?: string;
     auditTableName?: string;
-    rateLimitConfig?: { limit: number; windowMinutes: number };
   }
 ): Promise<T> => {
-  // Rate limiting check (only if user is authenticated)
-  if (options.rateLimitAction) {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) { // Only check rate limits for authenticated users
-        const isAllowed = await checkRateLimit({
-          action: options.rateLimitAction,
-          limit: options.rateLimitConfig?.limit,
-          windowMinutes: options.rateLimitConfig?.windowMinutes,
-        });
-
-        if (!isAllowed) {
-          toast({
-            variant: 'destructive',
-            title: 'Rate limit exceeded',
-            description: 'You are performing this action too frequently. Please wait before trying again.',
-          });
-          throw new Error('Rate limit exceeded');
-        }
-      }
-    } catch (error) {
-      if (error instanceof Error && error.message === 'Rate limit exceeded') {
-        throw error;
-      }
-      // Log rate limit check error but don't block the operation
-      console.error('Rate limit check failed:', error);
-    }
-  }
-
   try {
     const result = await operation();
 
@@ -248,15 +135,3 @@ export const sanitizeInput = (input: string): string => {
     .replace(/on\w+\s*=/gi, '')
     .trim();
 };
-
-/**
- * Rate limit constants for different actions
- */
-export const RATE_LIMITS = {
-  BANNER_CREATE: { action: 'banner_create', limit: 5, windowMinutes: 60 },
-  BANNER_UPDATE: { action: 'banner_update', limit: 10, windowMinutes: 60 },
-  BANNER_DELETE: { action: 'banner_delete', limit: 3, windowMinutes: 60 },
-  MEDIA_UPLOAD: { action: 'media_upload', limit: 20, windowMinutes: 60 },
-  MEDIA_DELETE: { action: 'media_delete', limit: 10, windowMinutes: 60 },
-  NOTIFICATION_SEND: { action: 'notification_send', limit: 50, windowMinutes: 60 },
-} as const;

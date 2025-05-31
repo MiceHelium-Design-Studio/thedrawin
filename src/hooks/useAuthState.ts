@@ -18,7 +18,7 @@ export const useAuthState = () => {
         console.warn('Auth initialization timeout - setting loading to false');
         setLoading(false);
       }
-    }, 10000); // 10 second timeout
+    }, 8000); // Reduced timeout
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

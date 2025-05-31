@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
 
 export const ensureFullAdmin = async () => {
   try {
@@ -9,7 +8,7 @@ export const ensureFullAdmin = async () => {
     
     // Add timeout to prevent hanging
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Admin setup timeout')), 5000);
+      setTimeout(() => reject(new Error('Admin setup timeout')), 3000); // Reduced timeout
     });
     
     const adminCheckPromise = (async () => {
