@@ -8,10 +8,12 @@ import { NotificationProvider } from './context/NotificationContext';
 import { BackgroundProvider } from './context/BackgroundContext';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
+import Draws from './pages/Draws';
 import Winners from './pages/Winners';
 import ProfilePage from './pages/ProfilePage';
 import Auth from './pages/Auth';
 import Admin from './pages/Admin';
+import NotificationsPage from './pages/NotificationsPage';
 import AdminIndexUsage from './pages/AdminIndexUsage';
 
 const queryClient = new QueryClient();
@@ -27,7 +29,9 @@ function App() {
                 <Layout>
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/draws" element={<Draws />} />
                     <Route path="/winners" element={<Winners />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/admin" element={<Admin />} />
