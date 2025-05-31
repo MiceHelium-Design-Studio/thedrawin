@@ -62,6 +62,7 @@ export const RATE_LIMITS = {
 
 /**
  * Log an audit event to the database using the secure function
+ * Note: The log_audit_event function has a fixed search path for security
  */
 export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
   try {
@@ -91,6 +92,7 @@ export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
 
 /**
  * Check rate limit using the secure database function
+ * Note: The check_rate_limit function has a fixed search path for security
  */
 export const checkRateLimit = async (action: string, limit?: number, windowMinutes?: number): Promise<boolean> => {
   try {
@@ -114,6 +116,7 @@ export const checkRateLimit = async (action: string, limit?: number, windowMinut
 
 /**
  * Server-side input validation using the secure database function
+ * Note: The validate_input function has a fixed search path for security
  */
 export const validateInput = async (params: ValidationParams): Promise<boolean> => {
   try {
