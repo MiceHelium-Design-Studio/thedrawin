@@ -126,39 +126,6 @@ export type Database = {
         }
         Relationships: []
       }
-      index_usage_log: {
-        Row: {
-          id: string
-          idx_scan: number | null
-          idx_tup_fetch: number | null
-          idx_tup_read: number | null
-          index_name: string
-          log_time: string | null
-          schema_name: string
-          table_name: string
-        }
-        Insert: {
-          id?: string
-          idx_scan?: number | null
-          idx_tup_fetch?: number | null
-          idx_tup_read?: number | null
-          index_name: string
-          log_time?: string | null
-          schema_name: string
-          table_name: string
-        }
-        Update: {
-          id?: string
-          idx_scan?: number | null
-          idx_tup_fetch?: number | null
-          idx_tup_read?: number | null
-          index_name?: string
-          log_time?: string | null
-          schema_name?: string
-          table_name?: string
-        }
-        Relationships: []
-      }
       media_items: {
         Row: {
           id: string
