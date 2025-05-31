@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart, Settings, Users, Image, ListTodo, 
-  BellRing, PanelRight, Layout, Medal, Bell
+  BellRing, PanelRight, Layout, Medal, Bell, Database
 } from 'lucide-react';
 
 interface AdminSidebarMenuProps {
@@ -11,71 +10,81 @@ interface AdminSidebarMenuProps {
 }
 
 const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ activeTab }) => {
+  const menuItems = [
+    {
+      id: "draws",
+      label: "Draws",
+      icon: Medal,
+      description: "Draws statistics"
+    },
+    {
+      id: "banners",
+      label: "Banners",
+      icon: Layout,
+      description: "Banners statistics"
+    },
+    {
+      id: "users",
+      label: "Users",
+      icon: Users,
+      description: "Users statistics"
+    },
+    {
+      id: "notifications",
+      label: "Push Notifications",
+      icon: BellRing,
+      description: "Push Notifications statistics"
+    },
+    {
+      id: "alerts",
+      label: "Alerts",
+      icon: Bell,
+      description: "Alerts statistics"
+    },
+    {
+      id: "stats",
+      label: "Statistics",
+      icon: BarChart,
+      description: "Statistics statistics"
+    },
+    {
+      id: "media",
+      label: "Media",
+      icon: Image,
+      description: "Media statistics"
+    },
+    {
+      id: "todos",
+      label: "Tasks",
+      icon: ListTodo,
+      description: "Tasks statistics"
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      description: "Settings statistics"
+    },
+    {
+      id: "index-usage",
+      label: "Index Usage",
+      icon: Database,
+      description: "Database index statistics"
+    }
+  ];
+
   return (
     <TabsList className="flex flex-col items-start space-y-2.5 w-full bg-transparent border-0 pt-1 h-auto">
-      <TabsTrigger 
-        value="draws" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Medal className="h-4 w-4 mr-2.5" />
-        Draws
-      </TabsTrigger>
-      <TabsTrigger 
-        value="banners" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Layout className="h-4 w-4 mr-2.5" />
-        Banners
-      </TabsTrigger>
-      <TabsTrigger 
-        value="users" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Users className="h-4 w-4 mr-2.5" />
-        Users
-      </TabsTrigger>
-      <TabsTrigger 
-        value="notifications" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <BellRing className="h-4 w-4 mr-2.5" />
-        Push Notifications
-      </TabsTrigger>
-      <TabsTrigger 
-        value="alerts" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Bell className="h-4 w-4 mr-2.5" />
-        Alerts
-      </TabsTrigger>
-      <TabsTrigger 
-        value="stats" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <BarChart className="h-4 w-4 mr-2.5" />
-        Statistics
-      </TabsTrigger>
-      <TabsTrigger 
-        value="media" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Image className="h-4 w-4 mr-2.5" />
-        Media
-      </TabsTrigger>
-      <TabsTrigger 
-        value="todos" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <ListTodo className="h-4 w-4 mr-2.5" />
-        Tasks
-      </TabsTrigger>
-      <TabsTrigger 
-        value="settings" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Settings className="h-4 w-4 mr-2.5" />
-        Settings
-      </TabsTrigger>
+      {menuItems.map((item) => (
+        <TabsTrigger 
+          key={item.id} 
+          value={item.id} 
+          className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
+        >
+          {item.icon && <item.icon className="h-4 w-4 mr-2.5" />}
+          {item.label}
+        </TabsTrigger>
+      ))}
     </TabsList>
   );
 };

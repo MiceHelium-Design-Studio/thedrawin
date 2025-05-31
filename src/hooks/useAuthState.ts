@@ -19,7 +19,7 @@ export const useAuthState = () => {
         console.warn('Auth initialization timeout - setting loading to false');
         setLoading(false);
       }
-    }, 8000);
+    }, 5000); // Reduced from 8000 to 5000
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -32,15 +32,24 @@ export const useAuthState = () => {
           if (session?.user) {
             console.log('Processing auth session for user:', session.user.id);
             
-            // For new signups, wait a bit longer for the trigger to complete
+            // For new signups, wait a bit for the trigger to complete
             if (event === 'SIGNED_UP' as AuthChangeEvent) {
               console.log('New signup detected, waiting for profile creation...');
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              await new Promise(resolve => setTimeout(resolve, 1500));
             }
             
-            // Try to fetch the user profile
-            let userProfile = await fetchUser(session.user.id);
-            console.log('Fetched user profile:', userProfile);
+            // Try to fetch the user profile with shorter timeout
+            let userProfile: User | null = null;
+            try {
+              userProfile = await Promise.race([
+                fetchUser(session.user.id),
+                new Promise<null>((_, reject) => 
+                  setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
+                )
+              ]);
+            } catch (error) {
+              console.log('Profile fetch failed or timed out:', error);
+            }
             
             if (userProfile && isSubscribed) {
               console.log('Setting user state:', userProfile.id);
@@ -103,8 +112,18 @@ export const useAuthState = () => {
         console.log('Initial session check:', data.session?.user?.id);
         
         if (data.session?.user && isSubscribed) {
-          // Try to fetch existing profile first
-          let userProfile = await fetchUser(data.session.user.id);
+          // Try to fetch existing profile with timeout
+          let userProfile: User | null = null;
+          try {
+            userProfile = await Promise.race([
+              fetchUser(data.session.user.id),
+              new Promise<null>((_, reject) => 
+                setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
+              )
+            ]);
+          } catch (error) {
+            console.log('Initial profile fetch failed or timed out:', error);
+          }
           
           if (userProfile) {
             console.log('Initialization: Setting user from session');
