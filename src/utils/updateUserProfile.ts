@@ -13,8 +13,11 @@ export async function updateUserProfile({ full_name, avatar_url }: UpdateProfile
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
+    console.error("User not authenticated:", authError);
     throw new Error("User not authenticated");
   }
+
+  console.log('Starting profile update for user:', user.id);
 
   const updateData: any = {};
   
@@ -26,25 +29,23 @@ export async function updateUserProfile({ full_name, avatar_url }: UpdateProfile
     updateData.avatar_url = avatar_url;
   }
 
-  // Ensure email is set
-  if (!updateData.email && user.email) {
-    updateData.email = user.email;
-  }
+  // Ensure required fields are set for upsert
+  updateData.id = user.id;
+  updateData.email = user.email || '';
 
-  console.log('Updating user profile:', updateData);
+  console.log('Upserting profile data:', updateData);
 
   const { error } = await supabase
     .from('profiles')
-    .upsert({
-      id: user.id,
-      ...updateData
+    .upsert(updateData, {
+      onConflict: 'id'
     });
 
   if (error) {
-    console.error("Error updating profile:", error.message);
+    console.error("Error upserting profile:", error.message, error.details);
     throw error;
   }
 
-  console.log('Profile updated successfully');
+  console.log('Profile upserted successfully for user:', user.id);
   return true;
 }
