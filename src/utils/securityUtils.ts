@@ -33,10 +33,30 @@ export const RATE_LIMITS = {
     limit: 5,
     windowMinutes: 30
   },
+  BANNER_CREATE: {
+    action: 'banner_create',
+    limit: 5,
+    windowMinutes: 30
+  },
+  BANNER_UPDATE: {
+    action: 'banner_update',
+    limit: 10,
+    windowMinutes: 30
+  },
+  BANNER_DELETE: {
+    action: 'banner_delete',
+    limit: 5,
+    windowMinutes: 30
+  },
   MEDIA_UPLOAD: {
     action: 'media_upload',
     limit: 20,
     windowMinutes: 60
+  },
+  MEDIA_DELETE: {
+    action: 'media_delete',
+    limit: 10,
+    windowMinutes: 30
   }
 };
 
@@ -66,6 +86,29 @@ export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
     }
   } catch (error) {
     console.error('Unexpected error logging audit event:', error);
+  }
+};
+
+/**
+ * Check rate limit using the secure database function
+ */
+export const checkRateLimit = async (action: string, limit?: number, windowMinutes?: number): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.rpc('check_rate_limit', {
+      p_action: action,
+      p_limit: limit || 10,
+      p_window_minutes: windowMinutes || 60
+    });
+
+    if (error) {
+      console.error('Error checking rate limit:', error);
+      return false; // Default to not allowing if there's an error
+    }
+
+    return data as boolean;
+  } catch (error) {
+    console.error('Unexpected error checking rate limit:', error);
+    return false;
   }
 };
 
@@ -107,16 +150,31 @@ export const validateInput = async (params: ValidationParams): Promise<boolean> 
 };
 
 /**
- * Simple security wrapper for operations
+ * Security wrapper for operations with rate limiting and audit logging
  */
 export const withSecurityChecks = async <T>(
   operation: () => Promise<T>,
   options: {
     auditAction?: string;
     auditTableName?: string;
+    rateLimitAction?: string;
+    rateLimitConfig?: RateLimitConfig;
   }
 ): Promise<T> => {
   try {
+    // Check rate limit if configured
+    if (options.rateLimitAction && options.rateLimitConfig) {
+      const isAllowed = await checkRateLimit(
+        options.rateLimitAction,
+        options.rateLimitConfig.limit,
+        options.rateLimitConfig.windowMinutes
+      );
+      
+      if (!isAllowed) {
+        throw new Error('Rate limit exceeded. Please try again later.');
+      }
+    }
+
     const result = await operation();
 
     // Audit logging for successful operations (only if user is authenticated)
