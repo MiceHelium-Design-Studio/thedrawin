@@ -12,6 +12,11 @@ export const fetchUser = async (userId: string): Promise<User | null> => {
       .single();
 
     if (error) {
+      // If profile doesn't exist, that's not necessarily an error
+      if (error.code === 'PGRST116') {
+        console.log('User profile not found, will create one');
+        return null;
+      }
       console.error('Error fetching user profile:', error);
       return null;
     }
@@ -26,7 +31,7 @@ export const fetchUser = async (userId: string): Promise<User | null> => {
       avatar: data.avatar || undefined,
       avatar_url: data.avatar_url || undefined,
       wallet: data.wallet || 0,
-      isAdmin: data.is_admin || false, // Convert is_admin to isAdmin
+      isAdmin: data.is_admin || false,
       createdAt: data.created_at
     };
   } catch (error) {
@@ -35,15 +40,49 @@ export const fetchUser = async (userId: string): Promise<User | null> => {
   }
 };
 
+export const createUserProfile = async (authUser: any): Promise<User | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert({
+        id: authUser.id,
+        email: authUser.email,
+        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+        avatar: authUser.user_metadata?.avatar_url || null,
+        wallet: 500, // Starting wallet amount
+        is_admin: authUser.email === 'raghidhilal@gmail.com' // Special admin case
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating user profile:', error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      email: data.email,
+      name: data.name || undefined,
+      avatar: data.avatar || undefined,
+      avatar_url: data.avatar_url || undefined,
+      wallet: data.wallet || 0,
+      isAdmin: data.is_admin || false,
+      createdAt: data.created_at
+    };
+  } catch (error) {
+    console.error('Unexpected error in createUserProfile:', error);
+    return null;
+  }
+};
+
 export const updateUserProfile = async (userId: string, data: Partial<User>): Promise<boolean> => {
   try {
-    // Update profile data including the new avatar_url field if present
     const updateData: any = {
       name: data.name,
       avatar: data.avatar,
     };
     
-    // Only add avatar_url if it's provided in the update data
     if (data.avatar_url) {
       updateData.avatar_url = data.avatar_url;
     }
@@ -92,7 +131,6 @@ export const addUserFunds = async (userId: string, amount: number): Promise<bool
 
 export const updateUserAdminStatus = async (email: string, isAdmin: boolean): Promise<boolean> => {
   try {
-    // Note: We need to map isAdmin to is_admin when updating the database
     const { data, error } = await supabase.rpc('update_user_admin_status', {
       user_email: email,
       is_admin_status: isAdmin
@@ -108,16 +146,15 @@ export const updateUserAdminStatus = async (email: string, isAdmin: boolean): Pr
 
 export const createDemoUser = (session: any): User => {
   const email = session.user.email || '';
-  const isFullAdmin = email === 'raghidhilal@gmail.com'; // Special case for this email
+  const isFullAdmin = email === 'raghidhilal@gmail.com';
   
-  // FOR DEMO: Creating minimal user with admin rights
   return {
     id: session.user.id,
     email: email,
     name: session.user?.user_metadata?.name || 'Demo User',
-    wallet: 500, // Give some funds to test
-    isAdmin: isFullAdmin || true, // Make user admin
+    wallet: 500,
+    isAdmin: isFullAdmin || true,
     avatar: session.user?.user_metadata?.avatar || null,
-    avatar_url: null // Initialize the new field
+    avatar_url: null
   };
 };

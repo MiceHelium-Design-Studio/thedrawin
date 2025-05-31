@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { updateUserProfile, addUserFunds, updateUserAdminStatus } from '@/utils/authUtils';
+import { updateUserProfile, addUserFunds, updateUserAdminStatus, fetchUser, createUserProfile } from '@/utils/authUtils';
 
 export const useAuthActions = (
   user: User | null,

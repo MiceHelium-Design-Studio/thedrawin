@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
-import { createDemoUser } from '@/utils/authUtils';
+import { fetchUser, createUserProfile } from '@/utils/authUtils';
 
 export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -13,18 +13,25 @@ export const useAuthState = () => {
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log("Auth state change event:", event);
         
         if (!isSubscribed) return;
         
         if (session?.user) {
-          // Use setTimeout to prevent potential recursion
-          setTimeout(() => {
-            if (!isSubscribed) return;
-            setUser(createDemoUser(session));
+          // Try to fetch existing profile first
+          let userProfile = await fetchUser(session.user.id);
+          
+          // If no profile exists, create one
+          if (!userProfile) {
+            console.log('Creating new user profile...');
+            userProfile = await createUserProfile(session.user);
+          }
+          
+          if (userProfile && isSubscribed) {
+            setUser(userProfile);
             setLoading(false);
-          }, 0);
+          }
         } else {
           if (isSubscribed) {
             setUser(null);
@@ -40,7 +47,18 @@ export const useAuthState = () => {
         const { data } = await supabase.auth.getSession();
         
         if (data.session?.user && isSubscribed) {
-          setUser(createDemoUser(data.session));
+          // Try to fetch existing profile first
+          let userProfile = await fetchUser(data.session.user.id);
+          
+          // If no profile exists, create one
+          if (!userProfile) {
+            console.log('Creating new user profile during initialization...');
+            userProfile = await createUserProfile(data.session.user);
+          }
+          
+          if (userProfile) {
+            setUser(userProfile);
+          }
           setLoading(false);
         } else if (isSubscribed) {
           setUser(null);
