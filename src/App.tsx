@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from 'react-query';
 import { AuthProvider } from './context/AuthContext';
 import { DrawProvider } from './context/DrawContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -16,11 +15,9 @@ import Admin from './pages/Admin';
 import NotificationsPage from './pages/NotificationsPage';
 import AdminIndexUsage from './pages/AdminIndexUsage';
 
-const queryClient = new QueryClient();
-
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClient>
       <Router>
         <AuthProvider>
           <DrawProvider>
@@ -31,10 +28,10 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/draws" element={<Draws />} />
                     <Route path="/winners" element={<Winners />} />
-                    <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/admin" element={<Admin />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/admin/index-usage" element={<AdminIndexUsage />} />
                   </Routes>
                 </Layout>
@@ -43,7 +40,7 @@ function App() {
           </DrawProvider>
         </AuthProvider>
       </Router>
-    </QueryClientProvider>
+    </QueryClient>
   );
 }
 

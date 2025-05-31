@@ -2,8 +2,9 @@ import React from 'react';
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart, Settings, Users, Image, ListTodo, 
-  BellRing, PanelRight, Layout, Medal, Bell, Database
+  BellRing, PanelRight, Layout, Medal, Bell
 } from 'lucide-react';
+import Database from 'lucide-react/dist/icons/database';
 
 interface AdminSidebarMenuProps {
   activeTab?: string;
