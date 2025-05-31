@@ -2,6 +2,7 @@
 import { Notification } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { withSecurityChecks, logAuditEvent, RATE_LIMITS, sanitizeInput, validateInput } from '@/utils/securityUtils';
 
 export const useNotificationFunctions = (
   setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>,
@@ -48,38 +49,114 @@ export const useNotificationFunctions = (
   };
 
   const markNotificationAsRead = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', id);
+    return withSecurityChecks(
+      async () => {
+        const notificationToUpdate = notifications.find(n => n.id === id);
+        
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('id', id);
 
-      if (error) {
-        console.error('Error marking notification as read:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to mark notification as read',
-          description: 'There was an error marking the notification as read. Please try again later.'
-        });
-        throw error;
-      } else {
-        setNotifications(notifications.map(notification =>
-          notification.id === id ? { ...notification, read: true } : notification
-        ));
+        if (error) {
+          console.error('Error marking notification as read:', error);
+          toast({
+            variant: 'destructive',
+            title: 'Failed to mark notification as read',
+            description: 'There was an error marking the notification as read. Please try again later.'
+          });
+          throw error;
+        } else {
+          setNotifications(notifications.map(notification =>
+            notification.id === id ? { ...notification, read: true } : notification
+          ));
+          
+          // Log the update for audit purposes
+          await logAuditEvent({
+            action: 'notification_mark_read',
+            tableName: 'notifications',
+            recordId: id,
+            oldValues: notificationToUpdate,
+            newValues: { ...notificationToUpdate, read: true },
+          });
+        }
+      },
+      {
+        auditAction: 'notification_mark_read',
+        auditTableName: 'notifications',
       }
-    } catch (err) {
-      console.error('Unexpected error marking notification as read:', err);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to mark notification as read',
-        description: 'An unexpected error occurred while marking the notification as read.'
-      });
-      throw err;
-    }
+    );
+  };
+
+  const sendNotification = async (
+    userId: string, 
+    message: string, 
+    type: 'win' | 'draw' | 'system' | 'promotion'
+  ) => {
+    return withSecurityChecks(
+      async () => {
+        // Validate and sanitize the message
+        const sanitizedMessage = sanitizeInput(message);
+        const isMessageValid = await validateInput({ 
+          input: sanitizedMessage, 
+          type: 'no_script', 
+          maxLength: 500 
+        });
+        
+        if (!isMessageValid) {
+          throw new Error('Invalid notification message format');
+        }
+
+        const { error } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: userId,
+            message: sanitizedMessage,
+            type: type,
+            read: false
+          });
+
+        if (error) {
+          console.error('Error sending notification:', error);
+          toast({
+            variant: 'destructive',
+            title: 'Failed to send notification',
+            description: 'There was an error sending the notification.'
+          });
+          throw error;
+        }
+
+        // Log the notification creation for audit purposes
+        await logAuditEvent({
+          action: 'notification_send',
+          tableName: 'notifications',
+          newValues: {
+            user_id: userId,
+            message: sanitizedMessage,
+            type: type,
+          },
+        });
+
+        toast({
+          title: 'Notification sent',
+          description: 'The notification has been sent successfully.'
+        });
+      },
+      {
+        rateLimitAction: RATE_LIMITS.NOTIFICATION_SEND.action,
+        rateLimitConfig: { 
+          limit: RATE_LIMITS.NOTIFICATION_SEND.limit, 
+          windowMinutes: RATE_LIMITS.NOTIFICATION_SEND.windowMinutes 
+        },
+        auditAction: 'notification_send',
+        auditTableName: 'notifications',
+      }
+    );
   };
 
   return {
     fetchNotifications,
-    markNotificationAsRead
+    markNotificationAsRead,
+    sendNotification
   };
 };
