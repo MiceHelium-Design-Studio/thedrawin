@@ -19,11 +19,16 @@ export async function updateUserProfile({ full_name, avatar_url }: UpdateProfile
   const updateData: any = {};
   
   if (full_name !== undefined) {
-    updateData.name = full_name; // Map to the 'name' column in profiles table
+    updateData.name = full_name;
   }
   
   if (avatar_url !== undefined) {
     updateData.avatar_url = avatar_url;
+  }
+
+  // Also update email if it's not already set
+  if (!updateData.email) {
+    updateData.email = user.email;
   }
 
   const { error } = await supabase

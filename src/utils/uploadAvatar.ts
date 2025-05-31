@@ -3,11 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function uploadAvatar(file: File, userId: string): Promise<string> {
   const fileExt = file.name.split('.').pop();
-  const fileName = `${userId}.${fileExt}`;
-  const filePath = fileName;
+  const fileName = `${userId}-${Date.now()}.${fileExt}`;
+  const filePath = `${userId}/${fileName}`;
 
   const { error: uploadError } = await supabase.storage
-    .from('profile_images') // using underscore to match existing pattern
+    .from('profile_images')
     .upload(filePath, file, {
       upsert: true,
       contentType: file.type,
