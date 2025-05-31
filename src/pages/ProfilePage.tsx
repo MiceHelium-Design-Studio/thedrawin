@@ -12,8 +12,8 @@ import { Camera, User, Mail, Save, X } from 'lucide-react';
 
 interface UserProfile {
   id: string;
-  username: string;
-  profile_image_url: string | null;
+  name: string;
+  avatar_url: string | null;
   email: string;
 }
 
@@ -29,7 +29,7 @@ const ProfilePage: React.FC = () => {
   const [uploading, setUploading] = useState(false);
 
   // Form state
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
 
   useEffect(() => {
@@ -59,8 +59,9 @@ const ProfilePage: React.FC = () => {
       if (!profileData) {
         const newProfile = {
           id: user.id,
-          username: user.name || user.email || 'User',
-          profile_image_url: user.avatar_url || null,
+          name: user.name || user.email || 'User',
+          avatar_url: user.avatar_url || null,
+          email: user.email || ''
         };
 
         const { data: createdProfile, error: createError } = await supabase
@@ -83,7 +84,7 @@ const ProfilePage: React.FC = () => {
       }
 
       // Set form state
-      setUsername(profileData?.username || user.name || user.email || 'User');
+      setName(profileData?.name || user.name || user.email || 'User');
       setEmail(user.email || '');
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -168,13 +169,13 @@ const ProfilePage: React.FC = () => {
     try {
       setSaving(true);
 
-      let imageUrl = profile.profile_image_url;
+      let avatarUrl = profile.avatar_url;
 
       // Upload new image if one was selected
       if (imageFile) {
         const uploadedUrl = await uploadImage();
         if (uploadedUrl) {
-          imageUrl = uploadedUrl;
+          avatarUrl = uploadedUrl;
         }
       }
 
@@ -182,8 +183,8 @@ const ProfilePage: React.FC = () => {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          username,
-          profile_image_url: imageUrl,
+          name,
+          avatar_url: avatarUrl,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
@@ -202,8 +203,8 @@ const ProfilePage: React.FC = () => {
       // Update local state
       setProfile({
         ...profile,
-        username,
-        profile_image_url: imageUrl,
+        name,
+        avatar_url: avatarUrl,
         email
       });
 
@@ -231,7 +232,7 @@ const ProfilePage: React.FC = () => {
 
   const handleCancel = () => {
     if (profile) {
-      setUsername(profile.username);
+      setName(profile.name);
       setEmail(profile.email);
     }
     setImageFile(null);
@@ -279,7 +280,7 @@ const ProfilePage: React.FC = () => {
               <div className="relative group">
                 <Avatar className="w-32 h-32 border-4 border-gray-200 transition-all duration-200 group-hover:border-blue-300">
                   <AvatarImage 
-                    src={imagePreview || profile.profile_image_url || ''} 
+                    src={imagePreview || profile.avatar_url || ''} 
                     alt="Profile" 
                     className="object-cover"
                   />
@@ -318,15 +319,15 @@ const ProfilePage: React.FC = () => {
             {/* Form Fields */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-gray-700 font-medium flex items-center gap-2">
+                <Label htmlFor="name" className="text-gray-700 font-medium flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  Username
+                  Name
                 </Label>
                 <Input
-                  id="username"
+                  id="name"
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   disabled={!isEditing}
                   className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
                 />
