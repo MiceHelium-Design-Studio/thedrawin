@@ -33,7 +33,7 @@ export const useAuthState = () => {
             console.log('Processing auth session for user:', session.user.id);
             
             // For new signups, wait a bit longer for the trigger to complete
-            if (event === 'SIGNED_UP') {
+            if (event === 'SIGNED_UP' as AuthChangeEvent) {
               console.log('New signup detected, waiting for profile creation...');
               await new Promise(resolve => setTimeout(resolve, 2000));
             }
