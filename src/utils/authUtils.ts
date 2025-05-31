@@ -1,10 +1,10 @@
-
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 export const fetchUser = async (userId: string): Promise<User | null> => {
   try {
+    console.log('Fetching user profile for:', userId);
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -21,8 +21,12 @@ export const fetchUser = async (userId: string): Promise<User | null> => {
       return null;
     }
 
-    if (!data) return null;
+    if (!data) {
+      console.log('No profile data returned');
+      return null;
+    }
 
+    console.log('Successfully fetched user profile:', data.id);
     // Map the database fields to our User type
     return {
       id: data.id,
@@ -42,24 +46,36 @@ export const fetchUser = async (userId: string): Promise<User | null> => {
 
 export const createUserProfile = async (authUser: any): Promise<User | null> => {
   try {
+    console.log('Creating user profile for:', authUser.id, authUser.email);
+    
+    const profileData = {
+      id: authUser.id,
+      email: authUser.email,
+      name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+      avatar: authUser.user_metadata?.avatar_url || null,
+      wallet: 500, // Starting wallet amount
+      is_admin: authUser.email === 'raghidhilal@gmail.com' // Special admin case
+    };
+
+    console.log('Profile data to insert:', profileData);
+
     const { data, error } = await supabase
       .from('profiles')
-      .insert({
-        id: authUser.id,
-        email: authUser.email,
-        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
-        avatar: authUser.user_metadata?.avatar_url || null,
-        wallet: 500, // Starting wallet amount
-        is_admin: authUser.email === 'raghidhilal@gmail.com' // Special admin case
-      })
+      .insert(profileData)
       .select()
       .single();
 
     if (error) {
+      // Check if the error is due to duplicate key (user already exists)
+      if (error.code === '23505') {
+        console.log('User profile already exists, fetching existing profile');
+        return await fetchUser(authUser.id);
+      }
       console.error('Error creating user profile:', error);
       return null;
     }
 
+    console.log('Successfully created user profile:', data.id);
     return {
       id: data.id,
       email: data.email,
@@ -72,7 +88,10 @@ export const createUserProfile = async (authUser: any): Promise<User | null> => 
     };
   } catch (error) {
     console.error('Unexpected error in createUserProfile:', error);
-    return null;
+    
+    // If profile creation fails, try to fetch existing profile
+    console.log('Profile creation failed, attempting to fetch existing profile');
+    return await fetchUser(authUser.id);
   }
 };
 

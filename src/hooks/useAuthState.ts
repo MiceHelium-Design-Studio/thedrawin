@@ -23,33 +23,68 @@ export const useAuthState = () => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state change event:", event);
+        console.log("Auth state change event:", event, "Session user:", session?.user?.id);
         
         if (!isSubscribed) return;
         
         try {
           if (session?.user) {
+            console.log('Processing auth session for user:', session.user.id);
+            
             // Try to fetch existing profile first
             let userProfile = await fetchUser(session.user.id);
+            console.log('Fetched user profile:', userProfile);
             
             // If no profile exists, create one
             if (!userProfile) {
-              console.log('Creating new user profile...');
+              console.log('Creating new user profile for:', session.user.id);
               userProfile = await createUserProfile(session.user);
+              console.log('Created user profile:', userProfile);
             }
             
             if (userProfile && isSubscribed) {
+              console.log('Setting user state:', userProfile.id);
               setUser(userProfile);
+            } else if (isSubscribed) {
+              console.error('Failed to get or create user profile');
+              // If we can't create a profile, at least set a basic user object
+              const basicUser: User = {
+                id: session.user.id,
+                email: session.user.email || '',
+                name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                wallet: 500,
+                isAdmin: session.user.email === 'raghidhilal@gmail.com',
+                avatar: session.user.user_metadata?.avatar_url || null,
+                avatar_url: session.user.user_metadata?.avatar_url || null
+              };
+              setUser(basicUser);
+              console.log('Set basic user object:', basicUser.id);
             }
           } else {
             if (isSubscribed) {
+              console.log('No session, setting user to null');
               setUser(null);
             }
           }
         } catch (error) {
           console.error('Error in auth state change handler:', error);
           if (isSubscribed) {
-            setUser(null);
+            // Even on error, try to set a basic user if we have a session
+            if (session?.user) {
+              const basicUser: User = {
+                id: session.user.id,
+                email: session.user.email || '',
+                name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                wallet: 500,
+                isAdmin: session.user.email === 'raghidhilal@gmail.com',
+                avatar: session.user.user_metadata?.avatar_url || null,
+                avatar_url: session.user.user_metadata?.avatar_url || null
+              };
+              setUser(basicUser);
+              console.log('Set fallback user object due to error:', basicUser.id);
+            } else {
+              setUser(null);
+            }
           }
         } finally {
           if (isSubscribed) {
@@ -63,7 +98,9 @@ export const useAuthState = () => {
     // Check for existing session
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth - checking for existing session');
         const { data } = await supabase.auth.getSession();
+        console.log('Initial session check:', data.session?.user?.id);
         
         if (data.session?.user && isSubscribed) {
           // Try to fetch existing profile first
@@ -76,9 +113,24 @@ export const useAuthState = () => {
           }
           
           if (userProfile) {
+            console.log('Initialization: Setting user from session');
             setUser(userProfile);
+          } else {
+            // Fallback to basic user object
+            const basicUser: User = {
+              id: data.session.user.id,
+              email: data.session.user.email || '',
+              name: data.session.user.user_metadata?.name || data.session.user.email?.split('@')[0] || 'User',
+              wallet: 500,
+              isAdmin: data.session.user.email === 'raghidhilal@gmail.com',
+              avatar: data.session.user.user_metadata?.avatar_url || null,
+              avatar_url: data.session.user.user_metadata?.avatar_url || null
+            };
+            setUser(basicUser);
+            console.log('Initialization: Set fallback user object');
           }
         } else if (isSubscribed) {
+          console.log('Initialization: No session found');
           setUser(null);
         }
       } catch (error) {
