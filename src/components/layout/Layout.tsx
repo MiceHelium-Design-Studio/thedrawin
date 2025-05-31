@@ -21,9 +21,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isAdminPage = location.pathname === '/admin' || location.pathname.startsWith('/admin/');
 
   console.log("Layout rendering, user:", user?.id, "isAdmin:", user?.isAdmin, "isAuthPage:", isAuthPage);
+  console.log("Auth loading:", authLoading, "User exists:", !!user);
+  console.log("Current pathname:", location.pathname);
+  console.log("IsAuthPage:", isAuthPage, "IsAdminPage:", isAdminPage);
 
   // Show auth page without navigation
   if (isAuthPage) {
+    console.log("Rendering auth page layout");
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
         <main className="flex-grow pattern-bg" role="main" aria-label="Main content">
@@ -35,6 +39,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // Show admin page without bottom navigation but check for admin access
   if (isAdminPage) {
+    console.log("Rendering admin page layout");
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
         <main className="flex-grow pattern-bg" role="main" aria-label="Main content">
@@ -46,6 +51,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // For all other pages, show navigation if user exists or if still loading (to prevent flash)
   const showNavigation = user || authLoading;
+  console.log("ShowNavigation:", showNavigation, "(user:", !!user, "|| authLoading:", authLoading, ")");
+  console.log("Will show bottom nav:", showNavigation && user);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
@@ -60,7 +67,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Bottom navbar - show if we have a user */}
       {showNavigation && user && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20">
+        <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20 z-50">
           <div className="grid grid-cols-5 h-16">
             <NavLink
               to="/"
