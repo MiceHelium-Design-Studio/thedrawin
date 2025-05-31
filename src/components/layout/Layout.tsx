@@ -18,14 +18,39 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   
   const unreadCount = notifications?.filter(n => !n.read)?.length || 0;
   const isAuthPage = location.pathname === '/auth';
-  const isAdminPage = location.pathname === '/admin';
+  const isAdminPage = location.pathname === '/admin' || location.pathname.startsWith('/admin/');
 
   console.log("Layout rendering, user:", user?.id, "isAdmin:", user?.isAdmin, "isAuthPage:", isAuthPage);
 
+  // Show auth page without navigation
+  if (isAuthPage) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
+        <main className="flex-grow pattern-bg" role="main" aria-label="Main content">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
+  // Show admin page without bottom navigation but check for admin access
+  if (isAdminPage) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
+        <main className="flex-grow pattern-bg" role="main" aria-label="Main content">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
+  // For all other pages, show navigation if user exists or if still loading (to prevent flash)
+  const showNavigation = user || authLoading;
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
-      {/* Top Navigation - show on all pages except auth and admin */}
-      {(!isAuthPage && !isAdminPage) && (user && !authLoading) && (
+      {/* Top Navigation - show if we have a user */}
+      {showNavigation && user && (
         <TopNavigation />
       )}
 
@@ -33,8 +58,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      {/* Bottom navbar - show on all pages except auth and admin */}
-      {(!isAuthPage && !isAdminPage) && (user && !authLoading) && (
+      {/* Bottom navbar - show if we have a user */}
+      {showNavigation && user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20">
           <div className="grid grid-cols-5 h-16">
             <NavLink
@@ -47,17 +72,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     : "text-white hover:text-gold"
                 )
               }
-              onClick={(e) => {
-                if (authLoading) {
-                  e.preventDefault();
-                  console.log("Navigation prevented during loading");
-                }
-              }}
             >
               <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/' && "bg-black-light/50")}>
                 <Home className="h-5 w-5 mb-1" />
               </div>
               <span>Home</span>
+            </NavLink>
+            
+            <NavLink
+              to="/draws"
+              className={({ isActive }) =>
+                cn(
+                  "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                  isActive
+                    ? "text-gold font-medium"
+                    : "text-white hover:text-gold"
+                )
+              }
+            >
+              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/draws' && "bg-black-light/50")}>
+                <Award className="h-5 w-5 mb-1" />
+              </div>
+              <span>Draws</span>
             </NavLink>
             
             <NavLink
@@ -115,7 +151,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
               <span>Profile</span>
             </NavLink>
-            
+
             {user?.isAdmin && (
               <NavLink
                 to="/admin"
