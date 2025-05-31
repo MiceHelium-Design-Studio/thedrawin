@@ -26,20 +26,25 @@ export async function updateUserProfile({ full_name, avatar_url }: UpdateProfile
     updateData.avatar_url = avatar_url;
   }
 
-  // Also update email if it's not already set
-  if (!updateData.email) {
+  // Also ensure email is set if it's not already there
+  if (!updateData.email && user.email) {
     updateData.email = user.email;
   }
 
+  console.log('Updating user profile:', updateData);
+
   const { error } = await supabase
     .from('profiles')
-    .update(updateData)
-    .eq('id', user.id);
+    .upsert({
+      id: user.id,
+      ...updateData
+    });
 
   if (error) {
     console.error("Error updating profile:", error.message);
     throw error;
   }
 
+  console.log('Profile updated successfully');
   return true;
 }

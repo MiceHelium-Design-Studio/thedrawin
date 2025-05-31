@@ -6,6 +6,8 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
   const fileName = `${userId}-${Date.now()}.${fileExt}`;
   const filePath = `${userId}/${fileName}`;
 
+  console.log('Uploading avatar to profile_images bucket:', filePath);
+
   const { error: uploadError } = await supabase.storage
     .from('profile_images')
     .upload(filePath, file, {
@@ -22,5 +24,6 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
     .from('profile_images')
     .getPublicUrl(filePath);
 
+  console.log('Avatar uploaded successfully:', data.publicUrl);
   return data.publicUrl;
 }
