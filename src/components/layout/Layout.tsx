@@ -68,7 +68,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Bottom navbar - show if we have a user */}
       {showNavigation && user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20 z-50">
-          <div className="grid grid-cols-5 h-16">
+          <div className={cn("grid h-16", user?.isAdmin ? "grid-cols-6" : "grid-cols-5")}>
             <NavLink
               to="/"
               className={({ isActive }) =>
