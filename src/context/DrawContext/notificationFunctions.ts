@@ -143,11 +143,6 @@ export const useNotificationFunctions = (
         });
       },
       {
-        rateLimitAction: RATE_LIMITS.NOTIFICATION_SEND.action,
-        rateLimitConfig: { 
-          limit: RATE_LIMITS.NOTIFICATION_SEND.limit, 
-          windowMinutes: RATE_LIMITS.NOTIFICATION_SEND.windowMinutes 
-        },
         auditAction: 'notification_send',
         auditTableName: 'notifications',
       }

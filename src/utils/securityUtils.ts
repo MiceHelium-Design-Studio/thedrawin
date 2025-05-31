@@ -16,6 +16,30 @@ export interface ValidationParams {
   maxLength?: number;
 }
 
+export interface RateLimitConfig {
+  limit: number;
+  windowMinutes: number;
+}
+
+// Rate limiting configuration constants
+export const RATE_LIMITS = {
+  NOTIFICATION_SEND: {
+    action: 'notification_send',
+    limit: 10,
+    windowMinutes: 60
+  },
+  BANNER_UPLOAD: {
+    action: 'banner_upload',
+    limit: 5,
+    windowMinutes: 30
+  },
+  MEDIA_UPLOAD: {
+    action: 'media_upload',
+    limit: 20,
+    windowMinutes: 60
+  }
+};
+
 /**
  * Log an audit event to the database using the secure function
  */
