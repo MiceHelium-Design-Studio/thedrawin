@@ -26,7 +26,7 @@ export async function updateUserProfile({ full_name, avatar_url }: UpdateProfile
     updateData.avatar_url = avatar_url;
   }
 
-  // Also ensure email is set if it's not already there
+  // Ensure email is set
   if (!updateData.email && user.email) {
     updateData.email = user.email;
   }

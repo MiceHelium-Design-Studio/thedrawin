@@ -9,6 +9,8 @@ import { updateUserProfile } from '@/utils/updateUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const CompleteProfileForm: React.FC = () => {
   const [fullName, setFullName] = useState('');
@@ -16,6 +18,8 @@ const CompleteProfileForm: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user, updateProfile } = useAuth();
+  const navigate = useNavigate();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
@@ -35,16 +39,16 @@ const CompleteProfileForm: React.FC = () => {
 
     try {
       const {
-        data: { user }
+        data: { user: authUser }
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (!authUser) {
         throw new Error('User not authenticated');
       }
 
       let avatarUrl = '';
       if (file) {
-        avatarUrl = await uploadAvatar(file, user.id);
+        avatarUrl = await uploadAvatar(file, authUser.id);
       }
 
       await updateUserProfile({
@@ -52,20 +56,21 @@ const CompleteProfileForm: React.FC = () => {
         avatar_url: avatarUrl,
       });
 
+      // Update the auth context with the new profile data
+      if (updateProfile) {
+        await updateProfile({
+          name: fullName,
+          avatar_url: avatarUrl
+        });
+      }
+
       toast({
         title: 'Profile completed!',
         description: 'Your profile has been set up successfully.',
       });
 
-      // Clear form after successful update
-      setFullName('');
-      setFile(null);
-      setPreviewUrl('');
-      // Reset file input
-      const fileInput = document.getElementById('avatar') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
-      }
+      // Navigate to the home page or profile page
+      navigate('/');
     } catch (error) {
       console.error('Profile update error:', error);
       toast({
@@ -76,6 +81,10 @@ const CompleteProfileForm: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSkip = () => {
+    navigate('/');
   };
 
   return (
@@ -106,6 +115,7 @@ const CompleteProfileForm: React.FC = () => {
                   size="sm"
                   className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
                   onClick={() => document.getElementById('avatar')?.click()}
+                  disabled={isLoading}
                 >
                   <Upload className="w-4 h-4" />
                 </Button>
@@ -116,6 +126,7 @@ const CompleteProfileForm: React.FC = () => {
                 accept="image/*"
                 onChange={handleFileChange}
                 className="hidden"
+                disabled={isLoading}
               />
               <p className="text-xs text-gray-500 text-center">
                 Click the upload button to add a profile picture
@@ -135,24 +146,37 @@ const CompleteProfileForm: React.FC = () => {
                 onChange={(e) => setFullName(e.target.value)}
                 className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 required
+                disabled={isLoading}
               />
             </div>
             
-            {/* Submit Button */}
-            <Button 
-              type="submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2"
-              disabled={isLoading || !fullName.trim()}
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Setting up profile...
-                </>
-              ) : (
-                'Complete Profile'
-              )}
-            </Button>
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <Button 
+                type="submit" 
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2"
+                disabled={isLoading || !fullName.trim()}
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Setting up profile...
+                  </>
+                ) : (
+                  'Complete Profile'
+                )}
+              </Button>
+              
+              <Button 
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleSkip}
+                disabled={isLoading}
+              >
+                Skip for now
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
