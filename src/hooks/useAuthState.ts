@@ -10,6 +10,15 @@ export const useAuthState = () => {
 
   useEffect(() => {
     let isSubscribed = true;
+    let initializationTimeout: NodeJS.Timeout;
+    
+    // Set timeout to prevent infinite loading
+    initializationTimeout = setTimeout(() => {
+      if (isSubscribed && loading) {
+        console.warn('Auth initialization timeout - setting loading to false');
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -18,24 +27,34 @@ export const useAuthState = () => {
         
         if (!isSubscribed) return;
         
-        if (session?.user) {
-          // Try to fetch existing profile first
-          let userProfile = await fetchUser(session.user.id);
-          
-          // If no profile exists, create one
-          if (!userProfile) {
-            console.log('Creating new user profile...');
-            userProfile = await createUserProfile(session.user);
+        try {
+          if (session?.user) {
+            // Try to fetch existing profile first
+            let userProfile = await fetchUser(session.user.id);
+            
+            // If no profile exists, create one
+            if (!userProfile) {
+              console.log('Creating new user profile...');
+              userProfile = await createUserProfile(session.user);
+            }
+            
+            if (userProfile && isSubscribed) {
+              setUser(userProfile);
+            }
+          } else {
+            if (isSubscribed) {
+              setUser(null);
+            }
           }
-          
-          if (userProfile && isSubscribed) {
-            setUser(userProfile);
-            setLoading(false);
-          }
-        } else {
+        } catch (error) {
+          console.error('Error in auth state change handler:', error);
           if (isSubscribed) {
             setUser(null);
+          }
+        } finally {
+          if (isSubscribed) {
             setLoading(false);
+            clearTimeout(initializationTimeout);
           }
         }
       }
@@ -59,16 +78,18 @@ export const useAuthState = () => {
           if (userProfile) {
             setUser(userProfile);
           }
-          setLoading(false);
         } else if (isSubscribed) {
           setUser(null);
-          setLoading(false);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
         if (isSubscribed) {
           setUser(null);
+        }
+      } finally {
+        if (isSubscribed) {
           setLoading(false);
+          clearTimeout(initializationTimeout);
         }
       }
     };
@@ -77,6 +98,7 @@ export const useAuthState = () => {
 
     return () => {
       isSubscribed = false;
+      clearTimeout(initializationTimeout);
       subscription.unsubscribe();
     };
   }, []);

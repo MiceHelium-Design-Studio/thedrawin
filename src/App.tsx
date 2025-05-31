@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,7 +10,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { DrawProvider } from "./context/DrawContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { BackgroundProvider } from "./context/BackgroundContext";
-import { ensureFullAdmin } from "./utils/adminSetup";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Pages
 import Home from "./pages/Home";
@@ -68,46 +69,49 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const App = () => {
   console.log("App rendering");
   
-  useEffect(() => {
-    ensureFullAdmin()
-      .then(() => console.log('Admin check completed'))
-      .catch(err => console.error('Admin check failed:', err));
-  }, []);
+  // Temporarily disable admin setup to prevent loading issues
+  // useEffect(() => {
+  //   ensureFullAdmin()
+  //     .then(() => console.log('Admin check completed'))
+  //     .catch(err => console.error('Admin check failed:', err));
+  // }, []);
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <BackgroundProvider>
-          <TooltipProvider>
-            <AuthProvider>
-              <DrawProvider>
-                <NotificationProvider>
-                  <Toaster />
-                  <Sonner />
-                  <Layout>
-                    <Routes>
-                      <Route path="/auth" element={<Auth />} />
-                      
-                      <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                      <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
-                      <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
-                      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-                      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                      <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
-                      <Route path="/todos" element={<ProtectedRoute><TodoList /></ProtectedRoute>} />
-                      <Route path="/todo-page" element={<ProtectedRoute><TodoPage /></ProtectedRoute>} />
-                      
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Layout>
-                </NotificationProvider>
-              </DrawProvider>
-            </AuthProvider>
-          </TooltipProvider>
-        </BackgroundProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <BackgroundProvider>
+            <TooltipProvider>
+              <AuthProvider>
+                <DrawProvider>
+                  <NotificationProvider>
+                    <Toaster />
+                    <Sonner />
+                    <Layout>
+                      <Routes>
+                        <Route path="/auth" element={<Auth />} />
+                        
+                        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                        <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
+                        <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
+                        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+                        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                        <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
+                        <Route path="/todos" element={<ProtectedRoute><TodoList /></ProtectedRoute>} />
+                        <Route path="/todo-page" element={<ProtectedRoute><TodoPage /></ProtectedRoute>} />
+                        
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Layout>
+                  </NotificationProvider>
+                </DrawProvider>
+              </AuthProvider>
+            </TooltipProvider>
+          </BackgroundProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

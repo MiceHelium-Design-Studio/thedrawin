@@ -27,7 +27,12 @@ export interface ValidationParams {
  */
 export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('Error getting user for audit log:', userError);
+      return;
+    }
     
     const { error } = await supabase
       .from('audit_logs')
@@ -53,7 +58,12 @@ export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
  */
 export const checkRateLimit = async (params: RateLimitParams): Promise<boolean> => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('Error getting user for rate limit check:', userError);
+      return false;
+    }
     
     if (!user) {
       console.log('No user found for rate limiting');
@@ -165,43 +175,61 @@ export const withSecurityChecks = async <T>(
     rateLimitConfig?: { limit: number; windowMinutes: number };
   }
 ): Promise<T> => {
-  // Rate limiting check
+  // Rate limiting check (only if user is authenticated)
   if (options.rateLimitAction) {
-    const isAllowed = await checkRateLimit({
-      action: options.rateLimitAction,
-      limit: options.rateLimitConfig?.limit,
-      windowMinutes: options.rateLimitConfig?.windowMinutes,
-    });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) { // Only check rate limits for authenticated users
+        const isAllowed = await checkRateLimit({
+          action: options.rateLimitAction,
+          limit: options.rateLimitConfig?.limit,
+          windowMinutes: options.rateLimitConfig?.windowMinutes,
+        });
 
-    if (!isAllowed) {
-      toast({
-        variant: 'destructive',
-        title: 'Rate limit exceeded',
-        description: 'You are performing this action too frequently. Please wait before trying again.',
-      });
-      throw new Error('Rate limit exceeded');
+        if (!isAllowed) {
+          toast({
+            variant: 'destructive',
+            title: 'Rate limit exceeded',
+            description: 'You are performing this action too frequently. Please wait before trying again.',
+          });
+          throw new Error('Rate limit exceeded');
+        }
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Rate limit exceeded') {
+        throw error;
+      }
+      // Log rate limit check error but don't block the operation
+      console.error('Rate limit check failed:', error);
     }
   }
 
   try {
     const result = await operation();
 
-    // Audit logging for successful operations
+    // Audit logging for successful operations (only if user is authenticated)
     if (options.auditAction && options.auditTableName) {
-      await logAuditEvent({
+      // Don't await audit logging to avoid blocking the operation
+      logAuditEvent({
         action: options.auditAction,
         tableName: options.auditTableName,
+      }).catch(error => {
+        console.error('Failed to log audit event:', error);
       });
     }
 
     return result;
   } catch (error) {
-    // Audit logging for failed operations
+    // Audit logging for failed operations (only if user is authenticated)
     if (options.auditAction && options.auditTableName) {
-      await logAuditEvent({
+      // Don't await audit logging to avoid blocking error handling
+      logAuditEvent({
         action: `${options.auditAction}_failed`,
         tableName: options.auditTableName,
         newValues: { error: error instanceof Error ? error.message : 'Unknown error' },
+      }).catch(auditError => {
+        console.error('Failed to log failed operation audit event:', auditError);
       });
     }
     throw error;

@@ -7,90 +7,56 @@ export const ensureFullAdmin = async () => {
     const adminEmail = 'raghidhilal@gmail.com';
     console.log(`Checking if ${adminEmail} is an admin...`);
     
-    // Step 1: Find the user by email using the available methods
-    const { data: usersData, error: usersError } = await supabase
-      .from('profiles')
-      .select('id, is_admin')
-      .eq('email', adminEmail)
-      .maybeSingle();
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Admin setup timeout')), 5000);
+    });
     
-    if (usersError) {
-      console.error('Error finding user by email:', usersError);
-      return;
-    }
-    
-    // Step 2: If user exists in profiles, check/update admin status
-    if (usersData) {
-      const userId = usersData.id;
+    const adminCheckPromise = (async () => {
+      // Step 1: Find the user by email using the available methods
+      const { data: usersData, error: usersError } = await supabase
+        .from('profiles')
+        .select('id, is_admin')
+        .eq('email', adminEmail)
+        .maybeSingle();
       
-      if (!usersData.is_admin) {
-        console.log(`Setting ${adminEmail} as admin...`);
-        
-        // Update admin status
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ is_admin: true })
-          .eq('id', userId);
-        
-        if (updateError) {
-          console.error('Error setting admin status:', updateError);
-        } else {
-          console.log(`${adminEmail} has been made an admin successfully`);
-        }
-      } else {
-        console.log(`${adminEmail} is already an admin`);
-      }
-      return;
-    }
-    
-    // Step 3: If user not found in profiles but exists in auth, we need to find them
-    console.log(`Profile for ${adminEmail} not found. Checking auth system...`);
-    
-    // Find existing user by email (using auth.signInWithOtp with error handling)
-    // Note: In a production app, you'd use admin APIs, but for this demo we'll
-    // use a workaround since we don't have access to admin.getUserByEmail
-    try {
-      // Try to find user auth data with proper typings
-      const { data, error: signInError } = await supabase.auth.signInWithOtp({
-        email: adminEmail,
-        options: {
-          shouldCreateUser: false // Don't create new user
-        }
-      });
-      
-      if (signInError) {
-        console.error('User may not exist in auth system:', signInError);
+      if (usersError) {
+        console.error('Error finding user by email:', usersError);
         return;
       }
       
-      // Explicitly check and type the user object
-      if (data && data.user) {
-        const user = data.user as User;
+      // Step 2: If user exists in profiles, check/update admin status
+      if (usersData) {
+        const userId = usersData.id;
         
-        // Now we can safely access the id property
-        console.log(`Creating profile for ${adminEmail} with admin status...`);
-        
-        // Fix: Include all required fields for the profiles table
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            email: adminEmail,
-            name: adminEmail.split('@')[0], // Use part before @ as a default name
-            is_admin: true,
-            wallet: 0 // Include default wallet value
-          });
-        
-        if (insertError) {
-          console.error('Error creating admin profile:', insertError);
+        if (!usersData.is_admin) {
+          console.log(`Setting ${adminEmail} as admin...`);
+          
+          // Update admin status
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ is_admin: true })
+            .eq('id', userId);
+          
+          if (updateError) {
+            console.error('Error setting admin status:', updateError);
+          } else {
+            console.log(`${adminEmail} has been made an admin successfully`);
+          }
         } else {
-          console.log(`Admin profile created successfully for ${adminEmail}`);
+          console.log(`${adminEmail} is already an admin`);
         }
+        return;
       }
-    } catch (authError) {
-      console.error('Error checking auth system:', authError);
-    }
+      
+      console.log(`Profile for ${adminEmail} not found. This is normal for new installations.`);
+    })();
+    
+    // Race between admin check and timeout
+    await Promise.race([adminCheckPromise, timeoutPromise]);
+    
   } catch (error) {
     console.error('Error in ensureFullAdmin:', error);
+    // Don't throw the error to prevent app from crashing
   }
 };
