@@ -27,6 +27,8 @@ export interface ValidationParams {
  */
 export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { error } = await supabase
       .from('audit_logs')
       .insert({
@@ -35,6 +37,7 @@ export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
         record_id: params.recordId || null,
         old_values: params.oldValues ? JSON.parse(JSON.stringify(params.oldValues)) : null,
         new_values: params.newValues ? JSON.parse(JSON.stringify(params.newValues)) : null,
+        user_id: user?.id || null,
       });
 
     if (error) {
@@ -50,6 +53,13 @@ export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
  */
 export const checkRateLimit = async (params: RateLimitParams): Promise<boolean> => {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.log('No user found for rate limiting');
+      return false; // Block if no user
+    }
+
     const limit = params.limit || 10;
     const windowMinutes = params.windowMinutes || 60;
     const now = new Date();
@@ -66,6 +76,7 @@ export const checkRateLimit = async (params: RateLimitParams): Promise<boolean> 
       .from('rate_limits')
       .select('count')
       .eq('action', params.action)
+      .eq('user_id', user.id)
       .eq('window_start', windowStart.toISOString())
       .single();
 
@@ -85,6 +96,7 @@ export const checkRateLimit = async (params: RateLimitParams): Promise<boolean> 
     const { error: upsertError } = await supabase
       .from('rate_limits')
       .upsert({
+        user_id: user.id,
         action: params.action,
         count: currentCount + 1,
         window_start: windowStart.toISOString(),
