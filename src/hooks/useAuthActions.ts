@@ -65,6 +65,8 @@ export const useAuthActions = (
   const signup = async (email: string, password: string, name: string, phone?: string) => {
     setLoading(true);
     try {
+      console.log('Starting signup process for:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -72,24 +74,51 @@ export const useAuthActions = (
           data: {
             name,
             phone
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/`
         }
       });
 
       if (error) {
+        console.error('Signup error from Supabase:', error);
         throw error;
+      }
+
+      if (data.user) {
+        console.log('User created successfully:', data.user.id);
+        
+        // Check if email confirmation is required
+        if (!data.session && data.user && !data.user.email_confirmed_at) {
+          toast({
+            title: 'Check your email',
+            description: 'Please check your email for a confirmation link to complete your signup.',
+          });
+        } else {
+          toast({
+            title: 'Account created!',
+            description: 'Your account has been created successfully.',
+          });
+        }
+      }
+      
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = error.message || 'An error occurred during signup';
+      
+      if (error.message?.includes('User already registered')) {
+        errorMessage = 'An account with this email already exists. Please try logging in instead.';
+      } else if (error.message?.includes('Password should be at least')) {
+        errorMessage = 'Password should be at least 6 characters long.';
+      } else if (error.message?.includes('Unable to validate email address')) {
+        errorMessage = 'Please enter a valid email address.';
       }
       
       toast({
-        title: 'Account created',
-        description: 'Your account has been created successfully.',
-      });
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      toast({
         variant: 'destructive',
         title: 'Signup failed',
-        description: error.message || 'An error occurred during signup',
+        description: errorMessage,
       });
       throw error;
     } finally {

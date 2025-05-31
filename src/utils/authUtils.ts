@@ -1,4 +1,3 @@
-
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,11 +11,6 @@ export const fetchUser = async (userId: string): Promise<User | null> => {
       .single();
 
     if (error) {
-      // If profile doesn't exist, that's not necessarily an error
-      if (error.code === 'PGRST116') {
-        console.log('User profile not found, will create one');
-        return null;
-      }
       console.error('Error fetching user profile:', error);
       return null;
     }
@@ -45,19 +39,32 @@ export const fetchUser = async (userId: string): Promise<User | null> => {
 };
 
 export const createUserProfile = async (authUser: any): Promise<User | null> => {
+  // With the new trigger, profiles should be created automatically
+  // This function now just fetches the profile that should have been created
   try {
-    console.log('Creating user profile for:', authUser.id, authUser.email);
+    console.log('Profile should have been created by trigger, fetching for:', authUser.id);
     
+    // Wait a moment for the trigger to complete
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const userProfile = await fetchUser(authUser.id);
+    
+    if (userProfile) {
+      console.log('Successfully retrieved auto-created profile:', userProfile.id);
+      return userProfile;
+    }
+    
+    console.log('Profile not found after trigger, creating manually as fallback');
+    
+    // Fallback: create profile manually if trigger failed
     const profileData = {
       id: authUser.id,
       email: authUser.email,
       name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
       avatar: authUser.user_metadata?.avatar_url || null,
-      wallet: 500, // Starting wallet amount
-      is_admin: authUser.email === 'raghidhilal@gmail.com' // Special admin case
+      wallet: 500,
+      is_admin: authUser.email === 'raghidhilal@gmail.com'
     };
-
-    console.log('Profile data to insert:', profileData);
 
     const { data, error } = await supabase
       .from('profiles')
@@ -66,16 +73,11 @@ export const createUserProfile = async (authUser: any): Promise<User | null> => 
       .single();
 
     if (error) {
-      // Check if the error is due to duplicate key (user already exists)
-      if (error.code === '23505') {
-        console.log('User profile already exists, fetching existing profile');
-        return await fetchUser(authUser.id);
-      }
-      console.error('Error creating user profile:', error);
+      console.error('Error creating user profile manually:', error);
       return null;
     }
 
-    console.log('Successfully created user profile:', data.id);
+    console.log('Successfully created user profile manually:', data.id);
     return {
       id: data.id,
       email: data.email,
@@ -88,10 +90,7 @@ export const createUserProfile = async (authUser: any): Promise<User | null> => 
     };
   } catch (error) {
     console.error('Unexpected error in createUserProfile:', error);
-    
-    // If profile creation fails, try to fetch existing profile
-    console.log('Profile creation failed, attempting to fetch existing profile');
-    return await fetchUser(authUser.id);
+    return null;
   }
 };
 

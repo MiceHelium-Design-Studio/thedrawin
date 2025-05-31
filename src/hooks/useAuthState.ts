@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
-import { fetchUser, createUserProfile } from '@/utils/authUtils';
+import { fetchUser } from '@/utils/authUtils';
 
 export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -18,7 +18,7 @@ export const useAuthState = () => {
         console.warn('Auth initialization timeout - setting loading to false');
         setLoading(false);
       }
-    }, 8000); // Reduced timeout
+    }, 8000);
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -31,23 +31,22 @@ export const useAuthState = () => {
           if (session?.user) {
             console.log('Processing auth session for user:', session.user.id);
             
-            // Try to fetch existing profile first
+            // For new signups, wait a bit longer for the trigger to complete
+            if (event === 'SIGNED_UP') {
+              console.log('New signup detected, waiting for profile creation...');
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            
+            // Try to fetch the user profile
             let userProfile = await fetchUser(session.user.id);
             console.log('Fetched user profile:', userProfile);
-            
-            // If no profile exists, create one
-            if (!userProfile) {
-              console.log('Creating new user profile for:', session.user.id);
-              userProfile = await createUserProfile(session.user);
-              console.log('Created user profile:', userProfile);
-            }
             
             if (userProfile && isSubscribed) {
               console.log('Setting user state:', userProfile.id);
               setUser(userProfile);
             } else if (isSubscribed) {
-              console.error('Failed to get or create user profile');
-              // If we can't create a profile, at least set a basic user object
+              console.log('Profile not found, setting basic user object');
+              // If we can't fetch a profile, set a basic user object
               const basicUser: User = {
                 id: session.user.id,
                 email: session.user.email || '',
@@ -105,12 +104,6 @@ export const useAuthState = () => {
         if (data.session?.user && isSubscribed) {
           // Try to fetch existing profile first
           let userProfile = await fetchUser(data.session.user.id);
-          
-          // If no profile exists, create one
-          if (!userProfile) {
-            console.log('Creating new user profile during initialization...');
-            userProfile = await createUserProfile(data.session.user);
-          }
           
           if (userProfile) {
             console.log('Initialization: Setting user from session');
