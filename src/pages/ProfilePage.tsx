@@ -3,12 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Camera, User, Mail, Save, X } from 'lucide-react';
+import ProfileImageSection from '@/components/profile/ProfileImageSection';
+import ProfileFormFields from '@/components/profile/ProfileFormFields';
+import ProfileActionButtons from '@/components/profile/ProfileActionButtons';
 
 interface UserProfile {
   id: string;
@@ -275,120 +273,30 @@ const ProfilePage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Profile Image Section */}
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative group">
-                <Avatar className="w-32 h-32 border-4 border-gray-200 transition-all duration-200 group-hover:border-blue-300">
-                  <AvatarImage 
-                    src={imagePreview || profile.avatar_url || ''} 
-                    alt="Profile" 
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="text-2xl">
-                    <User className="w-12 h-12 text-gray-400" />
-                  </AvatarFallback>
-                </Avatar>
-                
-                {isEditing && (
-                  <button
-                    type="button"
-                    className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors duration-200"
-                    onClick={() => document.getElementById('image-upload')?.click()}
-                    disabled={uploading}
-                  >
-                    <Camera className="w-5 h-5" />
-                  </button>
-                )}
-              </div>
-              
-              {isEditing && (
-                <input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              )}
-              
-              {uploading && (
-                <p className="text-sm text-gray-600">Uploading image...</p>
-              )}
-            </div>
+            <ProfileImageSection
+              imagePreview={imagePreview}
+              avatarUrl={profile.avatar_url}
+              isEditing={isEditing}
+              uploading={uploading}
+              onImageChange={handleImageChange}
+            />
 
-            {/* Form Fields */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-gray-700 font-medium flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={!isEditing}
-                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
-                />
-              </div>
+            <ProfileFormFields
+              name={name}
+              email={email}
+              isEditing={isEditing}
+              onNameChange={(e) => setName(e.target.value)}
+              onEmailChange={(e) => setEmail(e.target.value)}
+            />
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700 font-medium flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={!isEditing}
-                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
-                />
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-center space-x-4 pt-6">
-              {!isEditing ? (
-                <Button
-                  onClick={() => setIsEditing(true)}
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium px-8 py-3 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  Edit Profile
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={handleCancel}
-                    disabled={saving}
-                    className="border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors duration-200 px-6"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSave}
-                    disabled={saving || uploading}
-                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium px-6 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    {saving ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Save Changes
-                      </>
-                    )}
-                  </Button>
-                </>
-              )}
-            </div>
+            <ProfileActionButtons
+              isEditing={isEditing}
+              saving={saving}
+              uploading={uploading}
+              onEdit={() => setIsEditing(true)}
+              onSave={handleSave}
+              onCancel={handleCancel}
+            />
           </CardContent>
         </Card>
       </div>
