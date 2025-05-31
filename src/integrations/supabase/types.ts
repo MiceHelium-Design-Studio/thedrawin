@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           active: boolean | null
@@ -135,6 +174,33 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          action: string
+          count: number | null
+          created_at: string | null
+          id: string
+          user_id: string | null
+          window_start: string | null
+        }
+        Insert: {
+          action: string
+          count?: number | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          action?: string
+          count?: number | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       todos: {
         Row: {
           completed: boolean
@@ -199,6 +265,14 @@ export type Database = {
       }
     }
     Functions: {
+      check_rate_limit: {
+        Args: { p_action: string; p_limit?: number; p_window_minutes?: number }
+        Returns: boolean
+      }
+      cleanup_old_rate_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -207,9 +281,23 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      log_audit_event: {
+        Args: {
+          p_action: string
+          p_table_name: string
+          p_record_id?: string
+          p_old_values?: Json
+          p_new_values?: Json
+        }
+        Returns: undefined
+      }
       update_user_admin_status: {
         Args: { user_email: string; is_admin_status: boolean }
         Returns: undefined
+      }
+      validate_input: {
+        Args: { p_input: string; p_type?: string; p_max_length?: number }
+        Returns: boolean
       }
     }
     Enums: {

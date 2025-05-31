@@ -27,13 +27,15 @@ export interface ValidationParams {
  */
 export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
   try {
-    const { error } = await supabase.rpc('log_audit_event', {
-      p_action: params.action,
-      p_table_name: params.tableName,
-      p_record_id: params.recordId || null,
-      p_old_values: params.oldValues ? JSON.stringify(params.oldValues) : null,
-      p_new_values: params.newValues ? JSON.stringify(params.newValues) : null,
-    });
+    const { error } = await supabase
+      .from('audit_logs')
+      .insert({
+        action: params.action,
+        table_name: params.tableName,
+        record_id: params.recordId || null,
+        old_values: params.oldValues ? JSON.parse(JSON.stringify(params.oldValues)) : null,
+        new_values: params.newValues ? JSON.parse(JSON.stringify(params.newValues)) : null,
+      });
 
     if (error) {
       console.error('Error logging audit event:', error);
@@ -48,18 +50,54 @@ export const logAuditEvent = async (params: AuditLogParams): Promise<void> => {
  */
 export const checkRateLimit = async (params: RateLimitParams): Promise<boolean> => {
   try {
-    const { data, error } = await supabase.rpc('check_rate_limit', {
-      p_action: params.action,
-      p_limit: params.limit || 10,
-      p_window_minutes: params.windowMinutes || 60,
-    });
+    const limit = params.limit || 10;
+    const windowMinutes = params.windowMinutes || 60;
+    const now = new Date();
+    const windowStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      now.getHours(),
+      Math.floor(now.getMinutes() / windowMinutes) * windowMinutes
+    );
 
-    if (error) {
+    // Get current count for this user, action, and window
+    const { data: existingLimit, error } = await supabase
+      .from('rate_limits')
+      .select('count')
+      .eq('action', params.action)
+      .eq('window_start', windowStart.toISOString())
+      .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
       console.error('Error checking rate limit:', error);
       return false; // Default to blocking if there's an error
     }
 
-    return data as boolean;
+    const currentCount = existingLimit?.count || 0;
+
+    // Check if limit exceeded
+    if (currentCount >= limit) {
+      return false;
+    }
+
+    // Update or insert rate limit record
+    const { error: upsertError } = await supabase
+      .from('rate_limits')
+      .upsert({
+        action: params.action,
+        count: currentCount + 1,
+        window_start: windowStart.toISOString(),
+      }, {
+        onConflict: 'user_id,action,window_start'
+      });
+
+    if (upsertError) {
+      console.error('Error updating rate limit:', upsertError);
+      return false;
+    }
+
+    return true;
   } catch (error) {
     console.error('Unexpected error checking rate limit:', error);
     return false; // Default to blocking if there's an error
@@ -67,22 +105,36 @@ export const checkRateLimit = async (params: RateLimitParams): Promise<boolean> 
 };
 
 /**
- * Validate user input using server-side validation
+ * Validate user input using client-side validation
  */
 export const validateInput = async (params: ValidationParams): Promise<boolean> => {
   try {
-    const { data, error } = await supabase.rpc('validate_input', {
-      p_input: params.input,
-      p_type: params.type || 'general',
-      p_max_length: params.maxLength || 1000,
-    });
+    const { input, type = 'general', maxLength = 1000 } = params;
 
-    if (error) {
-      console.error('Error validating input:', error);
-      return false; // Default to invalid if there's an error
+    // Check length
+    if (input.length > maxLength) {
+      return false;
     }
 
-    return data as boolean;
+    // Check for null or empty
+    if (!input || input.trim() === '') {
+      return false;
+    }
+
+    // Type-specific validation
+    switch (type) {
+      case 'email':
+        return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(input);
+      case 'url':
+        return /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(input);
+      case 'alphanumeric':
+        return /^[A-Za-z0-9\s]+$/.test(input);
+      case 'no_script':
+        return !/<script|javascript:|vbscript:|onload|onerror|onclick/i.test(input);
+      default:
+        // General validation - no malicious patterns
+        return !/<script|javascript:|vbscript:|onload|onerror|onclick|<iframe|<object|<embed/i.test(input);
+    }
   } catch (error) {
     console.error('Unexpected error validating input:', error);
     return false; // Default to invalid if there's an error
