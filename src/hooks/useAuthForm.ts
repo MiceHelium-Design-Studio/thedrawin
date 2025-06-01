@@ -18,55 +18,98 @@ export const useAuthForm = () => {
     name?: string; 
     phone?: string 
   }) => {
+    if (isProcessing) return; // Prevent double submission
+    
     try {
       setIsProcessing(true);
+      console.log(`Handling ${mode} submission for:`, data.email);
+      
       if (mode === 'login') {
         await login(data.email, data.password);
+        console.log('Login completed successfully');
+        
         toast({
           title: 'Welcome back!',
           description: 'You are now signed in.',
         });
-        navigate("/", { replace: true });
+        
+        // Navigate to intended route or home
+        const from = location.state?.from?.pathname || "/";
+        navigate(from, { replace: true });
+        
       } else {
         await signup(data.email, data.password, data.name || '', data.phone);
+        console.log('Signup completed successfully');
+        
         toast({
           title: 'Account created!',
           description: 'Your account has been created successfully.',
         });
+        
+        // For signup, always go to home
         navigate("/", { replace: true });
       }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication failed',
-        description: 'Please check your credentials and try again.',
-      });
-      console.error(error);
+    } catch (error: any) {
+      console.error(`${mode} error:`, error);
+      
+      // Error is already handled in the auth actions, but we can add additional handling here
+      if (error.message?.includes('Invalid login credentials')) {
+        toast({
+          variant: 'destructive',
+          title: 'Login failed',
+          description: 'Invalid email or password. Please check your credentials and try again.',
+        });
+      } else if (error.message?.includes('Email not confirmed')) {
+        toast({
+          variant: 'destructive',
+          title: 'Email not confirmed',
+          description: 'Please check your email and click the confirmation link before signing in.',
+        });
+      } else {
+        // Generic error fallback
+        toast({
+          variant: 'destructive',
+          title: `${mode === 'login' ? 'Login' : 'Signup'} failed`,
+          description: error.message || 'An unexpected error occurred. Please try again.',
+        });
+      }
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleSocialLogin = async (provider: string) => {
+    if (isProcessing) return; // Prevent double submission
+    
     try {
       setIsProcessing(true);
+      console.log(`Starting ${provider} social login`);
+      
       if (provider === 'Google') {
         await signInWithGoogle();
+        console.log('Google OAuth flow initiated');
+        
+        // Note: For OAuth, the redirect happens automatically
+        // The success handling will be done in the auth state change listener
+        
       } else {
         toast({
-          title: 'Social login',
-          description: `${provider} login is not implemented yet.`,
+          title: 'Coming soon',
+          description: `${provider} login will be available soon.`,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`${provider} login error:`, error);
       toast({
         variant: 'destructive',
         title: `${provider} login failed`,
-        description: 'An error occurred during login.',
+        description: error.message || 'An error occurred during social login.',
       });
-      console.error(error);
     } finally {
-      setIsProcessing(false);
+      // For OAuth, don't set loading to false immediately as redirect might happen
+      if (provider !== 'Google') {
+        setIsProcessing(false);
+      }
     }
   };
 

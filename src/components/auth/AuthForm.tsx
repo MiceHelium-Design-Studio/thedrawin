@@ -1,7 +1,11 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+
 interface AuthFormProps {
   mode: 'login' | 'signup';
   onSubmit: (data: {
@@ -12,6 +16,7 @@ interface AuthFormProps {
   }) => Promise<void>;
   loading: boolean;
 }
+
 const AuthForm: React.FC<AuthFormProps> = ({
   mode,
   onSubmit,
@@ -21,54 +26,138 @@ const AuthForm: React.FC<AuthFormProps> = ({
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [error, setError] = useState('');
+
+  const validateForm = () => {
+    if (!email || !password) {
+      setError('Email and password are required');
+      return false;
+    }
+    
+    if (mode === 'signup' && (!name || !phone)) {
+      setError('Name and phone are required for signup');
+      return false;
+    }
+    
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({
-      email,
-      password,
-      ...(mode === 'signup' ? {
-        name,
-        phone
-      } : {})
-    });
+    setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    try {
+      console.log(`Submitting ${mode} form for:`, email);
+      await onSubmit({
+        email,
+        password,
+        ...(mode === 'signup' ? {
+          name,
+          phone
+        } : {})
+      });
+    } catch (error: any) {
+      console.error('Form submission error:', error);
+      setError(error.message || 'An error occurred. Please try again.');
+    }
   };
-  return <div className="w-full max-w-md mx-auto px-8">
-      
-      
+
+  return (
+    <div className="w-full max-w-md mx-auto px-8">
       <h2 className="text-xl font-serif text-center mb-6 text-gold tracking-wider uppercase font-bold">
         {mode === 'login' ? 'Sign In' : 'Create Account'}
       </h2>
       
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-4">
-        {mode === 'signup' && <>
+        {mode === 'signup' && (
+          <>
             <div className="space-y-2">
               <Label htmlFor="name" className="text-gold-light font-medium tracking-wide uppercase text-xs">Name</Label>
-              <Input id="name" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} required className="neo-input font-light" />
+              <Input 
+                id="name" 
+                placeholder="Your name" 
+                value={name} 
+                onChange={e => setName(e.target.value)} 
+                required={mode === 'signup'}
+                className="neo-input font-light" 
+              />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="phone" className="text-gold-light font-medium tracking-wide uppercase text-xs">Phone Number</Label>
-              <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" value={phone} onChange={e => setPhone(e.target.value)} required className="neo-input font-light" />
+              <Input 
+                id="phone" 
+                type="tel" 
+                placeholder="+1 (555) 123-4567" 
+                value={phone} 
+                onChange={e => setPhone(e.target.value)} 
+                required={mode === 'signup'}
+                className="neo-input font-light" 
+              />
             </div>
-          </>}
+          </>
+        )}
         
         <div className="space-y-2">
           <Label htmlFor="email" className="text-gold-light font-medium tracking-wide uppercase text-xs">Email</Label>
-          <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required className="neo-input font-light" />
+          <Input 
+            id="email" 
+            type="email" 
+            placeholder="you@example.com" 
+            value={email} 
+            onChange={e => setEmail(e.target.value)} 
+            required 
+            className="neo-input font-light" 
+          />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="password" className="text-gold-light font-medium tracking-wide uppercase text-xs">Password</Label>
-          <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="neo-input font-light" />
+          <Input 
+            id="password" 
+            type="password" 
+            placeholder="••••••••" 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            required 
+            minLength={6}
+            className="neo-input font-light" 
+          />
         </div>
         
-        <Button type="submit" disabled={loading} className="w-full bg-gold hover:bg-gold-dark text-black font-medium tracking-wide uppercase mt-8 py-5 text-sm">
-          {loading ? <div className="flex items-center justify-center">
+        <Button 
+          type="submit" 
+          disabled={loading} 
+          className="w-full bg-gold hover:bg-gold-dark text-black font-medium tracking-wide uppercase mt-8 py-5 text-sm"
+        >
+          {loading ? (
+            <div className="flex items-center justify-center">
               <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
               <span>Processing...</span>
-            </div> : mode === 'login' ? 'Sign In' : 'Create Account'}
+            </div>
+          ) : (
+            mode === 'login' ? 'Sign In' : 'Create Account'
+          )}
         </Button>
       </form>
-    </div>;
+    </div>
+  );
 };
+
 export default AuthForm;

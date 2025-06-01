@@ -13,15 +13,44 @@ export const useAuthState = () => {
     let isSubscribed = true;
     let initializationTimeout: NodeJS.Timeout;
     
-    // Set timeout to prevent infinite loading
+    // Reduce timeout from 8 seconds to 3 seconds
     initializationTimeout = setTimeout(() => {
       if (isSubscribed && loading) {
         console.warn('Auth initialization timeout - setting loading to false');
         setLoading(false);
       }
-    }, 8000);
+    }, 3000);
     
-    // Set up auth state listener first
+    const createUserFromSession = async (session: any): Promise<User | null> => {
+      if (!session?.user) return null;
+      
+      try {
+        // Try to fetch profile first
+        const userProfile = await fetchUser(session.user.id);
+        
+        if (userProfile) {
+          console.log('Using fetched profile:', userProfile.id);
+          return userProfile;
+        }
+        
+        // Fallback to basic user object if profile doesn't exist
+        console.log('Creating basic user object for:', session.user.id);
+        return {
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+          wallet: 500,
+          isAdmin: session.user.email === 'raghidhilal@gmail.com',
+          avatar: session.user.user_metadata?.avatar_url || null,
+          avatar_url: session.user.user_metadata?.avatar_url || null
+        };
+      } catch (error) {
+        console.error('Error creating user from session:', error);
+        return null;
+      }
+    };
+    
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session) => {
         console.log("Auth state change event:", event, "Session user:", session?.user?.id);
@@ -32,33 +61,17 @@ export const useAuthState = () => {
           if (session?.user) {
             console.log('Processing auth session for user:', session.user.id);
             
-            // For new signups, wait a bit longer for the trigger to complete
+            // For new signups, add a small delay
             if (event === 'SIGNED_UP' as AuthChangeEvent) {
               console.log('New signup detected, waiting for profile creation...');
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              await new Promise(resolve => setTimeout(resolve, 1000)); // Reduced from 2000ms
             }
             
-            // Try to fetch the user profile
-            let userProfile = await fetchUser(session.user.id);
-            console.log('Fetched user profile:', userProfile);
+            const userProfile = await createUserFromSession(session);
             
             if (userProfile && isSubscribed) {
               console.log('Setting user state:', userProfile.id);
               setUser(userProfile);
-            } else if (isSubscribed) {
-              console.log('Profile not found, setting basic user object');
-              // If we can't fetch a profile, set a basic user object
-              const basicUser: User = {
-                id: session.user.id,
-                email: session.user.email || '',
-                name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-                wallet: 500,
-                isAdmin: session.user.email === 'raghidhilal@gmail.com',
-                avatar: session.user.user_metadata?.avatar_url || null,
-                avatar_url: session.user.user_metadata?.avatar_url || null
-              };
-              setUser(basicUser);
-              console.log('Set basic user object:', basicUser.id);
             }
           } else {
             if (isSubscribed) {
@@ -69,7 +82,7 @@ export const useAuthState = () => {
         } catch (error) {
           console.error('Error in auth state change handler:', error);
           if (isSubscribed) {
-            // Even on error, try to set a basic user if we have a session
+            // Try basic user object on error
             if (session?.user) {
               const basicUser: User = {
                 id: session.user.id,
@@ -95,7 +108,7 @@ export const useAuthState = () => {
       }
     );
 
-    // Check for existing session
+    // Check for existing session with faster initialization
     const initializeAuth = async () => {
       try {
         console.log('Initializing auth - checking for existing session');
@@ -103,25 +116,11 @@ export const useAuthState = () => {
         console.log('Initial session check:', data.session?.user?.id);
         
         if (data.session?.user && isSubscribed) {
-          // Try to fetch existing profile first
-          let userProfile = await fetchUser(data.session.user.id);
+          const userProfile = await createUserFromSession(data.session);
           
           if (userProfile) {
             console.log('Initialization: Setting user from session');
             setUser(userProfile);
-          } else {
-            // Fallback to basic user object
-            const basicUser: User = {
-              id: data.session.user.id,
-              email: data.session.user.email || '',
-              name: data.session.user.user_metadata?.name || data.session.user.email?.split('@')[0] || 'User',
-              wallet: 500,
-              isAdmin: data.session.user.email === 'raghidhilal@gmail.com',
-              avatar: data.session.user.user_metadata?.avatar_url || null,
-              avatar_url: data.session.user.user_metadata?.avatar_url || null
-            };
-            setUser(basicUser);
-            console.log('Initialization: Set fallback user object');
           }
         } else if (isSubscribed) {
           console.log('Initialization: No session found');

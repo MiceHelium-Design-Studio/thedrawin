@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { updateUserProfile, addUserFunds, updateUserAdminStatus, fetchUser, createUserProfile } from '@/utils/authUtils';
 
 export const useAuthActions = (
   user: User | null,
@@ -13,14 +12,19 @@ export const useAuthActions = (
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
+      console.log('Starting email/password login for:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        console.error('Login error:', error);
         throw error;
       }
+      
+      console.log('Login successful:', data.user?.id);
       
     } catch (error: any) {
       console.error('Login error:', error);
@@ -38,6 +42,8 @@ export const useAuthActions = (
   const signInWithGoogle = async () => {
     setLoading(true);
     try {
+      console.log('Starting Google OAuth login');
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -46,8 +52,11 @@ export const useAuthActions = (
       });
 
       if (error) {
+        console.error('Google login error:', error);
         throw error;
       }
+
+      console.log('Google OAuth initiated successfully');
 
     } catch (error: any) {
       console.error('Google login error:', error);
@@ -87,7 +96,6 @@ export const useAuthActions = (
       if (data.user) {
         console.log('User created successfully:', data.user.id);
         
-        // Check if email confirmation is required
         if (!data.session && data.user && !data.user.email_confirmed_at) {
           toast({
             title: 'Check your email',
@@ -104,7 +112,6 @@ export const useAuthActions = (
     } catch (error: any) {
       console.error('Signup error:', error);
       
-      // Provide more specific error messages
       let errorMessage = error.message || 'An error occurred during signup';
       
       if (error.message?.includes('User already registered')) {
@@ -129,10 +136,14 @@ export const useAuthActions = (
   const logout = async () => {
     setLoading(true);
     try {
+      console.log('Starting logout process');
+      
       const { error } = await supabase.auth.signOut();
       if (error) {
         throw error;
       }
+      
+      console.log('Logout successful');
       
     } catch (error: any) {
       console.error('Logout error:', error);
@@ -151,6 +162,7 @@ export const useAuthActions = (
     if (!user) return;
     setLoading(true);
     try {
+      const { updateUserProfile } = await import('@/utils/authUtils');
       const success = await updateUserProfile(user.id, data);
       
       if (!success) {
@@ -180,6 +192,7 @@ export const useAuthActions = (
     if (!user) return;
     setLoading(true);
     try {
+      const { addUserFunds } = await import('@/utils/authUtils');
       const success = await addUserFunds(user.id, amount);
       
       if (!success) {
@@ -208,13 +221,13 @@ export const useAuthActions = (
   const makeUserAdmin = async (email: string) => {
     setLoading(true);
     try {
+      const { updateUserAdminStatus } = await import('@/utils/authUtils');
       const success = await updateUserAdminStatus(email, true);
       
       if (!success) {
         throw new Error('Failed to update admin status');
       }
       
-      // If the current user is the one being updated, update local state
       if (user && user.email === email) {
         setUser({ ...user, isAdmin: true });
       }
