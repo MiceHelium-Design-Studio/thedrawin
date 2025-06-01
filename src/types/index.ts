@@ -4,8 +4,10 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
+  avatar_url?: string;
   isAdmin?: boolean;
   wallet: number;
+  createdAt?: string;
 }
 
 export interface Draw {
@@ -15,7 +17,7 @@ export interface Draw {
   maxParticipants: number;
   currentParticipants: number;
   ticketPrices: number[];
-  status: 'upcoming' | 'active' | 'completed';
+  status: 'upcoming' | 'active' | 'completed' | 'open';
   startDate: string;
   endDate: string;
   winner?: string;

@@ -105,7 +105,7 @@ export const UserTable: React.FC<UserTableProps> = ({
               <div className="flex items-center space-x-2">
                 <Switch 
                   checked={user.isAdmin} 
-                  onCheckedChange={() => onToggleAdmin(user.id, user.isAdmin)}
+                  onCheckedChange={() => onToggleAdmin(user.id, user.isAdmin || false)}
                 />
                 <span className={user.isAdmin ? 'text-green-600' : 'text-gray-500'}>
                   {user.isAdmin ? 'Admin' : 'Regular User'}
