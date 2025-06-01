@@ -1,110 +1,109 @@
 
-import { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Coins } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Banknote, Ticket } from 'lucide-react';
 
 interface DrawTicketFormProps {
   ticketPrices: number[];
-  onSubmit: (number: number, price: number) => Promise<void>;
+  onSubmit: (number: number, price: number) => void;
   loading: boolean;
 }
 
-export const DrawTicketForm = ({ ticketPrices, onSubmit, loading }: DrawTicketFormProps) => {
-  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
-  const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
-  const { toast } = useToast();
+export const DrawTicketForm: React.FC<DrawTicketFormProps> = ({
+  ticketPrices,
+  onSubmit,
+  loading
+}) => {
+  const [selectedNumber, setSelectedNumber] = useState<string>('');
+  const [selectedPrice] = useState(ticketPrices[0] || 10); // Use first price as default
 
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (value >= 1 && value <= 100) {
-      setSelectedNumber(value);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!selectedNumber) {
-      toast({
-        variant: 'destructive',
-        title: 'Number required',
-        description: 'Please select a number between 1 and 100.',
-      });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const number = parseInt(selectedNumber);
+    if (isNaN(number) || number < 1 || number > 999999) {
       return;
     }
     
-    if (!selectedPrice) {
-      toast({
-        variant: 'destructive',
-        title: 'Price required',
-        description: 'Please select a ticket price.',
-      });
-      return;
-    }
+    onSubmit(number, selectedPrice);
+  };
 
-    await onSubmit(selectedNumber, selectedPrice);
+  const generateRandomNumber = () => {
+    const randomNum = Math.floor(Math.random() * 999999) + 1;
+    setSelectedNumber(randomNum.toString());
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-3">Pick your lucky number:</h3>
-        <Input
-          type="number"
-          min={1}
-          max={100}
-          placeholder="Enter a number from 1-100"
-          value={selectedNumber || ''}
-          onChange={handleNumberChange}
-          className="border-gold/30 focus:border-gold"
-        />
-      </div>
-      
-      <div>
-        <h3 className="text-lg font-medium mb-3">Select ticket price:</h3>
-        <RadioGroup 
-          onValueChange={(value) => setSelectedPrice(parseInt(value))} 
-          className="grid grid-cols-3 gap-3"
-        >
-          {ticketPrices.map((price) => (
-            <div key={price} className="flex items-center space-x-2">
-              <RadioGroupItem
-                value={price.toString()}
-                id={`price-${price}`}
-                className="text-gold"
+    <Card className="mt-6">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Ticket className="h-5 w-5" />
+          Enter the Draw
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="ticket-number">Choose Your Lucky Number (1-999999)</Label>
+            <div className="flex gap-2">
+              <Input
+                id="ticket-number"
+                type="number"
+                min="1"
+                max="999999"
+                value={selectedNumber}
+                onChange={(e) => setSelectedNumber(e.target.value)}
+                placeholder="Enter your lucky number"
+                className="flex-1"
+                required
               />
-              <Label 
-                htmlFor={`price-${price}`}
-                className="flex items-center cursor-pointer"
+              <Button
+                type="button"
+                variant="outline"
+                onClick={generateRandomNumber}
+                className="whitespace-nowrap"
               >
-                <Coins className="h-4 w-4 text-gold mr-1" />
-                ${price}
-              </Label>
+                Random
+              </Button>
             </div>
-          ))}
-        </RadioGroup>
-      </div>
-      
-      <Button
-        onClick={handleSubmit}
-        disabled={!selectedNumber || !selectedPrice || loading}
-        className="w-full bg-gold hover:bg-gold-dark text-black font-medium"
-      >
-        {loading ? (
-          <div className="flex items-center justify-center">
-            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
-            <span>Processing...</span>
+            <p className="text-sm text-gray-500">
+              Choose a number between 1 and 999,999 for your entry
+            </p>
           </div>
-        ) : (
-          'Purchase Ticket'
-        )}
-      </Button>
-      
-      <p className="text-sm text-gray-500 text-center">
-        By purchasing a ticket, you agree to the terms and conditions.
-      </p>
-    </div>
+
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Banknote className="h-5 w-5 text-green-600" />
+              <span className="font-medium">Entry Price:</span>
+            </div>
+            <span className="text-xl font-bold text-green-600">
+              ${selectedPrice}
+            </span>
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading || !selectedNumber}
+            size="lg"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Processing...
+              </>
+            ) : (
+              <>
+                <Ticket className="h-4 w-4 mr-2" />
+                Enter Draw with Number {selectedNumber || '___'}
+              </>
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };

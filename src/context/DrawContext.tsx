@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Draw, Ticket, Notification, MediaItem, Banner } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,7 +19,7 @@ interface DrawContextType {
   createDraw: (draw: Omit<Draw, 'id'>) => Promise<void>;
   updateDraw: (id: string, updates: Partial<Draw>) => Promise<void>;
   deleteDraw: (id: string) => Promise<void>;
-  buyTicket: (drawId: string, quantity: number) => Promise<void>;
+  buyTicket: (drawId: string, ticketNumber: number) => Promise<void>;
   markNotificationAsRead: (id: string) => Promise<void>;
   uploadMedia: (file: File, bucketType?: BucketType) => Promise<MediaItem>;
   deleteMedia: (id: string, bucketType?: BucketType) => Promise<void>;
@@ -250,8 +249,8 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }
   };
 
-  // Mock function for buying tickets since table doesn't exist in DB yet
-  const buyTicket = async (drawId: string, quantity: number) => {
+  // Updated buyTicket function to accept a specific number
+  const buyTicket = async (drawId: string, ticketNumber: number) => {
     setLoading(true);
     try {
       // Mock buy ticket functionality
@@ -260,30 +259,30 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         throw new Error('Draw not found');
       }
 
-      const ticketPrice = draw.ticketPrices[0]; // Assuming the first price in the array
+      const ticketPrice = draw.ticketPrices[0]; // Use the first price in the array
       
-      // Generate new tickets
-      const newTickets = Array(quantity).fill(null).map(() => ({
+      // Generate a single ticket with the specified number
+      const newTicket = {
         id: Math.random().toString(),
         drawId: drawId,
         userId: user?.id || '',
-        number: Math.floor(Math.random() * 1000000),
+        number: ticketNumber,
         price: ticketPrice,
         purchaseDate: new Date().toISOString()
-      }));
+      };
       
-      setTickets([...tickets, ...newTickets]);
+      setTickets([...tickets, newTicket]);
       toast({
-        title: 'Ticket purchased',
-        description: `You have purchased ${quantity} tickets for ${draw.title}.`,
+        title: 'Entry successful',
+        description: `You have entered ${draw.title} with number ${ticketNumber}.`,
       });
     } catch (err) {
       setError('An unexpected error occurred.');
       console.error('Unexpected error buying ticket:', err);
       toast({
         variant: 'destructive',
-        title: 'Failed to buy ticket',
-        description: 'An unexpected error occurred while buying the ticket.'
+        title: 'Failed to enter draw',
+        description: 'An unexpected error occurred while entering the draw.'
       });
     } finally {
       setLoading(false);

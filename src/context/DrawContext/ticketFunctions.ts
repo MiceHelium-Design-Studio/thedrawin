@@ -32,8 +32,8 @@ export const useTicketFunctions = (
     }
   };
 
-  // Mock function for buying tickets since table doesn't exist in DB yet
-  const buyTicket = async (drawId: string, quantity: number) => {
+  // Updated buyTicket function to accept a specific ticket number
+  const buyTicket = async (drawId: string, ticketNumber: number) => {
     try {
       // Mock buy ticket functionality
       const draw = draws.find(d => d.id === drawId);
@@ -43,27 +43,27 @@ export const useTicketFunctions = (
 
       const ticketPrice = draw.ticketPrices[0]; // Assuming the first price in the array
       
-      // Generate new tickets
-      const newTickets = Array(quantity).fill(null).map(() => ({
+      // Generate a single ticket with the specified number
+      const newTicket = {
         id: Math.random().toString(),
         drawId: drawId,
         userId: 'mock-user-id', // This will be replaced with the actual user ID
-        number: Math.floor(Math.random() * 1000000),
+        number: ticketNumber,
         price: ticketPrice,
         purchaseDate: new Date().toISOString()
-      }));
+      };
       
-      setTickets([...tickets, ...newTickets]);
+      setTickets([...tickets, newTicket]);
       toast({
-        title: 'Ticket purchased',
-        description: `You have purchased ${quantity} tickets for ${draw.title}.`,
+        title: 'Entry successful',
+        description: `You have entered ${draw.title} with number ${ticketNumber}.`,
       });
     } catch (err) {
       console.error('Unexpected error buying ticket:', err);
       toast({
         variant: 'destructive',
-        title: 'Failed to buy ticket',
-        description: 'An unexpected error occurred while buying the ticket.'
+        title: 'Failed to enter draw',
+        description: 'An unexpected error occurred while entering the draw.'
       });
       throw err;
     }

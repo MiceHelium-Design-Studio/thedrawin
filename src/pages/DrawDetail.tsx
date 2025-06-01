@@ -40,11 +40,11 @@ const DrawDetail: React.FC = () => {
     }
 
     try {
-      // Updated to match the buyTicket function signature in DrawContext
+      // Call buyTicket with the specific number chosen by the user
       await buyTicket(draw.id, number);
       
       toast({
-        title: 'Ticket purchased!',
+        title: 'Entry successful!',
         description: `You've entered the ${draw.title} draw with number ${number}.`,
       });
       
@@ -52,8 +52,8 @@ const DrawDetail: React.FC = () => {
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Purchase failed',
-        description: 'There was an error purchasing your ticket.',
+        title: 'Entry failed',
+        description: 'There was an error entering the draw.',
       });
       console.error(error);
     }
