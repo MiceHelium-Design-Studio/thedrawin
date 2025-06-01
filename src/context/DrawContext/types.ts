@@ -16,7 +16,7 @@ export interface DrawContextType {
   createDraw: (draw: Omit<Draw, 'id'>) => Promise<Draw>;
   updateDraw: (id: string, updates: Partial<Draw>) => Promise<void>;
   deleteDraw: (id: string) => Promise<void>;
-  buyTicket: (drawId: string, ticketNumber: number) => Promise<Ticket>;
+  buyTicket: (drawId: string, ticketNumber: number, price?: number) => Promise<Ticket>;
   markNotificationAsRead: (id: string) => Promise<void>;
   uploadMedia: (file: File, bucketType?: BucketType) => Promise<MediaItem>;
   deleteMedia: (id: string, bucketType?: BucketType) => Promise<void>;
