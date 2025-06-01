@@ -117,7 +117,7 @@ const PushNotifications: React.FC = () => {
         .select(`
           id, 
           message, 
-          type, 
+          title, 
           created_at,
           profiles:user_id (email, name)
         `)
@@ -132,21 +132,38 @@ const PushNotifications: React.FC = () => {
     }
   };
 
+  const getNotificationTitle = (type: string) => {
+    switch (type) {
+      case 'system':
+        return 'System Message';
+      case 'win':
+        return '🏆 Winner Announcement';
+      case 'draw':
+        return '🎉 Draw Update';
+      case 'promotion':
+        return '🎁 Promotion';
+      default:
+        return 'Notification';
+    }
+  };
+
   const onNotificationSubmit = async (data: z.infer<typeof notificationFormSchema>) => {
     try {
       setIsSending(true);
       
+      const notificationTitle = getNotificationTitle(data.type);
+      
       if (data.target === 'all') {
-        // Send to all users
+        // Send to all users with 'user' role
         const userIds = users.map(user => user.id);
-        await sendNotification(data.message, data.type, userIds);
+        await sendNotification(data.message, 'user', userIds);
         
         toast({
           title: "Notification sent",
           description: `Sent to ${userIds.length} users`,
         });
       } else if (data.target === 'selected' && data.selectedUsers) {
-        // Send to selected users
+        // Send to selected users with 'user' role
         const selectedEmails = data.selectedUsers.split(',').map(email => email.trim());
         const selectedUsers = users.filter(user => 
           selectedEmails.includes(user.email)
@@ -157,7 +174,7 @@ const PushNotifications: React.FC = () => {
         }
         
         const userIds = selectedUsers.map(user => user.id);
-        await sendNotification(data.message, data.type, userIds);
+        await sendNotification(data.message, 'user', userIds);
         
         toast({
           title: "Notification sent",
@@ -187,34 +204,30 @@ const PushNotifications: React.FC = () => {
     }
   };
 
-  const getNotificationTypeIcon = (type: string) => {
-    switch (type) {
-      case 'system':
-        return <BellRing className="h-4 w-4 text-blue-500" />;
-      case 'win':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'draw':
-        return <AlertCircle className="h-4 w-4 text-amber-500" />;
-      case 'promotion':
-        return <BellRing className="h-4 w-4 text-purple-500" />;
-      default:
-        return <BellRing className="h-4 w-4" />;
+  const getNotificationTypeIcon = (title: string) => {
+    if (title?.includes('🏆') || title?.toLowerCase().includes('winner')) {
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
     }
+    if (title?.includes('🎉') || title?.toLowerCase().includes('draw')) {
+      return <AlertCircle className="h-4 w-4 text-amber-500" />;
+    }
+    if (title?.includes('🎁') || title?.toLowerCase().includes('promotion')) {
+      return <BellRing className="h-4 w-4 text-purple-500" />;
+    }
+    return <BellRing className="h-4 w-4 text-blue-500" />;
   };
 
-  const getNotificationTypeLabel = (type: string) => {
-    switch (type) {
-      case 'system':
-        return 'System';
-      case 'win':
-        return 'Winner';
-      case 'draw':
-        return 'Draw';
-      case 'promotion':
-        return 'Promotion';
-      default:
-        return type;
+  const getNotificationTypeLabel = (title: string) => {
+    if (title?.includes('🏆') || title?.toLowerCase().includes('winner')) {
+      return 'Winner';
     }
+    if (title?.includes('🎉') || title?.toLowerCase().includes('draw')) {
+      return 'Draw';
+    }
+    if (title?.includes('🎁') || title?.toLowerCase().includes('promotion')) {
+      return 'Promotion';
+    }
+    return 'System';
   };
 
   return (
@@ -371,8 +384,8 @@ const PushNotifications: React.FC = () => {
                       <TableRow key={notification.id}>
                         <TableCell>
                           <div className="flex items-center">
-                            {getNotificationTypeIcon(notification.type)}
-                            <span className="ml-2">{getNotificationTypeLabel(notification.type)}</span>
+                            {getNotificationTypeIcon(notification.title)}
+                            <span className="ml-2">{getNotificationTypeLabel(notification.title)}</span>
                           </div>
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate">
