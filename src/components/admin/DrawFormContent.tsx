@@ -9,7 +9,7 @@ import { DrawerFooter, DrawerClose } from '@/components/ui/drawer';
 import { useDraws } from '@/context/DrawContext';
 import { Draw } from '@/types';
 import { toast } from '@/hooks/use-toast';
-import ImageUploader from './ImageUploader';
+import { ImageUploader } from './ImageUploader';
 
 interface DrawFormContentProps {
   selectedDraw: Draw | null;
@@ -20,7 +20,7 @@ interface DrawFormContentProps {
   onSuccess: () => void;
 }
 
-const DrawFormContent: React.FC<DrawFormContentProps> = ({
+export const DrawFormContent: React.FC<DrawFormContentProps> = ({
   selectedDraw,
   drawImageUrl,
   isUploadingDrawImage,

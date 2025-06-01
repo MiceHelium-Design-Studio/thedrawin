@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash, ImagePlus, Plus } from 'lucide-react';
@@ -33,7 +32,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Draw } from '../../types';
 import { useDraws } from '@/context/DrawContext';
-import { DrawFormContent } from './DrawFormContent';
+import DrawFormContent from './DrawFormContent';
 
 interface DrawActionProps {
   draw: Draw;
