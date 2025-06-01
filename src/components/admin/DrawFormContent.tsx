@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +19,7 @@ interface DrawFormContentProps {
   onSuccess: () => void;
 }
 
-export const DrawFormContent: React.FC<DrawFormContentProps> = ({
+const DrawFormContent: React.FC<DrawFormContentProps> = ({
   selectedDraw,
   drawImageUrl,
   isUploadingDrawImage,
@@ -161,9 +160,17 @@ export const DrawFormContent: React.FC<DrawFormContentProps> = ({
       <div>
         <Label>Banner Image</Label>
         <ImageUploader
-          currentImageUrl={drawImageUrl}
-          onImageUpload={(url) => setDrawImageUrl(url)}
-          onImageUploading={(uploading) => setIsUploadingDrawImage(uploading)}
+          previewUrl={drawImageUrl}
+          onImageSelected={(file) => {
+            setIsUploadingDrawImage(true);
+            // Mock upload for now
+            setTimeout(() => {
+              const mockUrl = URL.createObjectURL(file);
+              setDrawImageUrl(mockUrl);
+              setIsUploadingDrawImage(false);
+            }, 1000);
+          }}
+          isUploading={isUploadingDrawImage}
         />
       </div>
 
