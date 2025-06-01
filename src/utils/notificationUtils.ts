@@ -5,21 +5,23 @@ import { toast } from '@/hooks/use-toast';
 export const sendNotificationToUser = async (
   userId: string,
   message: string,
-  type: 'system' | 'win' | 'draw' | 'promotion'
+  role: 'admin' | 'user' = 'user',
+  title: string = 'Notification'
 ): Promise<void> => {
   try {
     // Insert the notification into the database
     const { error } = await supabase.from('notifications').insert({
       user_id: userId,
       message,
-      type
+      role,
+      title
     });
     
     if (error) throw error;
     
     // For real-time feedback, also show a toast notification
     toast({
-      title: type.charAt(0).toUpperCase() + type.slice(1),
+      title: title,
       description: message,
       duration: 5000
     });
@@ -40,14 +42,16 @@ export const sendDrawEntryNotifications = async (
     await sendNotificationToUser(
       userId,
       `You've successfully entered the "${drawTitle}" draw!`,
-      'draw'
+      'user',
+      '🎉 Ticket Purchased'
     );
     
     // Send receipt notification
     await sendNotificationToUser(
       userId,
       `Receipt: You purchased ticket #${ticketNumber} for $${ticketPrice} in "${drawTitle}"`,
-      'system'
+      'user',
+      'Purchase Receipt'
     );
   } catch (error) {
     console.error('Failed to send draw notifications:', error);

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -111,7 +112,8 @@ export const useUserManagement = () => {
         .insert({
           user_id: userId,
           message: 'Welcome to Gold Drawin! We hope you enjoy our platform.',
-          type: 'system'
+          role: 'user',
+          title: 'Welcome'
         });
       
       if (error) throw error;

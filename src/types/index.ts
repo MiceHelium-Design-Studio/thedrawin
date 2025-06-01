@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -37,11 +38,9 @@ export interface Notification {
   userId: string;
   message: string;
   read: boolean;
-  type: 'win' | 'draw' | 'system' | 'promotion';
   createdAt: string;
-  title?: string;
-  role?: 'admin' | 'user';
-  toAll?: boolean;
+  title: string;
+  role: 'admin' | 'user';
 }
 
 export interface Banner {

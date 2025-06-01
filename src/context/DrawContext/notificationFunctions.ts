@@ -31,9 +31,9 @@ export const useNotificationFunctions = (
           userId: item.user_id,
           message: item.message,
           read: item.read,
-          type: item.type as 'win' | 'draw' | 'system' | 'promotion',
           createdAt: item.created_at,
-          toAll: false
+          title: item.title,
+          role: item.role as 'admin' | 'user'
         }));
         setNotifications(mappedNotifications);
       }
@@ -91,7 +91,8 @@ export const useNotificationFunctions = (
   const sendNotification = async (
     userId: string, 
     message: string, 
-    type: 'win' | 'draw' | 'system' | 'promotion'
+    role: 'admin' | 'user',
+    title: string = 'Notification'
   ) => {
     return withSecurityChecks(
       async () => {
@@ -112,7 +113,8 @@ export const useNotificationFunctions = (
           .insert({
             user_id: userId,
             message: sanitizedMessage,
-            type: type,
+            role: role,
+            title: title,
             read: false
           });
 
@@ -133,7 +135,8 @@ export const useNotificationFunctions = (
           newValues: {
             user_id: userId,
             message: sanitizedMessage,
-            type: type,
+            role: role,
+            title: title,
           },
         });
 
