@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Draw } from '@/types';
 import { format } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
-import { useDraws } from '@/context/DrawContext';
+import { useDraws } from '@/context/DrawContext/index';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface DrawCardProps {
