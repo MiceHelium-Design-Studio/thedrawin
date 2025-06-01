@@ -19,7 +19,7 @@ interface DrawContextType {
   createDraw: (draw: Omit<Draw, 'id'>) => Promise<void>;
   updateDraw: (id: string, updates: Partial<Draw>) => Promise<void>;
   deleteDraw: (id: string) => Promise<void>;
-  buyTicket: (drawId: string, ticketNumber: number) => Promise<void>;
+  buyTicket: (drawId: string, ticketNumber: number, price?: number) => Promise<void>;
   markNotificationAsRead: (id: string) => Promise<void>;
   uploadMedia: (file: File, bucketType?: BucketType) => Promise<MediaItem>;
   deleteMedia: (id: string, bucketType?: BucketType) => Promise<void>;
@@ -249,8 +249,8 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }
   };
 
-  // Updated buyTicket function to accept a specific number
-  const buyTicket = async (drawId: string, ticketNumber: number) => {
+  // Updated buyTicket function to accept a specific number and optional price
+  const buyTicket = async (drawId: string, ticketNumber: number, price?: number) => {
     setLoading(true);
     try {
       // Mock buy ticket functionality
@@ -259,7 +259,8 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         throw new Error('Draw not found');
       }
 
-      const ticketPrice = draw.ticketPrices[0]; // Use the first price in the array
+      // Use provided price or default to first available price
+      const ticketPrice = price || draw.ticketPrices[0]; 
       
       // Generate a single ticket with the specified number
       const newTicket = {
@@ -274,7 +275,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       setTickets([...tickets, newTicket]);
       toast({
         title: 'Entry successful',
-        description: `You have entered ${draw.title} with number ${ticketNumber}.`,
+        description: `You have entered ${draw.title} with number ${ticketNumber} for $${ticketPrice}.`,
       });
     } catch (err) {
       setError('An unexpected error occurred.');
