@@ -22,6 +22,7 @@ export interface Draw {
   endDate: string;
   winner?: string;
   bannerImage?: string; // URL to the image on Unsplash or other sources
+  numberOfTickets?: number; // New field to track total tickets purchased
 }
 
 export interface Ticket {

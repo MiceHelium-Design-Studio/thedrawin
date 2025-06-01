@@ -138,6 +138,7 @@ export type Database = {
           draw_date: string | null
           gold_weight_grams: number | null
           id: string
+          number_of_tickets: number
           status: string | null
           title: string | null
         }
@@ -146,6 +147,7 @@ export type Database = {
           draw_date?: string | null
           gold_weight_grams?: number | null
           id?: string
+          number_of_tickets?: number
           status?: string | null
           title?: string | null
         }
@@ -154,6 +156,7 @@ export type Database = {
           draw_date?: string | null
           gold_weight_grams?: number | null
           id?: string
+          number_of_tickets?: number
           status?: string | null
           title?: string | null
         }

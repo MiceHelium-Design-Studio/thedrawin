@@ -20,7 +20,8 @@ export const useMockDrawFunctions = (
           ticketPrices: [5, 10, 20],
           status: 'active',
           startDate: new Date().toISOString(),
-          endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          numberOfTickets: 23
         }
       ]);
       return;
@@ -40,7 +41,8 @@ export const useMockDrawFunctions = (
     try {
       // Mock the create draw functionality for now
       const newDraw = { 
-        id: Math.random().toString(), 
+        id: Math.random().toString(),
+        numberOfTickets: 0, // Initialize with 0 tickets
         ...draw 
       };
       setDraws([...draws, newDraw]);

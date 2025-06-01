@@ -45,7 +45,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   // Import functionality from separate hook files
   const drawFunctions = useMockDrawFunctions(setDraws, draws);
-  const ticketFunctions = useTicketFunctions(setTickets, tickets, draws);
+  const ticketFunctions = useTicketFunctions(setTickets, tickets, draws, setDraws);
   const notificationFunctions = useNotificationFunctions(setNotifications, notifications);
   const bannerFunctions = useBannerFunctions(setBanners, banners);
   const mediaFunctions = useMediaFunctions(setMedia, media);

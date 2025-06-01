@@ -5,7 +5,8 @@ import { toast } from '@/hooks/use-toast';
 export const useTicketFunctions = (
   setTickets: React.Dispatch<React.SetStateAction<Ticket[]>>,
   tickets: Ticket[],
-  draws: Draw[]
+  draws: Draw[],
+  setDraws: React.Dispatch<React.SetStateAction<Draw[]>>
 ) => {
   // Mock function for fetching tickets since table doesn't exist in DB yet
   const fetchTickets = async (userId: string) => {
@@ -32,7 +33,7 @@ export const useTicketFunctions = (
     }
   };
 
-  // Updated buyTicket function to accept a specific ticket number
+  // Updated buyTicket function to accept a specific ticket number and update ticket count
   const buyTicket = async (drawId: string, ticketNumber: number) => {
     try {
       // Mock buy ticket functionality
@@ -54,6 +55,14 @@ export const useTicketFunctions = (
       };
       
       setTickets([...tickets, newTicket]);
+      
+      // Update the draw's numberOfTickets count
+      setDraws(draws.map(d => 
+        d.id === drawId 
+          ? { ...d, numberOfTickets: (d.numberOfTickets || 0) + 1 }
+          : d
+      ));
+      
       toast({
         title: 'Entry successful',
         description: `You have entered ${draw.title} with number ${ticketNumber}.`,
