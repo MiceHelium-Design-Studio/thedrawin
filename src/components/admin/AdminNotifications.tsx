@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck, Trash2 } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, Shield } from 'lucide-react';
 import NotificationItem from '@/components/notifications/NotificationItem';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -17,9 +17,15 @@ const AdminNotifications: React.FC = () => {
     ? notifications 
     : activeTab === 'unread' 
     ? notifications.filter(n => !n.read)
+    : activeTab === 'admin'
+    ? notifications.filter(n => n.role === 'admin')
+    : activeTab === 'user'
+    ? notifications.filter(n => n.role === 'user')
     : notifications.filter(n => n.type === activeTab);
     
   const unreadCount = notifications.filter(n => !n.read).length;
+  const adminCount = notifications.filter(n => n.role === 'admin').length;
+  const userCount = notifications.filter(n => n.role === 'user').length;
 
   return (
     <section className="mb-8">
@@ -57,6 +63,23 @@ const AdminNotifications: React.FC = () => {
                 {unreadCount > 0 && (
                   <span className="ml-2 bg-red-500 text-white px-2 rounded-full text-xs">
                     {unreadCount}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="admin">
+                <Shield className="h-4 w-4 mr-1" />
+                Admin
+                {adminCount > 0 && (
+                  <span className="ml-2 bg-orange-500 text-white px-2 rounded-full text-xs">
+                    {adminCount}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="user">
+                User
+                {userCount > 0 && (
+                  <span className="ml-2 bg-blue-500 text-white px-2 rounded-full text-xs">
+                    {userCount}
                   </span>
                 )}
               </TabsTrigger>

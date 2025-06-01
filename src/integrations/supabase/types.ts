@@ -228,24 +228,27 @@ export type Database = {
           id: string
           message: string
           read: boolean
-          type: string
-          user_id: string
+          role: string
+          title: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           message: string
           read?: boolean
-          type: string
-          user_id: string
+          role: string
+          title: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           message?: string
           read?: boolean
-          type?: string
-          user_id?: string
+          role?: string
+          title?: string
+          user_id?: string | null
         }
         Relationships: []
       }

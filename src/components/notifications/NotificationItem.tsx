@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bell, Award, Calendar, CheckCircle, Trash2, Gift } from 'lucide-react';
+import { Bell, Award, Calendar, CheckCircle, Trash2, Gift, Shield } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Notification } from '../../types';
 import { cn } from '../../lib/utils';
@@ -19,6 +19,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   onDelete
 }) => {
   const getIcon = () => {
+    if (notification.role === 'admin') {
+      return <Shield className="h-5 w-5 text-orange-500" />;
+    }
+    
     switch (notification.type) {
       case 'win':
         return <Award className="h-5 w-5 text-green-500" />;
@@ -47,6 +51,19 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         <div className="mt-1 bg-black/40 p-2 rounded-full">{getIcon()}</div>
         
         <div className="flex-1">
+          {notification.title && (
+            <h4 className={cn(
+              "font-medium text-white mb-1",
+              !notification.read && "font-semibold"
+            )}>
+              {notification.title}
+              {notification.role === 'admin' && (
+                <span className="ml-2 text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded">
+                  Admin
+                </span>
+              )}
+            </h4>
+          )}
           <p className={cn(
             "mb-1 text-white",
             !notification.read && "font-medium"

@@ -4,7 +4,6 @@ import { Notification } from '../types';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
-import { BellRing } from 'lucide-react';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -22,6 +21,20 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Helper function to map database fields to app fields
+  const mapDatabaseNotificationToAppNotification = (dbNotification: any): Notification => {
+    return {
+      id: dbNotification.id,
+      userId: dbNotification.user_id,
+      message: dbNotification.message,
+      read: dbNotification.read,
+      type: 'system', // Map to our existing type system
+      createdAt: dbNotification.created_at,
+      title: dbNotification.title || '',
+      role: dbNotification.role
+    };
+  };
 
   // Fetch notifications on user login
   useEffect(() => {
@@ -50,11 +63,36 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             
             // Show toast for new notification
             toast({
-              title: "New Notification",
+              title: newNotification.title || "New Notification",
               description: newNotification.message,
             });
           } catch (error) {
             console.error("Error processing real-time notification:", error);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `role=eq.admin`,
+        },
+        (payload) => {
+          try {
+            // Only show admin notifications if user is admin
+            if (user?.email === 'raghidhilal@gmail.com') {
+              const newNotification = mapDatabaseNotificationToAppNotification(payload.new);
+              setNotifications(prev => [newNotification, ...prev]);
+              
+              toast({
+                title: newNotification.title || "Admin Notification",
+                description: newNotification.message,
+              });
+            }
+          } catch (error) {
+            console.error("Error processing real-time admin notification:", error);
           }
         }
       )
@@ -65,28 +103,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
   }, [user, toast]);
 
-  // Helper function to map database fields to app fields
-  const mapDatabaseNotificationToAppNotification = (dbNotification: any): Notification => {
-    return {
-      id: dbNotification.id,
-      userId: dbNotification.user_id,
-      message: dbNotification.message,
-      read: dbNotification.read,
-      type: dbNotification.type as 'win' | 'draw' | 'system' | 'promotion',
-      createdAt: dbNotification.created_at
-    };
-  };
-
   const fetchNotifications = async () => {
     if (!user) return;
     
     setLoading(true);
     try {
-      // Simple direct query that avoids profile relation
+      // Fetch both user and admin notifications
       const { data, error } = await supabase
         .from('notifications')
-        .select('id, user_id, message, read, type, created_at')
-        .eq('user_id', user.id)
+        .select('id, user_id, role, title, message, read, created_at')
+        .or(`user_id.eq.${user.id},role.eq.admin`)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -96,8 +122,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications(mappedNotifications);
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      // Don't show toast for this error as it would be annoying on every page load
-      setNotifications([]); // Set empty array to avoid undefined
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -110,8 +135,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
       
       if (error) throw error;
       
@@ -139,8 +163,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const { error } = await supabase
         .from('notifications')
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
       
       if (error) throw error;
       
@@ -164,7 +187,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('user_id', user.id)
+        .or(`user_id.eq.${user.id},role.eq.admin`)
         .eq('read', false);
       
       if (error) throw error;
@@ -193,6 +216,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const promises = userIds.map(userId => 
           supabase.from('notifications').insert({
             user_id: userId,
+            role: 'user',
+            title: type.charAt(0).toUpperCase() + type.slice(1),
             message,
             type
           })
@@ -203,6 +228,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Send to current user
         const { error } = await supabase.from('notifications').insert({
           user_id: user.id,
+          role: 'user',
+          title: type.charAt(0).toUpperCase() + type.slice(1),
           message,
           type
         });
