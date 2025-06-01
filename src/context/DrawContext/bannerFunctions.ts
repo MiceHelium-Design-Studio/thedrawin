@@ -1,4 +1,3 @@
-
 import { Banner } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -28,8 +27,7 @@ export const useBannerFunctions = (
         linkUrl: banner.link_url || '/draws',
         title: banner.title || '',
         active: banner.active,
-        position: banner.position,
-        url: banner.image_url // Include url property to match Banner type
+        position: banner.position
       }));
 
       setBanners(fetchedBanners);
@@ -106,8 +104,7 @@ export const useBannerFunctions = (
           linkUrl: data.link_url || '/draws',
           title: data.title || '',
           active: data.active,
-          position: data.position,
-          url: data.image_url // Include url property
+          position: data.position
         };
 
         // Update the banners state with the new banner
