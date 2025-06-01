@@ -14,11 +14,12 @@ import PushNotifications from './PushNotifications';
 
 interface AdminContentProps {
   activeSection: string;
+  activeTab: string;
 }
 
-const AdminContent: React.FC<AdminContentProps> = ({ activeSection }) => {
+const AdminContent: React.FC<AdminContentProps> = ({ activeSection, activeTab }) => {
   const renderContent = () => {
-    switch (activeSection) {
+    switch (activeSection || activeTab) {
       case 'statistics':
         return <StatisticsContent />;
       case 'draws':

@@ -1,13 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../context/AuthContext';
 import UpdateProfileForm from '../components/profile/UpdateProfileForm';
 import WalletSection from '../components/profile/WalletSection';
 import UserTickets from '../components/profile/UserTickets';
+import { useProfileManagement } from '../hooks/useProfileManagement';
+import { useWalletManagement } from '../hooks/useWalletManagement';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { updateProfile } = useProfileManagement();
+  const { addFunds } = useWalletManagement();
 
   if (!user) {
     return (
@@ -19,6 +24,15 @@ const Profile: React.FC = () => {
     );
   }
 
+  const handleAddFunds = async (amount: number) => {
+    setLoading(true);
+    try {
+      await addFunds(amount);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6 space-y-6">
@@ -27,7 +41,11 @@ const Profile: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
             <UpdateProfileForm />
-            <WalletSection />
+            <WalletSection 
+              user={user} 
+              loading={loading} 
+              addFunds={handleAddFunds} 
+            />
           </div>
           
           <div>

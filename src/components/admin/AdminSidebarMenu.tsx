@@ -16,11 +16,13 @@ import {
 interface AdminSidebarMenuProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  activeTab: string;
 }
 
 const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ 
   activeSection, 
-  onSectionChange 
+  onSectionChange,
+  activeTab
 }) => {
   const menuItems = [
     { id: 'statistics', label: 'Statistics', icon: BarChart3 },
@@ -44,7 +46,7 @@ const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({
             key={item.id}
             onClick={() => onSectionChange(item.id)}
             className={`w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors ${
-              activeSection === item.id
+              activeTab === item.id
                 ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}

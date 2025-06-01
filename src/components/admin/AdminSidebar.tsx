@@ -54,7 +54,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
               className="w-full"
             >
               <div className="w-full">
-                <AdminSidebarMenu activeTab={activeTab} />
+                <AdminSidebarMenu 
+                  activeSection={activeTab} 
+                  onSectionChange={setActiveTab}
+                  activeTab={activeTab}
+                />
               </div>
             </Tabs>
           </div>

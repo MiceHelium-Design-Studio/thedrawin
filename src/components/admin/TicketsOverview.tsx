@@ -38,8 +38,8 @@ const TicketsOverview: React.FC = () => {
         if (drawsError) throw drawsError;
         setDraws(drawsData || []);
 
-        // Fetch tickets with related data
-        const { data, error } = await supabase
+        // Fetch tickets with related data - using separate queries to avoid relation issues
+        const { data: ticketsData, error: ticketsError } = await supabase
           .from('tickets')
           .select(`
             id,
@@ -47,31 +47,51 @@ const TicketsOverview: React.FC = () => {
             ticket_number,
             price,
             purchased_at,
-            user_id,
-            profiles:user_id (
-              name,
-              email
-            ),
-            draws:draw_id (
-              title,
-              status
-            )
+            user_id
           `)
           .order('purchased_at', { ascending: false });
 
-        if (error) throw error;
+        if (ticketsError) throw ticketsError;
 
-        const formattedTickets = data.map(ticket => ({
-          id: ticket.id,
-          draw_id: ticket.draw_id,
-          ticket_number: ticket.ticket_number,
-          price: ticket.price,
-          purchased_at: ticket.purchased_at,
-          user_name: ticket.profiles?.name || 'Unknown User',
-          user_email: ticket.profiles?.email || 'No email',
-          draw_title: ticket.draws?.title || 'Unknown Draw',
-          draw_status: ticket.draws?.status || 'unknown'
-        }));
+        // Fetch user profiles separately
+        const userIds = [...new Set(ticketsData?.map(t => t.user_id).filter(Boolean))];
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, name, email')
+          .in('id', userIds);
+
+        if (profilesError) {
+          console.warn('Could not fetch profiles:', profilesError);
+        }
+
+        // Fetch draws data separately
+        const drawIds = [...new Set(ticketsData?.map(t => t.draw_id).filter(Boolean))];
+        const { data: drawsDetailsData, error: drawsDetailsError } = await supabase
+          .from('draws')
+          .select('id, title, status')
+          .in('id', drawIds);
+
+        if (drawsDetailsError) {
+          console.warn('Could not fetch draw details:', drawsDetailsError);
+        }
+
+        // Combine the data
+        const formattedTickets = ticketsData?.map(ticket => {
+          const profile = profilesData?.find(p => p.id === ticket.user_id);
+          const draw = drawsDetailsData?.find(d => d.id === ticket.draw_id);
+          
+          return {
+            id: ticket.id,
+            draw_id: ticket.draw_id,
+            ticket_number: ticket.ticket_number,
+            price: ticket.price,
+            purchased_at: ticket.purchased_at,
+            user_name: profile?.name || 'Unknown User',
+            user_email: profile?.email || 'No email',
+            draw_title: draw?.title || 'Unknown Draw',
+            draw_status: draw?.status || 'unknown'
+          };
+        }) || [];
 
         setTickets(formattedTickets);
       } catch (error) {

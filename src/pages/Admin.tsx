@@ -46,7 +46,7 @@ const Admin: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
           <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-          <AdminContent activeTab={activeTab} />
+          <AdminContent activeSection={activeTab} activeTab={activeTab} />
         </div>
       </div>
     </div>
