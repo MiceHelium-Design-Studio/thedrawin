@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import { useDraws } from '@/context/DrawContext/index';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import SelectNumberModal from './draw-detail/SelectNumberModal';
 
 interface DrawCardProps {
   draw: Draw;
@@ -20,9 +21,11 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
   const { pickWinner } = useDraws();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPickingWinner, setIsPickingWinner] = useState(false);
+  const [isSelectNumberOpen, setIsSelectNumberOpen] = useState(false);
 
   const isAdmin = user?.isAdmin || false;
   const canPickWinner = isAdmin && (draw.status === 'active' || draw.status === 'open') && (draw.numberOfTickets || 0) > 0;
+  const canEnterDraw = (draw.status === 'active' || draw.status === 'open') && user;
   
   const handlePickWinner = async () => {
     try {
@@ -34,6 +37,11 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
     } finally {
       setIsPickingWinner(false);
     }
+  };
+
+  const handleEntrySuccess = () => {
+    // Refresh the component or show success state
+    console.log('Entry successful');
   };
 
   const getStatusBadgeColor = () => {
@@ -119,16 +127,40 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
                 <span>Entries: {draw.numberOfTickets || 0}</span>
               </div>
             )}
+
+            {/* Show ticket prices */}
+            {draw.ticketPrices && draw.ticketPrices.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Entry fees:</span>
+                <div className="flex gap-1">
+                  {draw.ticketPrices.map((price, index) => (
+                    <span key={index} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                      ${price}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex gap-2">
-            <Button 
-              variant="default" 
-              className="flex-1" 
-              onClick={() => navigate(`/draw/${draw.id}`)}
-            >
-              View Details
-            </Button>
+            {canEnterDraw ? (
+              <Button 
+                variant="default" 
+                className="flex-1" 
+                onClick={() => setIsSelectNumberOpen(true)}
+              >
+                Enter Draw
+              </Button>
+            ) : (
+              <Button 
+                variant="default" 
+                className="flex-1" 
+                onClick={() => navigate(`/draw/${draw.id}`)}
+              >
+                View Details
+              </Button>
+            )}
             
             {canPickWinner && (
               <Button 
@@ -142,6 +174,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
         </CardContent>
       </Card>
       
+      {/* Winner Selection Dialog */}
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -164,6 +197,14 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Number Selection Modal */}
+      <SelectNumberModal
+        draw={draw}
+        isOpen={isSelectNumberOpen}
+        onClose={() => setIsSelectNumberOpen(false)}
+        onSuccess={handleEntrySuccess}
+      />
     </>
   );
 };

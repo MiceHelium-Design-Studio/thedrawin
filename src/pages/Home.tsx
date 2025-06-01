@@ -76,6 +76,19 @@ const Home: React.FC = () => {
           <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
             Join exciting draws, win amazing prizes, and be part of the ultimate gaming experience
           </p>
+          
+          {/* Authentication prompt for non-logged in users */}
+          {!user && !authLoading && (
+            <div className="mt-6 p-4 bg-gold/10 border border-gold/20 rounded-lg max-w-md">
+              <p className="text-gold mb-3">Ready to enter draws and win prizes?</p>
+              <Button 
+                onClick={() => navigate('/login')} 
+                className="w-full bg-gold hover:bg-gold/90 text-black font-semibold"
+              >
+                Sign Up / Login to Get Started
+              </Button>
+            </div>
+          )}
         </div>
         
         {isLoading ? (
