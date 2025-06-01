@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -17,7 +16,7 @@ export interface Draw {
   maxParticipants: number;
   currentParticipants: number;
   ticketPrices: number[];
-  status: 'upcoming' | 'active' | 'completed';
+  status: 'upcoming' | 'active' | 'open' | 'completed';
   startDate: string;
   endDate: string;
   winner?: string;

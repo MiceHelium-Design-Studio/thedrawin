@@ -169,13 +169,20 @@ export const useMockDrawFunctions = (
         throw error;
       }
       
+      // Handle the winner data properly, checking if it's an object with the expected properties
+      let winnerName = 'Unknown';
+      if (winnerData && typeof winnerData === 'object') {
+        const winner = winnerData as Record<string, any>;
+        winnerName = winner.winner_name || 'Unknown';
+      }
+      
       // Update local state with the winner
       setDraws(draws.map(draw => {
         if (draw.id === drawId) {
           return {
             ...draw,
-            status: 'completed',
-            winner: winnerData.winner_name || 'Unknown',
+            status: 'completed' as const,
+            winner: winnerName,
           };
         }
         return draw;
@@ -183,7 +190,7 @@ export const useMockDrawFunctions = (
 
       toast({
         title: 'Winner selected!',
-        description: `A winner has been chosen for the draw: ${winnerData.winner_name}`
+        description: `A winner has been chosen for the draw: ${winnerName}`
       });
 
       return winnerData;

@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext } from 'react';
 import { Draw, Ticket, Notification, MediaItem, Banner } from '@/types';
 import { useAuth } from '../AuthContext';
@@ -21,10 +20,10 @@ export const DrawContext = createContext<DrawContextType>({
   fetchDraws: async () => {},
   fetchTickets: async () => {},
   fetchNotifications: async () => {},
-  createDraw: async () => {},
+  createDraw: async () => ({ id: '', title: '', description: '', maxParticipants: 0, currentParticipants: 0, ticketPrices: [], status: 'upcoming', startDate: '', endDate: '' }),
   updateDraw: async () => {},
   deleteDraw: async () => {},
-  buyTicket: async () => {},
+  buyTicket: async () => ({ id: '', drawId: '', userId: '', number: 0, price: 0, purchaseDate: '' }),
   markNotificationAsRead: async () => {},
   uploadMedia: async () => ({ id: '', name: '', url: '', type: 'image', size: 0, user_id: '', uploadDate: '' }),
   deleteMedia: async () => {},
@@ -104,7 +103,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }
   }, [user]);
 
-  // Pass through other functions
+  // Pass through other functions with proper return types
   const { createDraw, updateDraw, deleteDraw, pickWinner } = drawFunctions;
   const { buyTicket } = ticketFunctions;
   const { markNotificationAsRead } = notificationFunctions;
