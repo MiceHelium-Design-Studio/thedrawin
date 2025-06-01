@@ -40,7 +40,7 @@ const DrawDetail: React.FC = () => {
     }
 
     try {
-      // Call buyTicket with the specific number and price chosen by the user
+      // Call buyTicket with the draw ID, number, and price
       await buyTicket(draw.id, number, price);
       
       toast({

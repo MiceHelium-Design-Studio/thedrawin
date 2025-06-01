@@ -360,6 +360,7 @@ export type Database = {
         Row: {
           draw_id: string | null
           id: string
+          price: number
           purchased_at: string | null
           ticket_number: string | null
           user_id: string | null
@@ -367,6 +368,7 @@ export type Database = {
         Insert: {
           draw_id?: string | null
           id?: string
+          price?: number
           purchased_at?: string | null
           ticket_number?: string | null
           user_id?: string | null
@@ -374,6 +376,7 @@ export type Database = {
         Update: {
           draw_id?: string | null
           id?: string
+          price?: number
           purchased_at?: string | null
           ticket_number?: string | null
           user_id?: string | null

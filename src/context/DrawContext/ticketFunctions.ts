@@ -27,7 +27,7 @@ export const useTicketFunctions = (
         drawId: ticket.draw_id,
         userId: ticket.user_id,
         number: parseInt(ticket.ticket_number),
-        price: ticket.price || 10, // Use actual price from DB or default
+        price: ticket.price || 10, // Now the price column exists in the database
         purchaseDate: ticket.purchased_at
       }));
       
@@ -100,7 +100,7 @@ export const useTicketFunctions = (
         drawId: newTicket.draw_id,
         userId: newTicket.user_id,
         number: parseInt(newTicket.ticket_number),
-        price: ticketPrice,
+        price: newTicket.price, // Now properly available from the database
         purchaseDate: newTicket.purchased_at
       };
       
