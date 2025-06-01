@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Draw, Ticket, Notification, MediaItem, Banner } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -157,9 +158,9 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           userId: item.user_id,
           message: item.message,
           read: item.read,
-          type: item.type as 'win' | 'draw' | 'system' | 'promotion',
           createdAt: item.created_at,
-          toAll: false
+          title: item.title,
+          role: item.role as 'admin' | 'user'
         }));
         setNotifications(mappedNotifications);
       }

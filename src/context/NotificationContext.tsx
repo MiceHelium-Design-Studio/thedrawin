@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Notification } from '../types';
 import { useToast } from '@/hooks/use-toast';
@@ -11,7 +10,7 @@ interface NotificationContextType {
   markAsRead: (id: string) => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
-  sendNotification: (message: string, type: 'system' | 'win' | 'draw' | 'promotion', userIds?: string[]) => Promise<void>;
+  sendNotification: (message: string, role: 'admin' | 'user', userIds?: string[]) => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -29,7 +28,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       userId: dbNotification.user_id,
       message: dbNotification.message,
       read: dbNotification.read,
-      type: 'system', // Map to our existing type system
       createdAt: dbNotification.created_at,
       title: dbNotification.title || '',
       role: dbNotification.role
@@ -207,7 +205,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const sendNotification = async (message: string, type: 'system' | 'win' | 'draw' | 'promotion', userIds?: string[]) => {
+  const sendNotification = async (message: string, role: 'admin' | 'user', userIds?: string[]) => {
     if (!user && !userIds) return;
     
     try {
@@ -216,10 +214,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const promises = userIds.map(userId => 
           supabase.from('notifications').insert({
             user_id: userId,
-            role: 'user',
-            title: type.charAt(0).toUpperCase() + type.slice(1),
-            message,
-            type
+            role: role,
+            title: role.charAt(0).toUpperCase() + role.slice(1),
+            message
           })
         );
         
@@ -228,10 +225,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Send to current user
         const { error } = await supabase.from('notifications').insert({
           user_id: user.id,
-          role: 'user',
-          title: type.charAt(0).toUpperCase() + type.slice(1),
-          message,
-          type
+          role: role,
+          title: role.charAt(0).toUpperCase() + role.slice(1),
+          message
         });
         
         if (error) throw error;

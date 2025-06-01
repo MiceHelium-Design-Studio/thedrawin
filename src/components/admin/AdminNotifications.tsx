@@ -21,7 +21,7 @@ const AdminNotifications: React.FC = () => {
     ? notifications.filter(n => n.role === 'admin')
     : activeTab === 'user'
     ? notifications.filter(n => n.role === 'user')
-    : notifications.filter(n => n.type === activeTab);
+    : notifications;
     
   const unreadCount = notifications.filter(n => !n.read).length;
   const adminCount = notifications.filter(n => n.role === 'admin').length;
@@ -83,10 +83,6 @@ const AdminNotifications: React.FC = () => {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="system">System</TabsTrigger>
-              <TabsTrigger value="win">Winners</TabsTrigger>
-              <TabsTrigger value="draw">Draws</TabsTrigger>
-              <TabsTrigger value="promotion">Promotions</TabsTrigger>
             </TabsList>
             
             <TabsContent value={activeTab} className="space-y-4">

@@ -23,17 +23,18 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       return <Shield className="h-5 w-5 text-orange-500" />;
     }
     
-    switch (notification.type) {
-      case 'win':
-        return <Award className="h-5 w-5 text-green-500" />;
-      case 'draw':
-        return <Calendar className="h-5 w-5 text-blue-500" />;
-      case 'promotion':
-        return <Gift className="h-5 w-5 text-purple-500" />;
-      case 'system':
-      default:
-        return <Bell className="h-5 w-5 text-gold" />;
+    // Use title to determine icon type for user notifications
+    if (notification.title.toLowerCase().includes('winner') || notification.title.includes('🏆')) {
+      return <Award className="h-5 w-5 text-green-500" />;
     }
+    if (notification.title.toLowerCase().includes('draw') || notification.title.includes('🎉')) {
+      return <Calendar className="h-5 w-5 text-blue-500" />;
+    }
+    if (notification.title.toLowerCase().includes('promotion') || notification.title.includes('🎁')) {
+      return <Gift className="h-5 w-5 text-purple-500" />;
+    }
+    
+    return <Bell className="h-5 w-5 text-gold" />;
   };
 
   const timeAgo = formatDistanceToNow(new Date(notification.createdAt), {
