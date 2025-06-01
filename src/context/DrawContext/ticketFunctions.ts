@@ -27,7 +27,7 @@ export const useTicketFunctions = (
         drawId: ticket.draw_id,
         userId: ticket.user_id,
         number: parseInt(ticket.ticket_number),
-        price: 10, // Default price since it's not in the DB schema
+        price: ticket.price || 10, // Use actual price from DB or default
         purchaseDate: ticket.purchased_at
       }));
       
@@ -43,8 +43,8 @@ export const useTicketFunctions = (
     }
   };
 
-  // Buy a ticket with a specific number
-  const buyTicket = async (drawId: string, ticketNumber: number) => {
+  // Buy a ticket with a specific number and price
+  const buyTicket = async (drawId: string, ticketNumber: number, price?: number) => {
     try {
       // Find the draw to reference its details
       const draw = draws.find(d => d.id === drawId);
@@ -52,12 +52,16 @@ export const useTicketFunctions = (
         throw new Error('Draw not found');
       }
 
+      // Use provided price or default to first available price
+      const ticketPrice = price || draw.ticketPrices[0] || 10;
+
       // Insert the ticket into the database
       const { data: newTicket, error } = await supabase
         .from('tickets')
         .insert({
           draw_id: drawId,
           ticket_number: ticketNumber.toString(), // DB expects string
+          price: ticketPrice,
           // user_id will be automatically set to auth.uid() by RLS
         })
         .select('*')
@@ -96,7 +100,7 @@ export const useTicketFunctions = (
         drawId: newTicket.draw_id,
         userId: newTicket.user_id,
         number: parseInt(newTicket.ticket_number),
-        price: 10, // Default price
+        price: ticketPrice,
         purchaseDate: newTicket.purchased_at
       };
       
@@ -111,7 +115,7 @@ export const useTicketFunctions = (
       
       toast({
         title: 'Entry successful',
-        description: `You have entered ${draw.title} with number ${ticketNumber}.`,
+        description: `You have entered ${draw.title} with number ${ticketNumber} for $${ticketPrice}.`,
       });
 
       return appTicket;

@@ -40,12 +40,12 @@ const DrawDetail: React.FC = () => {
     }
 
     try {
-      // Call buyTicket with the specific number chosen by the user
-      await buyTicket(draw.id, number);
+      // Call buyTicket with the specific number and price chosen by the user
+      await buyTicket(draw.id, number, price);
       
       toast({
         title: 'Entry successful!',
-        description: `You've entered the ${draw.title} draw with number ${number}.`,
+        description: `You've entered the ${draw.title} draw with number ${number} for $${price}.`,
       });
       
       navigate('/');

@@ -7,6 +7,7 @@ import { useDraws } from '@/context/DrawContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { sendDrawEntryNotifications } from '@/utils/notificationUtils';
 
 interface SelectNumberModalProps {
   draw: Draw;
@@ -22,6 +23,8 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
   onSuccess
 }) => {
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+  const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
+  const [step, setStep] = useState<'number' | 'price'>('number');
   const [takenNumbers, setTakenNumbers] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUserEntered, setIsUserEntered] = useState(false);
@@ -65,6 +68,9 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
     
     if (isOpen) {
       fetchDrawInfo();
+      setStep('number');
+      setSelectedNumber(null);
+      setSelectedPrice(null);
     }
   }, [draw?.id, user?.id, isOpen]);
   
@@ -72,12 +78,31 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
     setSelectedNumber(number === selectedNumber ? null : number);
   };
   
+  const handleNumberConfirm = () => {
+    if (selectedNumber) {
+      setStep('price');
+    }
+  };
+  
+  const handlePriceSelect = (price: number) => {
+    setSelectedPrice(price === selectedPrice ? null : price);
+  };
+  
   const handleSubmit = async () => {
-    if (!selectedNumber || !draw?.id) return;
+    if (!selectedNumber || !selectedPrice || !draw?.id || !user?.id) return;
     
     try {
       setIsSubmitting(true);
       await buyTicket(draw.id, selectedNumber);
+      
+      // Send notifications
+      await sendDrawEntryNotifications(
+        user.id,
+        draw.title,
+        selectedNumber,
+        selectedPrice
+      );
+      
       onSuccess();
       onClose();
     } catch (error) {
@@ -94,6 +119,11 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
   
   const isNumberTaken = (number: number) => takenNumbers.includes(number);
 
+  const handleBack = () => {
+    setStep('number');
+    setSelectedPrice(null);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
@@ -101,7 +131,9 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
           <DialogTitle className="text-xl font-bold">
             {isUserEntered 
               ? "You've already entered this draw"
-              : `Choose Your Lucky Number for ${draw?.title}`}
+              : step === 'number' 
+                ? `Choose Your Lucky Number for ${draw?.title}`
+                : `Select Your Entry Price`}
           </DialogTitle>
         </DialogHeader>
         
@@ -109,7 +141,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
           <div className="text-center py-6">
             <p>You've already entered this draw with a number. Each user can only enter once.</p>
           </div>
-        ) : (
+        ) : step === 'number' ? (
           <>
             <div className="grid grid-cols-10 gap-2 mt-4">
               {availableNumbers.map((number) => (
@@ -153,10 +185,48 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 Cancel
               </Button>
               <Button
-                onClick={handleSubmit}
+                onClick={handleNumberConfirm}
                 disabled={!selectedNumber || isSubmitting}
               >
-                {isSubmitting ? "Processing..." : "Confirm Number"}
+                Next: Choose Price
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <>
+            <div className="mt-4">
+              <p className="text-sm text-gray-600 mb-4">
+                Selected Number: <span className="font-bold text-primary">#{selectedNumber}</span>
+              </p>
+              <p className="text-sm font-medium mb-4">Choose your entry price:</p>
+              <div className="grid grid-cols-2 gap-3">
+                {draw.ticketPrices.map((price) => (
+                  <Button
+                    key={price}
+                    variant={selectedPrice === price ? "default" : "outline"}
+                    className="h-16 flex flex-col"
+                    onClick={() => handlePriceSelect(price)}
+                  >
+                    <span className="text-lg font-bold">${price}</span>
+                    <span className="text-xs">Entry Fee</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            <DialogFooter className="mt-6">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={isSubmitting}
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={!selectedPrice || isSubmitting}
+              >
+                {isSubmitting ? "Processing..." : `Enter Draw ($${selectedPrice})`}
               </Button>
             </DialogFooter>
           </>

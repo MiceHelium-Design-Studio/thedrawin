@@ -58,6 +58,11 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
 
   const handlePurchaseSuccess = () => {
     setIsNumberModalOpen(false);
+    // Refresh the page or update state as needed
+    toast({
+      title: "Success!",
+      description: "You've successfully entered the draw!",
+    });
   };
 
   return (
