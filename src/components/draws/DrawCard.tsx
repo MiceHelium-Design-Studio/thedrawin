@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -125,7 +124,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
             <Button 
               variant="default" 
               className="flex-1" 
-              onClick={() => navigate(`/draws/${draw.id}`)}
+              onClick={() => navigate(`/draw/${draw.id}`)}
             >
               View Details
             </Button>
