@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Notification } from '../types';
 import { useToast } from '@/hooks/use-toast';
@@ -45,7 +46,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     // Set up real-time subscription for new notifications
     const channel = supabase
-      .channel('notifications-channel')
+      .channel('notifications-changes')
       .on(
         'postgres_changes',
         {
@@ -55,6 +56,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          console.log('New notification received:', payload);
           try {
             const newNotification = mapDatabaseNotificationToAppNotification(payload.new);
             setNotifications(prev => [newNotification, ...prev]);
@@ -78,25 +80,63 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           filter: `role=eq.admin`,
         },
         (payload) => {
+          console.log('New admin notification received:', payload);
           try {
-            // Only show admin notifications if user is admin
-            if (user?.email === 'raghidhilal@gmail.com') {
-              const newNotification = mapDatabaseNotificationToAppNotification(payload.new);
-              setNotifications(prev => [newNotification, ...prev]);
-              
-              toast({
-                title: newNotification.title || "Admin Notification",
-                description: newNotification.message,
-              });
-            }
+            // Show admin notifications to all users
+            const newNotification = mapDatabaseNotificationToAppNotification(payload.new);
+            setNotifications(prev => [newNotification, ...prev]);
+            
+            toast({
+              title: newNotification.title || "Admin Notification",
+              description: newNotification.message,
+            });
           } catch (error) {
             console.error("Error processing real-time admin notification:", error);
           }
         }
       )
-      .subscribe();
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+        },
+        (payload) => {
+          console.log('Notification updated:', payload);
+          try {
+            const updatedNotification = mapDatabaseNotificationToAppNotification(payload.new);
+            setNotifications(prev =>
+              prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
+            );
+          } catch (error) {
+            console.error("Error processing notification update:", error);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'notifications',
+        },
+        (payload) => {
+          console.log('Notification deleted:', payload);
+          try {
+            const deletedId = payload.old.id;
+            setNotifications(prev => prev.filter(n => n.id !== deletedId));
+          } catch (error) {
+            console.error("Error processing notification deletion:", error);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('Notification subscription status:', status);
+      });
     
     return () => {
+      console.log('Cleaning up notification subscription');
       supabase.removeChannel(channel);
     };
   }, [user, toast]);
@@ -106,20 +146,32 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     setLoading(true);
     try {
-      // Fetch both user and admin notifications
+      console.log('Fetching notifications for user:', user.id);
+      
+      // Fetch both user-specific and admin notifications
       const { data, error } = await supabase
         .from('notifications')
         .select('id, user_id, role, title, message, read, created_at')
         .or(`user_id.eq.${user.id},role.eq.admin`)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        throw error;
+      }
+      
+      console.log('Fetched notifications:', data);
       
       // Map database fields to app fields
       const mappedNotifications = (data || []).map(mapDatabaseNotificationToAppNotification);
       setNotifications(mappedNotifications);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error loading notifications',
+        description: 'Failed to load notifications. Please try again.',
+      });
       setNotifications([]);
     } finally {
       setLoading(false);
@@ -130,6 +182,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     
     try {
+      console.log('Marking notification as read:', id);
+      
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
@@ -158,6 +212,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
     
     try {
+      console.log('Deleting notification:', id);
+      
       const { error } = await supabase
         .from('notifications')
         .delete()
@@ -182,6 +238,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user || notifications.length === 0) return;
     
     try {
+      console.log('Marking all notifications as read for user:', user.id);
+      
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
@@ -206,31 +264,41 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const sendNotification = async (message: string, role: 'admin' | 'user', userIds?: string[]) => {
-    if (!user && !userIds) return;
-    
     try {
+      console.log('Sending notification:', { message, role, userIds });
+      
       if (userIds && userIds.length > 0) {
         // Send to specific users
         const promises = userIds.map(userId => 
           supabase.from('notifications').insert({
             user_id: userId,
             role: role,
-            title: role.charAt(0).toUpperCase() + role.slice(1),
+            title: role === 'admin' ? 'Admin Message' : 'Notification',
             message
           })
         );
         
-        await Promise.all(promises);
+        const results = await Promise.all(promises);
+        
+        // Check for errors
+        const errors = results.filter(result => result.error);
+        if (errors.length > 0) {
+          console.error('Errors sending notifications:', errors);
+          throw new Error('Some notifications failed to send');
+        }
+        
+        console.log('Notifications sent successfully to', userIds.length, 'users');
       } else if (user) {
         // Send to current user
         const { error } = await supabase.from('notifications').insert({
           user_id: user.id,
           role: role,
-          title: role.charAt(0).toUpperCase() + role.slice(1),
+          title: role === 'admin' ? 'Admin Message' : 'Notification',
           message
         });
         
         if (error) throw error;
+        console.log('Notification sent successfully to current user');
       }
       return;
     } catch (error) {

@@ -90,13 +90,19 @@ const PushNotifications: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching users for admin notifications...');
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('id, email, name')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+      }
       
+      console.log('Fetched users:', data);
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -112,6 +118,8 @@ const PushNotifications: React.FC = () => {
 
   const fetchRecentNotifications = async () => {
     try {
+      console.log('Fetching recent notifications...');
+      
       const { data, error } = await supabase
         .from('notifications')
         .select(`
@@ -124,11 +132,16 @@ const PushNotifications: React.FC = () => {
         .order('created_at', { ascending: false })
         .limit(10);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching recent notifications:', error);
+        throw error;
+      }
       
+      console.log('Fetched recent notifications:', data);
       setRecentNotifications(data || []);
     } catch (error) {
       console.error('Error fetching recent notifications:', error);
+      // Don't show error toast for this as it's not critical
     }
   };
 
@@ -150,12 +163,15 @@ const PushNotifications: React.FC = () => {
   const onNotificationSubmit = async (data: z.infer<typeof notificationFormSchema>) => {
     try {
       setIsSending(true);
+      console.log('Submitting notification:', data);
       
       const notificationTitle = getNotificationTitle(data.type);
       
       if (data.target === 'all') {
         // Send to all users with 'user' role
         const userIds = users.map(user => user.id);
+        console.log('Sending to all users:', userIds.length);
+        
         await sendNotification(data.message, 'user', userIds);
         
         toast({
@@ -174,6 +190,8 @@ const PushNotifications: React.FC = () => {
         }
         
         const userIds = selectedUsers.map(user => user.id);
+        console.log('Sending to selected users:', userIds);
+        
         await sendNotification(data.message, 'user', userIds);
         
         toast({
