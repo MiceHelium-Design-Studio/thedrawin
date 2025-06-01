@@ -141,6 +141,8 @@ export type Database = {
           number_of_tickets: number
           status: string | null
           title: string | null
+          winner_id: string | null
+          winner_ticket_number: number | null
         }
         Insert: {
           created_at?: string | null
@@ -150,6 +152,8 @@ export type Database = {
           number_of_tickets?: number
           status?: string | null
           title?: string | null
+          winner_id?: string | null
+          winner_ticket_number?: number | null
         }
         Update: {
           created_at?: string | null
@@ -159,8 +163,18 @@ export type Database = {
           number_of_tickets?: number
           status?: string | null
           title?: string | null
+          winner_id?: string | null
+          winner_ticket_number?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "draws_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "winners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       index_usage_log: {
         Row: {
@@ -560,6 +574,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      get_taken_ticket_numbers: {
+        Args: { draw_uuid: string }
+        Returns: number[]
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -574,9 +592,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      pick_draw_winner: {
+        Args: { draw_uuid: string }
+        Returns: Json
+      }
       update_user_admin_status: {
         Args: { user_email: string; is_admin_status: boolean }
         Returns: undefined
+      }
+      user_entered_draw: {
+        Args: { draw_uuid: string; user_uuid: string }
+        Returns: boolean
       }
       validate_input: {
         Args: { p_input: string; p_type?: string; p_max_length?: number }

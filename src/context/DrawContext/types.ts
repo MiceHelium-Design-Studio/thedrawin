@@ -16,7 +16,7 @@ export interface DrawContextType {
   createDraw: (draw: Omit<Draw, 'id'>) => Promise<void>;
   updateDraw: (id: string, updates: Partial<Draw>) => Promise<void>;
   deleteDraw: (id: string) => Promise<void>;
-  buyTicket: (drawId: string, quantity: number) => Promise<void>;
+  buyTicket: (drawId: string, ticketNumber: number) => Promise<void>;
   markNotificationAsRead: (id: string) => Promise<void>;
   uploadMedia: (file: File, bucketType?: BucketType) => Promise<MediaItem>;
   deleteMedia: (id: string, bucketType?: BucketType) => Promise<void>;
@@ -24,4 +24,5 @@ export interface DrawContextType {
   updateBanner: (id: string, banner: Partial<Banner>) => Promise<void>;
   deleteBanner: (id: string) => Promise<void>;
   fetchBanners: () => Promise<void>;
+  pickWinner: (drawId: string) => Promise<any>;
 }

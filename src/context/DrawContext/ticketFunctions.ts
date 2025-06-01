@@ -1,6 +1,8 @@
 
 import { Draw, Ticket } from '@/types';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { sendDrawEntryNotifications } from '@/utils/notificationUtils';
 
 export const useTicketFunctions = (
   setTickets: React.Dispatch<React.SetStateAction<Ticket[]>>,
@@ -8,20 +10,28 @@ export const useTicketFunctions = (
   draws: Draw[],
   setDraws: React.Dispatch<React.SetStateAction<Draw[]>>
 ) => {
-  // Mock function for fetching tickets since table doesn't exist in DB yet
+  // Fetch tickets for the currently logged in user
   const fetchTickets = async (userId: string) => {
     try {
-      // For development, we'll use a mock response until the tickets table is created
-      setTickets([
-        {
-          id: '1',
-          drawId: '1',
-          userId: userId,
-          number: 12345,
-          price: 10,
-          purchaseDate: new Date().toISOString()
-        }
-      ]);
+      const { data, error } = await supabase
+        .from('tickets')
+        .select('*')
+        .eq('user_id', userId)
+        .order('purchased_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Transform database tickets to our application Ticket type
+      const appTickets: Ticket[] = data.map(ticket => ({
+        id: ticket.id,
+        drawId: ticket.draw_id,
+        userId: ticket.user_id,
+        number: parseInt(ticket.ticket_number),
+        price: 10, // Default price since it's not in the DB schema
+        purchaseDate: ticket.purchased_at
+      }));
+      
+      setTickets(appTickets);
     } catch (err) {
       console.error('Unexpected error fetching tickets:', err);
       toast({
@@ -33,30 +43,66 @@ export const useTicketFunctions = (
     }
   };
 
-  // Updated buyTicket function to accept a specific ticket number and update ticket count
+  // Buy a ticket with a specific number
   const buyTicket = async (drawId: string, ticketNumber: number) => {
     try {
-      // Mock buy ticket functionality
+      // Find the draw to reference its details
       const draw = draws.find(d => d.id === drawId);
       if (!draw) {
         throw new Error('Draw not found');
       }
 
-      const ticketPrice = draw.ticketPrices[0]; // Assuming the first price in the array
-      
-      // Generate a single ticket with the specified number
-      const newTicket = {
-        id: Math.random().toString(),
-        drawId: drawId,
-        userId: 'mock-user-id', // This will be replaced with the actual user ID
-        number: ticketNumber,
-        price: ticketPrice,
-        purchaseDate: new Date().toISOString()
+      // Insert the ticket into the database
+      const { data: newTicket, error } = await supabase
+        .from('tickets')
+        .insert({
+          draw_id: drawId,
+          ticket_number: ticketNumber.toString(), // DB expects string
+          // user_id will be automatically set to auth.uid() by RLS
+        })
+        .select('*')
+        .single();
+
+      if (error) {
+        // Check if error is due to user already having a ticket
+        if (error.code === '23505' && error.message.includes('tickets_user_draw_unique')) {
+          toast({
+            variant: 'destructive',
+            title: 'Already entered',
+            description: 'You have already entered this draw with a number.'
+          });
+        } 
+        // Check if error is due to number already taken
+        else if (error.code === '23505' && error.message.includes('tickets_draw_ticket_unique')) {
+          toast({
+            variant: 'destructive',
+            title: 'Number already taken',
+            description: 'This number has already been taken. Please choose another number.'
+          });
+        }
+        else {
+          toast({
+            variant: 'destructive',
+            title: 'Failed to enter draw',
+            description: 'An unexpected error occurred. Please try again.'
+          });
+        }
+        throw error;
+      }
+
+      // Add the new ticket to our local state
+      const appTicket: Ticket = {
+        id: newTicket.id,
+        drawId: newTicket.draw_id,
+        userId: newTicket.user_id,
+        number: parseInt(newTicket.ticket_number),
+        price: 10, // Default price
+        purchaseDate: newTicket.purchased_at
       };
       
-      setTickets([...tickets, newTicket]);
+      setTickets([...tickets, appTicket]);
       
-      // Update the draw's numberOfTickets count
+      // Update the draw's numberOfTickets count in our local state
       setDraws(draws.map(d => 
         d.id === drawId 
           ? { ...d, numberOfTickets: (d.numberOfTickets || 0) + 1 }
@@ -67,13 +113,11 @@ export const useTicketFunctions = (
         title: 'Entry successful',
         description: `You have entered ${draw.title} with number ${ticketNumber}.`,
       });
+
+      return appTicket;
     } catch (err) {
-      console.error('Unexpected error buying ticket:', err);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to enter draw',
-        description: 'An unexpected error occurred while entering the draw.'
-      });
+      // Error toasts are handled above for specific cases
+      console.error('Error in buyTicket:', err);
       throw err;
     }
   };

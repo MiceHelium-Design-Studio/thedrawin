@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext } from 'react';
 import { Draw, Ticket, Notification, MediaItem, Banner } from '@/types';
 import { useAuth } from '../AuthContext';
@@ -31,6 +32,7 @@ export const DrawContext = createContext<DrawContextType>({
   updateBanner: async () => {},
   deleteBanner: async () => {},
   fetchBanners: async () => {},
+  pickWinner: async () => ({}),
 });
 
 const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -103,7 +105,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   }, [user]);
 
   // Pass through other functions
-  const { createDraw, updateDraw, deleteDraw } = drawFunctions;
+  const { createDraw, updateDraw, deleteDraw, pickWinner } = drawFunctions;
   const { buyTicket } = ticketFunctions;
   const { markNotificationAsRead } = notificationFunctions;
   const { createBanner, updateBanner, deleteBanner } = bannerFunctions;
@@ -164,7 +166,8 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     createBanner,
     updateBanner,
     deleteBanner,
-    fetchBanners
+    fetchBanners,
+    pickWinner
   };
 
   return (
