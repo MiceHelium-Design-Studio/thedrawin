@@ -13,41 +13,39 @@ export const useAuthState = () => {
     let isSubscribed = true;
     let initializationTimeout: NodeJS.Timeout;
     
-    // Reduce timeout to 2 seconds for faster loading
+    // Increase timeout to 5 seconds and add better error handling
     initializationTimeout = setTimeout(() => {
       if (isSubscribed && loading) {
         console.warn('Auth initialization timeout - setting loading to false');
         setLoading(false);
       }
-    }, 2000);
+    }, 5000);
     
     const createUserFromSession = async (session: any): Promise<User | null> => {
       if (!session?.user) return null;
       
       try {
-        // Try to fetch profile first with improved error handling
-        const userProfile = await fetchUser(session.user.id);
+        console.log('Creating user from session for:', session.user.id);
+        
+        // First try to fetch profile with a shorter timeout
+        const userProfile = await Promise.race([
+          fetchUser(session.user.id),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
+          )
+        ]) as User | null;
         
         if (userProfile) {
-          console.log('Using fetched profile:', userProfile.id);
+          console.log('Successfully fetched user profile:', userProfile.id);
           return userProfile;
         }
         
-        // Fallback to basic user object if profile doesn't exist or fails
-        console.log('Creating basic user object for:', session.user.id);
-        return {
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-          wallet: 500,
-          isAdmin: session.user.email === 'raghidhilal@gmail.com',
-          avatar: session.user.user_metadata?.avatar_url || null,
-          avatar_url: session.user.user_metadata?.avatar_url || null
-        };
+        throw new Error('No profile found');
       } catch (error) {
-        console.error('Error creating user from session:', error);
-        // Return basic user even on error to prevent blocking login
-        return {
+        console.warn('Profile fetch failed, creating fallback user:', error);
+        
+        // Create fallback user object immediately
+        const fallbackUser: User = {
           id: session.user.id,
           email: session.user.email || '',
           name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
@@ -56,6 +54,8 @@ export const useAuthState = () => {
           avatar: session.user.user_metadata?.avatar_url || null,
           avatar_url: session.user.user_metadata?.avatar_url || null
         };
+        
+        return fallbackUser;
       }
     };
     
@@ -84,7 +84,8 @@ export const useAuthState = () => {
           }
         } catch (error) {
           console.error('Error in auth state change handler:', error);
-          // Don't block auth flow on errors
+          
+          // Set fallback user even on errors to prevent auth blocking
           if (isSubscribed && session?.user) {
             const basicUser: User = {
               id: session.user.id,
@@ -113,7 +114,17 @@ export const useAuthState = () => {
     const initializeAuth = async () => {
       try {
         console.log('Initializing auth - checking for existing session');
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          if (isSubscribed) {
+            setLoading(false);
+            setUser(null);
+          }
+          return;
+        }
+        
         console.log('Initial session check:', data.session?.user?.id);
         
         if (data.session?.user && isSubscribed) {

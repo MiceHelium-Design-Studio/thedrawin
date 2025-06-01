@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Draw, Ticket, Notification, MediaItem, Banner } from '@/types';
 import { useAuth } from '../AuthContext';
 import { BucketType } from '@/utils/s3Utils';
@@ -43,7 +43,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   // Import functionality from separate hook files
   const drawFunctions = useMockDrawFunctions(setDraws, draws);
@@ -106,13 +106,18 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   };
 
   // Load data when user changes or on initial load
-  React.useEffect(() => {
-    console.log('DrawContext: Effect triggered, user:', user?.id);
+  useEffect(() => {
+    // Don't fetch data while auth is still loading
+    if (authLoading) {
+      console.log('DrawContext: Auth still loading, waiting...');
+      return;
+    }
     
-    // Always fetch draws (public data)
+    console.log('DrawContext: Auth loaded, user:', user?.id || 'none');
+    
+    // Always fetch draws and banners (public data) - but only after auth is resolved
     fetchDraws();
     
-    // Fetch banners (public data)
     bannerFunctions.fetchBanners().catch(err => {
       console.error('DrawContext: Error fetching banners:', err);
     });
@@ -125,7 +130,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         console.error('DrawContext: Error loading media:', err);
       });
     }
-  }, [user]);
+  }, [user, authLoading]); // Added authLoading as dependency
 
   // Pass through other functions with proper return types
   const { createDraw, updateDraw, deleteDraw, pickWinner } = drawFunctions;
@@ -176,7 +181,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     notifications,
     media,
     banners,
-    loading,
+    loading: loading || authLoading, // Include auth loading state
     error,
     fetchDraws,
     fetchTickets,
