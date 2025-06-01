@@ -28,6 +28,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
   const [takenNumbers, setTakenNumbers] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUserEntered, setIsUserEntered] = useState(false);
+  const [userBalance, setUserBalance] = useState<number>(0);
   const { buyTicket } = useDraws();
   const { user } = useAuth();
 
@@ -56,6 +57,16 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
         
         if (takenError) throw takenError;
         setTakenNumbers(takenNumbersData || []);
+
+        // Get user's current wallet balance
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('wallet')
+          .eq('id', user.id)
+          .single();
+        
+        if (profileError) throw profileError;
+        setUserBalance(profileData?.wallet || 0);
       } catch (error) {
         console.error('Error fetching draw info:', error);
         toast({
@@ -91,9 +102,19 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
   const handleSubmit = async () => {
     if (!selectedNumber || !selectedPrice || !draw?.id || !user?.id) return;
     
+    // Check if user has sufficient balance
+    if (userBalance < selectedPrice) {
+      toast({
+        variant: 'destructive',
+        title: 'Insufficient balance',
+        description: `You need $${selectedPrice} but only have $${userBalance}. Please add funds to your wallet.`
+      });
+      return;
+    }
+    
     try {
       setIsSubmitting(true);
-      await buyTicket(draw.id, selectedNumber);
+      await buyTicket(draw.id, selectedNumber, selectedPrice);
       
       // Send notifications
       await sendDrawEntryNotifications(
@@ -107,11 +128,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error purchasing ticket:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error entering draw',
-        description: 'Please try again later.'
-      });
+      // Error toast is handled in buyTicket function
     } finally {
       setIsSubmitting(false);
     }
@@ -123,6 +140,8 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
     setStep('number');
     setSelectedPrice(null);
   };
+
+  const canAffordPrice = (price: number) => userBalance >= price;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -143,6 +162,12 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
           </div>
         ) : step === 'number' ? (
           <>
+            <div className="mb-4 p-3 bg-muted rounded-lg">
+              <p className="text-sm">
+                <span className="font-medium">Your wallet balance:</span> ${userBalance}
+              </p>
+            </div>
+            
             <div className="grid grid-cols-10 gap-2 mt-4">
               {availableNumbers.map((number) => (
                 <Button
@@ -195,6 +220,12 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
         ) : (
           <>
             <div className="mt-4">
+              <div className="mb-4 p-3 bg-muted rounded-lg">
+                <p className="text-sm">
+                  <span className="font-medium">Your wallet balance:</span> ${userBalance}
+                </p>
+              </div>
+              
               <p className="text-sm text-gray-600 mb-4">
                 Selected Number: <span className="font-bold text-primary">#{selectedNumber}</span>
               </p>
@@ -204,11 +235,16 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                   <Button
                     key={price}
                     variant={selectedPrice === price ? "default" : "outline"}
-                    className="h-16 flex flex-col"
+                    className={`h-16 flex flex-col ${
+                      !canAffordPrice(price) ? "opacity-50" : ""
+                    }`}
                     onClick={() => handlePriceSelect(price)}
+                    disabled={!canAffordPrice(price)}
                   >
                     <span className="text-lg font-bold">${price}</span>
-                    <span className="text-xs">Entry Fee</span>
+                    <span className="text-xs">
+                      {canAffordPrice(price) ? "Entry Fee" : "Insufficient funds"}
+                    </span>
                   </Button>
                 ))}
               </div>
@@ -224,7 +260,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!selectedPrice || isSubmitting}
+                disabled={!selectedPrice || !canAffordPrice(selectedPrice || 0) || isSubmitting}
               >
                 {isSubmitting ? "Processing..." : `Enter Draw ($${selectedPrice})`}
               </Button>

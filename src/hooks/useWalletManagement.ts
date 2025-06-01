@@ -38,7 +38,7 @@ export const useWalletManagement = (users: User[], onUserUpdated: () => void) =>
       
       toast({
         title: 'Wallet updated',
-        description: `Added ${walletAmount} credits to user's wallet.`
+        description: `Added $${walletAmount} to user's wallet. New balance: $${newWalletAmount}`
       });
       
       // Call the callback to refetch users instead of trying to update the state directly

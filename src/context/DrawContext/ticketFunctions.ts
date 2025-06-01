@@ -27,7 +27,7 @@ export const useTicketFunctions = (
         drawId: ticket.draw_id,
         userId: ticket.user_id,
         number: parseInt(ticket.ticket_number),
-        price: ticket.price || 10, // Now the price column exists in the database
+        price: ticket.price || 10,
         purchaseDate: ticket.purchased_at
       }));
       
@@ -44,7 +44,7 @@ export const useTicketFunctions = (
   };
 
   // Buy a ticket with a specific number and price
-  const buyTicket = async (drawId: string, ticketNumber: number, price?: number) => {
+  const buyTicket = async (drawId: string, ticketNumber: number, price?: number): Promise<Ticket> => {
     try {
       // Find the draw to reference its details
       const draw = draws.find(d => d.id === drawId);
@@ -56,11 +56,14 @@ export const useTicketFunctions = (
       const ticketPrice = price || draw.ticketPrices[0] || 10;
 
       // Insert the ticket into the database
+      // The trigger will automatically:
+      // 1. Check wallet balance and deduct the price
+      // 2. Update the draw's number_of_tickets count
       const { data: newTicket, error } = await supabase
         .from('tickets')
         .insert({
           draw_id: drawId,
-          ticket_number: ticketNumber.toString(), // DB expects string
+          ticket_number: ticketNumber.toString(),
           price: ticketPrice,
           // user_id will be automatically set to auth.uid() by RLS
         })
@@ -68,23 +71,34 @@ export const useTicketFunctions = (
         .single();
 
       if (error) {
-        // Check if error is due to user already having a ticket
-        if (error.code === '23505' && error.message.includes('tickets_user_draw_unique')) {
+        // Handle specific constraint violations with user-friendly messages
+        if (error.code === '23505') {
+          if (error.message.includes('tickets_user_draw_unique')) {
+            toast({
+              variant: 'destructive',
+              title: 'Already entered',
+              description: 'You have already entered this draw. Each user can only enter once.'
+            });
+          } else if (error.message.includes('tickets_draw_ticket_unique')) {
+            toast({
+              variant: 'destructive',
+              title: 'Number already taken',
+              description: 'This number has already been taken. Please choose another number.'
+            });
+          } else {
+            toast({
+              variant: 'destructive',
+              title: 'Entry failed',
+              description: 'This entry conflicts with existing data. Please try again.'
+            });
+          }
+        } else if (error.message.includes('Insufficient wallet balance')) {
           toast({
             variant: 'destructive',
-            title: 'Already entered',
-            description: 'You have already entered this draw with a number.'
+            title: 'Insufficient balance',
+            description: `You need $${ticketPrice} in your wallet to enter this draw. Please add funds to continue.`
           });
-        } 
-        // Check if error is due to number already taken
-        else if (error.code === '23505' && error.message.includes('tickets_draw_ticket_unique')) {
-          toast({
-            variant: 'destructive',
-            title: 'Number already taken',
-            description: 'This number has already been taken. Please choose another number.'
-          });
-        }
-        else {
+        } else {
           toast({
             variant: 'destructive',
             title: 'Failed to enter draw',
@@ -100,13 +114,14 @@ export const useTicketFunctions = (
         drawId: newTicket.draw_id,
         userId: newTicket.user_id,
         number: parseInt(newTicket.ticket_number),
-        price: newTicket.price, // Now properly available from the database
+        price: newTicket.price,
         purchaseDate: newTicket.purchased_at
       };
       
       setTickets([...tickets, appTicket]);
       
-      // Update the draw's numberOfTickets count in our local state
+      // The draw's numberOfTickets count is automatically updated by the database trigger
+      // But we should update our local state to reflect the change immediately
       setDraws(draws.map(d => 
         d.id === drawId 
           ? { ...d, numberOfTickets: (d.numberOfTickets || 0) + 1 }
