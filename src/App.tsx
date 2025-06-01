@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -28,7 +29,7 @@ import TodoPage from "./pages/TodoPage";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      retry: 1, // Reduce retries for faster loading
       staleTime: 60000,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
@@ -45,13 +46,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     console.log("ProtectedRoute at path:", location.pathname, "user:", user?.id, "loading:", loading);
   }, [location.pathname, user, loading]);
   
+  // Reduce loading time and show content faster
   if (loading) {
     console.log("ProtectedRoute: Auth state is loading");
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <div className="animate-pulse space-y-4 w-full max-w-md">
           <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
-          <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
+          <div className="h-32 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
         </div>
       </div>
     );
@@ -68,13 +70,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   console.log("App rendering");
-  
-  // Temporarily disable admin setup to prevent loading issues
-  // useEffect(() => {
-  //   ensureFullAdmin()
-  //     .then(() => console.log('Admin check completed'))
-  //     .catch(err => console.error('Admin check failed:', err));
-  // }, []);
   
   return (
     <ErrorBoundary>

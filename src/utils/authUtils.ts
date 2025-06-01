@@ -4,19 +4,22 @@ import { supabase } from '@/integrations/supabase/client';
 export const fetchUser = async (userId: string): Promise<User | null> => {
   try {
     console.log('Fetching user profile for:', userId);
+    
+    // Use a more permissive query with better error handling
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle instead of single to handle no results gracefully
 
     if (error) {
       console.error('Error fetching user profile:', error);
+      // Don't throw error, return null to allow fallback
       return null;
     }
 
     if (!data) {
-      console.log('No profile data returned');
+      console.log('No profile data found for user:', userId);
       return null;
     }
 
@@ -34,6 +37,7 @@ export const fetchUser = async (userId: string): Promise<User | null> => {
     };
   } catch (error) {
     console.error('Unexpected error in fetchUser:', error);
+    // Return null instead of throwing to allow graceful fallback
     return null;
   }
 };

@@ -22,10 +22,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   console.log("Layout rendering, user:", user?.id, "isAdmin:", user?.isAdmin, "isAuthPage:", isAuthPage);
 
+  // Show loading state only briefly to prevent blocking
+  if (authLoading && !isAuthPage) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black">
+        <main className="flex-grow flex items-center justify-center">
+          <div className="animate-pulse space-y-4 w-full max-w-md px-4">
+            <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
+            <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
       {/* Top Navigation - show on all pages except auth and admin */}
-      {(!isAuthPage && !isAdminPage) && (user && !authLoading) && (
+      {(!isAuthPage && !isAdminPage) && user && (
         <TopNavigation />
       )}
 
@@ -34,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
 
       {/* Bottom navbar - show on all pages except auth and admin */}
-      {(!isAuthPage && !isAdminPage) && (user && !authLoading) && (
+      {(!isAuthPage && !isAdminPage) && user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20">
           <div className="grid grid-cols-5 h-16">
             <NavLink
@@ -47,12 +61,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     : "text-white hover:text-gold"
                 )
               }
-              onClick={(e) => {
-                if (authLoading) {
-                  e.preventDefault();
-                  console.log("Navigation prevented during loading");
-                }
-              }}
             >
               <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/' && "bg-black-light/50")}>
                 <Home className="h-5 w-5 mb-1" />

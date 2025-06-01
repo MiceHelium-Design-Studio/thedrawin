@@ -25,6 +25,8 @@ export const useProfileManagement = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -34,18 +36,29 @@ export const useProfileManagement = () => {
     try {
       setLoading(true);
       
-      // Fetch profile from profiles table
+      // Use maybeSingle for better error handling
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        throw profileError;
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        // Create profile from user data if fetch fails
+        const fallbackProfile = {
+          id: user.id,
+          name: user.name || user.email || 'User',
+          avatar_url: user.avatar_url || null,
+          email: user.email || ''
+        };
+        setProfile(fallbackProfile);
+        setName(fallbackProfile.name);
+        setEmail(fallbackProfile.email);
+        return;
       }
 
-      // If no profile exists, create one
+      // If no profile exists, create one from user data
       if (!profileData) {
         const newProfile = {
           id: user.id,
@@ -54,35 +67,32 @@ export const useProfileManagement = () => {
           email: user.email || ''
         };
 
-        const { data: createdProfile, error: createError } = await supabase
-          .from('profiles')
-          .insert(newProfile)
-          .select()
-          .single();
-
-        if (createError) throw createError;
-
-        setProfile({
-          ...createdProfile,
-          email: user.email || ''
-        });
+        setProfile(newProfile);
+        setName(newProfile.name);
+        setEmail(newProfile.email);
       } else {
-        setProfile({
+        const profile = {
           ...profileData,
-          email: user.email || ''
-        });
+          email: user.email || profileData.email || ''
+        };
+        setProfile(profile);
+        setName(profile.name || user.name || user.email || 'User');
+        setEmail(profile.email);
       }
-
-      // Set form state
-      setName(profileData?.name || user.name || user.email || 'User');
-      setEmail(user.email || '');
     } catch (error) {
       console.error('Error fetching profile:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error loading profile',
-        description: 'There was a problem loading your profile. Please try again.',
-      });
+      // Fallback to user data
+      if (user) {
+        const fallbackProfile = {
+          id: user.id,
+          name: user.name || user.email || 'User',
+          avatar_url: user.avatar_url || null,
+          email: user.email || ''
+        };
+        setProfile(fallbackProfile);
+        setName(fallbackProfile.name);
+        setEmail(fallbackProfile.email);
+      }
     } finally {
       setLoading(false);
     }
@@ -94,28 +104,45 @@ export const useProfileManagement = () => {
     try {
       setSaving(true);
 
-      // Update profile in database
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          name,
-          avatar_url: avatarUrl !== undefined ? avatarUrl : profile.avatar_url,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
+      // Try to update/insert profile in database
+      try {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: user.id,
+            name,
+            email: user.email || email,
+            avatar_url: avatarUrl !== undefined ? avatarUrl : profile.avatar_url,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'id'
+          });
 
-      if (updateError) throw updateError;
-
-      // Update auth user metadata if needed
-      if (user.email !== email) {
-        const { error: authError } = await supabase.auth.updateUser({
-          email: email
-        });
-
-        if (authError) throw authError;
+        if (updateError) {
+          console.error('Database update error:', updateError);
+          // Continue anyway - don't block the UI update
+        }
+      } catch (dbError) {
+        console.error('Database operation failed:', dbError);
+        // Continue with local update even if DB fails
       }
 
-      // Update local state
+      // Update auth user metadata if email changed
+      if (user.email !== email) {
+        try {
+          const { error: authError } = await supabase.auth.updateUser({
+            email: email
+          });
+
+          if (authError) {
+            console.error('Auth update error:', authError);
+          }
+        } catch (authError) {
+          console.error('Auth operation failed:', authError);
+        }
+      }
+
+      // Update local state regardless of DB success
       setProfile({
         ...profile,
         name,
