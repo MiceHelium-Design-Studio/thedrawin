@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_wallet_addresses: {
+        Row: {
+          created_at: string
+          currency_code: string
+          currency_name: string
+          id: string
+          is_active: boolean
+          network: string | null
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          currency_code: string
+          currency_name: string
+          id?: string
+          is_active?: boolean
+          network?: string | null
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          currency_code?: string
+          currency_name?: string
+          id?: string
+          is_active?: boolean
+          network?: string | null
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string

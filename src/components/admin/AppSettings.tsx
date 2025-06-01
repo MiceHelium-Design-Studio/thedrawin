@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +28,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from '@/hooks/use-toast';
-import { Paintbrush, Type, Palette, Globe } from 'lucide-react';
+import { Paintbrush, Type, Palette, Globe, Wallet } from 'lucide-react';
+import PaymentSettings from './PaymentSettings';
 
 // Color Scheme Form Schema
 const colorSchemeFormSchema = z.object({
@@ -151,7 +151,7 @@ const AppSettings: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-8">
+        <TabsList className="grid grid-cols-4 mb-8">
           <TabsTrigger value="colors" className="flex items-center gap-2">
             <Palette className="h-4 w-4" />
             Colors
@@ -163,6 +163,10 @@ const AppSettings: React.FC = () => {
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
             General
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="flex items-center gap-2">
+            <Wallet className="h-4 w-4" />
+            Payments
           </TabsTrigger>
         </TabsList>
         
@@ -474,6 +478,10 @@ const AppSettings: React.FC = () => {
               </Form>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="payments">
+          <PaymentSettings />
         </TabsContent>
       </Tabs>
     </section>
