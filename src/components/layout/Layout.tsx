@@ -17,12 +17,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   
   const unreadCount = notifications?.filter(n => !n.read)?.length || 0;
-  const isAuthPage = location.pathname === '/auth';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/auth';
   const isAdminPage = location.pathname === '/admin';
 
   console.log("Layout rendering, user:", user?.id, "isAdmin:", user?.isAdmin, "isAuthPage:", isAuthPage);
 
-  // Show loading state only briefly to prevent blocking
   if (authLoading && !isAuthPage) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black">
@@ -38,7 +37,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
-      {/* Top Navigation - show on all pages except auth and admin */}
       {(!isAuthPage && !isAdminPage) && user && (
         <TopNavigation />
       )}
@@ -47,12 +45,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      {/* Bottom navbar - show on all pages except auth and admin */}
       {(!isAuthPage && !isAdminPage) && user && (
         <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20">
           <div className="grid grid-cols-5 h-16">
             <NavLink
-              to="/"
+              to="/home"
               className={({ isActive }) =>
                 cn(
                   "flex flex-col items-center justify-center text-xs transition-all duration-300",
@@ -62,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )
               }
             >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/' && "bg-black-light/50")}>
+              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/home' && "bg-black-light/50")}>
                 <Home className="h-5 w-5 mb-1" />
               </div>
               <span>Home</span>

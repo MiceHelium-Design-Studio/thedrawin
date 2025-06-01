@@ -29,7 +29,7 @@ import TodoPage from "./pages/TodoPage";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1, // Reduce retries for faster loading
+      retry: 1,
       staleTime: 60000,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
@@ -46,7 +46,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     console.log("ProtectedRoute at path:", location.pathname, "user:", user?.id, "loading:", loading);
   }, [location.pathname, user, loading]);
   
-  // Reduce loading time and show content faster
   if (loading) {
     console.log("ProtectedRoute: Auth state is loading");
     return (
@@ -60,11 +59,36 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (!user) {
-    console.log("ProtectedRoute: No user, redirecting to auth");
-    return <Navigate to="/auth" replace state={{ from: location }} />;
+    console.log("ProtectedRoute: No user, redirecting to login");
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
   
   console.log("ProtectedRoute: User authenticated, rendering content", user?.id);
+  return <>{children}</>;
+};
+
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-black/90">
+        <div className="animate-pulse space-y-4 w-full max-w-md">
+          <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
+          <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (user) {
+    // Get the intended destination from location state, or default to home
+    const from = location.state?.from?.pathname || "/home";
+    console.log("PublicRoute: User already logged in, redirecting to:", from);
+    return <Navigate to={from} replace />;
+  }
+  
   return <>{children}</>;
 };
 
@@ -84,9 +108,11 @@ const App = () => {
                     <Sonner />
                     <Layout>
                       <Routes>
-                        <Route path="/auth" element={<Auth />} />
+                        <Route path="/login" element={<PublicRoute><Auth /></PublicRoute>} />
+                        <Route path="/auth" element={<Navigate to="/login" replace />} />
                         
-                        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                        <Route path="/" element={<Navigate to="/home" replace />} />
+                        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                         <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
                         <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
                         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />

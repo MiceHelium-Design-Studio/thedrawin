@@ -18,7 +18,7 @@ export const useAuthForm = () => {
     name?: string; 
     phone?: string 
   }) => {
-    if (isProcessing) return; // Prevent double submission
+    if (isProcessing) return;
     
     try {
       setIsProcessing(true);
@@ -33,8 +33,9 @@ export const useAuthForm = () => {
           description: 'You are now signed in.',
         });
         
-        // Navigate to intended route or home
-        const from = location.state?.from?.pathname || "/";
+        // Always redirect to /home after successful login
+        const from = location.state?.from?.pathname || "/home";
+        console.log('Redirecting to:', from);
         navigate(from, { replace: true });
         
       } else {
@@ -47,12 +48,11 @@ export const useAuthForm = () => {
         });
         
         // For signup, always go to home
-        navigate("/", { replace: true });
+        navigate("/home", { replace: true });
       }
     } catch (error: any) {
       console.error(`${mode} error:`, error);
       
-      // Error is already handled in the auth actions, but we can add additional handling here
       if (error.message?.includes('Invalid login credentials')) {
         toast({
           variant: 'destructive',
@@ -66,7 +66,6 @@ export const useAuthForm = () => {
           description: 'Please check your email and click the confirmation link before signing in.',
         });
       } else {
-        // Generic error fallback
         toast({
           variant: 'destructive',
           title: `${mode === 'login' ? 'Login' : 'Signup'} failed`,
@@ -79,7 +78,7 @@ export const useAuthForm = () => {
   };
 
   const handleSocialLogin = async (provider: string) => {
-    if (isProcessing) return; // Prevent double submission
+    if (isProcessing) return;
     
     try {
       setIsProcessing(true);
@@ -106,7 +105,6 @@ export const useAuthForm = () => {
         description: error.message || 'An error occurred during social login.',
       });
     } finally {
-      // For OAuth, don't set loading to false immediately as redirect might happen
       if (provider !== 'Google') {
         setIsProcessing(false);
       }
