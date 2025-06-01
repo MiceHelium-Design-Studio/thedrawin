@@ -14,7 +14,8 @@ const Home: React.FC = () => {
   const {
     draws = [],
     banners = [],
-    loading: drawsLoading
+    loading: drawsLoading,
+    error
   } = useDraws();
   const {
     user,
@@ -28,7 +29,8 @@ const Home: React.FC = () => {
     console.log("User in Home:", user?.id);
     console.log("Draws loaded:", draws?.length || 0, "items");
     console.log("Banners loaded:", banners?.length || 0, "items");
-  }, [isLoading, user, draws, banners]);
+    console.log("Error state:", error);
+  }, [isLoading, user, draws, banners, error]);
 
   const sortedDraws = [...(draws || [])].sort((a, b) => {
     const statusOrder = {
@@ -53,7 +55,7 @@ const Home: React.FC = () => {
     "https://images.unsplash.com/photo-1616514169928-a1e40c6f791c"
   ];
   
-  // Use default banners if none available from backend
+  // Use banners from backend if available, otherwise use defaults
   const displayBanners = banners && banners.length > 0 
     ? banners 
     : defaultBannerUrls.map((url, index) => ({
@@ -62,6 +64,46 @@ const Home: React.FC = () => {
         linkUrl: '/draws',
         active: true
       }));
+
+  // Show error state if there's an error and no draws are loaded
+  if (error && (!draws || draws.length === 0)) {
+    return (
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col items-center mb-8 text-center">
+            <img 
+              src="/lovable-uploads/eb8560b4-61ba-46be-a7eb-ab1918ff22de.png"
+              alt="DRAWIN - The First Draw & Win App" 
+              className="max-w-[280px] md:max-w-[320px] lg:max-w-[400px] mx-auto mb-4"
+            />
+            <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+              Join exciting draws, win amazing prizes, and be part of the ultimate gaming experience
+            </p>
+          </div>
+
+          <div className="text-center py-12 bg-black-light/30 rounded-xl">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h3 className="text-xl font-bold mb-2 text-gold">Error Loading Draws</h3>
+            <p className="text-white/60 mb-6">
+              We're having trouble loading the draws. Please try refreshing the page.
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.reload()}
+              className="mr-4"
+            >
+              Refresh Page
+            </Button>
+            {!user && (
+              <Button onClick={() => navigate('/login')} className="bg-gold hover:bg-gold/90 text-black">
+                Login
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

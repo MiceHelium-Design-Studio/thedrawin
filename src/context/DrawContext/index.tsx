@@ -58,49 +58,72 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     setError(null);
     try {
       await drawFunctions.fetchDraws();
-    } catch (err) {
-      setError('An unexpected error occurred.');
+      console.log('DrawContext: Draws fetched successfully');
+    } catch (err: any) {
+      console.error('DrawContext: Error fetching draws:', err);
+      setError(err.message || 'Failed to load draws');
     } finally {
       setLoading(false);
     }
   };
 
   const fetchTickets = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('DrawContext: No user, skipping ticket fetch');
+      return;
+    }
     
     setLoading(true);
     setError(null);
     try {
       await ticketFunctions.fetchTickets(user.id);
-    } catch (err) {
-      setError('An unexpected error occurred.');
+      console.log('DrawContext: Tickets fetched successfully');
+    } catch (err: any) {
+      console.error('DrawContext: Error fetching tickets:', err);
+      setError(err.message || 'Failed to load tickets');
     } finally {
       setLoading(false);
     }
   };
 
   const fetchNotifications = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('DrawContext: No user, skipping notifications fetch');
+      return;
+    }
     
     setLoading(true);
     setError(null);
     try {
       await notificationFunctions.fetchNotifications(user.id);
-    } catch (err) {
-      setError('An unexpected error occurred.');
+      console.log('DrawContext: Notifications fetched successfully');
+    } catch (err: any) {
+      console.error('DrawContext: Error fetching notifications:', err);
+      setError(err.message || 'Failed to load notifications');
     } finally {
       setLoading(false);
     }
   };
 
-  // Load data when user changes
+  // Load data when user changes or on initial load
   React.useEffect(() => {
+    console.log('DrawContext: Effect triggered, user:', user?.id);
+    
+    // Always fetch draws (public data)
+    fetchDraws();
+    
+    // Fetch banners (public data)
+    bannerFunctions.fetchBanners().catch(err => {
+      console.error('DrawContext: Error fetching banners:', err);
+    });
+    
+    // Only fetch user-specific data if user is logged in
     if (user) {
-      fetchDraws();
       fetchTickets();
       fetchNotifications();
-      bannerFunctions.fetchBanners();
-      mediaFunctions.loadMedia(user.id);
+      mediaFunctions.loadMedia(user.id).catch(err => {
+        console.error('DrawContext: Error loading media:', err);
+      });
     }
   }, [user]);
 
@@ -116,8 +139,10 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     setError(null);
     try {
       await bannerFunctions.fetchBanners();
-    } catch (err) {
-      setError('An unexpected error occurred.');
+      console.log('DrawContext: Banners fetched successfully');
+    } catch (err: any) {
+      console.error('DrawContext: Error fetching banners:', err);
+      setError(err.message || 'Failed to load banners');
     } finally {
       setLoading(false);
     }

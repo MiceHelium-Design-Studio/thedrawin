@@ -1,12 +1,11 @@
+
 export interface User {
   id: string;
   email: string;
-  name?: string;
+  name: string;
   avatar?: string;
-  avatar_url?: string; // Added new field for Unsplash avatar URL
+  isAdmin?: boolean;
   wallet: number;
-  isAdmin: boolean;
-  createdAt?: string;
 }
 
 export interface Draw {
@@ -16,12 +15,13 @@ export interface Draw {
   maxParticipants: number;
   currentParticipants: number;
   ticketPrices: number[];
-  status: 'upcoming' | 'active' | 'open' | 'completed';
+  status: 'upcoming' | 'active' | 'completed';
   startDate: string;
   endDate: string;
   winner?: string;
-  bannerImage?: string; // URL to the image on Unsplash or other sources
-  numberOfTickets?: number; // New field to track total tickets purchased
+  numberOfTickets?: number;
+  bannerImage?: string;
+  goldWeight?: number; // Added for gold weight in grams
 }
 
 export interface Ticket {
@@ -43,22 +43,21 @@ export interface Notification {
   role: 'admin' | 'user';
 }
 
-export interface Banner {
-  id: string;
-  imageUrl: string; // URL to the image on Unsplash or other sources
-  linkUrl?: string;
-  title?: string;
-  active?: boolean;
-  position?: number;
-  url?: string; // Adding url property for compatibility
-}
-
 export interface MediaItem {
   id: string;
   name: string;
-  url: string; // URL to the image on Unsplash or other sources
+  url: string;
   type: 'image' | 'document' | 'video';
   size: number;
   user_id: string;
   uploadDate: string;
+}
+
+export interface Banner {
+  id: string;
+  imageUrl: string;
+  linkUrl: string;
+  title?: string;
+  active: boolean;
+  position?: number;
 }
