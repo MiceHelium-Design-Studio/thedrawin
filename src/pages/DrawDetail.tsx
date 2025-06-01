@@ -74,7 +74,7 @@ const DrawDetail: React.FC = () => {
         title={draw.title}
       />
       
-      {draw.status === 'active' ? (
+      {(draw.status === 'active' || draw.status === 'open') ? (
         <DrawTicketForm
           ticketPrices={draw.ticketPrices}
           onSubmit={handleBuyTicket}

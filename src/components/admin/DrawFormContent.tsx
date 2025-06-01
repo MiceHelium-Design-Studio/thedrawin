@@ -1,78 +1,26 @@
 
-import React from 'react';
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
-import { Draw } from '../../types';
-import { useDraws } from '@/context/DrawContext';
-import { ImageUploader } from './ImageUploader';
-import { uploadToS3 } from '@/utils/s3Utils';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DrawerClose,
-  DrawerFooter,
-} from "@/components/ui/drawer";
-
-const drawFormSchema = z.object({
-  title: z.string().min(2, {
-    message: "Draw title must be at least 2 characters.",
-  }),
-  description: z.string().min(10, {
-    message: "Description must be at least 10 characters.",
-  }),
-  maxParticipants: z.number().min(1, {
-    message: "Max participants must be at least 1.",
-  }).max(1000, {
-    message: "Max participants must be less than 1000.",
-  }),
-  ticketPrices: z.string().refine(value => {
-    try {
-      const prices = value.split(',').map(Number);
-      return prices.every(price => price > 0);
-    } catch (error) {
-      return false;
-    }
-  }, {
-    message: "Ticket prices must be a comma-separated list of numbers greater than 0.",
-  }),
-  startDate: z.date(),
-  endDate: z.date().min(new Date(), {
-    message: "End date must be after today.",
-  }),
-  bannerImage: z.string().url({
-    message: "Banner image must be a valid URL.",
-  }).optional().or(z.literal('')),
-  status: z.enum(['active', 'upcoming', 'completed']),
-});
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DrawerFooter, DrawerClose } from '@/components/ui/drawer';
+import { useDraws } from '@/context/DrawContext';
+import { Draw } from '@/types';
+import { toast } from '@/hooks/use-toast';
+import ImageUploader from './ImageUploader';
 
 interface DrawFormContentProps {
   selectedDraw: Draw | null;
   drawImageUrl: string;
   isUploadingDrawImage: boolean;
   setDrawImageUrl: (url: string) => void;
-  setIsUploadingDrawImage: (isUploading: boolean) => void;
+  setIsUploadingDrawImage: (uploading: boolean) => void;
   onSuccess: () => void;
 }
 
-export const DrawFormContent: React.FC<DrawFormContentProps> = ({
+const DrawFormContent: React.FC<DrawFormContentProps> = ({
   selectedDraw,
   drawImageUrl,
   isUploadingDrawImage,
@@ -80,259 +28,155 @@ export const DrawFormContent: React.FC<DrawFormContentProps> = ({
   setIsUploadingDrawImage,
   onSuccess
 }) => {
-  const { toast } = useToast();
   const { createDraw, updateDraw } = useDraws();
-
-  const drawForm = useForm<z.infer<typeof drawFormSchema>>({
-    resolver: zodResolver(drawFormSchema),
-    defaultValues: {
-      title: selectedDraw?.title || "",
-      description: selectedDraw?.description || "",
-      maxParticipants: selectedDraw?.maxParticipants || 100,
-      ticketPrices: selectedDraw?.ticketPrices.join(', ') || "5, 10, 20",
-      startDate: selectedDraw ? new Date(selectedDraw.startDate) : new Date(),
-      endDate: selectedDraw ? new Date(selectedDraw.endDate) : new Date(),
-      bannerImage: selectedDraw?.bannerImage || "",
-      status: selectedDraw?.status || 'active',
-    },
+  const [formData, setFormData] = useState({
+    title: selectedDraw?.title || '',
+    description: selectedDraw?.description || '',
+    maxParticipants: selectedDraw?.maxParticipants || 100,
+    ticketPrices: selectedDraw?.ticketPrices?.join(', ') || '10',
+    startDate: selectedDraw?.startDate ? new Date(selectedDraw.startDate).toISOString().slice(0, 16) : '',
+    endDate: selectedDraw?.endDate ? new Date(selectedDraw.endDate).toISOString().slice(0, 16) : '',
+    status: selectedDraw?.status || 'upcoming' as 'upcoming' | 'active' | 'open' | 'completed'
   });
 
-  const handleDrawCreate = async (values: z.infer<typeof drawFormSchema>) => {
-    try {
-      const ticketPricesArray = values.ticketPrices.split(',').map(Number);
-      
-      const newDraw = {
-        title: values.title,
-        description: values.description,
-        maxParticipants: values.maxParticipants,
-        currentParticipants: 0,
-        ticketPrices: ticketPricesArray,
-        status: values.status,
-        startDate: values.startDate.toISOString(),
-        endDate: values.endDate.toISOString(),
-        bannerImage: values.bannerImage || drawImageUrl
-      };
-      
-      await createDraw(newDraw);
-      drawForm.reset();
-      onSuccess();
-      toast({
-        title: "Draw created",
-        description: "The draw has been successfully created.",
-      });
-    } catch (error) {
-      console.error('Error creating draw:', error);
-      toast({
-        variant: 'destructive',
-        title: "Creation failed",
-        description: "There was a problem creating the draw.",
-      });
-    }
+  const handleInputChange = (field: string, value: string | number) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleDrawUpdate = async (values: z.infer<typeof drawFormSchema>) => {
-    if (!selectedDraw) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
     try {
-      const ticketPricesArray = values.ticketPrices.split(',').map(Number);
-      
-      const updatedDraw = {
-        title: values.title,
-        description: values.description,
-        maxParticipants: values.maxParticipants,
-        ticketPrices: ticketPricesArray,
-        status: values.status,
-        startDate: values.startDate.toISOString(),
-        endDate: values.endDate.toISOString(),
-        bannerImage: values.bannerImage || drawImageUrl
+      const drawData = {
+        title: formData.title,
+        description: formData.description,
+        maxParticipants: formData.maxParticipants,
+        currentParticipants: selectedDraw?.currentParticipants || 0,
+        ticketPrices: formData.ticketPrices.split(',').map(price => parseFloat(price.trim())),
+        status: formData.status,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        bannerImage: drawImageUrl || undefined
       };
-      
-      await updateDraw(selectedDraw.id, updatedDraw);
-      drawForm.reset();
-      onSuccess();
-      toast({
-        title: "Draw updated",
-        description: "The draw has been successfully updated.",
-      });
-    } catch (error) {
-      console.error('Error updating draw:', error);
-      toast({
-        variant: 'destructive',
-        title: "Update failed",
-        description: "There was a problem updating the draw.",
-      });
-    }
-  };
 
-  const handleDrawImageUpload = async (file: File) => {
-    try {
-      setIsUploadingDrawImage(true);
-      toast({
-        title: "Uploading image...",
-        description: "Please wait while your image is being uploaded."
-      });
+      if (selectedDraw) {
+        await updateDraw(selectedDraw.id, drawData);
+      } else {
+        await createDraw(drawData);
+      }
       
-      const { url } = await uploadToS3(file, 'draw_images');
-      setDrawImageUrl(url);
-      drawForm.setValue('bannerImage', url);
-      
-      toast({
-        title: "Image uploaded",
-        description: "Draw image has been uploaded successfully."
-      });
+      onSuccess();
     } catch (error) {
-      console.error('Error uploading draw image:', error);
+      console.error('Error saving draw:', error);
       toast({
         variant: 'destructive',
-        title: "Upload failed",
-        description: "There was a problem uploading the draw image."
+        title: 'Error',
+        description: 'Failed to save draw. Please try again.'
       });
-    } finally {
-      setIsUploadingDrawImage(false);
     }
   };
 
   return (
-    <div className="p-4 pb-0">
-      <Form {...drawForm}>
-        <form onSubmit={drawForm.handleSubmit(selectedDraw ? handleDrawUpdate : handleDrawCreate)} className="space-y-4">
-          <div className="mb-6">
-            <FormLabel className="block mb-2">Draw Image</FormLabel>
-            <ImageUploader 
-              onImageSelected={handleDrawImageUpload} 
-              previewUrl={drawImageUrl || selectedDraw?.bannerImage}
-              isUploading={isUploadingDrawImage}
-            />
-            {drawImageUrl && (
-              <p className="text-xs text-gray-500 mt-2">
-                This image will be displayed on the draw card.
-              </p>
-            )}
-          </div>
-          
-          <FormField
-            control={drawForm.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="Draw Title" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={drawForm.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Input placeholder="Draw Description" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={drawForm.control}
-            name="maxParticipants"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max Participants</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="100" 
-                    {...field} 
-                    onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={drawForm.control}
-            name="ticketPrices"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ticket Prices (comma-separated)</FormLabel>
-                <FormControl>
-                  <Input placeholder="5, 10, 20" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={drawForm.control}
-            name="startDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Start Date</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="date" 
-                    value={field.value instanceof Date ? format(field.value, 'yyyy-MM-dd') : ''} 
-                    onChange={(e) => field.onChange(new Date(e.target.value))} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={drawForm.control}
-            name="endDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>End Date</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="date" 
-                    value={field.value instanceof Date ? format(field.value, 'yyyy-MM-dd') : ''} 
-                    onChange={(e) => field.onChange(new Date(e.target.value))} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={drawForm.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="upcoming">Upcoming</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <DrawerFooter>
-            <Button type="submit" className="w-full">
-              {selectedDraw ? 'Update Draw' : 'Create Draw'}
-            </Button>
-            <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </form>
-      </Form>
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-4 p-4">
+      <div>
+        <Label htmlFor="title">Title</Label>
+        <Input
+          id="title"
+          value={formData.title}
+          onChange={(e) => handleInputChange('title', e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => handleInputChange('description', e.target.value)}
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="maxParticipants">Max Participants</Label>
+        <Input
+          id="maxParticipants"
+          type="number"
+          value={formData.maxParticipants}
+          onChange={(e) => handleInputChange('maxParticipants', parseInt(e.target.value))}
+          min="1"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="ticketPrices">Ticket Prices (comma separated)</Label>
+        <Input
+          id="ticketPrices"
+          value={formData.ticketPrices}
+          onChange={(e) => handleInputChange('ticketPrices', e.target.value)}
+          placeholder="10, 20, 50"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="status">Status</Label>
+        <Select value={formData.status} onValueChange={(value: 'upcoming' | 'active' | 'open' | 'completed') => handleInputChange('status', value)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="upcoming">Upcoming</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="open">Open</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="startDate">Start Date</Label>
+        <Input
+          id="startDate"
+          type="datetime-local"
+          value={formData.startDate}
+          onChange={(e) => handleInputChange('startDate', e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="endDate">End Date</Label>
+        <Input
+          id="endDate"
+          type="datetime-local"
+          value={formData.endDate}
+          onChange={(e) => handleInputChange('endDate', e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <Label>Banner Image</Label>
+        <ImageUploader
+          currentImageUrl={drawImageUrl}
+          onImageUpload={(url) => setDrawImageUrl(url)}
+          onImageUploading={(uploading) => setIsUploadingDrawImage(uploading)}
+        />
+      </div>
+
+      <DrawerFooter>
+        <Button type="submit" disabled={isUploadingDrawImage}>
+          {selectedDraw ? 'Update Draw' : 'Create Draw'}
+        </Button>
+        <DrawerClose asChild>
+          <Button variant="outline">Cancel</Button>
+        </DrawerClose>
+      </DrawerFooter>
+    </form>
   );
 };
+
+export default DrawFormContent;

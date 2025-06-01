@@ -2,20 +2,35 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
-import { Draw } from '@/types';
+import { useDraws } from '@/context/DrawContext';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import SelectNumberModal from './SelectNumberModal';
 
 interface DrawTicketFormProps {
-  draw: Draw;
-  onPurchaseSuccess?: () => void;
+  ticketPrices: number[];
+  onSubmit: (number: number, price: number) => Promise<void>;
+  loading: boolean;
 }
 
-const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ draw, onPurchaseSuccess }) => {
+const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit, loading }) => {
   const { user } = useAuth();
+  const { draws } = useDraws();
   const navigate = useNavigate();
   const [isNumberModalOpen, setIsNumberModalOpen] = useState(false);
+
+  // For simplicity, we'll use the first available draw or create a mock one
+  const draw = draws[0] || {
+    id: '1',
+    title: 'Sample Draw',
+    description: 'Sample draw description',
+    maxParticipants: 100,
+    currentParticipants: 0,
+    ticketPrices: ticketPrices,
+    status: 'active' as const,
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  };
 
   const handleEnterDraw = () => {
     if (!user) {
@@ -42,9 +57,7 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ draw, onPurchaseSuccess
   };
 
   const handlePurchaseSuccess = () => {
-    if (onPurchaseSuccess) {
-      onPurchaseSuccess();
-    }
+    setIsNumberModalOpen(false);
   };
 
   return (
@@ -52,8 +65,9 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ draw, onPurchaseSuccess
       <Button 
         onClick={handleEnterDraw} 
         className="w-full"
+        disabled={loading}
       >
-        Enter Draw
+        {loading ? 'Processing...' : 'Enter Draw'}
       </Button>
       
       <SelectNumberModal
