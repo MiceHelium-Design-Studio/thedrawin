@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,7 +44,7 @@ const walletFormSchema = z.object({
   wallet_address: z.string().min(10, {
     message: "Wallet address must be at least 10 characters",
   }),
-  network: z.string().optional(),
+  network: z.string().default("mainnet"),
   is_active: z.boolean().default(true),
 });
 
@@ -126,7 +127,13 @@ const PaymentSettings: React.FC = () => {
         // Update existing wallet
         const { error } = await supabase
           .from('admin_wallet_addresses')
-          .update(data)
+          .update({
+            currency_code: data.currency_code,
+            currency_name: data.currency_name,
+            wallet_address: data.wallet_address,
+            network: data.network,
+            is_active: data.is_active,
+          })
           .eq('id', editingWallet.id);
 
         if (error) throw error;
@@ -139,7 +146,13 @@ const PaymentSettings: React.FC = () => {
         // Create new wallet
         const { error } = await supabase
           .from('admin_wallet_addresses')
-          .insert([data]);
+          .insert({
+            currency_code: data.currency_code,
+            currency_name: data.currency_name,
+            wallet_address: data.wallet_address,
+            network: data.network,
+            is_active: data.is_active,
+          });
 
         if (error) throw error;
 
