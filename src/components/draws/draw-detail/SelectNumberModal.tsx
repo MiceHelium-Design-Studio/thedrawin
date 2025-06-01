@@ -7,7 +7,6 @@ import { useDraws } from '@/context/DrawContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { sendDrawEntryNotifications } from '@/utils/notificationUtils';
 
 interface SelectNumberModalProps {
   draw: Draw;
@@ -24,7 +23,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
 }) => {
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
-  const [step, setStep] = useState<'number' | 'price'>('number');
+  const [step, setStep] = useState<'number' | 'price' | 'confirm'>('number');
   const [takenNumbers, setTakenNumbers] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUserEntered, setIsUserEntered] = useState(false);
@@ -98,6 +97,12 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
   const handlePriceSelect = (price: number) => {
     setSelectedPrice(price === selectedPrice ? null : price);
   };
+
+  const handlePriceConfirm = () => {
+    if (selectedPrice) {
+      setStep('confirm');
+    }
+  };
   
   const handleSubmit = async () => {
     if (!selectedNumber || !selectedPrice || !draw?.id || !user?.id) return;
@@ -116,13 +121,10 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
       setIsSubmitting(true);
       await buyTicket(draw.id, selectedNumber, selectedPrice);
       
-      // Send notifications
-      await sendDrawEntryNotifications(
-        user.id,
-        draw.title,
-        selectedNumber,
-        selectedPrice
-      );
+      toast({
+        title: 'Entry successful!',
+        description: `You've entered ${draw.title} with number ${selectedNumber} for $${selectedPrice}.`
+      });
       
       onSuccess();
       onClose();
@@ -137,8 +139,12 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
   const isNumberTaken = (number: number) => takenNumbers.includes(number);
 
   const handleBack = () => {
-    setStep('number');
-    setSelectedPrice(null);
+    if (step === 'price') {
+      setStep('number');
+      setSelectedPrice(null);
+    } else if (step === 'confirm') {
+      setStep('price');
+    }
   };
 
   const canAffordPrice = (price: number) => userBalance >= price;
@@ -151,8 +157,10 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
             {isUserEntered 
               ? "You've already entered this draw"
               : step === 'number' 
-                ? `Choose Your Lucky Number for ${draw?.title}`
-                : `Select Your Entry Price`}
+                ? `Choose Your Lucky Number (1-100)`
+                : step === 'price'
+                  ? `Select Your Entry Price`
+                  : `Confirm Your Entry`}
           </DialogTitle>
         </DialogHeader>
         
@@ -166,16 +174,20 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
               <p className="text-sm">
                 <span className="font-medium">Your wallet balance:</span> ${userBalance}
               </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Pick a number from 1-100. Taken numbers are grayed out.
+              </p>
             </div>
             
-            <div className="grid grid-cols-10 gap-2 mt-4">
+            <div className="grid grid-cols-10 gap-2 mt-4 max-h-64 overflow-y-auto">
               {availableNumbers.map((number) => (
                 <Button
                   key={number}
                   variant={selectedNumber === number ? "default" : "outline"}
-                  className={`h-10 ${
+                  size="sm"
+                  className={`h-8 text-xs ${
                     isNumberTaken(number)
-                      ? "opacity-50 cursor-not-allowed"
+                      ? "opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-700"
                       : "hover:bg-primary/20"
                   }`}
                   disabled={isNumberTaken(number)}
@@ -186,18 +198,18 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
               ))}
             </div>
             
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center justify-between mt-4 text-xs">
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 bg-primary rounded-sm"></div>
-                <span className="text-sm">Selected</span>
+                <div className="h-3 w-3 bg-primary rounded-sm"></div>
+                <span>Selected</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 bg-gray-300 dark:bg-gray-700 rounded-sm"></div>
-                <span className="text-sm">Available</span>
+                <div className="h-3 w-3 border border-border rounded-sm"></div>
+                <span>Available</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 bg-gray-300 dark:bg-gray-700 opacity-50 rounded-sm"></div>
-                <span className="text-sm">Taken</span>
+                <div className="h-3 w-3 bg-gray-300 dark:bg-gray-700 rounded-sm"></div>
+                <span>Taken</span>
               </div>
             </div>
             
@@ -213,22 +225,22 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 onClick={handleNumberConfirm}
                 disabled={!selectedNumber || isSubmitting}
               >
-                Next: Choose Price
+                Continue with #{selectedNumber}
               </Button>
             </DialogFooter>
           </>
-        ) : (
+        ) : step === 'price' ? (
           <>
             <div className="mt-4">
               <div className="mb-4 p-3 bg-muted rounded-lg">
+                <p className="text-sm">
+                  <span className="font-medium">Selected Number:</span> #{selectedNumber}
+                </p>
                 <p className="text-sm">
                   <span className="font-medium">Your wallet balance:</span> ${userBalance}
                 </p>
               </div>
               
-              <p className="text-sm text-gray-600 mb-4">
-                Selected Number: <span className="font-bold text-primary">#{selectedNumber}</span>
-              </p>
               <p className="text-sm font-medium mb-4">Choose your entry price:</p>
               <div className="grid grid-cols-2 gap-3">
                 {draw.ticketPrices.map((price) => (
@@ -259,10 +271,57 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 Back
               </Button>
               <Button
-                onClick={handleSubmit}
+                onClick={handlePriceConfirm}
                 disabled={!selectedPrice || !canAffordPrice(selectedPrice || 0) || isSubmitting}
               >
-                {isSubmitting ? "Processing..." : `Enter Draw ($${selectedPrice})`}
+                Continue with ${selectedPrice}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <>
+            <div className="mt-4">
+              <div className="mb-6 p-4 bg-muted rounded-lg">
+                <h3 className="font-semibold mb-3">Entry Summary</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Draw:</span>
+                    <span className="font-medium">{draw.title}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Your Number:</span>
+                    <span className="font-bold text-primary">#{selectedNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Entry Fee:</span>
+                    <span className="font-medium">${selectedPrice}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Remaining Balance:</span>
+                    <span className="font-medium">${userBalance - (selectedPrice || 0)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-sm text-muted-foreground mb-4">
+                By confirming, you agree to enter this draw with the selected number and pay the entry fee.
+              </p>
+            </div>
+            
+            <DialogFooter className="mt-6">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={isSubmitting}
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isSubmitting ? "Processing..." : `Confirm Entry`}
               </Button>
             </DialogFooter>
           </>

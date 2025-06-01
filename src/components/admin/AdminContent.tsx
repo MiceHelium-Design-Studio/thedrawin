@@ -1,86 +1,54 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { 
-  Tabs,
-  TabsContent,
-} from "@/components/ui/tabs";
-
-// Import Admin components
-import DrawsManagement from '@/components/admin/DrawsManagement';
-import BannersManagement from '@/components/admin/BannersManagement';
-import UserManagement from '@/components/admin/UserManagement';
-import AppSettings from '@/components/admin/AppSettings';
-import PushNotifications from '@/components/admin/PushNotifications';
-import MediaManager from '@/components/admin/MediaManager';
 import StatisticsContent from './StatisticsContent';
-import TodoPage from '@/pages/TodoPage';
+import DrawsManagement from './DrawsManagement';
+import BannersManagement from './BannersManagement';
+import MediaManager from './MediaManager';
+import UserManagement from './UserManagement';
 import AdminNotifications from './AdminNotifications';
+import NotificationTestPanel from './NotificationTestPanel';
+import TicketsOverview from './TicketsOverview';
+import AppSettings from './AppSettings';
+import PaymentSettings from './PaymentSettings';
+import PushNotifications from './PushNotifications';
 
 interface AdminContentProps {
-  activeTab: string;
+  activeSection: string;
 }
 
-const AdminContent: React.FC<AdminContentProps> = ({ activeTab }) => {
-  // Get tab name for the heading
-  const getTabName = () => {
-    switch(activeTab) {
-      case 'draws': return 'Draws Management';
-      case 'banners': return 'Banners Management';
-      case 'users': return 'User Management';
-      case 'settings': return 'Application Settings';
-      case 'notifications': return 'Push Notifications';
-      case 'alerts': return 'System Alerts';
-      case 'stats': return 'Statistics & Analytics';
-      case 'media': return 'Media Library';
-      case 'todos': return 'Tasks & Todos';
-      default: return 'Dashboard';
+const AdminContent: React.FC<AdminContentProps> = ({ activeSection }) => {
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'statistics':
+        return <StatisticsContent />;
+      case 'draws':
+        return <DrawsManagement />;
+      case 'tickets':
+        return <TicketsOverview />;
+      case 'banners':
+        return <BannersManagement />;
+      case 'media':
+        return <MediaManager />;
+      case 'users':
+        return <UserManagement />;
+      case 'notifications':
+        return <AdminNotifications />;
+      case 'notification-test':
+        return <NotificationTestPanel />;
+      case 'settings':
+        return <AppSettings />;
+      case 'payments':
+        return <PaymentSettings />;
+      case 'push-notifications':
+        return <PushNotifications />;
+      default:
+        return <StatisticsContent />;
     }
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <h1 className="text-xl md:text-2xl font-bold mb-4 text-gold">{getTabName()}</h1>
-      
-      <Card className="p-6 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl flex-grow">
-        <Tabs value={activeTab} className="w-full">
-          <TabsContent value="draws" className="mt-0 animate-in fade-in-50">
-            <DrawsManagement />
-          </TabsContent>
-          
-          <TabsContent value="banners" className="mt-0 animate-in fade-in-50">
-            <BannersManagement />
-          </TabsContent>
-          
-          <TabsContent value="users" className="mt-0 animate-in fade-in-50">
-            <UserManagement />
-          </TabsContent>
-          
-          <TabsContent value="settings" className="mt-0 animate-in fade-in-50">
-            <AppSettings />
-          </TabsContent>
-          
-          <TabsContent value="notifications" className="mt-0 animate-in fade-in-50">
-            <PushNotifications />
-          </TabsContent>
-          
-          <TabsContent value="alerts" className="mt-0 animate-in fade-in-50">
-            <AdminNotifications />
-          </TabsContent>
-          
-          <TabsContent value="stats" className="mt-0 animate-in fade-in-50">
-            <StatisticsContent />
-          </TabsContent>
-          
-          <TabsContent value="media" className="mt-0 animate-in fade-in-50">
-            <MediaManager />
-          </TabsContent>
-          
-          <TabsContent value="todos" className="mt-0 animate-in fade-in-50">
-            <TodoPage />
-          </TabsContent>
-        </Tabs>
-      </Card>
+    <div className="flex-1 p-6">
+      {renderContent()}
     </div>
   );
 };

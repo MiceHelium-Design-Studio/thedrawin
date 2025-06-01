@@ -1,82 +1,60 @@
 
 import React from 'react';
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  BarChart, Settings, Users, Image, ListTodo, 
-  BellRing, PanelRight, Layout, Medal, Bell
+  BarChart3, 
+  Trophy, 
+  Users, 
+  Image, 
+  Bell, 
+  Settings,
+  CreditCard,
+  TestTube,
+  Ticket,
+  MessageSquare
 } from 'lucide-react';
 
 interface AdminSidebarMenuProps {
-  activeTab?: string;
+  activeSection: string;
+  onSectionChange: (section: string) => void;
 }
 
-const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ activeTab }) => {
+const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ 
+  activeSection, 
+  onSectionChange 
+}) => {
+  const menuItems = [
+    { id: 'statistics', label: 'Statistics', icon: BarChart3 },
+    { id: 'draws', label: 'Draws', icon: Trophy },
+    { id: 'tickets', label: 'Tickets', icon: Ticket },
+    { id: 'banners', label: 'Banners', icon: Image },
+    { id: 'users', label: 'Users', icon: Users },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'notification-test', label: 'Test Notifications', icon: TestTube },
+    { id: 'payments', label: 'Payment Settings', icon: CreditCard },
+    { id: 'push-notifications', label: 'Push Notifications', icon: MessageSquare },
+    { id: 'settings', label: 'Settings', icon: Settings },
+  ];
+
   return (
-    <TabsList className="flex flex-col items-start space-y-2.5 w-full bg-transparent border-0 pt-1 h-auto">
-      <TabsTrigger 
-        value="draws" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Medal className="h-4 w-4 mr-2.5" />
-        Draws
-      </TabsTrigger>
-      <TabsTrigger 
-        value="banners" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Layout className="h-4 w-4 mr-2.5" />
-        Banners
-      </TabsTrigger>
-      <TabsTrigger 
-        value="users" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Users className="h-4 w-4 mr-2.5" />
-        Users
-      </TabsTrigger>
-      <TabsTrigger 
-        value="notifications" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <BellRing className="h-4 w-4 mr-2.5" />
-        Push Notifications
-      </TabsTrigger>
-      <TabsTrigger 
-        value="alerts" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Bell className="h-4 w-4 mr-2.5" />
-        Alerts
-      </TabsTrigger>
-      <TabsTrigger 
-        value="stats" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <BarChart className="h-4 w-4 mr-2.5" />
-        Statistics
-      </TabsTrigger>
-      <TabsTrigger 
-        value="media" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Image className="h-4 w-4 mr-2.5" />
-        Media
-      </TabsTrigger>
-      <TabsTrigger 
-        value="todos" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <ListTodo className="h-4 w-4 mr-2.5" />
-        Tasks
-      </TabsTrigger>
-      <TabsTrigger 
-        value="settings" 
-        className="w-full justify-start rounded-md transition-colors px-3 py-2.5"
-      >
-        <Settings className="h-4 w-4 mr-2.5" />
-        Settings
-      </TabsTrigger>
-    </TabsList>
+    <nav className="space-y-2">
+      {menuItems.map((item) => {
+        const IconComponent = item.icon;
+        return (
+          <button
+            key={item.id}
+            onClick={() => onSectionChange(item.id)}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors ${
+              activeSection === item.id
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            <IconComponent className="h-4 w-4" />
+            {item.label}
+          </button>
+        );
+      })}
+    </nav>
   );
 };
 

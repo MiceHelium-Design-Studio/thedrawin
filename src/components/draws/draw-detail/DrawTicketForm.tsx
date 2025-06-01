@@ -19,8 +19,9 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
   const navigate = useNavigate();
   const [isNumberModalOpen, setIsNumberModalOpen] = useState(false);
 
-  // For simplicity, we'll use the first available draw or create a mock one
-  const draw = draws[0] || {
+  // Get the current draw from the URL or use the first available draw
+  const currentDrawId = window.location.pathname.split('/').pop();
+  const draw = draws.find(d => d.id === currentDrawId) || draws[0] || {
     id: '1',
     title: 'Sample Draw',
     description: 'Sample draw description',
@@ -39,7 +40,7 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
         description: "Please login to enter this draw",
         variant: "default",
       });
-      navigate('/login');
+      navigate('/auth');
       return;
     }
 
@@ -58,11 +59,8 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
 
   const handlePurchaseSuccess = () => {
     setIsNumberModalOpen(false);
-    // Refresh the page or update state as needed
-    toast({
-      title: "Success!",
-      description: "You've successfully entered the draw!",
-    });
+    // Optionally refresh the page or navigate
+    window.location.reload();
   };
 
   return (
@@ -72,7 +70,7 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
         className="w-full"
         disabled={loading}
       >
-        {loading ? 'Processing...' : 'Enter Draw'}
+        {loading ? 'Processing...' : 'Pick Your Number & Enter Draw'}
       </Button>
       
       <SelectNumberModal

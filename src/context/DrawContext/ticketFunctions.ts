@@ -2,7 +2,6 @@
 import { Draw, Ticket } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { sendDrawEntryNotifications } from '@/utils/notificationUtils';
 
 export const useTicketFunctions = (
   setTickets: React.Dispatch<React.SetStateAction<Ticket[]>>,
@@ -46,6 +45,8 @@ export const useTicketFunctions = (
   // Buy a ticket with a specific number and price
   const buyTicket = async (drawId: string, ticketNumber: number, price?: number): Promise<Ticket> => {
     try {
+      console.log('Attempting to buy ticket:', { drawId, ticketNumber, price });
+      
       // Find the draw to reference its details
       const draw = draws.find(d => d.id === drawId);
       if (!draw) {
@@ -55,10 +56,29 @@ export const useTicketFunctions = (
       // Use provided price or default to first available price
       const ticketPrice = price || draw.ticketPrices[0] || 10;
 
+      // Check if the number is already taken
+      const { data: existingTicket, error: checkError } = await supabase
+        .from('tickets')
+        .select('ticket_number')
+        .eq('draw_id', drawId)
+        .eq('ticket_number', ticketNumber.toString())
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking for existing ticket:', checkError);
+        throw checkError;
+      }
+
+      if (existingTicket) {
+        toast({
+          variant: 'destructive',
+          title: 'Number already taken',
+          description: `Number ${ticketNumber} has already been selected. Please choose another number.`
+        });
+        throw new Error('Number already taken');
+      }
+
       // Insert the ticket into the database
-      // The trigger will automatically:
-      // 1. Check wallet balance and deduct the price
-      // 2. Update the draw's number_of_tickets count
       const { data: newTicket, error } = await supabase
         .from('tickets')
         .insert({
@@ -71,6 +91,8 @@ export const useTicketFunctions = (
         .single();
 
       if (error) {
+        console.error('Database error when inserting ticket:', error);
+        
         // Handle specific constraint violations with user-friendly messages
         if (error.code === '23505') {
           if (error.message.includes('tickets_user_draw_unique')) {
@@ -108,6 +130,8 @@ export const useTicketFunctions = (
         throw error;
       }
 
+      console.log('Ticket inserted successfully:', newTicket);
+
       // Add the new ticket to our local state
       const appTicket: Ticket = {
         id: newTicket.id,
@@ -127,11 +151,6 @@ export const useTicketFunctions = (
           ? { ...d, numberOfTickets: (d.numberOfTickets || 0) + 1 }
           : d
       ));
-      
-      toast({
-        title: 'Entry successful',
-        description: `You have entered ${draw.title} with number ${ticketNumber} for $${ticketPrice}.`,
-      });
 
       return appTicket;
     } catch (err) {
