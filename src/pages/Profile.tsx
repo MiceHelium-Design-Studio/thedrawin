@@ -6,13 +6,11 @@ import UpdateProfileForm from '../components/profile/UpdateProfileForm';
 import WalletSection from '../components/profile/WalletSection';
 import UserTickets from '../components/profile/UserTickets';
 import { useProfileManagement } from '../hooks/useProfileManagement';
-import { useWalletManagement } from '../hooks/useWalletManagement';
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, addFunds } = useAuth();
   const [loading, setLoading] = useState(false);
-  const { updateProfile } = useProfileManagement();
-  const { addFunds } = useWalletManagement();
+  const { saveProfile } = useProfileManagement();
 
   if (!user) {
     return (
