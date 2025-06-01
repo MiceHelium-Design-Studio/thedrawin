@@ -104,27 +104,24 @@ export const useProfileManagement = () => {
     try {
       setSaving(true);
 
-      // Try to update/insert profile in database
-      try {
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            name,
-            email: user.email || email,
-            avatar_url: avatarUrl !== undefined ? avatarUrl : profile.avatar_url,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'id'
-          });
+      console.log('Saving profile with avatar URL:', avatarUrl);
 
-        if (updateError) {
-          console.error('Database update error:', updateError);
-          // Continue anyway - don't block the UI update
-        }
-      } catch (dbError) {
-        console.error('Database operation failed:', dbError);
-        // Continue with local update even if DB fails
+      // Update profile in database
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          name,
+          email: user.email || email,
+          avatar_url: avatarUrl !== undefined ? avatarUrl : profile.avatar_url,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'id'
+        });
+
+      if (updateError) {
+        console.error('Database update error:', updateError);
+        throw updateError;
       }
 
       // Update auth user metadata if email changed
@@ -142,7 +139,7 @@ export const useProfileManagement = () => {
         }
       }
 
-      // Update local state regardless of DB success
+      // Update local state
       setProfile({
         ...profile,
         name,
@@ -155,6 +152,7 @@ export const useProfileManagement = () => {
         description: 'Your profile has been updated successfully.',
       });
 
+      console.log('Profile saved successfully');
       return true;
     } catch (error) {
       console.error('Error saving profile:', error);

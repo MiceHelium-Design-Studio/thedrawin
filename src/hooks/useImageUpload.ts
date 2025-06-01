@@ -49,6 +49,8 @@ export const useImageUpload = () => {
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${user.id}/profile-${Date.now()}.${fileExt}`;
 
+      console.log('Uploading to profile-images bucket:', fileName);
+
       const { error: uploadError } = await supabase.storage
         .from('profile-images')
         .upload(fileName, imageFile, {
@@ -56,12 +58,16 @@ export const useImageUpload = () => {
           upsert: true
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       const { data } = supabase.storage
         .from('profile-images')
         .getPublicUrl(fileName);
 
+      console.log('Image uploaded successfully:', data.publicUrl);
       return data.publicUrl;
     } catch (error) {
       console.error('Error uploading image:', error);

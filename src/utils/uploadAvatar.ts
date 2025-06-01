@@ -3,14 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 
 export async function uploadAvatar(file: File, userId: string): Promise<string> {
   const fileExt = file.name.split('.').pop();
-  const fileName = `${userId}-${Date.now()}.${fileExt}`;
-  const filePath = `${userId}/${fileName}`;
+  const fileName = `${userId}/profile-${Date.now()}.${fileExt}`;
 
-  console.log('Uploading avatar to profile_images bucket:', filePath);
+  console.log('Uploading avatar to profile-images bucket:', fileName);
 
   const { error: uploadError } = await supabase.storage
-    .from('profile_images')
-    .upload(filePath, file, {
+    .from('profile-images')
+    .upload(fileName, file, {
       upsert: true,
       contentType: file.type,
     });
@@ -21,8 +20,8 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
   }
 
   const { data } = supabase.storage
-    .from('profile_images')
-    .getPublicUrl(filePath);
+    .from('profile-images')
+    .getPublicUrl(fileName);
 
   console.log('Avatar uploaded successfully:', data.publicUrl);
   return data.publicUrl;
