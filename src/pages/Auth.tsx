@@ -31,58 +31,77 @@ const Auth = () => {
 
   if (authLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-black/90">
-        <div className="animate-pulse space-y-4 w-full max-w-md">
-          <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
-          <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
+      <div className="flex justify-center items-center min-h-screen bg-[#0D0D0D] pattern-bg">
+        <div className="luxury-fade-in space-y-6 w-full max-w-md">
+          <div className="luxury-card h-8 w-3/4 mx-auto"></div>
+          <div className="luxury-card h-64"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-slate-800 rounded w-full gold-shimmer"></div>
+            <div className="h-4 bg-slate-800 rounded w-2/3 gold-shimmer"></div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div 
-      className="min-h-screen flex flex-col justify-center p-4 bg-cover bg-center pattern-bg" 
-      style={{ 
-        backgroundImage: `url(${authBackgroundImage})`,
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        backgroundBlendMode: 'overlay'
-      }}
-    >
-      <div className="max-w-md w-full mx-auto glass-card rounded-xl backdrop-blur-md shadow-lg p-6 my-8">
-        <AuthHeader />
-        <AuthForm mode={mode} onSubmit={handleSubmit} loading={isProcessing} />
-
-        <div className="mt-6">
-          <div className="relative flex items-center justify-center">
-            <Separator className="bg-gold/20" />
-            <span className="px-2 text-xs text-white bg-black/50 relative z-10 font-medium tracking-wider uppercase">
-              OR CONTINUE WITH
-            </span>
+    <div className="min-h-screen bg-[#0D0D0D] relative overflow-hidden">
+      {/* Premium background effects */}
+      <div className="fixed inset-0 pattern-bg pointer-events-none" />
+      <div className="fixed inset-0 hero-glow pointer-events-none" />
+      
+      <div 
+        className="min-h-screen flex flex-col justify-center p-4 relative z-10" 
+        style={{ 
+          backgroundImage: `url(${authBackgroundImage})`,
+          backgroundColor: 'rgba(13, 13, 13, 0.95)',
+          backgroundBlendMode: 'overlay',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="max-w-md w-full mx-auto luxury-card rounded-xl backdrop-blur-xl shadow-luxury p-8 my-8 relative overflow-hidden">
+          {/* Subtle animated border */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#F39C0A]/20 via-transparent to-[#F39C0A]/20 p-0.5 rounded-xl">
+            <div className="bg-[#0D0D0D]/95 w-full h-full rounded-lg" />
           </div>
           
-          <div className="mt-4">
-            <SocialLoginButtons onSocialLogin={handleSocialLogin} isProcessing={isProcessing} />
+          <div className="relative z-10">
+            <AuthHeader />
+            <AuthForm mode={mode} onSubmit={handleSubmit} loading={isProcessing} />
+
+            <div className="mt-6">
+              <div className="relative flex items-center justify-center">
+                <Separator className="bg-[#F39C0A]/20" />
+                <span className="px-3 text-xs text-slate-300 bg-[#0D0D0D]/90 relative z-10 font-medium tracking-wider uppercase">
+                  OR CONTINUE WITH
+                </span>
+              </div>
+              
+              <div className="mt-4">
+                <SocialLoginButtons onSocialLogin={handleSocialLogin} isProcessing={isProcessing} />
+              </div>
+            </div>
+
+            <div className="mt-8 text-center">
+              <p className="text-xs text-slate-400 mb-3 font-medium tracking-wide uppercase">
+                {mode === 'login' ? "DON'T HAVE AN ACCOUNT?" : 'ALREADY HAVE AN ACCOUNT?'}
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+                className="premium-outline-button w-full"
+                disabled={isProcessing}
+              >
+                {mode === 'login' ? 'CREATE ACCOUNT' : 'SIGN IN'}
+              </Button>
+            </div>
           </div>
         </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-xs text-white mb-2 font-light tracking-wide uppercase">
-            {mode === 'login' ? "DON'T HAVE AN ACCOUNT?" : 'ALREADY HAVE AN ACCOUNT?'}
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-            className="text-white hover:text-white border border-gold/30 hover:border-gold/60 bg-black/50 hover:bg-black-light/70 transition-all duration-300 font-medium tracking-wide text-sm uppercase"
-            disabled={isProcessing}
-          >
-            {mode === 'login' ? 'SIGN UP' : 'SIGN IN'}
-          </Button>
+        
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+          <p className="text-xs text-slate-500 tracking-wider font-light uppercase">© 2025 DRAWIN</p>
         </div>
-      </div>
-      
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-        <p className="text-xs text-white tracking-wider font-light uppercase">© 2025 THE DRAW WIN</p>
       </div>
     </div>
   );

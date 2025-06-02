@@ -73,7 +73,7 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#08080C] relative overflow-hidden">
+    <div className="min-h-screen bg-[#0D0D0D] relative overflow-hidden">
       {/* Premium background effects */}
       <div className="fixed inset-0 pattern-bg pointer-events-none" />
       <div className="fixed inset-0 hero-glow pointer-events-none" />

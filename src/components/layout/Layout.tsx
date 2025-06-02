@@ -26,14 +26,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   if (authLoading && !isAuthPage) {
     return (
-      <MobileLayout className="bg-[#0D0D0D] min-h-screen">
+      <MobileLayout className="bg-[#0D0D0D] min-h-screen pattern-bg">
         <main className="flex-grow flex items-center justify-center px-6 py-12">
           <div className="luxury-fade-in space-y-6 w-full max-w-md">
-            <div className="h-8 bg-[#1A1A1A] rounded-lg w-3/4 mx-auto gold-shimmer"></div>
-            <div className="h-48 luxury-card rounded-xl"></div>
+            <div className="h-8 bg-slate-800 rounded-lg w-3/4 mx-auto gold-shimmer"></div>
+            <div className="h-48 luxury-card rounded-xl gold-shimmer"></div>
             <div className="space-y-3">
-              <div className="h-4 bg-[#1A1A1A] rounded w-full gold-shimmer"></div>
-              <div className="h-4 bg-[#1A1A1A] rounded w-2/3 gold-shimmer"></div>
+              <div className="h-4 bg-slate-800 rounded w-full gold-shimmer"></div>
+              <div className="h-4 bg-slate-800 rounded w-2/3 gold-shimmer"></div>
             </div>
           </div>
         </main>
@@ -44,14 +44,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <MobileLayout 
       className={cn(
-        "flex flex-col min-h-screen bg-[#0D0D0D]",
+        "flex flex-col min-h-screen bg-[#0D0D0D] relative overflow-hidden",
         isNativeMobile && "safe-area-inset-top safe-area-inset-bottom"
       )} 
       aria-hidden={false}
     >
+      {/* Premium background effects */}
+      <div className="fixed inset-0 pattern-bg pointer-events-none" />
+      <div className="fixed inset-0 hero-glow pointer-events-none opacity-30" />
+      
       <main 
         className={cn(
-          "flex-grow mobile-scroll relative luxury-fade-in",
+          "flex-grow mobile-scroll relative luxury-fade-in z-10",
           (!isAuthPage && !isAdminPage) && user ? "pb-20" : "pb-0",
           "px-1"
         )} 
@@ -66,8 +70,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {(!isAuthPage && !isAdminPage) && user && (
         <nav 
           className={cn(
-            "fixed bottom-0 left-0 right-0 glass-effect",
-            "border-t border-gold-500/20 shadow-luxury",
+            "fixed bottom-0 left-0 right-0 z-50",
+            "luxury-card border-t border-[#F39C0A]/20 shadow-luxury backdrop-blur-xl",
             isNativeMobile && "safe-area-inset-bottom"
           )}
         >
@@ -77,10 +81,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 to="/home"
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1 group relative",
                     isActive
-                      ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
-                      : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
+                      ? "text-[#F39C0A] font-bold bg-[#F39C0A]/20 shadow-gold"
+                      : "text-slate-400 hover:text-[#F39C0A] hover:bg-white/5"
                   )
                 }
               >
@@ -94,8 +98,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   cn(
                     "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
                     isActive
-                      ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
-                      : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
+                      ? "text-[#F39C0A] font-bold bg-[#F39C0A]/20 shadow-gold"
+                      : "text-slate-400 hover:text-[#F39C0A] hover:bg-white/5"
                   )
                 }
               >
@@ -109,15 +113,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   cn(
                     "flex flex-col items-center justify-center text-xs relative transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
                     isActive
-                      ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
-                      : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
+                      ? "text-[#F39C0A] font-bold bg-[#F39C0A]/20 shadow-gold"
+                      : "text-slate-400 hover:text-[#F39C0A] hover:bg-white/5"
                   )
                 }
               >
                 <div className="relative">
                   <Bell className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
                   {!notificationsLoading && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-sm animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-sm gold-pulse">
                       {unreadCount}
                     </span>
                   )}
@@ -131,8 +135,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   cn(
                     "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
                     isActive
-                      ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
-                      : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
+                      ? "text-[#F39C0A] font-bold bg-[#F39C0A]/20 shadow-gold"
+                      : "text-slate-400 hover:text-[#F39C0A] hover:bg-white/5"
                   )
                 }
               >
@@ -147,8 +151,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     cn(
                       "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
                       isActive
-                        ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
-                        : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
+                        ? "text-[#F39C0A] font-bold bg-[#F39C0A]/20 shadow-gold"
+                        : "text-slate-400 hover:text-[#F39C0A] hover:bg-white/5"
                     )
                   }
                 >
