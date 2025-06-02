@@ -9,9 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import UserTickets from '../components/profile/UserTickets';
 import WalletSection from '../components/profile/WalletSection';
 import UpdateProfileForm from '../components/profile/UpdateProfileForm';
+import { cn } from '@/lib/utils';
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading, updateProfile, addFunds, logout } = useAuth();
   const [activeTab, setActiveTab] = React.useState<'overview' | 'tickets' | 'wallet' | 'settings'>('overview');
 
   if (!user) {
@@ -47,7 +48,7 @@ const Profile: React.FC = () => {
           <div className="relative inline-block">
             <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-white dark:ring-gray-800 shadow-lg">
               <AvatarImage 
-                src={user.user_metadata?.avatar_url} 
+                src={user.avatar || user.avatar_url} 
                 alt={user.email}
                 className="object-cover"
               />
@@ -55,7 +56,7 @@ const Profile: React.FC = () => {
                 {getUserInitials(user.email)}
               </AvatarFallback>
             </Avatar>
-            {user.user_metadata?.isAdmin && (
+            {user.isAdmin && (
               <Badge className="absolute -top-1 -right-1 bg-gold-500 text-white text-xs px-2 py-1 rounded-full">
                 Admin
               </Badge>
@@ -63,7 +64,7 @@ const Profile: React.FC = () => {
           </div>
           
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {user.user_metadata?.full_name || 'User'}
+            {user.name || 'User'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 font-medium">
             {user.email}
@@ -111,13 +112,13 @@ const Profile: React.FC = () => {
                   <div>
                     <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Member since</label>
                     <p className="text-gray-900 dark:text-white font-medium">
-                      {new Date(user.created_at).toLocaleDateString()}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Account Type</label>
                     <p className="text-gray-900 dark:text-white font-medium">
-                      {user.user_metadata?.isAdmin ? 'Administrator' : 'Standard User'}
+                      {user.isAdmin ? 'Administrator' : 'Standard User'}
                     </p>
                   </div>
                 </CardContent>
@@ -165,7 +166,11 @@ const Profile: React.FC = () => {
                 <CardTitle>Wallet & Payments</CardTitle>
               </CardHeader>
               <CardContent>
-                <WalletSection />
+                <WalletSection 
+                  user={user}
+                  loading={authLoading}
+                  addFunds={addFunds}
+                />
               </CardContent>
             </Card>
           )}

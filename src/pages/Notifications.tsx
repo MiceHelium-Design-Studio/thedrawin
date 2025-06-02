@@ -6,6 +6,7 @@ import { useNotifications } from '../context/NotificationContext';
 import NotificationItem from '../components/notifications/NotificationItem';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 const Notifications: React.FC = () => {
   const { notifications, loading, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
