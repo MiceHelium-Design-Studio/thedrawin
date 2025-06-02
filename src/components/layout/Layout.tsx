@@ -4,8 +4,10 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Award, Bell, User, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { cn } from '../../lib/utils';
 import TopNavigation from './TopNavigation';
+import MobileLayout from './MobileLayout';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,45 +16,64 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, loading: authLoading } = useAuth();
   const { notifications, loading: notificationsLoading } = useNotifications();
+  const { isMobile, isNativeMobile } = useMobileDetection();
   const location = useLocation();
   
   const unreadCount = notifications?.filter(n => !n.read)?.length || 0;
   const isAuthPage = location.pathname === '/login' || location.pathname === '/auth';
   const isAdminPage = location.pathname === '/admin';
 
-  console.log("Layout rendering, user:", user?.id, "isAdmin:", user?.isAdmin, "isAuthPage:", isAuthPage);
+  console.log("Layout rendering, user:", user?.id, "isAdmin:", user?.isAdmin, "isAuthPage:", isAuthPage, "isMobile:", isMobile, "isNativeMobile:", isNativeMobile);
 
   if (authLoading && !isAuthPage) {
     return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black">
+      <MobileLayout className="bg-gradient-to-b from-black-dark to-black">
         <main className="flex-grow flex items-center justify-center">
           <div className="animate-pulse space-y-4 w-full max-w-md px-4">
             <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
             <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
           </div>
         </main>
-      </div>
+      </MobileLayout>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black" aria-hidden={false}>
+    <MobileLayout 
+      className={cn(
+        "flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black",
+        isNativeMobile && "safe-area-inset-top safe-area-inset-bottom"
+      )} 
+      aria-hidden={false}
+    >
       {(!isAuthPage && !isAdminPage) && user && (
         <TopNavigation />
       )}
 
-      <main className="flex-grow pb-16 pattern-bg" role="main" aria-label="Main content">
+      <main 
+        className={cn(
+          "flex-grow pattern-bg mobile-scroll",
+          (!isAuthPage && !isAdminPage) && user ? "pb-16" : "pb-0"
+        )} 
+        role="main" 
+        aria-label="Main content"
+      >
         {children}
       </main>
 
       {(!isAuthPage && !isAdminPage) && user && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20">
+        <nav 
+          className={cn(
+            "fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20",
+            isNativeMobile && "safe-area-inset-bottom"
+          )}
+        >
           <div className="grid grid-cols-5 h-16">
             <NavLink
               to="/home"
               className={({ isActive }) =>
                 cn(
-                  "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                  "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select",
                   isActive
                     ? "text-gold font-medium"
                     : "text-white hover:text-gold"
@@ -69,7 +90,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               to="/winners"
               className={({ isActive }) =>
                 cn(
-                  "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                  "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select",
                   isActive
                     ? "text-gold font-medium"
                     : "text-white hover:text-gold"
@@ -86,7 +107,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               to="/notifications"
               className={({ isActive }) =>
                 cn(
-                  "flex flex-col items-center justify-center text-xs relative transition-all duration-300",
+                  "flex flex-col items-center justify-center text-xs relative transition-all duration-300 touch-target no-select",
                   isActive
                     ? "text-gold font-medium"
                     : "text-white hover:text-gold"
@@ -108,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               to="/profile"
               className={({ isActive }) =>
                 cn(
-                  "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                  "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select",
                   isActive
                     ? "text-gold font-medium"
                     : "text-white hover:text-gold"
@@ -126,7 +147,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 to="/admin"
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center text-xs transition-all duration-300",
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select",
                     isActive
                       ? "text-gold font-medium"
                       : "text-white hover:text-gold"
@@ -142,7 +163,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </nav>
       )}
-    </div>
+    </MobileLayout>
   );
 };
 
