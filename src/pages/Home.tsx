@@ -68,7 +68,7 @@ const Home: React.FC = () => {
   // Show error state if there's an error and no draws are loaded
   if (error && (!draws || draws.length === 0)) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col items-center mb-8 text-center">
             <img 
@@ -81,9 +81,9 @@ const Home: React.FC = () => {
             </p>
           </div>
 
-          <div className="text-center py-12 bg-black-light/30 rounded-xl">
+          <div className="text-center py-12 bg-gray-900/50 rounded-xl">
             <div className="text-6xl mb-4">⚠️</div>
-            <h3 className="text-xl font-bold mb-2 text-gold">Error Loading Draws</h3>
+            <h3 className="text-xl font-bold mb-2 text-gold-500">Error Loading Draws</h3>
             <p className="text-white/60 mb-6">
               We're having trouble loading the draws. Please try refreshing the page.
             </p>
@@ -95,7 +95,7 @@ const Home: React.FC = () => {
               Refresh Page
             </Button>
             {!user && (
-              <Button onClick={() => navigate('/login')} className="bg-gold hover:bg-gold/90 text-black">
+              <Button onClick={() => navigate('/login')} className="bg-gold-500 hover:bg-gold-600 text-black">
                 Login
               </Button>
             )}
@@ -106,7 +106,7 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-black">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col items-center mb-8 text-center">
@@ -121,11 +121,11 @@ const Home: React.FC = () => {
           
           {/* Authentication prompt for non-logged in users */}
           {!user && !authLoading && (
-            <div className="mt-6 p-4 bg-gold/10 border border-gold/20 rounded-lg max-w-md">
-              <p className="text-gold mb-3">Ready to enter draws and win prizes?</p>
+            <div className="mt-6 p-4 bg-gold-500/10 border border-gold-500/20 rounded-lg max-w-md">
+              <p className="text-gold-500 mb-3">Ready to enter draws and win prizes?</p>
               <Button 
                 onClick={() => navigate('/login')} 
-                className="w-full bg-gold hover:bg-gold/90 text-black font-semibold"
+                className="w-full bg-gold-500 hover:bg-gold-600 text-black font-semibold"
               >
                 Sign Up / Login to Get Started
               </Button>
@@ -135,16 +135,16 @@ const Home: React.FC = () => {
         
         {isLoading ? (
           <div className="space-y-8">
-            <Skeleton className="h-48 w-full rounded-lg" />
+            <Skeleton className="h-48 w-full rounded-lg bg-gray-800" />
             <div className="grid md:grid-cols-3 gap-6">
-              <Skeleton className="h-32 w-full rounded-md" />
-              <Skeleton className="h-32 w-full rounded-md" />
-              <Skeleton className="h-32 w-full rounded-md" />
+              <Skeleton className="h-32 w-full rounded-md bg-gray-800" />
+              <Skeleton className="h-32 w-full rounded-md bg-gray-800" />
+              <Skeleton className="h-32 w-full rounded-md bg-gray-800" />
             </div>
             <div className="space-y-4">
-              <Skeleton className="h-8 w-48 rounded-md" />
-              <Skeleton className="h-24 w-full rounded-md" />
-              <Skeleton className="h-24 w-full rounded-md" />
+              <Skeleton className="h-8 w-48 rounded-md bg-gray-800" />
+              <Skeleton className="h-24 w-full rounded-md bg-gray-800" />
+              <Skeleton className="h-24 w-full rounded-md bg-gray-800" />
             </div>
           </div>
         ) : (
@@ -160,7 +160,7 @@ const Home: React.FC = () => {
               <section className="mb-12">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                   <h2 className="text-2xl font-bold uppercase tracking-wide">
-                    <span className="bg-gold-gradient bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent">
                       Active Draws
                     </span>
                   </h2>
@@ -184,7 +184,7 @@ const Home: React.FC = () => {
             <section className="mb-8">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <h2 className="text-2xl font-bold uppercase tracking-wide">
-                  <span className="bg-gold-gradient bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent">
                     All Draws
                   </span>
                 </h2>
@@ -199,9 +199,9 @@ const Home: React.FC = () => {
                     <DrawCard key={draw.id} draw={draw} />
                   ))
                 ) : (
-                  <div className="text-center py-12 bg-black-light/30 rounded-xl">
+                  <div className="text-center py-12 bg-gray-900/50 rounded-xl">
                     <div className="text-6xl mb-4">🎯</div>
-                    <h3 className="text-xl font-bold mb-2 text-gold">No Draws Available</h3>
+                    <h3 className="text-xl font-bold mb-2 text-gold-500">No Draws Available</h3>
                     <p className="text-white/60 mb-6">
                       New exciting draws are coming soon. Stay tuned!
                     </p>

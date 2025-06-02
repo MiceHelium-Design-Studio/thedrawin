@@ -17,10 +17,10 @@ const Profile: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <Card className="w-full max-w-md bg-gray-900 border-gray-700">
           <CardContent className="pt-6 text-center">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-400">
               Please log in to view your profile.
             </p>
           </CardContent>
@@ -41,12 +41,12 @@ const Profile: React.FC = () => {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-black">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Profile Header */}
         <div className="text-center mb-8">
           <div className="relative inline-block">
-            <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-white dark:ring-gray-800 shadow-lg">
+            <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-gray-800 shadow-lg">
               <AvatarImage 
                 src={user.avatar || user.avatar_url} 
                 alt={user.email}
@@ -63,16 +63,16 @@ const Profile: React.FC = () => {
             )}
           </div>
           
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2">
             {user.name || 'User'}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 font-medium">
+          <p className="text-gray-400 font-medium">
             {user.email}
           </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800/50 p-1 rounded-xl mb-8 overflow-x-auto">
+        <div className="flex space-x-1 bg-gray-800/50 p-1 rounded-xl mb-8 overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -82,8 +82,8 @@ const Profile: React.FC = () => {
                 className={cn(
                   "flex items-center space-x-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap",
                   activeTab === tab.id
-                    ? "bg-white dark:bg-gray-700 text-gold-600 dark:text-gold-400 shadow-sm"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50"
+                    ? "bg-gray-700 text-gold-400 shadow-sm"
+                    : "text-gray-400 hover:text-white hover:bg-gray-700/50"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -97,7 +97,7 @@ const Profile: React.FC = () => {
         <div className="space-y-6">
           {activeTab === 'overview' && (
             <div className="grid gap-6 md:grid-cols-2">
-              <Card>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <User className="h-5 w-5 text-gold-500" />
@@ -106,25 +106,25 @@ const Profile: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Email</label>
-                    <p className="text-gray-900 dark:text-white font-medium">{user.email}</p>
+                    <label className="text-sm font-medium text-gray-400">Email</label>
+                    <p className="text-white font-medium">{user.email}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Member since</label>
-                    <p className="text-gray-900 dark:text-white font-medium">
+                    <label className="text-sm font-medium text-gray-400">Member since</label>
+                    <p className="text-white font-medium">
                       {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Account Type</label>
-                    <p className="text-gray-900 dark:text-white font-medium">
+                    <label className="text-sm font-medium text-gray-400">Account Type</label>
+                    <p className="text-white font-medium">
                       {user.isAdmin ? 'Administrator' : 'Standard User'}
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Trophy className="h-5 w-5 text-gold-500" />
@@ -133,16 +133,16 @@ const Profile: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Draws Entered</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">-</span>
+                    <span className="text-gray-400">Draws Entered</span>
+                    <span className="font-semibold text-white">-</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Total Spent</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">$0.00</span>
+                    <span className="text-gray-400">Total Spent</span>
+                    <span className="font-semibold text-white">$0.00</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Prizes Won</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">0</span>
+                    <span className="text-gray-400">Prizes Won</span>
+                    <span className="font-semibold text-white">0</span>
                   </div>
                 </CardContent>
               </Card>
@@ -150,7 +150,7 @@ const Profile: React.FC = () => {
           )}
 
           {activeTab === 'tickets' && (
-            <Card>
+            <Card className="bg-gray-900 border-gray-700">
               <CardHeader>
                 <CardTitle>My Tickets</CardTitle>
               </CardHeader>
@@ -161,7 +161,7 @@ const Profile: React.FC = () => {
           )}
 
           {activeTab === 'wallet' && (
-            <Card>
+            <Card className="bg-gray-900 border-gray-700">
               <CardHeader>
                 <CardTitle>Wallet & Payments</CardTitle>
               </CardHeader>

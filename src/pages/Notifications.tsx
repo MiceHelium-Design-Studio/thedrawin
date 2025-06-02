@@ -47,15 +47,15 @@ const Notifications: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-black">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl font-bold text-white tracking-tight">
               Notifications
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 font-medium">
+            <p className="text-gray-400 font-medium">
               Stay updated with your latest activity
             </p>
           </div>
@@ -66,7 +66,7 @@ const Notifications: React.FC = () => {
               size="sm"
               onClick={handleMarkAllAsRead}
               disabled={loading}
-              className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gold-400 transition-all duration-200 font-medium shadow-sm"
+              className="text-gray-300 border-gray-600 hover:bg-gray-800 hover:border-gold-400 transition-all duration-200 font-medium shadow-sm"
             >
               <CheckCheck className="h-4 w-4 mr-2" />
               Mark all as read
@@ -75,16 +75,16 @@ const Notifications: React.FC = () => {
         </div>
         
         {/* Content */}
-        <div className="bg-white dark:bg-gray-800/50 rounded-2xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+        <div className="bg-gray-900/50 rounded-2xl shadow-sm border border-gray-700/50 overflow-hidden">
           {loading ? (
             <div className="p-6 space-y-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="p-4 border border-gray-100 dark:border-gray-700 rounded-xl">
+                <div key={i} className="p-4 border border-gray-700 rounded-xl">
                   <div className="flex items-start space-x-4">
-                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-10 w-10 rounded-full bg-gray-800" />
                     <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
+                      <Skeleton className="h-4 w-3/4 bg-gray-800" />
+                      <Skeleton className="h-3 w-1/2 bg-gray-800" />
                     </div>
                   </div>
                 </div>
@@ -92,18 +92,18 @@ const Notifications: React.FC = () => {
             </div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-16 px-6">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Bell className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Bell className="h-8 w-8 text-gray-500" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-lg font-semibold text-white mb-2">
                 No notifications yet
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto">
+              <p className="text-gray-400 max-w-sm mx-auto">
                 When you have new activity, we'll notify you here so you don't miss anything important.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-700">
+            <div className="divide-y divide-gray-700">
               {notifications.map((notification, index) => (
                 <div 
                   key={notification.id} 

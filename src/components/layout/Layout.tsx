@@ -26,14 +26,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   if (authLoading && !isAuthPage) {
     return (
-      <MobileLayout className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <MobileLayout className="bg-black">
         <main className="flex-grow flex items-center justify-center px-6 py-12">
           <div className="animate-pulse space-y-6 w-full max-w-md">
-            <div className="h-8 bg-gray-200 rounded-lg dark:bg-gray-700 w-3/4 mx-auto"></div>
-            <div className="h-48 bg-gray-200 rounded-xl dark:bg-gray-700 shadow-sm"></div>
+            <div className="h-8 bg-gray-800 rounded-lg w-3/4 mx-auto"></div>
+            <div className="h-48 bg-gray-800 rounded-xl shadow-sm"></div>
             <div className="space-y-3">
-              <div className="h-4 bg-gray-200 rounded dark:bg-gray-700 w-full"></div>
-              <div className="h-4 bg-gray-200 rounded dark:bg-gray-700 w-2/3"></div>
+              <div className="h-4 bg-gray-800 rounded w-full"></div>
+              <div className="h-4 bg-gray-800 rounded w-2/3"></div>
             </div>
           </div>
         </main>
@@ -44,7 +44,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <MobileLayout 
       className={cn(
-        "flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900",
+        "flex flex-col min-h-screen bg-black",
         isNativeMobile && "safe-area-inset-top safe-area-inset-bottom"
       )} 
       aria-hidden={false}
@@ -66,8 +66,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {(!isAuthPage && !isAdminPage) && user && (
         <nav 
           className={cn(
-            "fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl",
-            "border-t border-gray-200/50 dark:border-gray-700/50 shadow-lg",
+            "fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl",
+            "border-t border-gray-800/50 shadow-lg",
             isNativeMobile && "safe-area-inset-bottom"
           )}
         >
@@ -79,8 +79,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   cn(
                     "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
                     isActive
-                      ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                      ? "text-gold-600 font-semibold bg-gold-900/30"
+                      : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
                   )
                 }
               >
@@ -94,8 +94,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   cn(
                     "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
                     isActive
-                      ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                      ? "text-gold-600 font-semibold bg-gold-900/30"
+                      : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
                   )
                 }
               >
@@ -109,8 +109,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   cn(
                     "flex flex-col items-center justify-center text-xs relative transition-all duration-300 touch-target no-select rounded-xl mx-1",
                     isActive
-                      ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                      ? "text-gold-600 font-semibold bg-gold-900/30"
+                      : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
                   )
                 }
               >
@@ -131,8 +131,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   cn(
                     "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
                     isActive
-                      ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
-                      : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                      ? "text-gold-600 font-semibold bg-gold-900/30"
+                      : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
                   )
                 }
               >
@@ -147,8 +147,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     cn(
                       "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
                       isActive
-                        ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
-                        : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                        ? "text-gold-600 font-semibold bg-gold-900/30"
+                        : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
                     )
                   }
                 >
