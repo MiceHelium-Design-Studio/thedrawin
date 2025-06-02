@@ -14,7 +14,10 @@ const Profile: React.FC = () => {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-6">
-          <p>Please login to view your profile.</p>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+            <p className="text-gray-600">Please login to view your profile.</p>
+          </div>
         </div>
       </Layout>
     );
@@ -23,7 +26,11 @@ const Profile: React.FC = () => {
   const handleAddFunds = async (amount: number) => {
     setLoading(true);
     try {
+      console.log('Adding funds:', amount);
       await addFunds(amount);
+      console.log('Funds added successfully');
+    } catch (error) {
+      console.error('Error adding funds:', error);
     } finally {
       setLoading(false);
     }
@@ -32,7 +39,12 @@ const Profile: React.FC = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6 space-y-6">
-        <h1 className="text-3xl font-bold">My Profile</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">My Profile</h1>
+          <div className="text-sm text-gray-500">
+            Welcome back, {user.name || user.email}
+          </div>
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">

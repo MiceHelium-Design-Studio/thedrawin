@@ -40,35 +40,69 @@ export const useImageUpload = () => {
     setImagePreview(previewUrl);
   };
 
+  const uploadImageWithRetry = async (file: File, retries = 3): Promise<string | null> => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user!.id}/profile-${Date.now()}.${fileExt}`;
+
+        console.log(`Upload attempt ${attempt}/${retries} for file:`, fileName);
+
+        const { error: uploadError } = await supabase.storage
+          .from('profile-images')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: true
+          });
+
+        if (uploadError) {
+          console.error(`Upload attempt ${attempt} failed:`, uploadError);
+          
+          // If this isn't the last attempt, continue to retry
+          if (attempt < retries) {
+            console.log(`Retrying upload in ${attempt * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+            continue;
+          }
+          
+          throw uploadError;
+        }
+
+        const { data } = supabase.storage
+          .from('profile-images')
+          .getPublicUrl(fileName);
+
+        console.log(`Upload successful on attempt ${attempt}:`, data.publicUrl);
+        return data.publicUrl;
+      } catch (error) {
+        console.error(`Upload attempt ${attempt} error:`, error);
+        
+        // If this is the last attempt, throw the error
+        if (attempt === retries) {
+          throw error;
+        }
+      }
+    }
+    
+    return null;
+  };
+
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile || !user) return null;
 
     try {
       setUploading(true);
       
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${user.id}/profile-${Date.now()}.${fileExt}`;
-
-      console.log('Uploading to profile-images bucket:', fileName);
-
-      const { error: uploadError } = await supabase.storage
-        .from('profile-images')
-        .upload(fileName, imageFile, {
-          cacheControl: '3600',
-          upsert: true
+      const uploadedUrl = await uploadImageWithRetry(imageFile);
+      
+      if (uploadedUrl) {
+        toast({
+          title: 'Upload successful',
+          description: 'Your profile image has been uploaded.',
         });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
       }
-
-      const { data } = supabase.storage
-        .from('profile-images')
-        .getPublicUrl(fileName);
-
-      console.log('Image uploaded successfully:', data.publicUrl);
-      return data.publicUrl;
+      
+      return uploadedUrl;
     } catch (error) {
       console.error('Error uploading image:', error);
       toast({

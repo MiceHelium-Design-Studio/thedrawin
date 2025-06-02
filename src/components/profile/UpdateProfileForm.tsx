@@ -10,6 +10,7 @@ import ProfileImageSection from './ProfileImageSection';
 
 const UpdateProfileForm: React.FC = () => {
   const {
+    profile,
     name,
     setName,
     email,
@@ -34,13 +35,19 @@ const UpdateProfileForm: React.FC = () => {
     let avatarUrl: string | null = null;
     
     if (imageFile) {
+      console.log('Uploading new profile image...');
       avatarUrl = await uploadImage();
-      if (!avatarUrl) return; // Upload failed
+      if (!avatarUrl) {
+        console.error('Image upload failed, aborting profile save');
+        return; // Upload failed, don't proceed with profile save
+      }
+      console.log('Image uploaded successfully:', avatarUrl);
     }
     
     const success = await saveProfile(avatarUrl);
     if (success) {
       clearImageState();
+      console.log('Profile updated successfully');
     }
   };
 
@@ -58,7 +65,7 @@ const UpdateProfileForm: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <ProfileImageSection
             imagePreview={imagePreview}
-            avatarUrl={null}
+            avatarUrl={profile?.avatar_url || null}
             isEditing={true}
             uploading={uploading}
             onImageChange={handleImageChange}
