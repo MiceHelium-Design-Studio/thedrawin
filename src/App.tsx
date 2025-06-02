@@ -124,9 +124,9 @@ const App = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <BackgroundProvider>
-            <TooltipProvider>
+        <TooltipProvider>
+          <BrowserRouter>
+            <BackgroundProvider>
               <AuthProvider>
                 <DrawProvider>
                   <NotificationProvider>
@@ -136,9 +136,9 @@ const App = () => {
                   </NotificationProvider>
                 </DrawProvider>
               </AuthProvider>
-            </TooltipProvider>
-          </BackgroundProvider>
-        </BrowserRouter>
+            </BackgroundProvider>
+          </BrowserRouter>
+        </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
