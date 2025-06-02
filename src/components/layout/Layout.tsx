@@ -26,14 +26,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   if (authLoading && !isAuthPage) {
     return (
-      <MobileLayout className="bg-black">
+      <MobileLayout className="bg-[#0D0D0D] min-h-screen">
         <main className="flex-grow flex items-center justify-center px-6 py-12">
-          <div className="animate-pulse space-y-6 w-full max-w-md">
-            <div className="h-8 bg-gray-800 rounded-lg w-3/4 mx-auto"></div>
-            <div className="h-48 bg-gray-800 rounded-xl shadow-sm"></div>
+          <div className="luxury-fade-in space-y-6 w-full max-w-md">
+            <div className="h-8 bg-[#1A1A1A] rounded-lg w-3/4 mx-auto gold-shimmer"></div>
+            <div className="h-48 luxury-card rounded-xl"></div>
             <div className="space-y-3">
-              <div className="h-4 bg-gray-800 rounded w-full"></div>
-              <div className="h-4 bg-gray-800 rounded w-2/3"></div>
+              <div className="h-4 bg-[#1A1A1A] rounded w-full gold-shimmer"></div>
+              <div className="h-4 bg-[#1A1A1A] rounded w-2/3 gold-shimmer"></div>
             </div>
           </div>
         </main>
@@ -44,14 +44,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <MobileLayout 
       className={cn(
-        "flex flex-col min-h-screen bg-black",
+        "flex flex-col min-h-screen bg-[#0D0D0D]",
         isNativeMobile && "safe-area-inset-top safe-area-inset-bottom"
       )} 
       aria-hidden={false}
     >
       <main 
         className={cn(
-          "flex-grow mobile-scroll relative",
+          "flex-grow mobile-scroll relative luxury-fade-in",
           (!isAuthPage && !isAdminPage) && user ? "pb-20" : "pb-0",
           "px-1"
         )} 
@@ -66,8 +66,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {(!isAuthPage && !isAdminPage) && user && (
         <nav 
           className={cn(
-            "fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl",
-            "border-t border-gray-800/50 shadow-lg",
+            "fixed bottom-0 left-0 right-0 glass-effect",
+            "border-t border-gold-500/20 shadow-luxury",
             isNativeMobile && "safe-area-inset-bottom"
           )}
         >
@@ -77,67 +77,67 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 to="/home"
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
                     isActive
-                      ? "text-gold-600 font-semibold bg-gold-900/30"
-                      : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
+                      ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
+                      : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
                   )
                 }
               >
-                <Home className="h-5 w-5 mb-1" />
-                <span className="font-medium">Home</span>
+                <Home className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
+                <span className="font-semibold">Home</span>
               </NavLink>
               
               <NavLink
                 to="/winners"
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
                     isActive
-                      ? "text-gold-600 font-semibold bg-gold-900/30"
-                      : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
+                      ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
+                      : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
                   )
                 }
               >
-                <Award className="h-5 w-5 mb-1" />
-                <span className="font-medium">Winners</span>
+                <Award className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
+                <span className="font-semibold">Winners</span>
               </NavLink>
               
               <NavLink
                 to="/notifications"
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center text-xs relative transition-all duration-300 touch-target no-select rounded-xl mx-1",
+                    "flex flex-col items-center justify-center text-xs relative transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
                     isActive
-                      ? "text-gold-600 font-semibold bg-gold-900/30"
-                      : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
+                      ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
+                      : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
                   )
                 }
               >
                 <div className="relative">
-                  <Bell className="h-5 w-5 mb-1" />
+                  <Bell className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
                   {!notificationsLoading && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center text-[10px] font-semibold shadow-sm">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-sm animate-pulse">
                       {unreadCount}
                     </span>
                   )}
                 </div>
-                <span className="font-medium">Alerts</span>
+                <span className="font-semibold">Alerts</span>
               </NavLink>
               
               <NavLink
                 to="/profile"
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
                     isActive
-                      ? "text-gold-600 font-semibold bg-gold-900/30"
-                      : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
+                      ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
+                      : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
                   )
                 }
               >
-                <User className="h-5 w-5 mb-1" />
-                <span className="font-medium">Profile</span>
+                <User className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
+                <span className="font-semibold">Profile</span>
               </NavLink>
               
               {user?.isAdmin && (
@@ -145,15 +145,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   to="/admin"
                   className={({ isActive }) =>
                     cn(
-                      "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
+                      "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1 group",
                       isActive
-                        ? "text-gold-600 font-semibold bg-gold-900/30"
-                        : "text-gray-400 hover:text-gold-600 hover:bg-gray-800/50"
+                        ? "text-gold-500 font-bold bg-gold-500/20 shadow-md"
+                        : "text-gray-400 hover:text-gold-400 hover:bg-white/5"
                     )
                   }
                 >
-                  <Settings className="h-5 w-5 mb-1" />
-                  <span className="font-medium">Admin</span>
+                  <Settings className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
+                  <span className="font-semibold">Admin</span>
                 </NavLink>
               )}
             </div>

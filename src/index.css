@@ -1,76 +1,83 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 222 84% 4%;
-    --foreground: 210 20% 98%;
-    --card: 222 84% 4%;
-    --card-foreground: 210 20% 98%;
-    --popover: 222 84% 4%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 210 20% 98%;
-    --primary-foreground: 222 84% 4%;
-    --secondary: 217 19% 15%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 217 19% 15%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217 19% 15%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 217 19% 15%;
-    --input: 217 19% 15%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 13 13 13; /* #0D0D0D */
+    --foreground: 255 255 255; /* #FFFFFF */
+    --card: 26 26 26; /* #1A1A1A */
+    --card-foreground: 255 255 255;
+    --popover: 26 26 26;
+    --popover-foreground: 255 255 255;
+    --primary: 212 175 55; /* #D4AF37 - Gold */
+    --primary-foreground: 13 13 13;
+    --secondary: 42 42 42;
+    --secondary-foreground: 255 255 255;
+    --muted: 42 42 42;
+    --muted-foreground: 176 176 176; /* #B0B0B0 */
+    --accent: 42 42 42;
+    --accent-foreground: 255 255 255;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 42 42 42;
+    --input: 42 42 42;
+    --ring: 212 175 55;
+    --chart-1: 212 175 55;
+    --chart-2: 36 199 142;
+    --chart-3: 251 191 36;
+    --chart-4: 168 85 247;
+    --chart-5: 239 68 68;
     --radius: 0.75rem;
     
-    /* Enhanced color palette */
-    --gold: 43 74% 55%;
-    --gray-50: 210 20% 8%;
-    --gray-100: 220 14% 12%;
-    --gray-200: 220 13% 16%;
-    --gray-300: 216 12% 20%;
-    --gray-400: 218 11% 35%;
-    --gray-500: 220 9% 46%;
-    --gray-600: 215 14% 65%;
-    --gray-700: 217 19% 75%;
-    --gray-800: 215 28% 85%;
-    --gray-900: 222 84% 95%;
+    /* Enhanced luxury color palette */
+    --gold: 212 175 55; /* #D4AF37 */
+    --gold-50: 254 252 232;
+    --gold-100: 254 249 195;
+    --gold-200: 254 240 138;
+    --gold-300: 253 224 71;
+    --gold-400: 250 204 21;
+    --gold-500: 212 175 55; /* Primary gold */
+    --gold-600: 180 140 30;
+    --gold-700: 146 108 25;
+    --gold-800: 120 88 25;
+    --gold-900: 101 77 28;
+    
+    --dark-bg: 13 13 13; /* #0D0D0D */
+    --soft-black: 26 26 26; /* #1A1A1A */
+    --clean-white: 255 255 255; /* #FFFFFF */
+    --secondary-gray: 176 176 176; /* #B0B0B0 */
+    --success-green: 36 199 142; /* #24C78E */
+    
+    --shadow-luxury: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.3);
+    --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #F4D03F 50%, #D4AF37 100%);
+    --gradient-dark: linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%);
   }
 
   .dark {
-    --background: 222 84% 4%;
-    --foreground: 210 20% 98%;
-    --card: 222 84% 4%;
-    --card-foreground: 210 20% 98%;
-    --popover: 222 84% 4%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 210 20% 98%;
-    --primary-foreground: 222 84% 4%;
-    --secondary: 217 19% 15%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 217 19% 15%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217 19% 15%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 217 19% 15%;
-    --input: 217 19% 15%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 13 13 13;
+    --foreground: 255 255 255;
+    --card: 26 26 26;
+    --card-foreground: 255 255 255;
+    --popover: 26 26 26;
+    --popover-foreground: 255 255 255;
+    --primary: 212 175 55;
+    --primary-foreground: 13 13 13;
+    --secondary: 42 42 42;
+    --secondary-foreground: 255 255 255;
+    --muted: 42 42 42;
+    --muted-foreground: 176 176 176;
+    --accent: 42 42 42;
+    --accent-foreground: 255 255 255;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 42 42 42;
+    --input: 42 42 42;
+    --ring: 212 175 55;
   }
 }
 
@@ -80,64 +87,93 @@
   }
   
   body {
-    @apply bg-black text-foreground font-sans antialiased;
+    @apply bg-[#0D0D0D] text-white font-inter antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background: #0D0D0D;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+  }
+  
+  h1 { @apply text-2xl md:text-3xl lg:text-4xl; }
+  h2 { @apply text-xl md:text-2xl lg:text-3xl; }
+  h3 { @apply text-lg md:text-xl lg:text-2xl; }
+  
+  p, span, div {
+    font-family: 'Inter', system-ui, sans-serif;
   }
 }
 
 /* Enhanced utility classes */
 @layer utilities {
-  .safe-area-inset-top {
-    padding-top: env(safe-area-inset-top);
-  }
+  .font-inter { font-family: 'Inter', system-ui, sans-serif; }
+  .font-poppins { font-family: 'Poppins', 'Inter', system-ui, sans-serif; }
   
-  .safe-area-inset-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+  .text-title { @apply text-2xl md:text-3xl font-semibold; }
+  .text-body { @apply text-sm md:text-base; }
+  .text-button { @apply text-base font-bold; }
   
-  .safe-area-inset-left {
-    padding-left: env(safe-area-inset-left);
-  }
-  
-  .safe-area-inset-right {
-    padding-right: env(safe-area-inset-right);
-  }
+  .safe-area-inset-top { padding-top: env(safe-area-inset-top); }
+  .safe-area-inset-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-area-inset-left { padding-left: env(safe-area-inset-left); }
+  .safe-area-inset-right { padding-right: env(safe-area-inset-right); }
 
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
+  .touch-target { min-height: 44px; min-width: 44px; }
+  .no-select { user-select: none; }
+  .mobile-scroll { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 
-  .no-select {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-
-  .mobile-scroll {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-  }
-
-  /* Premium glass effect */
-  .glass-card {
-    background: rgba(0, 0, 0, 0.8);
+  /* Luxury design elements */
+  .luxury-card {
+    @apply bg-[#1A1A1A] border border-white/10 shadow-2xl;
+    box-shadow: var(--shadow-luxury);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
   }
-
-  /* Gradient backgrounds */
-  .gradient-primary {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  
+  .luxury-card:hover {
+    @apply border-gold-500/30;
+    box-shadow: var(--shadow-luxury), var(--shadow-gold);
+    transform: translateY(-2px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-
-  .gradient-secondary {
-    background: linear-gradient(135deg, #374151 0%, #111827 100%);
+  
+  .gold-glow {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4), 0 0 40px rgba(212, 175, 55, 0.2);
+  }
+  
+  .gold-gradient {
+    background: var(--gradient-gold);
+  }
+  
+  .dark-gradient {
+    background: var(--gradient-dark);
+  }
+  
+  .premium-button {
+    @apply bg-gold-500 hover:bg-gold-600 text-black font-bold text-button rounded-xl px-6 py-3;
+    @apply transition-all duration-300 ease-out;
+    @apply shadow-lg hover:shadow-xl hover:scale-105;
+    @apply border border-gold-400 hover:border-gold-300;
+  }
+  
+  .premium-button:hover {
+    box-shadow: var(--shadow-gold);
+  }
+  
+  .outline-button {
+    @apply border-2 border-gold-500 text-gold-500 bg-transparent hover:bg-gold-500 hover:text-black;
+    @apply font-bold text-button rounded-xl px-6 py-3;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:shadow-lg hover:scale-105;
+  }
+  
+  .glass-effect {
+    @apply bg-black/30 backdrop-blur-xl border border-white/10;
+  }
+  
+  .hero-glow {
+    background: radial-gradient(600px circle at 50% 50%, rgba(212, 175, 55, 0.15), transparent 40%);
   }
 }
 
@@ -174,17 +210,86 @@
 }
 
 /* Enhanced animations */
-@keyframes slideIn {
+@keyframes goldShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes luxuryFadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-.slide-in {
-  animation: slideIn 0.4s ease-out;
+@keyframes goldPulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.8), 0 0 60px rgba(212, 175, 55, 0.4);
+  }
+}
+
+@keyframes coinRotate {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+.gold-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: goldShimmer 2s infinite;
+}
+
+.luxury-fade-in {
+  animation: luxuryFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gold-pulse {
+  animation: goldPulse 2s infinite;
+}
+
+.coin-rotate {
+  animation: coinRotate 2s linear infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #F4D03F;
+}
+
+/* Loading animations */
+.loading-dots {
+  display: inline-block;
+}
+
+.loading-dots::after {
+  content: '...';
+  animation: dots 1.5s steps(3, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { color: transparent; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
+  40% { color: #D4AF37; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
+  60% { text-shadow: .25em 0 0 #D4AF37, .5em 0 0 transparent; }
+  80%, 100% { text-shadow: .25em 0 0 #D4AF37, .5em 0 0 #D4AF37; }
 }

@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { CheckCheck, Bell } from 'lucide-react';
+import { CheckCheck, Bell, Sparkles } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
 import NotificationItem from '../components/notifications/NotificationItem';
 import { useToast } from '@/hooks/use-toast';
@@ -47,16 +47,22 @@ const Notifications: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-black">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
+    <div className="min-h-screen bg-[#0D0D0D] hero-glow">
+      <div className="max-w-4xl mx-auto px-4 py-8 luxury-fade-in">
+        {/* Enhanced Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-white tracking-tight">
-              Notifications
-            </h1>
-            <p className="text-gray-400 font-medium">
-              Stay updated with your latest activity
+          <div className="space-y-2">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gold-500/20 rounded-xl flex items-center justify-center">
+                <Bell className="h-5 w-5 text-gold-500" />
+              </div>
+              <h1 className="text-title font-poppins text-white tracking-tight">
+                Notifications
+              </h1>
+              <Sparkles className="h-6 w-6 text-gold-500 animate-pulse" />
+            </div>
+            <p className="text-body text-gray-400 font-inter">
+              Stay updated with your latest activity and wins
             </p>
           </div>
           
@@ -66,25 +72,25 @@ const Notifications: React.FC = () => {
               size="sm"
               onClick={handleMarkAllAsRead}
               disabled={loading}
-              className="text-gray-300 border-gray-600 hover:bg-gray-800 hover:border-gold-400 transition-all duration-200 font-medium shadow-sm"
+              className="group"
             >
-              <CheckCheck className="h-4 w-4 mr-2" />
+              <CheckCheck className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
               Mark all as read
             </Button>
           )}
         </div>
         
-        {/* Content */}
-        <div className="bg-gray-900/50 rounded-2xl shadow-sm border border-gray-700/50 overflow-hidden">
+        {/* Enhanced Content */}
+        <div className="luxury-card rounded-2xl overflow-hidden">
           {loading ? (
             <div className="p-6 space-y-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="p-4 border border-gray-700 rounded-xl">
+                <div key={i} className="p-4 border border-white/10 rounded-xl">
                   <div className="flex items-start space-x-4">
-                    <Skeleton className="h-10 w-10 rounded-full bg-gray-800" />
+                    <Skeleton className="h-10 w-10 rounded-full bg-[#2A2A2A]" />
                     <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4 bg-gray-800" />
-                      <Skeleton className="h-3 w-1/2 bg-gray-800" />
+                      <Skeleton className="h-4 w-3/4 bg-[#2A2A2A] gold-shimmer" />
+                      <Skeleton className="h-3 w-1/2 bg-[#2A2A2A] gold-shimmer" />
                     </div>
                   </div>
                 </div>
@@ -92,23 +98,29 @@ const Notifications: React.FC = () => {
             </div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-16 px-6">
-              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Bell className="h-8 w-8 text-gray-500" />
+              <div className="w-20 h-20 bg-gold-500/20 rounded-full flex items-center justify-center mx-auto mb-6 gold-pulse">
+                <Bell className="h-10 w-10 text-gold-500" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <h3 className="text-xl font-bold text-white mb-3 font-poppins">
                 No notifications yet
               </h3>
-              <p className="text-gray-400 max-w-sm mx-auto">
+              <p className="text-gray-400 max-w-sm mx-auto font-inter">
                 When you have new activity, we'll notify you here so you don't miss anything important.
               </p>
+              <div className="mt-6">
+                <Button variant="outline" size="sm">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Enable Notifications
+                </Button>
+              </div>
             </div>
           ) : (
-            <div className="divide-y divide-gray-700">
+            <div className="divide-y divide-white/10">
               {notifications.map((notification, index) => (
                 <div 
                   key={notification.id} 
                   className={cn(
-                    "transition-colors duration-200",
+                    "transition-all duration-300 hover:bg-white/5",
                     index === 0 && "rounded-t-2xl",
                     index === notifications.length - 1 && "rounded-b-2xl"
                   )}
