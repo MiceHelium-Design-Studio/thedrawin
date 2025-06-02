@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { DrawProvider } from "./context/DrawContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { BackgroundProvider } from "./context/BackgroundContext";
+import { useCapacitorPlugins } from "./hooks/useCapacitorPlugins";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 // Pages
@@ -91,6 +92,32 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AppContent = () => {
+  useCapacitorPlugins();
+  
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/login" element={<PublicRoute><Auth /></PublicRoute>} />
+        <Route path="/auth" element={<Navigate to="/login" replace />} />
+        
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
+        <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+        <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
+        <Route path="/todos" element={<ProtectedRoute><TodoList /></ProtectedRoute>} />
+        <Route path="/todo-page" element={<ProtectedRoute><TodoPage /></ProtectedRoute>} />
+        
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Layout>
+  );
+};
+
 const App = () => {
   console.log("App rendering");
   
@@ -105,25 +132,7 @@ const App = () => {
                   <NotificationProvider>
                     <Toaster />
                     <Sonner />
-                    <Layout>
-                      <Routes>
-                        <Route path="/login" element={<PublicRoute><Auth /></PublicRoute>} />
-                        <Route path="/auth" element={<Navigate to="/login" replace />} />
-                        
-                        <Route path="/" element={<Navigate to="/home" replace />} />
-                        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                        <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
-                        <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
-                        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-                        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                        <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
-                        <Route path="/todos" element={<ProtectedRoute><TodoList /></ProtectedRoute>} />
-                        <Route path="/todo-page" element={<ProtectedRoute><TodoPage /></ProtectedRoute>} />
-                        
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </Layout>
+                    <AppContent />
                   </NotificationProvider>
                 </DrawProvider>
               </AuthProvider>
