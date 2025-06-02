@@ -1,0 +1,61 @@
+
+/* Premium animations and effects */
+@layer utilities {
+  /* Animation classes */
+  .luxury-fade-in {
+    animation: luxuryFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .gold-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(243, 156, 10, 0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  .gold-pulse {
+    animation: goldPulse 2s infinite;
+  }
+
+  /* Loading animations */
+  .loading-luxury {
+    display: inline-block;
+  }
+
+  .loading-luxury::after {
+    content: '...';
+    animation: luxuryDots 1.5s steps(3, end) infinite;
+  }
+}
+
+/* Keyframe definitions */
+@keyframes luxuryFadeIn {
+  0% { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.98); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes goldPulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(243, 156, 10, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(243, 156, 10, 0.6), 0 0 60px rgba(243, 156, 10, 0.3);
+  }
+}
+
+@keyframes luxuryDots {
+  0%, 20% { color: transparent; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
+  40% { color: #F39C0A; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
+  60% { text-shadow: .25em 0 0 #F39C0A, .5em 0 0 transparent; }
+  80%, 100% { text-shadow: .25em 0 0 #F39C0A, .5em 0 0 #F39C0A; }
+}
