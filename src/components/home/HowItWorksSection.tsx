@@ -7,45 +7,43 @@ const HowItWorksSection: React.FC = () => {
   const steps = [
     {
       icon: Coins,
-      title: "Buy Tickets",
-      description: "Purchase tickets for your favorite draws using your wallet balance."
+      title: "Purchase Tickets",
+      description: "Select your favorite draws and purchase tickets using your secure wallet balance."
     },
     {
       icon: Users,
-      title: "Join the Draw",
-      description: "Wait for other participants to join and the draw to reach capacity."
+      title: "Join the Community",
+      description: "Connect with players worldwide as draws fill up and excitement builds."
     },
     {
       icon: Award,
-      title: "Win Prizes",
-      description: "When the draw ends, one lucky winner takes home the prize!"
+      title: "Win Premium Prizes",
+      description: "Experience the thrill as winners are selected and claim their exclusive rewards."
     }
   ];
 
   return (
-    <section className="mb-12">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-4 uppercase tracking-wide">
-          <span className="bg-gold-gradient bg-clip-text text-transparent">
-            How It Works
-          </span>
+    <section className="mb-16">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold mb-4 text-white tracking-tight">
+          How It <span className="bg-gold-gradient bg-clip-text text-transparent">Works</span>
         </h2>
-        <p className="text-white/80 max-w-2xl mx-auto">
-          Join exciting draws, win amazing prizes, and be part of the DRAWIN community
+        <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
+          Three simple steps to join the future of digital gaming
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-3 gap-8">
         {steps.map((step, index) => (
-          <Card key={index} className="luxury-card text-center">
-            <CardContent className="p-6">
-              <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <step.icon className="h-8 w-8 text-gold" />
+          <Card key={index} className="luxury-card text-center group hover:scale-[1.02] transition-all duration-300">
+            <CardContent className="p-8">
+              <div className="w-20 h-20 bg-[#F39C0A]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-[#F39C0A]/20 transition-colors duration-300 border border-[#F39C0A]/20">
+                <step.icon className="h-10 w-10 text-[#F39C0A]" />
               </div>
-              <h3 className="text-lg font-bold mb-2 text-gold uppercase">
+              <h3 className="text-xl font-semibold mb-4 text-white">
                 {step.title}
               </h3>
-              <p className="text-white/70 text-sm leading-relaxed">
+              <p className="text-slate-400 leading-relaxed">
                 {step.description}
               </p>
             </CardContent>

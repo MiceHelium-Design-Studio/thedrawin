@@ -15,42 +15,43 @@ const ActiveDrawsSection: React.FC<ActiveDrawsSectionProps> = ({ activeDraws, on
   }
 
   return (
-    <section className="mb-12 relative">
-      {/* Futuristic section background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-gold-500/5 via-transparent to-cyber-cyan/5 rounded-2xl" />
+    <section className="mb-16 relative">
+      {/* Premium section background */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#F39C0A]/5 via-transparent to-[#06B6D4]/5 rounded-3xl" />
       
       <div className="relative z-10">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gold-500/20 rounded-lg flex items-center justify-center cyber-pulse">
-                <div className="w-4 h-4 bg-gold-500 rounded-sm neon-flicker" />
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-[#F39C0A]/10 rounded-xl flex items-center justify-center gold-pulse border border-[#F39C0A]/20">
+                <div className="w-5 h-5 bg-[#F39C0A] rounded-sm shadow-gold" />
               </div>
-              <h2 className="text-2xl font-bold uppercase tracking-wide font-orbitron">
-                <span className="cyber-text">
-                  ACTIVE PROTOCOLS
-                </span>
+              <h2 className="text-3xl font-bold text-white tracking-tight">
+                Active <span className="bg-gold-gradient bg-clip-text text-transparent">Draws</span>
               </h2>
             </div>
-            <div className="h-0.5 w-24 bg-gradient-to-r from-gold-500 to-transparent" />
+            <div className="h-px w-32 bg-gradient-to-r from-[#F39C0A] to-transparent" />
+            <p className="text-slate-400 text-lg">
+              Live draws waiting for your participation
+            </p>
           </div>
           
           <Button 
             variant="outline" 
-            size="sm" 
+            size="lg" 
             onClick={onViewAll}
-            className="cyber-outline-button group"
+            className="premium-outline-button group min-w-[160px]"
           >
-            <span className="relative z-10">VIEW ALL DRAWS</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gold-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="relative z-10">View All Draws</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F39C0A]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </Button>
         </div>
         
-        <div className="grid gap-6 md:gap-8">
+        <div className="grid gap-8">
           {activeDraws.slice(0, 3).map((draw, index) => (
             <div 
               key={draw.id} 
-              className="cyber-fade-in relative"
+              className="luxury-fade-in relative"
               style={{ animationDelay: `${index * 150}ms` }}
             >
               <DrawCard draw={draw} />
