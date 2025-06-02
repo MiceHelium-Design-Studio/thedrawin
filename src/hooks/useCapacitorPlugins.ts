@@ -1,29 +1,51 @@
 
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { SplashScreen } from '@capacitor/splash-screen';
-import { StatusBar, Style } from '@capacitor/status-bar';
+
+// Use dynamic imports to handle potential module resolution issues
+const initializeCapacitorPlugins = async () => {
+  if (!Capacitor.isNativePlatform()) {
+    return null;
+  }
+
+  try {
+    const { SplashScreen } = await import('@capacitor/splash-screen');
+    const { StatusBar, Style } = await import('@capacitor/status-bar');
+    
+    return { SplashScreen, StatusBar, Style };
+  } catch (error) {
+    console.warn('Capacitor plugins not available:', error);
+    return null;
+  }
+};
 
 export const useCapacitorPlugins = () => {
   useEffect(() => {
     const initializePlugins = async () => {
-      if (Capacitor.isNativePlatform()) {
-        try {
-          // Configure status bar
-          await StatusBar.setStyle({ style: Style.Dark });
-          await StatusBar.setBackgroundColor({ color: '#000000' });
-          await StatusBar.setOverlaysWebView({ overlay: false });
+      const plugins = await initializeCapacitorPlugins();
+      
+      if (!plugins) {
+        console.log('Capacitor plugins not available or not running on native platform');
+        return;
+      }
 
-          // Hide splash screen after app is ready
-          setTimeout(async () => {
-            await SplashScreen.hide({
-              fadeOutDuration: 300
-            });
-          }, 2000);
+      const { SplashScreen, StatusBar, Style } = plugins;
 
-        } catch (error) {
-          console.error('Error initializing Capacitor plugins:', error);
-        }
+      try {
+        // Configure status bar
+        await StatusBar.setStyle({ style: Style.Dark });
+        await StatusBar.setBackgroundColor({ color: '#000000' });
+        await StatusBar.setOverlaysWebView({ overlay: false });
+
+        // Hide splash screen after app is ready
+        setTimeout(async () => {
+          await SplashScreen.hide({
+            fadeOutDuration: 300
+          });
+        }, 2000);
+
+      } catch (error) {
+        console.error('Error initializing Capacitor plugins:', error);
       }
     };
 
@@ -31,26 +53,36 @@ export const useCapacitorPlugins = () => {
   }, []);
 
   const hideSplashScreen = async () => {
-    if (Capacitor.isNativePlatform()) {
-      try {
-        await SplashScreen.hide({
-          fadeOutDuration: 300
-        });
-      } catch (error) {
-        console.error('Error hiding splash screen:', error);
-      }
+    const plugins = await initializeCapacitorPlugins();
+    
+    if (!plugins) {
+      console.log('SplashScreen not available');
+      return;
+    }
+
+    try {
+      await plugins.SplashScreen.hide({
+        fadeOutDuration: 300
+      });
+    } catch (error) {
+      console.error('Error hiding splash screen:', error);
     }
   };
 
   const setStatusBarStyle = async (style: 'light' | 'dark') => {
-    if (Capacitor.isNativePlatform()) {
-      try {
-        await StatusBar.setStyle({ 
-          style: style === 'light' ? Style.Light : Style.Dark 
-        });
-      } catch (error) {
-        console.error('Error setting status bar style:', error);
-      }
+    const plugins = await initializeCapacitorPlugins();
+    
+    if (!plugins) {
+      console.log('StatusBar not available');
+      return;
+    }
+
+    try {
+      await plugins.StatusBar.setStyle({ 
+        style: style === 'light' ? plugins.Style.Light : plugins.Style.Dark 
+      });
+    } catch (error) {
+      console.error('Error setting status bar style:', error);
     }
   };
 
