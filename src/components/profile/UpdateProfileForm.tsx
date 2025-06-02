@@ -1,85 +1,112 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { updateUserProfile } from '@/utils/updateUserProfile';
-import { useToast } from '@/hooks/use-toast';
+import { useProfileManagement } from '@/hooks/useProfileManagement';
+import { useImageUpload } from '@/hooks/useImageUpload';
+import ProfileImageSection from './ProfileImageSection';
 
 const UpdateProfileForm: React.FC = () => {
-  const [fullName, setFullName] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    saving,
+    saveProfile,
+    resetForm
+  } = useProfileManagement();
+  
+  const {
+    imageFile,
+    imagePreview,
+    uploading,
+    handleImageChange,
+    uploadImage,
+    clearImageState
+  } = useImageUpload();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    try {
-      await updateUserProfile({
-        full_name: fullName,
-        avatar_url: avatarUrl
-      });
-      
-      toast({
-        title: 'Profile updated',
-        description: 'Your profile has been updated successfully.',
-      });
-      
-      // Clear form after successful update
-      setFullName('');
-      setAvatarUrl('');
-    } catch (error) {
-      console.error('Profile update error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Update failed',
-        description: 'There was an error updating your profile.',
-      });
-    } finally {
-      setIsLoading(false);
+    let avatarUrl: string | null = null;
+    
+    if (imageFile) {
+      avatarUrl = await uploadImage();
+      if (!avatarUrl) return; // Upload failed
+    }
+    
+    const success = await saveProfile(avatarUrl);
+    if (success) {
+      clearImageState();
     }
   };
 
+  const handleReset = () => {
+    resetForm();
+    clearImageState();
+  };
+
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Update Profile</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input
-              id="fullName"
-              type="text"
-              placeholder="Enter your full name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <ProfileImageSection
+            imagePreview={imagePreview}
+            avatarUrl={null}
+            isEditing={true}
+            uploading={uploading}
+            onImageChange={handleImageChange}
+          />
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="avatarUrl">Avatar URL</Label>
-            <Input
-              id="avatarUrl"
-              type="url"
-              placeholder="Enter avatar image URL"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-            />
+          <div className="flex gap-3">
+            <Button 
+              type="submit" 
+              className="flex-1"
+              disabled={saving || uploading}
+            >
+              {saving ? 'Updating...' : 'Save Profile'}
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={handleReset}
+              disabled={saving || uploading}
+            >
+              Reset
+            </Button>
           </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Updating...' : 'Save Profile'}
-          </Button>
         </form>
       </CardContent>
     </Card>
