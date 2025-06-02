@@ -8,7 +8,7 @@ import { uploadAvatar } from '@/utils/uploadAvatar';
 import { updateUserProfile } from '@/utils/updateUserProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, User, Camera } from 'lucide-react';
+import { User, Camera } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
