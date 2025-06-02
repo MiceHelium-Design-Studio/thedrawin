@@ -73,27 +73,38 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-4 py-8">
-        <HeroSection user={user} authLoading={authLoading} />
-        
-        {isLoading ? (
-          <LoadingSection />
-        ) : (
-          <>
-            <BannerSlider banners={displayBanners} />
-            <HowItWorksSection />
-            <ActiveDrawsSection 
-              activeDraws={activeDraws} 
-              onViewAll={handleViewAll} 
-            />
-            <RecentWinnersSection />
-            <AllDrawsSection 
-              draws={sortedDraws} 
-              onViewAll={handleViewAll} 
-            />
-          </>
-        )}
+    <div className="min-h-screen bg-cyber-dark relative overflow-hidden">
+      {/* Futuristic background effects */}
+      <div className="fixed inset-0 cyber-grid opacity-20 pointer-events-none" />
+      <div className="fixed inset-0 bg-cyber-bg pointer-events-none" />
+      
+      {/* Animated data streams */}
+      <div className="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent opacity-50">
+        <div className="w-full h-full bg-gradient-to-r from-transparent via-white to-transparent animate-data-flow" />
+      </div>
+      
+      <div className="relative z-10">
+        <div className="container mx-auto px-4 py-8">
+          <HeroSection user={user} authLoading={authLoading} />
+          
+          {isLoading ? (
+            <LoadingSection />
+          ) : (
+            <div className="space-y-16">
+              <BannerSlider banners={displayBanners} />
+              <HowItWorksSection />
+              <ActiveDrawsSection 
+                activeDraws={activeDraws} 
+                onViewAll={handleViewAll} 
+              />
+              <RecentWinnersSection />
+              <AllDrawsSection 
+                draws={sortedDraws} 
+                onViewAll={handleViewAll} 
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

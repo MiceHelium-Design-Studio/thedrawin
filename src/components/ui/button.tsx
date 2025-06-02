@@ -6,20 +6,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-bold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98] hover:scale-105",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-bold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98] hover:scale-105 relative overflow-hidden",
   {
     variants: {
       variant: {
-        default: "premium-button",
+        default: "futuristic-button",
         destructive:
-          "bg-red-500 text-white hover:bg-red-600 shadow-lg hover:shadow-xl font-bold",
+          "bg-red-500 text-white hover:bg-red-600 shadow-cyber hover:shadow-neon font-bold border border-red-400 hover:border-red-300",
         outline:
-          "outline-button",
+          "cyber-outline-button",
         secondary:
-          "bg-[#2A2A2A] text-white hover:bg-[#3A3A3A] shadow-md hover:shadow-lg font-semibold border border-white/10",
-        ghost: "hover:bg-white/10 text-white hover:shadow-sm font-medium rounded-lg",
-        link: "text-gold-500 underline-offset-4 hover:underline font-semibold hover:text-gold-400",
-        luxury: "bg-gradient-to-r from-[#1A1A1A] to-[#2A2A2A] text-white hover:from-[#2A2A2A] hover:to-[#3A3A3A] shadow-lg hover:shadow-xl border border-gold-500/30 hover:border-gold-400 font-bold"
+          "bg-cyber-surface text-cyber-white hover:bg-cyber-card shadow-cyber hover:shadow-glass font-semibold border border-white/10 hover:border-gold-500/30",
+        ghost: "hover:bg-white/10 text-cyber-white hover:shadow-glass font-medium rounded-lg border border-transparent hover:border-white/20",
+        link: "text-gold-500 underline-offset-4 hover:underline font-semibold hover:text-gold-400 neon-flicker",
+        luxury: "bg-gradient-to-r from-cyber-card to-cyber-surface text-cyber-white hover:from-cyber-surface hover:to-cyber-card shadow-cyber hover:shadow-neon border border-gold-500/30 hover:border-gold-400 font-bold"
       },
       size: {
         default: "h-12 px-6 py-3",
