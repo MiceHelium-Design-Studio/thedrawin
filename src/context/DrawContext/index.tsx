@@ -57,6 +57,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     setLoading(true);
     setError(null);
     try {
+      console.log('DrawContext: Starting to fetch draws...');
       await drawFunctions.fetchDraws();
       console.log('DrawContext: Draws fetched successfully');
     } catch (err: any) {
@@ -130,7 +131,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         console.error('DrawContext: Error loading media:', err);
       });
     }
-  }, [user, authLoading]); // Added authLoading as dependency
+  }, [user, authLoading]);
 
   // Pass through other functions with proper return types
   const { createDraw, updateDraw, deleteDraw, pickWinner } = drawFunctions;
