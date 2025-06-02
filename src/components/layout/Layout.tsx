@@ -6,7 +6,6 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { cn } from '../../lib/utils';
-import TopNavigation from './TopNavigation';
 import MobileLayout from './MobileLayout';
 
 interface LayoutProps {
@@ -27,11 +26,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   if (authLoading && !isAuthPage) {
     return (
-      <MobileLayout className="bg-gradient-to-b from-black-dark to-black">
-        <main className="flex-grow flex items-center justify-center">
-          <div className="animate-pulse space-y-4 w-full max-w-md px-4">
-            <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
-            <div className="h-64 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
+      <MobileLayout className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <main className="flex-grow flex items-center justify-center px-6 py-12">
+          <div className="animate-pulse space-y-6 w-full max-w-md">
+            <div className="h-8 bg-gray-200 rounded-lg dark:bg-gray-700 w-3/4 mx-auto"></div>
+            <div className="h-48 bg-gray-200 rounded-xl dark:bg-gray-700 shadow-sm"></div>
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-200 rounded dark:bg-gray-700 w-full"></div>
+              <div className="h-4 bg-gray-200 rounded dark:bg-gray-700 w-2/3"></div>
+            </div>
           </div>
         </main>
       </MobileLayout>
@@ -41,125 +44,119 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <MobileLayout 
       className={cn(
-        "flex flex-col min-h-screen bg-gradient-to-b from-black-dark to-black",
+        "flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900",
         isNativeMobile && "safe-area-inset-top safe-area-inset-bottom"
       )} 
       aria-hidden={false}
     >
-      {(!isAuthPage && !isAdminPage) && user && (
-        <TopNavigation />
-      )}
-
       <main 
         className={cn(
-          "flex-grow pattern-bg mobile-scroll",
-          (!isAuthPage && !isAdminPage) && user ? "pb-16" : "pb-0"
+          "flex-grow mobile-scroll relative",
+          (!isAuthPage && !isAdminPage) && user ? "pb-20" : "pb-0",
+          "px-1"
         )} 
         role="main" 
         aria-label="Main content"
       >
-        {children}
+        <div className="max-w-6xl mx-auto">
+          {children}
+        </div>
       </main>
 
       {(!isAuthPage && !isAdminPage) && user && (
         <nav 
           className={cn(
-            "fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-gold/20",
+            "fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl",
+            "border-t border-gray-200/50 dark:border-gray-700/50 shadow-lg",
             isNativeMobile && "safe-area-inset-bottom"
           )}
         >
-          <div className="grid grid-cols-5 h-16">
-            <NavLink
-              to="/home"
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select",
-                  isActive
-                    ? "text-gold font-medium"
-                    : "text-white hover:text-gold"
-                )
-              }
-            >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/home' && "bg-black-light/50")}>
-                <Home className="h-5 w-5 mb-1" />
-              </div>
-              <span>Home</span>
-            </NavLink>
-            
-            <NavLink
-              to="/winners"
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select",
-                  isActive
-                    ? "text-gold font-medium"
-                    : "text-white hover:text-gold"
-                )
-              }
-            >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/winners' && "bg-black-light/50")}>
-                <Award className="h-5 w-5 mb-1" />
-              </div>
-              <span>Winners</span>
-            </NavLink>
-            
-            <NavLink
-              to="/notifications"
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center justify-center text-xs relative transition-all duration-300 touch-target no-select",
-                  isActive
-                    ? "text-gold font-medium"
-                    : "text-white hover:text-gold"
-                )
-              }
-            >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/notifications' && "bg-black-light/50")}>
-                <Bell className="h-5 w-5 mb-1" />
-                {!notificationsLoading && unreadCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center text-[10px] border border-black">
-                    {unreadCount}
-                  </span>
-                )}
-              </div>
-              <span>Alerts</span>
-            </NavLink>
-            
-            <NavLink
-              to="/profile"
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select",
-                  isActive
-                    ? "text-gold font-medium"
-                    : "text-white hover:text-gold"
-                )
-              }
-            >
-              <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/profile' && "bg-black-light/50")}>
-                <User className="h-5 w-5 mb-1" />
-              </div>
-              <span>Profile</span>
-            </NavLink>
-            
-            {user?.isAdmin && (
+          <div className="max-w-lg mx-auto">
+            <div className="grid grid-cols-5 h-16 px-2">
               <NavLink
-                to="/admin"
+                to="/home"
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select",
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
                     isActive
-                      ? "text-gold font-medium"
-                      : "text-white hover:text-gold"
+                      ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   )
                 }
               >
-                <div className={cn("p-1.5 rounded-full transition-all duration-300", location.pathname === '/admin' && "bg-black-light/50")}>
-                  <Settings className="h-5 w-5 mb-1" />
-                </div>
-                <span>Admin</span>
+                <Home className="h-5 w-5 mb-1" />
+                <span className="font-medium">Home</span>
               </NavLink>
-            )}
+              
+              <NavLink
+                to="/winners"
+                className={({ isActive }) =>
+                  cn(
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
+                    isActive
+                      ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  )
+                }
+              >
+                <Award className="h-5 w-5 mb-1" />
+                <span className="font-medium">Winners</span>
+              </NavLink>
+              
+              <NavLink
+                to="/notifications"
+                className={({ isActive }) =>
+                  cn(
+                    "flex flex-col items-center justify-center text-xs relative transition-all duration-300 touch-target no-select rounded-xl mx-1",
+                    isActive
+                      ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  )
+                }
+              >
+                <div className="relative">
+                  <Bell className="h-5 w-5 mb-1" />
+                  {!notificationsLoading && unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center text-[10px] font-semibold shadow-sm">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+                <span className="font-medium">Alerts</span>
+              </NavLink>
+              
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  cn(
+                    "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
+                    isActive
+                      ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  )
+                }
+              >
+                <User className="h-5 w-5 mb-1" />
+                <span className="font-medium">Profile</span>
+              </NavLink>
+              
+              {user?.isAdmin && (
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    cn(
+                      "flex flex-col items-center justify-center text-xs transition-all duration-300 touch-target no-select rounded-xl mx-1",
+                      isActive
+                        ? "text-gold-600 dark:text-gold-400 font-semibold bg-gold-50 dark:bg-gold-900/20"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gold-600 dark:hover:text-gold-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    )
+                  }
+                >
+                  <Settings className="h-5 w-5 mb-1" />
+                  <span className="font-medium">Admin</span>
+                </NavLink>
+              )}
+            </div>
           </div>
         </nav>
       )}

@@ -26,14 +26,28 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				gold: {
-					light: '#FFE9A3', // Lightened for better contrast
-					DEFAULT: '#D4AF37',
-					dark: '#996515',
+					50: '#fffbeb',
+					100: '#fef3c7',
+					200: '#fde68a',
+					300: '#fcd34d',
+					400: '#fbbf24',
+					500: '#f59e0b',
+					600: '#d97706',
+					700: '#b45309',
+					800: '#92400e',
+					900: '#78350f',
 				},
-				black: {
-					light: '#222222',
-					DEFAULT: '#000000',
-					dark: '#0A0A0A',
+				gray: {
+					50: 'hsl(var(--gray-50))',
+					100: 'hsl(var(--gray-100))',
+					200: 'hsl(var(--gray-200))',
+					300: 'hsl(var(--gray-300))',
+					400: 'hsl(var(--gray-400))',
+					500: 'hsl(var(--gray-500))',
+					600: 'hsl(var(--gray-600))',
+					700: 'hsl(var(--gray-700))',
+					800: 'hsl(var(--gray-800))',
+					900: 'hsl(var(--gray-900))',
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
@@ -63,11 +77,6 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				darkBlue: {
-					light: '#1A2C5B',
-					DEFAULT: '#0F1E42',
-					dark: '#071124',
-				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -83,6 +92,9 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			fontFamily: {
+				sans: ['Inter', 'system-ui', 'sans-serif'],
 			},
 			keyframes: {
 				'accordion-down': {
@@ -101,75 +113,55 @@ export default {
 						height: '0'
 					}
 				},
-				'shimmer': {
+				'fade-in': {
 					'0%': {
-						backgroundPosition: '-500px 0',
+						opacity: '0',
+						transform: 'translateY(10px)'
 					},
 					'100%': {
-						backgroundPosition: '500px 0',
-					},
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				},
-				'spin-slow': {
+				'slide-up': {
 					'0%': {
-						transform: 'rotate(0deg)',
+						opacity: '0',
+						transform: 'translateY(20px)'
 					},
 					'100%': {
-						transform: 'rotate(360deg)',
-					},
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				},
-				'glow': {
-					'0%, 100%': { 
-						boxShadow: '0 0 5px #D4AF37, 0 0 10px #D4AF37' 
+				'scale-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'scale(0.95)'
 					},
-					'50%': { 
-						boxShadow: '0 0 20px #D4AF37, 0 0 30px #D4AF37'
+					'100%': {
+						opacity: '1',
+						transform: 'scale(1)'
 					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'shimmer': 'shimmer 2s infinite linear',
-				'spin-slow': 'spin-slow 3s linear infinite',
-				'glow': 'glow 2s ease-in-out infinite'
+				'fade-in': 'fade-in 0.3s ease-out',
+				'slide-up': 'slide-up 0.4s ease-out',
+				'scale-in': 'scale-in 0.2s ease-out'
 			},
-			backgroundImage: {
-				'gold-gradient': 'linear-gradient(90deg, #D4AF37 0%, #FFF8DC 50%, #D4AF37 100%)',
-				'black-gradient': 'linear-gradient(180deg, #000000 0%, #222222 100%)',
-				'futuristic-pattern': 'radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 80%)',
+			spacing: {
+				'18': '4.5rem',
+				'88': '22rem',
+				'100': '25rem',
+				'112': '28rem',
+				'128': '32rem',
 			},
-			fontFamily: {
-				sans: ['Lato', 'system-ui', 'sans-serif'],
-				serif: ['Lato', 'system-ui', 'sans-serif'], // Change serif to also use Lato
-			},
-			typography: {
-				DEFAULT: {
-					css: {
-						maxWidth: '65ch',
-						color: 'hsl(var(--foreground))',
-						'h1,h2,h3,h4,h5,h6': {
-							color: 'hsl(var(--foreground))',
-							fontWeight: '700',
-							fontFamily: 'Lato, system-ui, sans-serif',
-							textTransform: 'uppercase',
-						},
-						a: {
-							color: 'hsl(var(--primary))',
-							'&:hover': {
-								color: 'hsl(var(--primary))',
-							},
-						},
-					},
-				},
-			},
-			letterSpacing: {
-				tighter: '-0.05em',
-				tight: '-0.025em',
-				normal: '0',
-				wide: '0.025em',
-				wider: '0.05em',
-				widest: '0.1em',
-			},
+			maxWidth: {
+				'8xl': '88rem',
+				'9xl': '96rem',
+			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
