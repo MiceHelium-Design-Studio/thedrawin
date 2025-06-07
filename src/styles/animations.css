@@ -1,37 +1,73 @@
 
-/* Premium animations and effects */
+/* Apple-inspired animations with native feel */
 @layer utilities {
-  /* Animation classes */
+  /* Apple-style entrance animations */
   .luxury-fade-in {
-    animation: luxuryFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: appleSlideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   
   .gold-shimmer {
-    background: linear-gradient(90deg, transparent, rgba(243, 156, 10, 0.4), transparent);
+    background: linear-gradient(
+      90deg, 
+      transparent, 
+      rgba(var(--primary), 0.3), 
+      transparent
+    );
     background-size: 200% 100%;
-    animation: shimmer 2s infinite;
+    animation: shimmer 2s ease-in-out infinite;
   }
   
   .gold-pulse {
-    animation: goldPulse 2s infinite;
+    animation: applePulse 2s ease-in-out infinite;
   }
 
-  /* Loading animations */
+  /* Apple-style loading animations */
   .loading-luxury {
     display: inline-block;
   }
 
   .loading-luxury::after {
-    content: '...';
-    animation: luxuryDots 1.5s steps(3, end) infinite;
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgb(var(--primary));
+    animation: appleDots 1.4s ease-in-out infinite both;
+  }
+
+  /* Apple spring animations */
+  .spring-bounce {
+    animation: appleSpring 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* Apple-style hover effects */
+  .hover-lift {
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px) scale(1.002);
+  }
+
+  /* Apple-style focus animations */
+  .focus-ring {
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .focus-ring:focus-visible {
+    transform: scale(1.02);
+    box-shadow: 
+      0 0 0 3px rgba(var(--primary), 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.1);
   }
 }
 
-/* Keyframe definitions */
-@keyframes luxuryFadeIn {
+/* Apple-inspired keyframe definitions */
+@keyframes appleSlideUp {
   0% { 
     opacity: 0; 
-    transform: translateY(20px) scale(0.98); 
+    transform: translateY(20px) scale(0.99); 
   }
   100% { 
     opacity: 1; 
@@ -40,22 +76,90 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% { 
+    background-position: -200% 0; 
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% { 
+    background-position: 200% 0; 
+    opacity: 0;
+  }
 }
 
-@keyframes goldPulse {
+@keyframes applePulse {
   0%, 100% { 
-    box-shadow: 0 0 20px rgba(243, 156, 10, 0.3);
+    box-shadow: 0 0 0 0 rgba(var(--primary), 0.4);
+    transform: scale(1);
   }
   50% { 
-    box-shadow: 0 0 40px rgba(243, 156, 10, 0.6), 0 0 60px rgba(243, 156, 10, 0.3);
+    box-shadow: 0 0 0 8px rgba(var(--primary), 0);
+    transform: scale(1.02);
   }
 }
 
-@keyframes luxuryDots {
-  0%, 20% { color: transparent; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
-  40% { color: #F39C0A; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
-  60% { text-shadow: .25em 0 0 #F39C0A, .5em 0 0 transparent; }
-  80%, 100% { text-shadow: .25em 0 0 #F39C0A, .5em 0 0 #F39C0A; }
+@keyframes appleDots {
+  0%, 80%, 100% { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  40% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes appleSpring {
+  0% {
+    transform: scale(0.95) translateY(5px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.02) translateY(-2px);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Apple system animation for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .luxury-fade-in,
+  .gold-shimmer,
+  .gold-pulse,
+  .spring-bounce,
+  .hover-lift {
+    animation: none;
+    transition: none;
+  }
+  
+  .hover-lift:hover {
+    transform: none;
+  }
+  
+  .focus-ring:focus-visible {
+    transform: none;
+  }
+}
+
+/* Apple-style scroll behavior */
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Apple-style selection colors */
+::selection {
+  background-color: rgba(var(--primary), 0.3);
+  color: rgb(var(--label-primary));
+}
+
+::-moz-selection {
+  background-color: rgba(var(--primary), 0.3);
+  color: rgb(var(--label-primary));
 }

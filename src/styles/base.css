@@ -1,78 +1,80 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800;900&display=swap");
 
 @layer base {
   :root {
-    --background: 8 8 12; /* #08080C - Deep luxury black */
-    --foreground: 250 250 250; /* #FAFAFA - Premium white */
-    --card: 15 15 20; /* #0F0F14 - Luxury card background */
-    --card-foreground: 245 245 245;
-    --popover: 12 12 16;
-    --popover-foreground: 245 245 245;
-    --primary: 243 156 10; /* #F39C0A - Golden accent */
-    --primary-foreground: 8 8 12;
-    --secondary: 24 24 30; /* #18181E - Premium secondary */
-    --secondary-foreground: 245 245 245;
-    --muted: 30 30 38; /* #1E1E26 - Elegant muted */
-    --muted-foreground: 160 160 165; /* #A0A0A5 - Sophisticated text */
-    --accent: 243 156 10; /* #F39C0A - Golden highlight */
-    --accent-foreground: 8 8 12;
-    --destructive: 220 38 38; /* #DC2626 - Error red */
-    --destructive-foreground: 250 250 250;
-    --border: 39 39 50; /* #272732 - Premium border */
-    --input: 24 24 30;
-    --ring: 243 156 10; /* #F39C0A - Focus ring */
-    --chart-1: 243 156 10;
-    --chart-2: 34 197 94;
-    --chart-3: 251 191 36;
-    --chart-4: 168 85 247;
-    --chart-5: 239 68 68;
-    --radius: 0.75rem;
+    /* Apple-inspired color system with proper contrast */
+    --background: 10 10 12; /* #0A0A0C - Deep premium black */
+    --foreground: 255 255 255; /* #FFFFFF - Pure white for maximum contrast */
+    --card: 17 17 19; /* #111113 - Slightly lighter for depth */
+    --card-foreground: 255 255 255;
+    --popover: 17 17 19;
+    --popover-foreground: 255 255 255;
+    --primary: 243 156 10; /* #F39C0A - Brand golden orange */
+    --primary-foreground: 0 0 0; /* Black text on golden background */
+    --secondary: 28 28 32; /* #1C1C20 - Apple-like secondary surface */
+    --secondary-foreground: 255 255 255;
+    --muted: 44 44 48; /* #2C2C30 - Muted background with proper contrast */
+    --muted-foreground: 174 174 178; /* #AEAEB2 - Apple's secondary label */
+    --accent: 243 156 10;
+    --accent-foreground: 0 0 0;
+    --destructive: 255 69 58; /* #FF453A - Apple's red */
+    --destructive-foreground: 255 255 255;
+    --border: 58 58 62; /* #3A3A3E - Apple's separator */
+    --input: 28 28 32;
+    --ring: 243 156 10;
+    --radius: 12px; /* Apple's standard border radius */
     
-    /* Premium color palette */
-    --gold: 243 156 10; /* #F39C0A - Primary golden */
-    --gold-50: 254 250 240; /* #FEFAF0 */
+    /* Apple semantic colors */
+    --label-primary: 255 255 255; /* Primary text - maximum contrast */
+    --label-secondary: 174 174 178; /* Secondary text - WCAG AA compliant */
+    --label-tertiary: 142 142 147; /* Tertiary text - subtle but readable */
+    --label-quaternary: 99 99 102; /* Quaternary text - minimal use */
+    
+    /* Apple system backgrounds */
+    --system-background: 10 10 12; /* Primary background */
+    --secondary-system-background: 17 17 19; /* Secondary background */
+    --tertiary-system-background: 28 28 32; /* Tertiary background */
+    
+    /* Apple fills for buttons and controls */
+    --system-fill: 120 120 128; /* Primary fill with 36% opacity */
+    --secondary-system-fill: 120 120 128; /* Secondary fill with 32% opacity */
+    --tertiary-system-fill: 118 118 128; /* Tertiary fill with 24% opacity */
+    --quaternary-system-fill: 116 116 128; /* Quaternary fill with 18% opacity */
+    
+    /* Golden brand palette */
+    --gold-50: 255 252 235; /* #FFFCEB */
     --gold-100: 254 243 199; /* #FEF3C7 */
-    --gold-200: 253 224 158; /* #FDE09E */
-    --gold-300: 252 200 107; /* #FCC86B */
-    --gold-400: 249 168 37; /* #F9A825 */
-    --gold-500: 243 156 10; /* #F39C0A - Primary */
+    --gold-200: 253 230 138; /* #FDE68A */
+    --gold-300: 252 211 77; /* #FCD34D */
+    --gold-400: 251 191 36; /* #FBBF24 */
+    --gold-500: 243 156 10; /* #F39C0A - Primary brand */
     --gold-600: 217 119 6; /* #D97706 */
     --gold-700: 180 83 9; /* #B45309 */
     --gold-800: 146 64 14; /* #92400E */
     --gold-900: 120 53 15; /* #78350F */
-    
-    /* Premium neutral palette */
-    --luxury-black: 8 8 12; /* #08080C - Deep luxury */
-    --graphite: 15 15 20; /* #0F0F14 - Rich graphite */
-    --slate: 24 24 30; /* #18181E - Premium slate */
-    --platinum: 250 250 250; /* #FAFAFA - Clean platinum */
-    --silver: 160 160 165; /* #A0A0A5 - Elegant silver */
-    --mercury: 6 182 212; /* #06B6D4 - Subtle accent */
-    --smoke: 147 51 234; /* #9333EA - Luxury purple */
   }
 
   .dark {
-    --background: 8 8 12;
-    --foreground: 250 250 250;
-    --card: 15 15 20;
-    --card-foreground: 245 245 245;
-    --popover: 12 12 16;
-    --popover-foreground: 245 245 245;
+    --background: 10 10 12;
+    --foreground: 255 255 255;
+    --card: 17 17 19;
+    --card-foreground: 255 255 255;
+    --popover: 17 17 19;
+    --popover-foreground: 255 255 255;
     --primary: 243 156 10;
-    --primary-foreground: 8 8 12;
-    --secondary: 24 24 30;
-    --secondary-foreground: 245 245 245;
-    --muted: 30 30 38;
-    --muted-foreground: 160 160 165;
+    --primary-foreground: 0 0 0;
+    --secondary: 28 28 32;
+    --secondary-foreground: 255 255 255;
+    --muted: 44 44 48;
+    --muted-foreground: 174 174 178;
     --accent: 243 156 10;
-    --accent-foreground: 8 8 12;
-    --destructive: 220 38 38;
-    --destructive-foreground: 250 250 250;
-    --border: 39 39 50;
-    --input: 24 24 30;
+    --accent-foreground: 0 0 0;
+    --destructive: 255 69 58;
+    --destructive-foreground: 255 255 255;
+    --border: 58 58 62;
+    --input: 28 28 32;
     --ring: 243 156 10;
   }
 }
@@ -83,44 +85,100 @@
   }
   
   body {
-    @apply bg-[#08080C] text-[#FAFAFA] font-inter antialiased;
+    @apply bg-[rgb(var(--system-background))] text-[rgb(var(--label-primary))];
+    font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    background: #08080C;
-    background-image: 
-      radial-gradient(circle at 20% 80%, rgba(243, 156, 10, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.03) 0%, transparent 50%);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
   }
 
+  /* Apple-inspired typography scale */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
-    font-family: 'Orbitron', 'Poppins', 'Inter', system-ui, sans-serif;
+    @apply font-semibold text-[rgb(var(--label-primary))];
+    font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
   }
   
-  h1 { @apply text-2xl md:text-3xl lg:text-4xl; }
-  h2 { @apply text-xl md:text-2xl lg:text-3xl; }
-  h3 { @apply text-lg md:text-xl lg:text-2xl; }
+  h1 { 
+    @apply text-3xl md:text-4xl lg:text-5xl;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  h2 { 
+    @apply text-2xl md:text-3xl lg:text-4xl;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  h3 { 
+    @apply text-xl md:text-2xl lg:text-3xl;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  h4 {
+    @apply text-lg md:text-xl lg:text-2xl;
+    font-weight: 600;
+  }
+  h5 {
+    @apply text-base md:text-lg lg:text-xl;
+    font-weight: 600;
+  }
+  h6 {
+    @apply text-sm md:text-base lg:text-lg;
+    font-weight: 600;
+  }
   
   p, span, div {
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply text-[rgb(var(--label-primary))];
+    font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+
+  /* Secondary text for less important content */
+  .text-secondary {
+    @apply text-[rgb(var(--label-secondary))];
+  }
+
+  /* Tertiary text for captions and disabled states */
+  .text-tertiary {
+    @apply text-[rgb(var(--label-tertiary))];
+  }
+
+  /* Quaternary text for placeholder and very subtle content */
+  .text-quaternary {
+    @apply text-[rgb(var(--label-quaternary))];
   }
 }
 
-/* Scrollbar styling */
+/* Apple-style scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 15, 20, 0.5);
-  border-radius: 3px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #F39C0A, #FFA726);
-  border-radius: 3px;
+  background: rgba(120, 120, 128, 0.3);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #FFA726, #F39C0A);
+  background: rgba(120, 120, 128, 0.5);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Focus styles following Apple's accessibility guidelines */
+:focus-visible {
+  outline: 2px solid rgb(var(--primary));
+  outline-offset: 2px;
+  border-radius: 4px;
 }

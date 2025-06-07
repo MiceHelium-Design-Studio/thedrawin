@@ -1,16 +1,23 @@
 
-/* Premium component styles */
+/* Apple-inspired component styles with proper contrast and accessibility */
 @layer utilities {
-  /* Card components */
+  /* Card components with Apple's depth and materials */
   .luxury-card {
-    @apply bg-[#0F0F14] border border-[#272732]/50 rounded-2xl;
-    background: linear-gradient(135deg, rgba(15, 15, 20, 0.95) 0%, rgba(24, 24, 30, 0.9) 100%);
+    @apply bg-[rgb(var(--secondary-system-background))] border border-[rgb(var(--border))];
+    @apply rounded-[20px]; /* Apple's larger corner radius for cards */
+    background: linear-gradient(
+      145deg, 
+      rgba(var(--secondary-system-background), 1) 0%, 
+      rgba(var(--tertiary-system-background), 0.8) 100%
+    );
     box-shadow: 
-      0 20px 25px -5px rgba(0, 0, 0, 0.4),
-      0 10px 10px -5px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      0 4px 16px rgba(0, 0, 0, 0.12),
+      0 1px 4px rgba(0, 0, 0, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     position: relative;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   
   .luxury-card::before {
@@ -22,7 +29,12 @@
     bottom: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(243, 156, 10, 0.2), transparent, rgba(6, 182, 212, 0.1));
+    background: linear-gradient(
+      145deg, 
+      rgba(var(--primary), 0.1), 
+      transparent 40%, 
+      rgba(var(--primary), 0.05)
+    );
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: xor;
     -webkit-mask-composite: xor;
@@ -31,36 +43,52 @@
     transition: opacity 0.3s ease;
   }
   
+  .luxury-card:hover {
+    transform: translateY(-2px) scale(1.002);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.16),
+      0 2px 8px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(var(--primary), 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
   .luxury-card:hover::before {
     opacity: 1;
   }
   
-  .luxury-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 25px 50px -12px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(243, 156, 10, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
+  /* Apple-style glass effect for overlays */
   .glass-effect {
-    @apply bg-black/20 backdrop-blur-xl border border-white/5;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    @apply bg-[rgba(var(--secondary-system-background),0.8)] backdrop-blur-xl;
+    @apply border border-[rgba(var(--border),0.5)];
+    background: linear-gradient(
+      145deg, 
+      rgba(255, 255, 255, 0.04) 0%, 
+      rgba(255, 255, 255, 0.01) 100%
+    );
     box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 8px 32px rgba(0, 0, 0, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    -webkit-backdrop-filter: blur(20px);
   }
 
-  /* Button components */
+  /* Apple-inspired button system with full rounded corners */
   .luxury-button {
-    @apply bg-[#F39C0A] hover:bg-[#FFA726] text-[#08080C] font-semibold rounded-xl px-6 py-3;
-    @apply transition-all duration-300 ease-out relative overflow-hidden;
-    @apply shadow-lg hover:shadow-xl hover:scale-[1.02];
-    background: linear-gradient(135deg, #F39C0A 0%, #FFA726 100%);
+    @apply bg-[rgb(var(--primary))] hover:bg-[rgb(var(--primary))]/90;
+    @apply text-[rgb(var(--primary-foreground))] font-semibold;
+    @apply rounded-full px-8 py-4; /* Fully rounded pill shape */
+    @apply transition-all duration-200 ease-out relative overflow-hidden;
+    @apply shadow-lg hover:shadow-xl active:scale-[0.98];
+    @apply border-0 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2;
+    @apply focus:ring-offset-[rgb(var(--system-background))];
+    background: linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--gold-600)) 100%);
     box-shadow: 
-      0 4px 12px rgba(243, 156, 10, 0.25),
+      0 2px 8px rgba(var(--primary), 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    min-height: 44px; /* Apple's minimum touch target */
   }
   
   .luxury-button::before {
@@ -71,7 +99,7 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.6s;
+    transition: left 0.5s ease;
   }
   
   .luxury-button:hover::before {
@@ -79,23 +107,90 @@
   }
   
   .luxury-button:hover {
+    transform: translateY(-1px);
     box-shadow: 
-      0 8px 25px rgba(243, 156, 10, 0.4),
+      0 4px 16px rgba(var(--primary), 0.4),
+      0 2px 4px rgba(0, 0, 0, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
   
+  .luxury-button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 
+      0 1px 4px rgba(var(--primary), 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Apple-style outline button */
   .premium-outline-button {
-    @apply border border-[#F39C0A]/30 text-[#F39C0A] bg-transparent hover:bg-[#F39C0A]/10;
-    @apply font-semibold rounded-xl px-6 py-3 relative overflow-hidden;
-    @apply transition-all duration-300 ease-out;
-    @apply hover:shadow-lg hover:scale-[1.02] hover:border-[#F39C0A]/60;
-    background: linear-gradient(135deg, rgba(243, 156, 10, 0.03) 0%, rgba(243, 156, 10, 0.08) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    @apply border-2 border-[rgb(var(--primary))] text-[rgb(var(--primary))];
+    @apply bg-transparent hover:bg-[rgb(var(--primary))]/10;
+    @apply font-semibold rounded-full px-8 py-4 relative overflow-hidden;
+    @apply transition-all duration-200 ease-out;
+    @apply shadow-sm hover:shadow-lg active:scale-[0.98];
+    @apply focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2;
+    @apply focus:ring-offset-[rgb(var(--system-background))];
+    background: linear-gradient(
+      135deg, 
+      rgba(var(--primary), 0.02) 0%, 
+      rgba(var(--primary), 0.06) 100%
+    );
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    min-height: 44px;
   }
   
   .premium-outline-button:hover {
+    @apply border-[rgb(var(--primary))]/80 bg-[rgb(var(--primary))]/15;
+    transform: translateY(-1px);
     box-shadow: 
-      0 4px 12px rgba(243, 156, 10, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      0 2px 8px rgba(var(--primary), 0.2),
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .premium-outline-button:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* Apple-style secondary button */
+  .secondary-button {
+    @apply bg-[rgb(var(--secondary-system-fill))]/36 text-[rgb(var(--label-primary))];
+    @apply font-medium rounded-full px-6 py-3;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:bg-[rgb(var(--secondary-system-fill))]/50;
+    @apply focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2;
+    @apply focus:ring-offset-[rgb(var(--system-background))];
+    @apply active:scale-[0.98];
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    min-height: 44px;
+  }
+
+  /* Apple-style input fields with full rounded corners */
+  .apple-input {
+    @apply bg-[rgb(var(--tertiary-system-background))] border border-[rgb(var(--border))];
+    @apply text-[rgb(var(--label-primary))] placeholder:text-[rgb(var(--label-tertiary))];
+    @apply rounded-full px-6 py-4; /* Fully rounded pill shape */
+    @apply transition-all duration-200 ease-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-0;
+    @apply focus:border-[rgb(var(--primary))]/50;
+    @apply hover:border-[rgb(var(--border))]/80;
+    font-size: 16px;
+    line-height: 1.4;
+    min-height: 48px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .apple-input:focus {
+    @apply bg-[rgb(var(--secondary-system-background))];
+    box-shadow: 
+      0 0 0 3px rgba(var(--primary), 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.1);
   }
 }

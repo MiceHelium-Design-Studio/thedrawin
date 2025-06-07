@@ -6,27 +6,27 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98] hover:scale-[1.02] relative overflow-hidden",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--system-background))] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98] relative overflow-hidden touch-target",
   {
     variants: {
       variant: {
         default: "luxury-button",
         destructive:
-          "bg-red-600 text-white hover:bg-red-700 shadow-lg hover:shadow-red-500/25 font-semibold border border-red-500/20 hover:border-red-400/40",
+          "bg-[rgb(var(--destructive))] text-[rgb(var(--destructive-foreground))] hover:bg-[rgb(var(--destructive))]/90 rounded-full px-8 py-4 font-semibold border-0 shadow-lg hover:shadow-xl",
         outline:
           "premium-outline-button",
         secondary:
-          "bg-slate-800 text-slate-100 hover:bg-slate-700 shadow-lg hover:shadow-slate-500/10 font-medium border border-slate-700/50 hover:border-slate-600/70",
-        ghost: "hover:bg-white/5 text-slate-300 hover:text-white hover:shadow-lg font-medium rounded-xl border border-transparent hover:border-white/10",
-        link: "text-[#F39C0A] underline-offset-4 hover:underline font-medium hover:text-[#FFA726] transition-colors",
-        luxury: "bg-gradient-to-r from-slate-800 to-slate-700 text-white hover:from-slate-700 hover:to-slate-600 shadow-lg hover:shadow-slate-500/20 border border-[#F39C0A]/20 hover:border-[#F39C0A]/40 font-semibold"
+          "secondary-button",
+        ghost: "hover:bg-[rgb(var(--secondary-system-fill))]/20 text-[rgb(var(--label-primary))] hover:text-[rgb(var(--label-primary))] rounded-full px-6 py-3 font-medium border-0",
+        link: "text-[rgb(var(--primary))] underline-offset-4 hover:underline font-medium hover:text-[rgb(var(--primary))]/80 transition-colors p-0 h-auto",
+        luxury: "bg-gradient-to-r from-[rgb(var(--secondary-system-background))] to-[rgb(var(--tertiary-system-background))] text-[rgb(var(--label-primary))] hover:from-[rgb(var(--tertiary-system-background))] hover:to-[rgb(var(--secondary-system-background))] rounded-full px-8 py-4 shadow-apple-md hover:shadow-apple-lg border border-[rgb(var(--border))] font-semibold backdrop-blur-sm"
       },
       size: {
-        default: "h-11 px-6 py-2.5",
-        sm: "h-9 rounded-lg px-4 text-xs font-medium",
-        lg: "h-12 rounded-xl px-8 text-base font-semibold",
-        icon: "h-11 w-11",
-        xl: "h-14 rounded-2xl px-10 text-lg font-semibold"
+        default: "rounded-full px-8 py-4 text-base min-h-[44px]",
+        sm: "rounded-full px-6 py-3 text-sm font-medium min-h-[36px]",
+        lg: "rounded-full px-10 py-5 text-lg font-semibold min-h-[48px]",
+        icon: "rounded-full h-11 w-11 p-0",
+        xl: "rounded-full px-12 py-6 text-xl font-semibold min-h-[52px]"
       },
     },
     defaultVariants: {
