@@ -47,8 +47,8 @@ const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({
             onClick={() => onSectionChange(item.id)}
             className={`w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors ${
               activeTab === item.id
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                ? 'bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))]'
+                : 'text-[rgb(var(--label-primary))] hover:text-[rgb(var(--label-primary))] hover:bg-[rgb(var(--secondary-system-fill))]/20'
             }`}
           >
             <IconComponent className="h-4 w-4" />

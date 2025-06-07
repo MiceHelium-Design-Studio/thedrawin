@@ -24,11 +24,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
           <div className="flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">
-                <Medal className="size-6 text-gold" />
+                <Medal className="size-6 text-[rgb(var(--primary))]" />
               </div>
               <div className="flex-grow">
-                <h2 className="text-xl font-bold text-gold-light">Admin Panel</h2>
-                <Separator className="bg-gradient-to-r from-transparent via-gold/30 to-transparent mt-2" />
+                <h2 className="text-xl font-bold text-[rgb(var(--label-primary))]">Admin Panel</h2>
+                <Separator className="bg-gradient-to-r from-transparent via-[rgb(var(--primary))]/30 to-transparent mt-2" />
               </div>
             </div>
             
@@ -37,7 +37,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/')}
-                className="flex items-center gap-1.5 hover:bg-black-light/50 hover:text-gold transition-colors w-full justify-start px-3 py-2"
+                className="flex items-center gap-1.5 hover:bg-[rgb(var(--secondary-system-fill))]/20 hover:text-[rgb(var(--primary))] transition-colors w-full justify-start px-3 py-2 text-[rgb(var(--label-primary))]"
               >
                 <LogOut className="size-4" />
                 Exit Admin

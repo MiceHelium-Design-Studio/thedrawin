@@ -35,13 +35,13 @@ const Admin: React.FC = () => {
         <div className="flex items-center mb-6 text-sm">
           <a 
             href="/"
-            className="flex items-center text-gold-light/70 hover:text-gold transition-colors"
+            className="flex items-center text-[rgb(var(--label-secondary))] hover:text-[rgb(var(--primary))] transition-colors"
           >
             <Home className="h-4 w-4 mr-1" />
             Home
           </a>
-          <ChevronRight className="mx-2 h-4 w-4 text-gold-light/50" />
-          <span className="text-gold-light font-medium">Administration</span>
+          <ChevronRight className="mx-2 h-4 w-4 text-[rgb(var(--label-tertiary))]" />
+          <span className="text-[rgb(var(--label-primary))] font-medium">Administration</span>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
