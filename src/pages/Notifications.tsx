@@ -51,19 +51,15 @@ const Notifications: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 py-8 luxury-fade-in">
         {/* Enhanced Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="space-y-2">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gold-500/20 rounded-xl flex items-center justify-center">
-                <Bell className="h-5 w-5 text-gold-500" />
-              </div>
-              <h1 className="text-title font-poppins text-white tracking-tight">
-                Notifications
-              </h1>
-              <Sparkles className="h-6 w-6 text-gold-500 animate-pulse" />
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#F39C0A]/20 to-[#FFD700]/10 rounded-xl flex items-center justify-center border border-[#F39C0A]/20">
+              <Bell className="h-6 w-6 text-[#F39C0A]" />
             </div>
-            <p className="text-body text-gray-400 font-inter">
-              Stay updated with your latest activity and wins
-            </p>
+            <h1 className="text-3xl font-bold text-white tracking-tight">
+              <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent">
+                Notifications
+              </span>
+            </h1>
           </div>
           
           {!loading && notifications.some(n => !n.read) && (
