@@ -20,9 +20,17 @@ export const uploadAvatar = async (file: File, userId: string): Promise<string> 
       throw uploadError;
     }
 
+    if (!data?.path) {
+      throw new Error('Upload failed: No path returned');
+    }
+
     const { data: urlData } = supabase.storage
       .from('media')
-      .getPublicUrl(fileName);
+      .getPublicUrl(data.path);
+
+    if (!urlData?.publicUrl) {
+      throw new Error('Failed to generate public URL');
+    }
 
     console.log('Avatar uploaded successfully:', urlData.publicUrl);
     return urlData.publicUrl;

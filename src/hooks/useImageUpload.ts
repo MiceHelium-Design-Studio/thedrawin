@@ -41,18 +41,21 @@ export const useImageUpload = () => {
   };
 
   const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile || !user) return null;
+    if (!imageFile || !user) {
+      console.error('Missing image file or user for upload');
+      return null;
+    }
 
     try {
       setUploading(true);
-      console.log('Starting image upload...');
+      console.log('Starting image upload to media bucket...');
 
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${user.id}/profile-${Date.now()}.${fileExt}`;
 
       console.log('Uploading to media bucket with filename:', fileName);
 
-      // Upload to the existing 'media' bucket instead of 'profile-images'
+      // Upload to the 'media' bucket
       const { data, error: uploadError } = await supabase.storage
         .from('media')
         .upload(fileName, imageFile, {
@@ -65,21 +68,29 @@ export const useImageUpload = () => {
         throw uploadError;
       }
 
+      if (!data?.path) {
+        throw new Error('Upload failed: No path returned');
+      }
+
       console.log('Upload successful:', data);
 
       // Get the public URL
       const { data: urlData } = supabase.storage
         .from('media')
-        .getPublicUrl(fileName);
+        .getPublicUrl(data.path);
+
+      if (!urlData?.publicUrl) {
+        throw new Error('Failed to generate public URL');
+      }
 
       console.log('Public URL generated:', urlData.publicUrl);
 
-      // Record in media_items table for tracking
+      // Try to record in media_items table for tracking (optional - don't fail if this doesn't work)
       try {
         const { error: dbError } = await supabase
           .from('media_items')
           .insert({
-            id: fileName,
+            id: data.path,
             name: imageFile.name,
             url: urlData.publicUrl,
             type: 'image',
@@ -102,10 +113,24 @@ export const useImageUpload = () => {
       return urlData.publicUrl;
     } catch (error) {
       console.error('Error uploading image:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = 'There was a problem uploading your image. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('not found')) {
+          errorMessage = 'Storage bucket not found. Please contact support.';
+        } else if (error.message.includes('permission')) {
+          errorMessage = 'You do not have permission to upload files. Please check your account.';
+        } else if (error.message.includes('size')) {
+          errorMessage = 'The file is too large. Please select a smaller image.';
+        }
+      }
+
       toast({
         variant: 'destructive',
         title: 'Upload failed',
-        description: 'There was a problem uploading your image. Please try again.',
+        description: errorMessage,
       });
       return null;
     } finally {
