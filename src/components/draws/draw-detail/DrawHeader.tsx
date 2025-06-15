@@ -41,14 +41,18 @@ export const DrawHeader = ({ title, description, bannerImage }: DrawHeaderProps)
       </Button>
       
       <Card className="overflow-hidden">
-        <div className="h-48 bg-gray-100 relative">
-          <img
-            src={bannerImage || defaultImage}
-            alt={title}
-            className="h-full w-full object-cover"
-            onError={handleImageError}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-40"></div>
+        <div className="p-4">
+          <div className="luxury-card overflow-hidden">
+            <div className="h-48 relative">
+              <img
+                src={bannerImage || defaultImage}
+                alt={title}
+                className="h-full w-full object-cover"
+                onError={handleImageError}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-40"></div>
+            </div>
+          </div>
         </div>
         
         <CardContent className="p-4">

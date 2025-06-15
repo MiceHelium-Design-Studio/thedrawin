@@ -77,15 +77,17 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
       <Card className="overflow-hidden backdrop-blur-sm bg-card/90 shadow-sm border-0">
         <div className="relative">
           {draw.bannerImage && (
-            <div className="aspect-[2/1] w-full overflow-hidden">
-              <img 
-                src={draw.bannerImage} 
-                alt={draw.title} 
-                className="w-full h-full object-cover"
-              />
+            <div className="aspect-[2/1] w-full overflow-hidden p-4">
+              <div className="w-full h-full luxury-card overflow-hidden">
+                <img 
+                  src={draw.bannerImage} 
+                  alt={draw.title} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           )}
-          <div className={`absolute top-2 right-2 ${getStatusBadgeColor()} text-white text-xs font-bold py-1 px-2 rounded-full`}>
+          <div className={`absolute top-6 right-6 ${getStatusBadgeColor()} text-white text-xs font-bold py-1 px-2 rounded-full`}>
             {getStatusLabel()}
           </div>
         </div>
