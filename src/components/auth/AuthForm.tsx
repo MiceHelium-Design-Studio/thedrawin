@@ -95,7 +95,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
                 value={name} 
                 onChange={e => setName(e.target.value)} 
                 required={mode === 'signup'}
-                className="bg-[#1F1D36] border-[#55596E] text-white placeholder-slate-400 focus:border-[#F39C0A] focus:ring-[#F39C0A]" 
+                className="bg-white text-black placeholder:text-gray-600 border-gray-300 focus:border-[#F39C0A] focus:ring-[#F39C0A]/20" 
               />
             </div>
             
@@ -108,7 +108,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
                 value={phone} 
                 onChange={e => setPhone(e.target.value)} 
                 required={mode === 'signup'}
-                className="bg-[#1F1D36] border-[#55596E] text-white placeholder-slate-400 focus:border-[#F39C0A] focus:ring-[#F39C0A]" 
+                className="bg-white text-black placeholder:text-gray-600 border-gray-300 focus:border-[#F39C0A] focus:ring-[#F39C0A]/20" 
               />
             </div>
           </>
@@ -123,7 +123,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
             value={email} 
             onChange={e => setEmail(e.target.value)} 
             required 
-            className="bg-[#1F1D36] border-[#55596E] text-white placeholder-slate-400 focus:border-[#F39C0A] focus:ring-[#F39C0A]" 
+            className="bg-white text-black placeholder:text-gray-600 border-gray-300 focus:border-[#F39C0A] focus:ring-[#F39C0A]/20" 
           />
         </div>
         
@@ -137,7 +137,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
             onChange={e => setPassword(e.target.value)} 
             required 
             minLength={6}
-            className="bg-[#1F1D36] border-[#55596E] text-white placeholder-slate-400 focus:border-[#F39C0A] focus:ring-[#F39C0A]" 
+            className="bg-white text-black placeholder:text-gray-600 border-gray-300 focus:border-[#F39C0A] focus:ring-[#F39C0A]/20" 
           />
         </div>
         
