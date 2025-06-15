@@ -55,7 +55,10 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({
       )}
       
       {uploading && (
-        <p className="text-sm text-gray-600">Uploading image...</p>
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+          <p className="text-sm text-gray-600">Uploading image...</p>
+        </div>
       )}
     </div>
   );

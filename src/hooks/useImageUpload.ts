@@ -48,6 +48,7 @@ export const useImageUpload = () => {
 
         console.log(`Upload attempt ${attempt}/${retries} for file:`, fileName);
 
+        // Upload to profile-images bucket
         const { error: uploadError } = await supabase.storage
           .from('profile-images')
           .upload(fileName, file, {
@@ -58,7 +59,6 @@ export const useImageUpload = () => {
         if (uploadError) {
           console.error(`Upload attempt ${attempt} failed:`, uploadError);
           
-          // If this isn't the last attempt, continue to retry
           if (attempt < retries) {
             console.log(`Retrying upload in ${attempt * 1000}ms...`);
             await new Promise(resolve => setTimeout(resolve, attempt * 1000));
@@ -73,11 +73,31 @@ export const useImageUpload = () => {
           .getPublicUrl(fileName);
 
         console.log(`Upload successful on attempt ${attempt}:`, data.publicUrl);
+
+        // Record in media_items table for tracking
+        try {
+          const { error: dbError } = await supabase
+            .from('media_items')
+            .insert({
+              id: fileName,
+              name: file.name,
+              url: data.publicUrl,
+              type: 'image',
+              size: file.size,
+              user_id: user!.id
+            });
+
+          if (dbError) {
+            console.warn('Failed to record in media_items, but upload was successful:', dbError);
+          }
+        } catch (dbErr) {
+          console.warn('Database recording error, but upload was successful:', dbErr);
+        }
+
         return data.publicUrl;
       } catch (error) {
         console.error(`Upload attempt ${attempt} error:`, error);
         
-        // If this is the last attempt, throw the error
         if (attempt === retries) {
           throw error;
         }
@@ -118,6 +138,9 @@ export const useImageUpload = () => {
 
   const clearImageState = () => {
     setImageFile(null);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
     setImagePreview(null);
   };
 

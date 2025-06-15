@@ -39,7 +39,7 @@ const UpdateProfileForm: React.FC = () => {
       avatarUrl = await uploadImage();
       if (!avatarUrl) {
         console.error('Image upload failed, aborting profile save');
-        return; // Upload failed, don't proceed with profile save
+        return;
       }
       console.log('Image uploaded successfully:', avatarUrl);
     }
@@ -57,9 +57,11 @@ const UpdateProfileForm: React.FC = () => {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full shadow-lg border-0 bg-white/90 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle>Update Profile</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Update Profile
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -73,7 +75,9 @@ const UpdateProfileForm: React.FC = () => {
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">
+                Full Name
+              </Label>
               <Input
                 id="fullName"
                 type="text"
@@ -81,11 +85,14 @@ const UpdateProfileForm: React.FC = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                className="rounded-lg"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -93,23 +100,32 @@ const UpdateProfileForm: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="rounded-lg"
               />
             </div>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex gap-3 pt-4">
             <Button 
               type="submit" 
-              className="flex-1"
+              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg py-2.5 font-medium transition-all duration-200"
               disabled={saving || uploading}
             >
-              {saving ? 'Updating...' : 'Save Profile'}
+              {saving || uploading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                  {uploading ? 'Uploading...' : 'Updating...'}
+                </div>
+              ) : (
+                'Save Profile'
+              )}
             </Button>
             <Button 
               type="button" 
               variant="outline"
               onClick={handleReset}
               disabled={saving || uploading}
+              className="rounded-lg border-gray-300 hover:bg-gray-50"
             >
               Reset
             </Button>
