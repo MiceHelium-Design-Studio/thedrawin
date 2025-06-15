@@ -40,89 +40,66 @@ export const useImageUpload = () => {
     setImagePreview(previewUrl);
   };
 
-  const uploadImageWithRetry = async (file: File, retries = 3): Promise<string | null> => {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user!.id}/profile-${Date.now()}.${fileExt}`;
-
-        console.log(`Upload attempt ${attempt}/${retries} for file:`, fileName);
-
-        // Upload to profile-images bucket
-        const { error: uploadError } = await supabase.storage
-          .from('profile-images')
-          .upload(fileName, file, {
-            cacheControl: '3600',
-            upsert: true
-          });
-
-        if (uploadError) {
-          console.error(`Upload attempt ${attempt} failed:`, uploadError);
-          
-          if (attempt < retries) {
-            console.log(`Retrying upload in ${attempt * 1000}ms...`);
-            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
-            continue;
-          }
-          
-          throw uploadError;
-        }
-
-        const { data } = supabase.storage
-          .from('profile-images')
-          .getPublicUrl(fileName);
-
-        console.log(`Upload successful on attempt ${attempt}:`, data.publicUrl);
-
-        // Record in media_items table for tracking
-        try {
-          const { error: dbError } = await supabase
-            .from('media_items')
-            .insert({
-              id: fileName,
-              name: file.name,
-              url: data.publicUrl,
-              type: 'image',
-              size: file.size,
-              user_id: user!.id
-            });
-
-          if (dbError) {
-            console.warn('Failed to record in media_items, but upload was successful:', dbError);
-          }
-        } catch (dbErr) {
-          console.warn('Database recording error, but upload was successful:', dbErr);
-        }
-
-        return data.publicUrl;
-      } catch (error) {
-        console.error(`Upload attempt ${attempt} error:`, error);
-        
-        if (attempt === retries) {
-          throw error;
-        }
-      }
-    }
-    
-    return null;
-  };
-
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile || !user) return null;
 
     try {
       setUploading(true);
-      
-      const uploadedUrl = await uploadImageWithRetry(imageFile);
-      
-      if (uploadedUrl) {
-        toast({
-          title: 'Upload successful',
-          description: 'Your profile image has been uploaded.',
+      console.log('Starting image upload...');
+
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${user.id}/profile-${Date.now()}.${fileExt}`;
+
+      console.log('Uploading to media bucket with filename:', fileName);
+
+      // Upload to the existing 'media' bucket instead of 'profile-images'
+      const { data, error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(fileName, imageFile, {
+          cacheControl: '3600',
+          upsert: true
         });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
       }
-      
-      return uploadedUrl;
+
+      console.log('Upload successful:', data);
+
+      // Get the public URL
+      const { data: urlData } = supabase.storage
+        .from('media')
+        .getPublicUrl(fileName);
+
+      console.log('Public URL generated:', urlData.publicUrl);
+
+      // Record in media_items table for tracking
+      try {
+        const { error: dbError } = await supabase
+          .from('media_items')
+          .insert({
+            id: fileName,
+            name: imageFile.name,
+            url: urlData.publicUrl,
+            type: 'image',
+            size: imageFile.size,
+            user_id: user.id
+          });
+
+        if (dbError) {
+          console.warn('Failed to record in media_items, but upload was successful:', dbError);
+        }
+      } catch (dbErr) {
+        console.warn('Database recording error, but upload was successful:', dbErr);
+      }
+
+      toast({
+        title: 'Upload successful',
+        description: 'Your profile image has been uploaded.',
+      });
+
+      return urlData.publicUrl;
     } catch (error) {
       console.error('Error uploading image:', error);
       toast({

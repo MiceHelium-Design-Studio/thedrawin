@@ -6,10 +6,10 @@ export const uploadAvatar = async (file: File, userId: string): Promise<string> 
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/avatar-${Date.now()}.${fileExt}`;
 
-    console.log('Uploading avatar to profile-images bucket:', fileName);
+    console.log('Uploading avatar to media bucket:', fileName);
 
-    const { error: uploadError } = await supabase.storage
-      .from('profile-images')
+    const { data, error: uploadError } = await supabase.storage
+      .from('media')
       .upload(fileName, file, {
         cacheControl: '3600',
         upsert: true
@@ -20,12 +20,12 @@ export const uploadAvatar = async (file: File, userId: string): Promise<string> 
       throw uploadError;
     }
 
-    const { data } = supabase.storage
-      .from('profile-images')
+    const { data: urlData } = supabase.storage
+      .from('media')
       .getPublicUrl(fileName);
 
-    console.log('Avatar uploaded successfully:', data.publicUrl);
-    return data.publicUrl;
+    console.log('Avatar uploaded successfully:', urlData.publicUrl);
+    return urlData.publicUrl;
   } catch (error) {
     console.error('Error uploading avatar:', error);
     throw error;
