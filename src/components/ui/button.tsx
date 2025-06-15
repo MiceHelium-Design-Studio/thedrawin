@@ -10,14 +10,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "luxury-button",
+        default: "bg-[#F39C0A] text-[#0D0D0D] hover:bg-[#FABE3C] rounded-full px-8 py-4 font-semibold border-0 shadow-lg hover:shadow-xl min-h-[44px]",
         destructive:
           "bg-[#FF4C4C] text-white hover:bg-[#FF4C4C]/90 rounded-full px-8 py-4 font-semibold border-0 shadow-lg hover:shadow-xl min-h-[44px]",
         outline:
-          "premium-outline-button",
+          "border-2 border-[#F39C0A] bg-[#F39C0A] text-[#0D0D0D] hover:bg-[#FABE3C] hover:border-[#FABE3C] rounded-full px-8 py-4 font-semibold shadow-lg hover:shadow-xl min-h-[44px]",
         secondary:
-          "secondary-button",
-        ghost: "hover:bg-[#55596E]/20 text-white hover:text-white rounded-full px-6 py-3 font-medium border-0 min-h-[44px]",
+          "bg-[#F39C0A] text-[#0D0D0D] hover:bg-[#FABE3C] rounded-full px-8 py-4 font-semibold border-0 shadow-lg hover:shadow-xl min-h-[44px]",
+        ghost: "hover:bg-[#F39C0A]/20 text-[#F39C0A] hover:text-[#FABE3C] rounded-full px-6 py-3 font-medium border-0 min-h-[44px]",
         link: "text-[#F39C0A] underline-offset-4 hover:underline font-medium hover:text-[#FABE3C] transition-colors p-0 h-auto",
         success: "bg-[#19C37D] text-white hover:bg-[#19C37D]/90 rounded-full px-8 py-4 font-semibold border-0 shadow-lg hover:shadow-xl min-h-[44px]"
       },

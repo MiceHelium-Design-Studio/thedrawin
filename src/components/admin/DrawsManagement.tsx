@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash, ImagePlus, Plus } from 'lucide-react';
@@ -66,7 +67,7 @@ const DrawAction: React.FC<DrawActionProps> = ({ draw, onEdit, onDeleteConfirm }
 const DrawsManagement: React.FC = () => {
   const { toast } = useToast();
   const { draws, deleteDraw } = useDraws();
-  const [isDrawDrawerOpen, setIsDrawDrawerOpen] = useState(false);
+  const [isDrawDrawerOpen, set IsDrawDrawerOpen] = useState(false);
   const [selectedDraw, setSelectedDraw] = useState<Draw | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [drawToDelete, setDrawToDelete] = useState<string | null>(null);
@@ -140,7 +141,7 @@ const DrawsManagement: React.FC = () => {
           <img src={row.original.bannerImage} alt="Draw banner" className="w-20 h-12 object-cover rounded" />
         </a>
       ) : (
-        <span className="text-gray-400">No image</span>
+        <span className="text-white/70">No image</span>
       ),
     },
     {
@@ -159,7 +160,7 @@ const DrawsManagement: React.FC = () => {
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Draws</h2>
+        <h2 className="text-2xl font-semibold text-white">Draws</h2>
         <Drawer open={isDrawDrawerOpen} onOpenChange={setIsDrawDrawerOpen}>
           <DrawerTrigger asChild>
             <Button>
@@ -186,7 +187,7 @@ const DrawsManagement: React.FC = () => {
         </Drawer>
       </div>
 
-      <div className="rounded-md border overflow-x-auto">
+      <div className="rounded-md border border-white/20 overflow-x-auto">
         <Table>
           <TableHeader>
             {drawTableColumns.map((column) => (

@@ -132,7 +132,7 @@ const TicketsOverview: React.FC = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <TicketIcon className="h-5 w-5" />
             Tickets Overview
           </CardTitle>
@@ -150,7 +150,7 @@ const TicketsOverview: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <TicketIcon className="h-5 w-5" />
             Tickets Overview
           </CardTitle>
@@ -160,24 +160,24 @@ const TicketsOverview: React.FC = () => {
             <div className="bg-muted p-4 rounded-lg">
               <div className="flex items-center gap-2">
                 <TicketIcon className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Total Tickets</span>
+                <span className="text-sm font-medium text-white">Total Tickets</span>
               </div>
-              <p className="text-2xl font-bold">{filteredTickets.length}</p>
+              <p className="text-2xl font-bold text-white">{filteredTickets.length}</p>
             </div>
             <div className="bg-muted p-4 rounded-lg">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Unique Players</span>
+                <span className="text-sm font-medium text-white">Unique Players</span>
               </div>
-              <p className="text-2xl font-bold">
+              <p className="text-2xl font-bold text-white">
                 {new Set(filteredTickets.map(t => t.user_email)).size}
               </p>
             </div>
             <div className="bg-muted p-4 rounded-lg">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Total Revenue</span>
+                <span className="text-sm font-medium text-white">Total Revenue</span>
               </div>
-              <p className="text-2xl font-bold">${totalRevenue}</p>
+              <p className="text-2xl font-bold text-white">${totalRevenue}</p>
             </div>
           </div>
 
@@ -185,7 +185,7 @@ const TicketsOverview: React.FC = () => {
             <select
               value={selectedDraw}
               onChange={(e) => setSelectedDraw(e.target.value)}
-              className="px-3 py-2 border rounded-md"
+              className="px-3 py-2 border rounded-md bg-[#1F1D36] text-white border-white/20"
             >
               <option value="all">All Draws</option>
               {draws.map(draw => (
@@ -210,27 +210,27 @@ const TicketsOverview: React.FC = () => {
             {filteredTickets.length === 0 ? (
               <div className="text-center py-8">
                 <TicketIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No tickets found for the selected criteria.</p>
+                <p className="text-white">No tickets found for the selected criteria.</p>
               </div>
             ) : (
               filteredTickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className="flex items-center justify-between p-4 border rounded-lg bg-card hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-between p-4 border border-white/20 rounded-lg bg-card hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full">
                       <span className="font-bold text-primary">#{ticket.ticket_number}</span>
                     </div>
                     <div>
-                      <p className="font-medium">{ticket.draw_title}</p>
+                      <p className="font-medium text-white">{ticket.draw_title}</p>
                       {showUserDetails && (
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-white/70">
                           <p>{ticket.user_name}</p>
                           <p>{ticket.user_email}</p>
                         </div>
                       )}
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-white/50">
                         {new Date(ticket.purchased_at).toLocaleString()}
                       </p>
                     </div>
@@ -238,7 +238,7 @@ const TicketsOverview: React.FC = () => {
                   <div className="text-right">
                     <div className="flex items-center gap-2">
                       {getStatusBadge(ticket.draw_status || 'unknown')}
-                      <span className="font-medium">${ticket.price}</span>
+                      <span className="font-medium text-white">${ticket.price}</span>
                     </div>
                   </div>
                 </div>

@@ -75,7 +75,7 @@ const BannerTable: React.FC<BannerTableProps> = ({ banners, onEdit }) => {
             href={row.original.linkUrl} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
+            className="text-[#F39C0A] hover:underline"
           >
             {row.original.linkUrl}
           </a>
@@ -99,7 +99,7 @@ const BannerTable: React.FC<BannerTableProps> = ({ banners, onEdit }) => {
   ];
 
   return (
-    <div className="rounded-md border overflow-x-auto">
+    <div className="rounded-md border border-white/20 overflow-x-auto">
       <Table>
         <TableHeader>
           {bannerTableColumns.map((column) => (
