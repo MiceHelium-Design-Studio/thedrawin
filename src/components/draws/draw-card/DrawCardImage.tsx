@@ -14,7 +14,7 @@ const DrawCardImage: React.FC<DrawCardImageProps> = ({ bannerImage, title, statu
   return (
     <div className="relative">
       <div className="aspect-[2/1] w-full overflow-hidden p-4">
-        <div className="w-full h-full luxury-card overflow-hidden">
+        <div className="w-full h-full overflow-hidden rounded-3xl shadow-lg border border-white/10">
           <img 
             src={bannerImage} 
             alt={title} 
