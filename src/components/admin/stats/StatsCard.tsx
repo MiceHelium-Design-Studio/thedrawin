@@ -27,16 +27,16 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-[rgb(var(--label-primary))]">{title}</CardTitle>
-        <CardDescription className="text-[rgb(var(--label-secondary))]">{description}</CardDescription>
+        <CardTitle style={{ color: '#FFFFFF' }}>{title}</CardTitle>
+        <CardDescription style={{ color: '#FFFFFF' }}>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         {loading ? (
           <Skeleton className="h-8 w-24" />
         ) : error ? (
-          <p className="text-3xl font-bold text-[rgb(var(--destructive))]">Error</p>
+          <p className="text-3xl font-bold text-[rgb(var(--destructive))]" style={{ color: '#FF4C4C' }}>Error</p>
         ) : (
-          <p className="text-3xl font-bold text-[rgb(var(--label-primary))]">{value}</p>
+          <p className="text-3xl font-bold" style={{ color: '#FFFFFF' }}>{value}</p>
         )}
       </CardContent>
     </Card>

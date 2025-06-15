@@ -1,4 +1,3 @@
-
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
 
@@ -16,7 +15,7 @@
     --secondary: 31 29 54; /* #1F1D36 - Dark variant background */
     --secondary-foreground: 255 255 255;
     --muted: 85 89 110; /* #55596E - Muted backgrounds */
-    --muted-foreground: 170 170 170; /* #AAAAAA - Muted text */
+    --muted-foreground: 255 255 255; /* Changed to white */
     --accent: 6 182 212; /* #06B6D4 - Accent cyan */
     --accent-foreground: 255 255 255;
     --destructive: 255 76 76; /* #FF4C4C - Error/alert */
@@ -28,11 +27,11 @@
     --ring: 243 156 10;
     --radius: 24px; /* Rounded corners: 24px */
     
-    /* Premium text colors */
+    /* Premium text colors - ALL WHITE */
     --text-primary: 255 255 255; /* #FFFFFF */
-    --text-secondary: 242 242 242; /* #F2F2F2 */
-    --text-muted: 204 204 204; /* #CCCCCC */
-    --text-label: 170 170 170; /* #AAAAAA */
+    --text-secondary: 255 255 255; /* Changed to white */
+    --text-muted: 255 255 255; /* Changed to white */
+    --text-label: 255 255 255; /* Changed to white */
     
     /* Gradient colors */
     --gradient-start: 31 29 54; /* #1F1D36 */
@@ -41,11 +40,11 @@
     /* Button hover states */
     --primary-hover: 250 190 60; /* #FABE3C */
     
-    /* Apple semantic colors */
+    /* Apple semantic colors - ALL WHITE */
     --label-primary: 255 255 255; /* #FFFFFF */
-    --label-secondary: 242 242 242; /* #F2F2F2 */
-    --label-tertiary: 204 204 204; /* #CCCCCC */
-    --label-quaternary: 170 170 170; /* #AAAAAA */
+    --label-secondary: 255 255 255; /* Changed to white */
+    --label-tertiary: 255 255 255; /* Changed to white */
+    --label-quaternary: 255 255 255; /* Changed to white */
     
     /* Apple system backgrounds */
     --system-background: 13 13 13; /* #0D0D0D */
@@ -71,7 +70,7 @@
     --secondary: 31 29 54;
     --secondary-foreground: 255 255 255;
     --muted: 85 89 110;
-    --muted-foreground: 170 170 170;
+    --muted-foreground: 255 255 255;
     --accent: 6 182 212;
     --accent-foreground: 255 255 255;
     --destructive: 255 76 76;
@@ -85,71 +84,83 @@
 @layer base {
   * {
     @apply border-border;
+    color: #FFFFFF !important; /* Force white text on everything */
   }
   
   body {
-    @apply bg-[rgb(var(--background))] text-[rgb(var(--foreground))];
+    @apply bg-[rgb(var(--background))] text-white;
     font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.6;
     background-color: #0D0D0D;
+    color: #FFFFFF;
   }
 
-  /* Premium typography scale */
+  /* Premium typography scale - ALL WHITE */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold text-[rgb(var(--text-primary))];
+    @apply font-semibold;
     font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     line-height: 1.3;
     letter-spacing: -0.02em;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
   }
   
   /* Title / Headline: 24pt / Semibold / White */
   h1 { 
     @apply text-2xl font-semibold;
     font-size: 24pt;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
   }
   
-  /* Section Label: 16pt / Medium / #F2F2F2 */
+  /* Section Label: 16pt / Medium / White */
   h2 { 
     @apply text-lg font-medium;
     font-size: 16pt;
-    color: #F2F2F2;
+    color: #FFFFFF !important;
   }
   
   h3 { 
     @apply text-base font-medium;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
   }
   
-  /* Paragraph: 14pt / Regular / #CCCCCC */
+  /* Paragraph: 14pt / Regular / White */
   p {
     font-size: 14pt;
     font-weight: 400;
     line-height: 1.6;
-    color: #CCCCCC;
+    color: #FFFFFF !important;
   }
   
-  /* Small Label: 12pt / Uppercase / #AAAAAA */
+  /* Small Label: 12pt / Uppercase / White */
   .text-label {
     font-size: 12pt;
     letter-spacing: 0.05em;
     font-weight: 500;
     text-transform: uppercase;
-    color: #AAAAAA;
+    color: #FFFFFF !important;
   }
   
-  /* Secondary text for less important content */
+  /* Secondary text for less important content - WHITE */
   .text-secondary {
-    color: #F2F2F2;
+    color: #FFFFFF !important;
   }
 
-  /* Muted text */
+  /* Muted text - WHITE */
   .text-muted {
-    color: #CCCCCC;
+    color: #FFFFFF !important;
+  }
+
+  /* Force white text on common elements */
+  span, label, div, td, th, a, button {
+    color: #FFFFFF !important;
+  }
+
+  /* Force white icons */
+  svg {
+    color: #FFFFFF !important;
   }
 }
 

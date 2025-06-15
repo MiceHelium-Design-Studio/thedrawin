@@ -48,11 +48,17 @@ const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({
             className={`w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors ${
               activeTab === item.id
                 ? 'bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))]'
-                : 'text-[rgb(var(--label-primary))] hover:text-[rgb(var(--label-primary))] hover:bg-[rgb(var(--secondary-system-fill))]/20'
+                : 'text-white hover:text-white hover:bg-[rgb(var(--secondary-system-fill))]/20'
             }`}
+            style={{ color: activeTab === item.id ? '#0D0D0D' : '#FFFFFF' }}
           >
-            <IconComponent className="h-4 w-4" />
-            {item.label}
+            <IconComponent 
+              className="h-4 w-4" 
+              style={{ color: activeTab === item.id ? '#0D0D0D' : '#FFFFFF' }}
+            />
+            <span style={{ color: activeTab === item.id ? '#0D0D0D' : '#FFFFFF' }}>
+              {item.label}
+            </span>
           </button>
         );
       })}
