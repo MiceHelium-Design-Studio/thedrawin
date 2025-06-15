@@ -43,7 +43,7 @@ const HowItWorksSection: React.FC = () => {
               {/* Connection line for larger screens */}
               {index < steps.length - 1 && <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-[#F39C0A]/30 to-transparent z-10" />}
               
-              <Card className="luxury-card text-center group hover:scale-[1.03] transition-all duration-500 relative overflow-hidden h-full bg-yellow-400">
+              <Card className="luxury-card text-center group hover:scale-[1.03] transition-all duration-500 relative overflow-hidden h-full bg-neutral-950">
                 {/* Premium card background effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
