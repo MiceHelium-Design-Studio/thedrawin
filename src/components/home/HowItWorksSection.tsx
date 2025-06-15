@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Coins, Award, Users } from 'lucide-react';
+
 const HowItWorksSection: React.FC = () => {
   const steps = [{
     icon: Coins,
@@ -18,12 +19,16 @@ const HowItWorksSection: React.FC = () => {
     description: "Experience the thrill as winners are selected and claim their exclusive rewards.",
     color: "from-[#F39C0A] to-[#F97316]"
   }];
-  return <section className="mb-20 relative rounded-full my-[6px]">
+  return (
+    <section className="mb-20 relative rounded-full my-[6px]">
       {/* Enhanced section background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#F39C0A]/5 via-transparent to-[#06B6D4]/8 rounded-3xl" />
       
       <div className="relative">
         <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 tracking-tight">
+            How It Works?
+          </h2>
           
           <div className="w-24 h-1 bg-gradient-to-r from-[#F39C0A] to-[#06B6D4] rounded-full mx-auto mb-6" />
           <p className="text-slate-400 max-w-3xl mx-auto text-xl leading-relaxed">
@@ -32,9 +37,12 @@ const HowItWorksSection: React.FC = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((step, index) => <div key={index} className="relative group">
+          {steps.map((step, index) => (
+            <div key={index} className="relative group">
               {/* Connection line for larger screens */}
-              {index < steps.length - 1 && <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-[#F39C0A]/30 to-transparent z-10" />}
+              {index < steps.length - 1 && (
+                <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-[#F39C0A]/30 to-transparent z-10" />
+              )}
               
               <Card className="luxury-card text-center group hover:scale-[1.03] transition-all duration-500 relative overflow-hidden h-full">
                 {/* Premium card background effect */}
@@ -65,9 +73,12 @@ const HowItWorksSection: React.FC = () => {
                   <div className={`w-16 h-1 bg-gradient-to-r ${step.color} rounded-full mx-auto mt-6 opacity-50 group-hover:opacity-100 transition-opacity duration-300`} />
                 </CardContent>
               </Card>
-            </div>)}
+            </div>
+          ))}
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default HowItWorksSection;
