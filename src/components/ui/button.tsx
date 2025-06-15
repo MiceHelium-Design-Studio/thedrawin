@@ -6,20 +6,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--background))] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-95 relative overflow-hidden",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F39C0A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0D0D0D] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-95 relative overflow-hidden cursor-pointer",
   {
     variants: {
       variant: {
         default: "luxury-button",
         destructive:
-          "bg-[rgb(var(--destructive))] text-[rgb(var(--destructive-foreground))] hover:bg-[rgb(var(--destructive))]/90 rounded-full px-8 py-4 font-semibold border-0 shadow-lg hover:shadow-xl min-h-[44px]",
+          "bg-[#FF4C4C] text-white hover:bg-[#FF4C4C]/90 rounded-full px-8 py-4 font-semibold border-0 shadow-lg hover:shadow-xl min-h-[44px]",
         outline:
           "premium-outline-button",
         secondary:
           "secondary-button",
-        ghost: "hover:bg-[rgb(var(--muted))]/20 text-[rgb(var(--text-primary))] hover:text-[rgb(var(--text-primary))] rounded-full px-6 py-3 font-medium border-0 min-h-[44px]",
-        link: "text-[rgb(var(--primary))] underline-offset-4 hover:underline font-medium hover:text-[rgb(var(--primary-hover))] transition-colors p-0 h-auto",
-        success: "bg-[rgb(var(--success))] text-[rgb(var(--success-foreground))] hover:bg-[rgb(var(--success))]/90 rounded-full px-8 py-4 font-semibold border-0 shadow-lg hover:shadow-xl min-h-[44px]"
+        ghost: "hover:bg-[#55596E]/20 text-white hover:text-white rounded-full px-6 py-3 font-medium border-0 min-h-[44px]",
+        link: "text-[#F39C0A] underline-offset-4 hover:underline font-medium hover:text-[#FABE3C] transition-colors p-0 h-auto",
+        success: "bg-[#19C37D] text-white hover:bg-[#19C37D]/90 rounded-full px-8 py-4 font-semibold border-0 shadow-lg hover:shadow-xl min-h-[44px]"
       },
       size: {
         default: "rounded-full px-8 py-4 text-base min-h-[44px]",

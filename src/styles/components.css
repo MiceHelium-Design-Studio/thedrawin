@@ -3,9 +3,8 @@
 @layer utilities {
   /* Premium card components with 24px rounded corners and soft shadows */
   .luxury-card {
-    @apply bg-[rgb(var(--card))] border-0;
-    border-radius: 24px; /* Rounded corners: 24px */
-    background: rgb(var(--card));
+    background: #1F1D36;
+    border-radius: 24px;
     box-shadow: 
       0 4px 8px rgba(255, 255, 255, 0.05),
       0 1px 2px rgba(0, 0, 0, 0.1);
@@ -13,7 +12,8 @@
     -webkit-backdrop-filter: blur(20px);
     position: relative;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    padding: 16px 24px; /* Inner padding: 16–24px */
+    padding: 16px 24px;
+    border: 0;
   }
   
   .luxury-card:hover {
@@ -21,12 +21,12 @@
     box-shadow: 
       0 8px 16px rgba(255, 255, 255, 0.08),
       0 2px 4px rgba(0, 0, 0, 0.12),
-      0 0 0 1px rgba(var(--primary), 0.08);
+      0 0 0 1px rgba(243, 156, 10, 0.08);
   }
   
   /* Glassmorphism cards for special states */
   .glass-card {
-    @apply bg-[rgba(var(--card),0.8)] border-0;
+    background: rgba(31, 29, 54, 0.8);
     border-radius: 24px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -35,82 +35,106 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
     position: relative;
     padding: 16px 24px;
+    border: 0;
   }
 
   /* Premium button system with fully rounded pill shapes */
   .luxury-button {
-    @apply bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))];
-    @apply font-semibold transition-all duration-200 ease-out relative overflow-hidden;
-    @apply shadow-lg hover:shadow-xl active:scale-95; /* Scale down on press (0.95) */
-    @apply border-0 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2;
-    @apply focus:ring-offset-[rgb(var(--background))];
-    border-radius: 999px; /* Fully rounded pill shape */
-    background: rgb(var(--primary));
-    font-size: 16px;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-    min-height: 44px; /* Minimum 44x44px tap targets */
-    padding: 12px 24px;
-  }
-  
-  .luxury-button:hover {
-    background: rgb(var(--primary-hover)); /* Hover state: lighten gold */
-    transform: translateY(-1px);
-  }
-  
-  .luxury-button:disabled {
-    @apply bg-[rgb(var(--muted))] text-[#888];
-    background: rgb(var(--muted)); /* Disabled state: #55596E background */
-    cursor: not-allowed;
-    transform: none;
-  }
-  
-  /* Premium outline button */
-  .premium-outline-button {
-    @apply border-2 border-[rgb(var(--primary))] text-[rgb(var(--primary))];
-    @apply bg-transparent hover:bg-[rgb(var(--primary))]/10;
-    @apply font-semibold relative overflow-hidden;
-    @apply transition-all duration-200 ease-out;
-    @apply shadow-sm hover:shadow-lg active:scale-95;
-    @apply focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2;
-    @apply focus:ring-offset-[rgb(var(--background))];
+    background: #F39C0A;
+    color: #0D0D0D;
+    font-weight: 600;
+    transition: all 0.2s ease-out;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(243, 156, 10, 0.3);
     border-radius: 999px;
     font-size: 16px;
     line-height: 1.2;
     letter-spacing: -0.01em;
     min-height: 44px;
     padding: 12px 24px;
+    border: 0;
+    cursor: pointer;
+  }
+  
+  .luxury-button:hover {
+    background: #FABE3C;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(243, 156, 10, 0.4);
+  }
+  
+  .luxury-button:active {
+    transform: scale(0.95);
+  }
+  
+  .luxury-button:disabled {
+    background: #55596E;
+    color: #888888;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Premium outline button */
+  .premium-outline-button {
+    border: 2px solid #F39C0A;
+    color: #F39C0A;
+    background: transparent;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease-out;
+    box-shadow: 0 2px 8px rgba(243, 156, 10, 0.2);
+    border-radius: 999px;
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    min-height: 44px;
+    padding: 12px 24px;
+    cursor: pointer;
   }
   
   .premium-outline-button:hover {
-    @apply border-[rgb(var(--primary-hover))] bg-[rgb(var(--primary))]/15;
+    border-color: #FABE3C;
+    background: rgba(243, 156, 10, 0.15);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(243, 156, 10, 0.3);
+  }
+
+  .premium-outline-button:active {
+    transform: scale(0.95);
   }
 
   /* Secondary button */
   .secondary-button {
-    @apply bg-[rgb(var(--secondary))] text-[rgb(var(--text-primary))];
-    @apply font-medium transition-all duration-200 ease-out;
-    @apply hover:bg-[rgb(var(--muted))];
-    @apply focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2;
-    @apply focus:ring-offset-[rgb(var(--background))];
-    @apply active:scale-95;
+    background: #1F1D36;
+    color: #FFFFFF;
+    font-weight: 500;
+    transition: all 0.2s ease-out;
     border-radius: 999px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     min-height: 44px;
     padding: 12px 20px;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .secondary-button:hover {
+    background: #55596E;
+  }
+
+  .secondary-button:active {
+    transform: scale(0.95);
   }
 
   /* Premium input fields with rounded corners */
   .apple-input {
-    @apply bg-[rgb(var(--input))] border border-[rgb(var(--border))];
-    @apply text-[rgb(var(--text-primary))] placeholder:text-[rgb(var(--text-muted))];
-    @apply transition-all duration-200 ease-out;
-    @apply focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-0;
-    @apply focus:border-[rgb(var(--primary))]/50;
-    @apply hover:border-[rgb(var(--border))]/80;
-    border-radius: 24px; /* Rounded input fields */
+    background: #1F1D36;
+    border: 1px solid #55596E;
+    color: #FFFFFF;
+    transition: all 0.2s ease-out;
+    border-radius: 24px;
     font-size: 16px;
     line-height: 1.4;
     min-height: 48px;
@@ -119,34 +143,44 @@
     -webkit-backdrop-filter: blur(10px);
   }
 
+  .apple-input::placeholder {
+    color: #CCCCCC;
+  }
+
+  .apple-input:hover {
+    border-color: rgba(85, 89, 110, 0.8);
+  }
+
   .apple-input:focus {
-    @apply bg-[rgb(var(--card))];
+    outline: none;
+    border-color: rgba(243, 156, 10, 0.5);
+    background: #1F1D36;
     box-shadow: 
-      0 0 0 3px rgba(var(--primary), 0.1),
+      0 0 0 3px rgba(243, 156, 10, 0.1),
       0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
   /* Premium gradient backgrounds */
   .premium-gradient {
-    background: linear-gradient(135deg, rgb(var(--gradient-start)) 0%, rgb(var(--gradient-end)) 100%);
+    background: linear-gradient(135deg, #1F1D36 0%, #0D0D0D 100%);
   }
   
   .premium-gradient-header {
-    background: linear-gradient(180deg, rgb(var(--gradient-start)) 0%, rgb(var(--gradient-end)) 100%);
+    background: linear-gradient(180deg, #1F1D36 0%, #0D0D0D 100%);
   }
 
   /* Transaction cards with color-coded amounts */
   .transaction-gain {
-    @apply text-[rgb(var(--success))];
+    color: #19C37D;
   }
   
   .transaction-spend {
-    @apply text-[rgb(var(--destructive))];
+    color: #FF4C4C;
   }
 
   /* Bottom tab bar styling */
   .bottom-tab-bar {
-    @apply bg-[rgb(var(--card))];
+    background: #1F1D36;
     border-radius: 24px 24px 0 0;
     box-shadow: 
       0 -4px 8px rgba(255, 255, 255, 0.05),
@@ -157,35 +191,39 @@
   
   /* Active tab styling */
   .tab-active {
-    @apply text-[rgb(var(--text-primary))];
+    color: #FFFFFF;
   }
   
   .tab-inactive {
-    @apply text-[rgb(var(--text-muted))];
+    color: #CCCCCC;
   }
   
   /* Notification badge */
   .notification-badge {
-    @apply bg-[rgb(var(--primary))];
+    background: #F39C0A;
     border-radius: 999px;
   }
 
   /* Modal backdrop */
   .modal-backdrop {
-    background: rgba(17, 20, 38, 0.8);
+    background: rgba(13, 13, 13, 0.8);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
   }
 
   /* Success state styling */
   .success-state {
-    @apply bg-[rgb(var(--success))]/10 text-[rgb(var(--success))] border border-[rgb(var(--success))]/20;
+    background: rgba(25, 195, 125, 0.1);
+    color: #19C37D;
+    border: 1px solid rgba(25, 195, 125, 0.2);
     border-radius: 24px;
   }
   
   /* Error state styling */
   .error-state {
-    @apply bg-[rgb(var(--destructive))]/10 text-[rgb(var(--destructive))] border border-[rgb(var(--destructive))]/20;
+    background: rgba(255, 76, 76, 0.1);
+    color: #FF4C4C;
+    border: 1px solid rgba(255, 76, 76, 0.2);
     border-radius: 24px;
   }
 
@@ -204,7 +242,7 @@
 
   /* Profile banner with floating avatar */
   .profile-banner {
-    @apply premium-gradient;
+    background: linear-gradient(135deg, #1F1D36 0%, #0D0D0D 100%);
     border-radius: 24px 24px 0 0;
     position: relative;
     min-height: 120px;
@@ -215,8 +253,8 @@
     bottom: -30px;
     left: 50%;
     transform: translateX(-50%);
-    border: 4px solid rgb(var(--card));
+    border: 4px solid #1F1D36;
     border-radius: 999px;
-    background: rgb(var(--card));
+    background: #1F1D36;
   }
 }

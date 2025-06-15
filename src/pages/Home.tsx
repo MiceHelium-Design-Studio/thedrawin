@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDraws } from '../context/DrawContext';
@@ -72,26 +73,26 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#0D0D0D' }}>
       {/* Premium gradient header */}
       <div className="fixed top-0 left-0 w-full h-32 premium-gradient-header pointer-events-none opacity-60" />
       
       {/* Ambient background effects */}
-      <div className="fixed top-20 left-10 w-32 h-32 bg-[rgb(var(--primary))]/10 rounded-full blur-3xl animate-pulse opacity-40" />
-      <div className="fixed bottom-32 right-20 w-40 h-40 bg-[rgb(var(--accent))]/8 rounded-full blur-3xl animate-pulse opacity-30" style={{ animationDelay: '2s' }} />
-      <div className="fixed top-1/2 left-1/3 w-24 h-24 bg-[rgb(var(--primary))]/6 rounded-full blur-2xl animate-pulse opacity-50" style={{ animationDelay: '4s' }} />
+      <div className="fixed top-20 left-10 w-32 h-32 rounded-full blur-3xl animate-pulse opacity-40" style={{ background: 'rgba(243, 156, 10, 0.1)' }} />
+      <div className="fixed bottom-32 right-20 w-40 h-40 rounded-full blur-3xl animate-pulse opacity-30" style={{ background: 'rgba(6, 182, 212, 0.08)', animationDelay: '2s' }} />
+      <div className="fixed top-1/2 left-1/3 w-24 h-24 rounded-full blur-2xl animate-pulse opacity-50" style={{ background: 'rgba(243, 156, 10, 0.06)', animationDelay: '4s' }} />
       
       {/* Premium data streams */}
-      <div className="fixed top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[rgb(var(--primary))]/30 to-transparent opacity-70">
-        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/50 to-transparent animate-[shimmer_2.5s_linear_infinite]" />
+      <div className="fixed top-0 left-0 w-full h-px opacity-70" style={{ background: 'linear-gradient(to right, transparent, rgba(243, 156, 10, 0.3), transparent)' }}>
+        <div className="w-full h-full animate-[shimmer_2.5s_linear_infinite]" style={{ background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent)' }} />
       </div>
-      <div className="fixed bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[rgb(var(--accent))]/25 to-transparent opacity-60">
-        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[shimmer_3.5s_linear_infinite]" style={{ animationDelay: '1s' }} />
+      <div className="fixed bottom-0 left-0 w-full h-px opacity-60" style={{ background: 'linear-gradient(to right, transparent, rgba(6, 182, 212, 0.25), transparent)' }}>
+        <div className="w-full h-full animate-[shimmer_3.5s_linear_infinite]" style={{ background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent)', animationDelay: '1s' }} />
       </div>
       
       {/* Side accent lines */}
-      <div className="fixed left-0 top-1/4 w-px h-32 bg-gradient-to-b from-transparent via-[rgb(var(--primary))]/40 to-transparent opacity-80" />
-      <div className="fixed right-0 top-3/4 w-px h-24 bg-gradient-to-b from-transparent via-[rgb(var(--accent))]/35 to-transparent opacity-70" />
+      <div className="fixed left-0 top-1/4 w-px h-32 opacity-80" style={{ background: 'linear-gradient(to bottom, transparent, rgba(243, 156, 10, 0.4), transparent)' }} />
+      <div className="fixed right-0 top-3/4 w-px h-24 opacity-70" style={{ background: 'linear-gradient(to bottom, transparent, rgba(6, 182, 212, 0.35), transparent)' }} />
       
       <div className="relative z-10">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -103,7 +104,7 @@ const Home: React.FC = () => {
             <div className="space-y-24">
               {/* Premium banner section */}
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-[rgb(var(--primary))]/8 via-transparent to-[rgb(var(--accent))]/6 rounded-3xl blur-xl" />
+                <div className="absolute inset-0 rounded-3xl blur-xl" style={{ background: 'linear-gradient(to right, rgba(243, 156, 10, 0.08), transparent, rgba(6, 182, 212, 0.06))' }} />
                 <div className="relative">
                   <BannerSlider banners={displayBanners} />
                 </div>
@@ -114,7 +115,7 @@ const Home: React.FC = () => {
               {/* Active draws with premium container */}
               {activeDraws.length > 0 && (
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[rgb(var(--primary))]/12 via-transparent to-[rgb(var(--accent))]/8 rounded-3xl" />
+                  <div className="absolute inset-0 rounded-3xl" style={{ background: 'linear-gradient(to bottom right, rgba(243, 156, 10, 0.12), transparent, rgba(6, 182, 212, 0.08))' }} />
                   <div className="relative luxury-card">
                     <ActiveDrawsSection 
                       activeDraws={activeDraws} 
@@ -128,7 +129,7 @@ const Home: React.FC = () => {
               
               {/* All draws section */}
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-tl from-[rgb(var(--accent))]/8 via-transparent to-[rgb(var(--primary))]/6 rounded-3xl" />
+                <div className="absolute inset-0 rounded-3xl" style={{ background: 'linear-gradient(to top left, rgba(6, 182, 212, 0.08), transparent, rgba(243, 156, 10, 0.06))' }} />
                 <div className="relative">
                   <AllDrawsSection 
                     draws={sortedDraws} 

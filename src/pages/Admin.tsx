@@ -29,23 +29,23 @@ const Admin: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background premium-gradient relative overflow-hidden">
+    <div className="flex flex-col min-h-screen relative overflow-hidden" style={{ backgroundColor: '#0D0D0D' }}>
       {/* Premium ambient effects */}
-      <div className="fixed top-20 right-10 w-24 h-24 bg-[rgb(var(--primary))]/8 rounded-full blur-2xl animate-pulse opacity-30" />
-      <div className="fixed bottom-40 left-20 w-32 h-32 bg-[rgb(var(--accent))]/6 rounded-full blur-3xl animate-pulse opacity-20" style={{ animationDelay: '2s' }} />
+      <div className="fixed top-20 right-10 w-24 h-24 rounded-full blur-2xl animate-pulse opacity-30" style={{ background: 'rgba(243, 156, 10, 0.08)' }} />
+      <div className="fixed bottom-40 left-20 w-32 h-32 rounded-full blur-3xl animate-pulse opacity-20" style={{ background: 'rgba(6, 182, 212, 0.06)', animationDelay: '2s' }} />
       
       <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-1 relative z-10">
         {/* Premium breadcrumbs */}
         <div className="flex items-center mb-6 text-sm">
           <a 
             href="/"
-            className="flex items-center text-[rgb(var(--text-muted))] hover:text-[rgb(var(--primary))] transition-colors"
+            className="flex items-center text-[#CCCCCC] hover:text-[#F39C0A] transition-colors"
           >
             <Home className="h-4 w-4 mr-1" />
             Home
           </a>
-          <ChevronRight className="mx-2 h-4 w-4 text-[rgb(var(--text-muted))]" />
-          <span className="text-[rgb(var(--text-primary))] font-medium">Administration</span>
+          <ChevronRight className="mx-2 h-4 w-4 text-[#CCCCCC]" />
+          <span className="text-white font-medium">Administration</span>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
