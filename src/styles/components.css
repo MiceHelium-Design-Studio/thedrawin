@@ -1,196 +1,222 @@
 
-/* Apple-inspired component styles with proper contrast and accessibility */
+/* Premium component styles with Apple-inspired design */
 @layer utilities {
-  /* Card components with Apple's depth and materials */
+  /* Premium card components with 24px rounded corners and soft shadows */
   .luxury-card {
-    @apply bg-[rgb(var(--secondary-system-background))] border border-[rgb(var(--border))];
-    @apply rounded-[20px]; /* Apple's larger corner radius for cards */
-    background: linear-gradient(
-      145deg, 
-      rgba(var(--secondary-system-background), 1) 0%, 
-      rgba(var(--tertiary-system-background), 0.8) 100%
-    );
+    @apply bg-[rgb(var(--card))] border-0;
+    border-radius: 24px; /* Rounded corners: 24px */
+    background: rgb(var(--card));
     box-shadow: 
-      0 4px 16px rgba(0, 0, 0, 0.12),
-      0 1px 4px rgba(0, 0, 0, 0.16),
-      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      0 4px 8px rgba(255, 255, 255, 0.05),
+      0 1px 2px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     position: relative;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-  
-  .luxury-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      145deg, 
-      rgba(var(--primary), 0.1), 
-      transparent 40%, 
-      rgba(var(--primary), 0.05)
-    );
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: xor;
-    -webkit-mask-composite: xor;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    padding: 16px 24px; /* Inner padding: 16–24px */
   }
   
   .luxury-card:hover {
     transform: translateY(-2px) scale(1.002);
     box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.16),
-      0 2px 8px rgba(0, 0, 0, 0.12),
-      0 0 0 1px rgba(var(--primary), 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      0 8px 16px rgba(255, 255, 255, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(var(--primary), 0.08);
   }
   
-  .luxury-card:hover::before {
-    opacity: 1;
-  }
-  
-  /* Apple-style glass effect for overlays */
-  .glass-effect {
-    @apply bg-[rgba(var(--secondary-system-background),0.8)] backdrop-blur-xl;
-    @apply border border-[rgba(var(--border),0.5)];
-    background: linear-gradient(
-      145deg, 
-      rgba(255, 255, 255, 0.04) 0%, 
-      rgba(255, 255, 255, 0.01) 100%
-    );
+  /* Glassmorphism cards for special states */
+  .glass-card {
+    @apply bg-[rgba(var(--card),0.8)] border-0;
+    border-radius: 24px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.24),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    padding: 16px 24px;
   }
 
-  /* Apple-inspired button system with full rounded corners */
+  /* Premium button system with fully rounded pill shapes */
   .luxury-button {
-    @apply bg-[rgb(var(--primary))] hover:bg-[rgb(var(--primary))]/90;
-    @apply text-[rgb(var(--primary-foreground))] font-semibold;
-    @apply rounded-full px-8 py-4; /* Fully rounded pill shape */
-    @apply transition-all duration-200 ease-out relative overflow-hidden;
-    @apply shadow-lg hover:shadow-xl active:scale-[0.98];
+    @apply bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))];
+    @apply font-semibold transition-all duration-200 ease-out relative overflow-hidden;
+    @apply shadow-lg hover:shadow-xl active:scale-95; /* Scale down on press (0.95) */
     @apply border-0 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2;
-    @apply focus:ring-offset-[rgb(var(--system-background))];
-    background: linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--gold-600)) 100%);
-    box-shadow: 
-      0 2px 8px rgba(var(--primary), 0.3),
-      0 1px 2px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    @apply focus:ring-offset-[rgb(var(--background))];
+    border-radius: 999px; /* Fully rounded pill shape */
+    background: rgb(var(--primary));
     font-size: 16px;
     line-height: 1.2;
     letter-spacing: -0.01em;
-    min-height: 44px; /* Apple's minimum touch target */
-  }
-  
-  .luxury-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s ease;
-  }
-  
-  .luxury-button:hover::before {
-    left: 100%;
+    min-height: 44px; /* Minimum 44x44px tap targets */
+    padding: 12px 24px;
   }
   
   .luxury-button:hover {
+    background: rgb(var(--primary-hover)); /* Hover state: lighten gold */
     transform: translateY(-1px);
-    box-shadow: 
-      0 4px 16px rgba(var(--primary), 0.4),
-      0 2px 4px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
   
-  .luxury-button:active {
-    transform: translateY(0) scale(0.98);
-    box-shadow: 
-      0 1px 4px rgba(var(--primary), 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  .luxury-button:disabled {
+    @apply bg-[rgb(var(--muted))] text-[#888];
+    background: rgb(var(--muted)); /* Disabled state: #55596E background */
+    cursor: not-allowed;
+    transform: none;
   }
   
-  /* Apple-style outline button */
+  /* Premium outline button */
   .premium-outline-button {
     @apply border-2 border-[rgb(var(--primary))] text-[rgb(var(--primary))];
     @apply bg-transparent hover:bg-[rgb(var(--primary))]/10;
-    @apply font-semibold rounded-full px-8 py-4 relative overflow-hidden;
+    @apply font-semibold relative overflow-hidden;
     @apply transition-all duration-200 ease-out;
-    @apply shadow-sm hover:shadow-lg active:scale-[0.98];
+    @apply shadow-sm hover:shadow-lg active:scale-95;
     @apply focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2;
-    @apply focus:ring-offset-[rgb(var(--system-background))];
-    background: linear-gradient(
-      135deg, 
-      rgba(var(--primary), 0.02) 0%, 
-      rgba(var(--primary), 0.06) 100%
-    );
-    box-shadow: 
-      0 1px 3px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    @apply focus:ring-offset-[rgb(var(--background))];
+    border-radius: 999px;
     font-size: 16px;
     line-height: 1.2;
     letter-spacing: -0.01em;
     min-height: 44px;
+    padding: 12px 24px;
   }
   
   .premium-outline-button:hover {
-    @apply border-[rgb(var(--primary))]/80 bg-[rgb(var(--primary))]/15;
+    @apply border-[rgb(var(--primary-hover))] bg-[rgb(var(--primary))]/15;
     transform: translateY(-1px);
-    box-shadow: 
-      0 2px 8px rgba(var(--primary), 0.2),
-      0 1px 2px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
 
-  .premium-outline-button:active {
-    transform: translateY(0) scale(0.98);
-  }
-
-  /* Apple-style secondary button */
+  /* Secondary button */
   .secondary-button {
-    @apply bg-[rgb(var(--secondary-system-fill))]/36 text-[rgb(var(--label-primary))];
-    @apply font-medium rounded-full px-6 py-3;
-    @apply transition-all duration-200 ease-out;
-    @apply hover:bg-[rgb(var(--secondary-system-fill))]/50;
+    @apply bg-[rgb(var(--secondary))] text-[rgb(var(--text-primary))];
+    @apply font-medium transition-all duration-200 ease-out;
+    @apply hover:bg-[rgb(var(--muted))];
     @apply focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-2;
-    @apply focus:ring-offset-[rgb(var(--system-background))];
-    @apply active:scale-[0.98];
+    @apply focus:ring-offset-[rgb(var(--background))];
+    @apply active:scale-95;
+    border-radius: 999px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     min-height: 44px;
+    padding: 12px 20px;
   }
 
-  /* Apple-style input fields with full rounded corners */
+  /* Premium input fields with rounded corners */
   .apple-input {
-    @apply bg-[rgb(var(--tertiary-system-background))] border border-[rgb(var(--border))];
-    @apply text-[rgb(var(--label-primary))] placeholder:text-[rgb(var(--label-tertiary))];
-    @apply rounded-full px-6 py-4; /* Fully rounded pill shape */
+    @apply bg-[rgb(var(--input))] border border-[rgb(var(--border))];
+    @apply text-[rgb(var(--text-primary))] placeholder:text-[rgb(var(--text-muted))];
     @apply transition-all duration-200 ease-out;
     @apply focus:outline-none focus:ring-2 focus:ring-[rgb(var(--primary))] focus:ring-offset-0;
     @apply focus:border-[rgb(var(--primary))]/50;
     @apply hover:border-[rgb(var(--border))]/80;
+    border-radius: 24px; /* Rounded input fields */
     font-size: 16px;
     line-height: 1.4;
     min-height: 48px;
+    padding: 12px 20px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
 
   .apple-input:focus {
-    @apply bg-[rgb(var(--secondary-system-background))];
+    @apply bg-[rgb(var(--card))];
     box-shadow: 
       0 0 0 3px rgba(var(--primary), 0.1),
       0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Premium gradient backgrounds */
+  .premium-gradient {
+    background: linear-gradient(135deg, rgb(var(--gradient-start)) 0%, rgb(var(--gradient-end)) 100%);
+  }
+  
+  .premium-gradient-header {
+    background: linear-gradient(180deg, rgb(var(--gradient-start)) 0%, rgb(var(--gradient-end)) 100%);
+  }
+
+  /* Transaction cards with color-coded amounts */
+  .transaction-gain {
+    @apply text-[rgb(var(--success))];
+  }
+  
+  .transaction-spend {
+    @apply text-[rgb(var(--destructive))];
+  }
+
+  /* Bottom tab bar styling */
+  .bottom-tab-bar {
+    @apply bg-[rgb(var(--card))];
+    border-radius: 24px 24px 0 0;
+    box-shadow: 
+      0 -4px 8px rgba(255, 255, 255, 0.05),
+      0 -1px 2px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
+  /* Active tab styling */
+  .tab-active {
+    @apply text-[rgb(var(--text-primary))];
+  }
+  
+  .tab-inactive {
+    @apply text-[rgb(var(--text-muted))];
+  }
+  
+  /* Notification badge */
+  .notification-badge {
+    @apply bg-[rgb(var(--primary))];
+    border-radius: 999px;
+  }
+
+  /* Modal backdrop */
+  .modal-backdrop {
+    background: rgba(17, 20, 38, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Success state styling */
+  .success-state {
+    @apply bg-[rgb(var(--success))]/10 text-[rgb(var(--success))] border border-[rgb(var(--success))]/20;
+    border-radius: 24px;
+  }
+  
+  /* Error state styling */
+  .error-state {
+    @apply bg-[rgb(var(--destructive))]/10 text-[rgb(var(--destructive))] border border-[rgb(var(--destructive))]/20;
+    border-radius: 24px;
+  }
+
+  /* Premium shadow system */
+  .shadow-premium {
+    box-shadow: 
+      0 4px 8px rgba(255, 255, 255, 0.05),
+      0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .shadow-premium-lg {
+    box-shadow: 
+      0 8px 16px rgba(255, 255, 255, 0.08),
+      0 2px 4px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Profile banner with floating avatar */
+  .profile-banner {
+    @apply premium-gradient;
+    border-radius: 24px 24px 0 0;
+    position: relative;
+    min-height: 120px;
+  }
+  
+  .profile-avatar-float {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid rgb(var(--card));
+    border-radius: 999px;
+    background: rgb(var(--card));
   }
 }

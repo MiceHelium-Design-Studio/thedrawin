@@ -29,19 +29,23 @@ const Admin: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-background/80">
-      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-1">
-        {/* Breadcrumbs */}
+    <div className="flex flex-col min-h-screen bg-background premium-gradient relative overflow-hidden">
+      {/* Premium ambient effects */}
+      <div className="fixed top-20 right-10 w-24 h-24 bg-[rgb(var(--primary))]/8 rounded-full blur-2xl animate-pulse opacity-30" />
+      <div className="fixed bottom-40 left-20 w-32 h-32 bg-[rgb(var(--accent))]/6 rounded-full blur-3xl animate-pulse opacity-20" style={{ animationDelay: '2s' }} />
+      
+      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-1 relative z-10">
+        {/* Premium breadcrumbs */}
         <div className="flex items-center mb-6 text-sm">
           <a 
             href="/"
-            className="flex items-center text-[rgb(var(--label-secondary))] hover:text-[rgb(var(--primary))] transition-colors"
+            className="flex items-center text-[rgb(var(--text-muted))] hover:text-[rgb(var(--primary))] transition-colors"
           >
             <Home className="h-4 w-4 mr-1" />
             Home
           </a>
-          <ChevronRight className="mx-2 h-4 w-4 text-[rgb(var(--label-tertiary))]" />
-          <span className="text-[rgb(var(--label-primary))] font-medium">Administration</span>
+          <ChevronRight className="mx-2 h-4 w-4 text-[rgb(var(--text-muted))]" />
+          <span className="text-[rgb(var(--text-primary))] font-medium">Administration</span>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
