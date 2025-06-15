@@ -19,16 +19,7 @@ const AllDrawsSection: React.FC<AllDrawsSectionProps> = ({
       <div className="relative z-10">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="space-y-2">
-            <div className="flex items-center space-x-3">
-              <div className="">
-                <div className="w-4 h-4 w-40 rounded-bl-sm bg-yellow-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-white uppercase tracking-wide">
-                <span className="bg-gradient-to-r from-[#06B6D4] to-[#F39C0A] bg-clip-text text-yellow-400">
-                  ALL DRAWS
-                </span>
-              </h2>
-            </div>
+            
             <div className="h-0.5 w-20 bg-gradient-to-r from-[#06B6D4] to-transparent" />
           </div>
           
