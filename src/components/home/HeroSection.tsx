@@ -1,18 +1,16 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-
 interface HeroSectionProps {
   user: any;
   authLoading: boolean;
 }
-
-const HeroSection: React.FC<HeroSectionProps> = ({ user, authLoading }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({
+  user,
+  authLoading
+}) => {
   const navigate = useNavigate();
-
-  return (
-    <div className="flex flex-col items-center mb-20 text-center relative">
+  return <div className="flex flex-col items-center mb-20 text-center relative">
       {/* Premium background glow */}
       <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-[#F39C0A]/10 rounded-full blur-3xl opacity-30" />
       
@@ -23,11 +21,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user, authLoading }) => {
           <div className="absolute inset-0 bg-gradient-to-br from-[#F39C0A]/20 via-transparent to-[#06B6D4]/15 blur-2xl rounded-full animate-pulse" />
           
           <div className="relative">
-            <img 
-              src="/lovable-uploads/eb8560b4-61ba-46be-a7eb-ab1918ff22de.png"
-              alt="DRAWIN - The Future of Gaming" 
-              className="max-w-[320px] md:max-w-[380px] lg:max-w-[500px] mx-auto relative z-10 drop-shadow-2xl hover:scale-105 transition-transform duration-500"
-            />
+            <img src="/lovable-uploads/eb8560b4-61ba-46be-a7eb-ab1918ff22de.png" alt="DRAWIN - The Future of Gaming" className="max-w-[320px] md:max-w-[380px] lg:max-w-[500px] mx-auto relative z-10 drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
             
             {/* Premium border ring */}
             <div className="absolute inset-0 rounded-full border border-[#F39C0A]/20 animate-pulse scale-110" />
@@ -58,24 +52,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user, authLoading }) => {
           
           {/* Perfectly aligned feature highlights */}
           <div className="flex flex-wrap justify-center gap-6 text-sm">
-            <div className="flex items-center space-x-3 luxury-card px-6 py-3 border border-[#F39C0A]/20">
+            <div className="flex items-center space-x-3 luxury-card px-6 py-3 border border-[#F39C0A]/20 rounded-full">
               <div className="w-2 h-2 bg-[#F39C0A] rounded-full animate-pulse" />
               <span className="text-white font-medium">Secure & Fair</span>
             </div>
-            <div className="flex items-center space-x-3 luxury-card px-6 py-3 border border-[#19C37D]/20">
-              <div className="w-2 h-2 bg-[#19C37D] rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
+            <div className="flex items-center space-x-3 luxury-card px-6 py-3 border border-[#19C37D]/20 rounded-full">
+              <div className="w-2 h-2 bg-[#19C37D] rounded-full animate-pulse" style={{
+              animationDelay: '0.5s'
+            }} />
               <span className="text-white font-medium">Instant Wins</span>
             </div>
-            <div className="flex items-center space-x-3 luxury-card px-6 py-3 border border-[#06B6D4]/20">
-              <div className="w-2 h-2 bg-[#06B6D4] rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="flex items-center space-x-3 luxury-card px-6 py-3 border border-[#06B6D4]/20 rounded-full">
+              <div className="w-2 h-2 bg-[#06B6D4] rounded-full animate-pulse" style={{
+              animationDelay: '1s'
+            }} />
               <span className="text-white font-medium">Premium Rewards</span>
             </div>
           </div>
         </div>
         
         {/* Premium authentication prompt for non-logged in users */}
-        {!user && !authLoading && (
-          <div className="mt-12 luxury-card max-w-2xl mx-auto relative overflow-hidden">
+        {!user && !authLoading && <div className="mt-12 luxury-card max-w-2xl mx-auto relative overflow-hidden">
             {/* Animated border effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#F39C0A]/20 via-[#06B6D4]/15 to-[#F39C0A]/20 p-0.5 rounded-3xl">
               <div className="bg-[#1F1D36] w-full h-full rounded-[22px]" />
@@ -83,8 +80,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user, authLoading }) => {
             
             {/* Floating particles effect */}
             <div className="absolute top-6 left-10 w-2 h-2 bg-[#F39C0A]/30 rounded-full animate-pulse" />
-            <div className="absolute bottom-8 right-14 w-1 h-1 bg-[#06B6D4]/40 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
-            <div className="absolute top-1/2 right-10 w-1.5 h-1.5 bg-[#F39C0A]/25 rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+            <div className="absolute bottom-8 right-14 w-1 h-1 bg-[#06B6D4]/40 rounded-full animate-pulse" style={{
+          animationDelay: '1s'
+        }} />
+            <div className="absolute top-1/2 right-10 w-1.5 h-1.5 bg-[#F39C0A]/25 rounded-full animate-pulse" style={{
+          animationDelay: '2s'
+        }} />
             
             <div className="relative z-10 p-12">
               <div className="flex items-center justify-center mb-10">
@@ -93,8 +94,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user, authLoading }) => {
                     <div className="w-12 h-12 bg-gradient-to-br from-[#F39C0A] to-[#FFD700] rounded-full animate-pulse" />
                   </div>
                   {/* Orbiting rings */}
-                  <div className="absolute inset-0 border border-[#F39C0A]/20 rounded-full animate-spin" style={{ animationDuration: '8s' }} />
-                  <div className="absolute inset-2 border border-[#06B6D4]/15 rounded-full animate-spin" style={{ animationDuration: '12s', animationDirection: 'reverse' }} />
+                  <div className="absolute inset-0 border border-[#F39C0A]/20 rounded-full animate-spin" style={{
+                animationDuration: '8s'
+              }} />
+                  <div className="absolute inset-2 border border-[#06B6D4]/15 rounded-full animate-spin" style={{
+                animationDuration: '12s',
+                animationDirection: 'reverse'
+              }} />
                 </div>
               </div>
               
@@ -106,10 +112,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user, authLoading }) => {
                   Join thousands of players in the ultimate gaming experience where every draw could change your life
                 </p>
                 
-                <Button 
-                  onClick={() => navigate('/login')} 
-                  className="w-full max-w-sm mx-auto luxury-button relative overflow-hidden group text-lg py-6 font-bold tracking-wide"
-                >
+                <Button onClick={() => navigate('/login')} className="w-full max-w-sm mx-auto luxury-button relative overflow-hidden group text-lg py-6 font-bold tracking-wide">
                   <span className="relative z-10">Start Your Journey</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 </Button>
@@ -119,11 +122,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ user, authLoading }) => {
                 </p>
               </div>
             </div>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default HeroSection;
