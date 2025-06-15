@@ -18,20 +18,13 @@ const HowItWorksSection: React.FC = () => {
     description: "Experience the thrill as winners are selected and claim their exclusive rewards.",
     color: "from-[#F39C0A] to-[#F97316]"
   }];
-  return <section className="mb-20 relative rounded-full">
+  return <section className="mb-20 relative rounded-full my-[6px]">
       {/* Enhanced section background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#F39C0A]/5 via-transparent to-[#06B6D4]/8 rounded-3xl" />
       
       <div className="relative">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center space-x-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#F39C0A]/20 to-[#06B6D4]/10 rounded-xl flex items-center justify-center border border-[#F39C0A]/20">
-              <div className="w-6 h-6 bg-gradient-to-br from-[#F39C0A] to-[#FFD700] rounded-lg animate-pulse" />
-            </div>
-            <h2 className="text-4xl font-bold text-white tracking-tight">
-              How It <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent">Works</span>
-            </h2>
-          </div>
+          
           <div className="w-24 h-1 bg-gradient-to-r from-[#F39C0A] to-[#06B6D4] rounded-full mx-auto mb-6" />
           <p className="text-slate-400 max-w-3xl mx-auto text-xl leading-relaxed">
             Three simple steps to join the future of digital gaming and start winning amazing prizes
