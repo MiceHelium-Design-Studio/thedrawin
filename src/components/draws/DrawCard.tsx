@@ -22,7 +22,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
 
   const isAdmin = user?.isAdmin || false;
   const canPickWinner = isAdmin && (draw.status === 'active' || draw.status === 'open') && (draw.numberOfTickets || 0) > 0;
-  const canEnterDraw = (draw.status === 'active' || draw.status === 'open') && user;
+  const canEnterDraw = (draw.status === 'active' || draw.status === 'open') && !!user;
   
   const handlePickWinner = async () => {
     try {
