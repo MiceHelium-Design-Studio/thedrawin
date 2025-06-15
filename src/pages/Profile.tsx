@@ -51,27 +51,24 @@ const Profile: React.FC = () => {
       
       <div className="relative z-10">
         <div className="max-w-4xl mx-auto px-4 py-8 luxury-fade-in">
-          {/* Enhanced Profile Header */}
+          {/* Fixed Profile Header */}
           <div className="text-center mb-8 relative">
-            <div className="absolute inset-0 hero-glow opacity-50"></div>
-            <div className="relative z-10">
-              <div className="relative inline-block mb-6">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#F39C0A] to-[#FFA726] p-1 gold-pulse">
-                  <div className="rounded-full bg-[#0D0D0D] p-2">
-                    <Avatar className="w-24 h-24 mx-auto ring-4 ring-[#F39C0A]/20 shadow-gold">
-                      <AvatarImage 
-                        src={user.avatar || user.avatar_url} 
-                        alt={user.email}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-gradient-to-br from-[#F39C0A] to-[#FFA726] text-black text-xl font-bold">
-                        {getUserInitials(user.email)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
+            <div className="mb-6">
+              <div className="relative inline-block">
+                <div className="relative">
+                  <Avatar className="w-24 h-24 mx-auto ring-4 ring-[#F39C0A]/20 shadow-gold">
+                    <AvatarImage 
+                      src={user.avatar || user.avatar_url} 
+                      alt={user.email}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-gradient-to-br from-[#F39C0A] to-[#FFA726] text-black text-xl font-bold">
+                      {getUserInitials(user.email)}
+                    </AvatarFallback>
+                  </Avatar>
                 </div>
                 {user.isAdmin && (
-                  <div className="absolute -top-2 -right-2">
+                  <div className="absolute -top-2 -right-2 z-10">
                     <Badge className="bg-[#F39C0A] text-black text-xs px-3 py-1 rounded-full font-bold shadow-gold">
                       <Crown className="w-3 h-3 mr-1" />
                       Admin
@@ -79,11 +76,13 @@ const Profile: React.FC = () => {
                   </div>
                 )}
               </div>
-              
-              <h1 className="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+            </div>
+            
+            <div className="space-y-4">
+              <h1 className="text-3xl font-bold text-white bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
                 {user.name || 'Welcome'}
               </h1>
-              <p className="text-slate-400 text-lg font-medium mb-4">
+              <p className="text-slate-400 text-lg font-medium">
                 {user.email}
               </p>
               
@@ -99,7 +98,7 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          {/* Enhanced Tab Navigation */}
+          {/* Tab Navigation */}
           <div className="flex space-x-1 luxury-card p-1 rounded-xl mb-8 overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -121,7 +120,7 @@ const Profile: React.FC = () => {
             })}
           </div>
 
-          {/* Enhanced Tab Content */}
+          {/* Tab Content */}
           <div className="space-y-6">
             {activeTab === 'overview' && (
               <div className="grid gap-6 md:grid-cols-2">
