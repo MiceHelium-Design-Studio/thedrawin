@@ -43,19 +43,19 @@ const HowItWorksSection: React.FC = () => {
               {/* Connection line for larger screens */}
               {index < steps.length - 1 && <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-px bg-gradient-to-r from-[#F39C0A]/30 to-transparent z-10" />}
               
-              <Card className="luxury-card text-center group hover:scale-[1.03] transition-all duration-500 relative overflow-hidden h-full">
+              <Card className="luxury-card text-center group hover:scale-[1.03] transition-all duration-500 relative overflow-hidden h-full bg-yellow-400">
                 {/* Premium card background effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
-                <CardContent className="p-8 relative rounded-lg">
+                <CardContent className="p-8 relative">
                   {/* Step number */}
                   <div className="absolute top-4 right-4 w-8 h-8 bg-[#F39C0A]/20 rounded-full flex items-center justify-center text-[#F39C0A] font-bold text-sm border border-[#F39C0A]/30">
                     {index + 1}
                   </div>
                   
-                  <div className="mb-8 rounded-full">
+                  <div className="mb-8">
                     <div className={`w-24 h-24 bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                      <div className="w-20 h-20 bg-black/20 flex items-center justify-center backdrop-blur-sm rounded-full">
+                      <div className="w-20 h-20 bg-black/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                         <step.icon className="h-12 w-12 text-white drop-shadow-lg" />
                       </div>
                     </div>
