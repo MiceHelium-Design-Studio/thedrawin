@@ -18,10 +18,7 @@ const AllDrawsSection: React.FC<AllDrawsSectionProps> = ({
       
       <div className="relative z-10">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div className="space-y-2">
-            
-            <div className="h-0.5 w-20 bg-gradient-to-r from-[#06B6D4] to-transparent" />
-          </div>
+          
           
           
         </div>
