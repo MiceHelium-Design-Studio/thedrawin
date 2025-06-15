@@ -48,12 +48,10 @@ export const useImageUpload = () => {
 
     try {
       setUploading(true);
-      console.log('Starting image upload to media bucket...');
-
+      console.log('--- Starting image upload to media bucket ---');
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${user.id}/profile-${Date.now()}.${fileExt}`;
-
-      console.log('Uploading to media bucket with filename:', fileName);
+      console.log('[ImageUpload] Uploading to media bucket:', fileName);
 
       // Upload to the 'media' bucket
       const { data, error: uploadError } = await supabase.storage
@@ -64,7 +62,7 @@ export const useImageUpload = () => {
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        console.error('[ImageUpload] Upload error:', uploadError);
         throw uploadError;
       }
 
@@ -72,7 +70,7 @@ export const useImageUpload = () => {
         throw new Error('Upload failed: No path returned');
       }
 
-      console.log('Upload successful:', data);
+      console.log('[ImageUpload] Upload successful:', data);
 
       // Get the public URL
       const { data: urlData } = supabase.storage
@@ -83,10 +81,19 @@ export const useImageUpload = () => {
         throw new Error('Failed to generate public URL');
       }
 
-      console.log('Public URL generated:', urlData.publicUrl);
+      console.log('[ImageUpload] Public URL:', urlData.publicUrl);
 
       // Try to record in media_items table for tracking (optional - don't fail if this doesn't work)
       try {
+        console.log('[ImageUpload] Inserting in media_items:', {
+          id: data.path,
+          name: imageFile.name,
+          url: urlData.publicUrl,
+          type: 'image',
+          size: imageFile.size,
+          user_id: user.id
+        });
+
         const { error: dbError } = await supabase
           .from('media_items')
           .insert({
@@ -99,10 +106,35 @@ export const useImageUpload = () => {
           });
 
         if (dbError) {
-          console.warn('Failed to record in media_items, but upload was successful:', dbError);
+          // Check for RLS violation
+          if (
+            dbError.code === '42501' ||
+            dbError.message?.toLowerCase().includes('row-level security') ||
+            dbError.message?.toLowerCase().includes('permission denied')
+          ) {
+            toast({
+              variant: 'destructive',
+              title: 'Upload succeeded but not tracked',
+              description:
+                "Image uploaded but couldn't be tracked in your media library (security restriction). Your profile will still update.",
+            });
+            console.warn('[ImageUpload] RLS violation or permission denied on media_items:', dbError);
+          } else {
+            toast({
+              variant: 'destructive',
+              title: 'Upload succeeded but not tracked',
+              description: "Image uploaded, but it couldn't be saved in your library: " + dbError.message,
+            });
+            console.warn('[ImageUpload] Non-RLS DB error on media_items:', dbError);
+          }
         }
       } catch (dbErr) {
-        console.warn('Database recording error, but upload was successful:', dbErr);
+        toast({
+          variant: 'destructive',
+          title: 'Upload partial success',
+          description: 'Image uploaded, but not recorded in your media library.',
+        });
+        console.warn('[ImageUpload] DB insert error:', dbErr);
       }
 
       toast({
@@ -112,11 +144,9 @@ export const useImageUpload = () => {
 
       return urlData.publicUrl;
     } catch (error) {
-      console.error('Error uploading image:', error);
-      
+      console.error('[ImageUpload] Error uploading image:', error);
       // Provide more specific error messages
       let errorMessage = 'There was a problem uploading your image. Please try again.';
-      
       if (error instanceof Error) {
         if (error.message.includes('not found')) {
           errorMessage = 'Storage bucket not found. Please contact support.';
@@ -126,7 +156,6 @@ export const useImageUpload = () => {
           errorMessage = 'The file is too large. Please select a smaller image.';
         }
       }
-
       toast({
         variant: 'destructive',
         title: 'Upload failed',
