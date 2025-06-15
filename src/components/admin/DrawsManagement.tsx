@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash, ImagePlus, Plus } from 'lucide-react';
@@ -67,7 +66,7 @@ const DrawAction: React.FC<DrawActionProps> = ({ draw, onEdit, onDeleteConfirm }
 const DrawsManagement: React.FC = () => {
   const { toast } = useToast();
   const { draws, deleteDraw } = useDraws();
-  const [isDrawDrawerOpen, set IsDrawDrawerOpen] = useState(false);
+  const [isDrawDrawerOpen, setIsDrawDrawerOpen] = useState(false);
   const [selectedDraw, setSelectedDraw] = useState<Draw | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [drawToDelete, setDrawToDelete] = useState<string | null>(null);
