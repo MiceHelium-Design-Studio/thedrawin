@@ -73,7 +73,7 @@ const Auth = () => {
             <div className="mt-6">
               <div className="relative flex items-center justify-center">
                 <Separator className="bg-[#F39C0A]/20" />
-                <span className="px-3 text-xs text-slate-300 bg-[#0D0D0D]/90 relative z-10 font-medium tracking-wider uppercase">
+                <span className="px-3 text-xs text-white bg-[#0D0D0D]/90 relative z-10 font-medium tracking-wider uppercase">
                   OR CONTINUE WITH
                 </span>
               </div>
@@ -84,13 +84,13 @@ const Auth = () => {
             </div>
 
             <div className="mt-8 text-center">
-              <p className="text-xs text-slate-400 mb-3 font-medium tracking-wide uppercase">
+              <p className="text-xs text-white mb-3 font-medium tracking-wide uppercase">
                 {mode === 'login' ? "DON'T HAVE AN ACCOUNT?" : 'ALREADY HAVE AN ACCOUNT?'}
               </p>
               <Button 
                 variant="outline" 
                 onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-                className="premium-outline-button w-full"
+                className="w-full border-[#F39C0A] text-white hover:bg-[#F39C0A] hover:text-black transition-colors"
                 disabled={isProcessing}
               >
                 {mode === 'login' ? 'CREATE ACCOUNT' : 'SIGN IN'}
@@ -100,7 +100,7 @@ const Auth = () => {
         </div>
         
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-          <p className="text-xs text-slate-500 tracking-wider font-light uppercase">© 2025 DRAWIN</p>
+          <p className="text-xs text-white tracking-wider font-light uppercase">© 2025 DRAWIN</p>
         </div>
       </div>
     </div>

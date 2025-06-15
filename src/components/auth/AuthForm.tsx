@@ -73,14 +73,14 @@ const AuthForm: React.FC<AuthFormProps> = ({
 
   return (
     <div className="w-full max-w-md mx-auto px-8">
-      <h2 className="text-xl font-serif text-center mb-6 text-gold tracking-wider uppercase font-bold">
+      <h2 className="text-xl font-serif text-center mb-6 text-white tracking-wider uppercase font-bold">
         {mode === 'login' ? 'Sign In' : 'Create Account'}
       </h2>
       
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="text-white">{error}</AlertDescription>
         </Alert>
       )}
       
@@ -88,19 +88,19 @@ const AuthForm: React.FC<AuthFormProps> = ({
         {mode === 'signup' && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-gold-light font-medium tracking-wide uppercase text-xs">Name</Label>
+              <Label htmlFor="name" className="text-white font-medium tracking-wide uppercase text-xs">Name</Label>
               <Input 
                 id="name" 
                 placeholder="Your name" 
                 value={name} 
                 onChange={e => setName(e.target.value)} 
                 required={mode === 'signup'}
-                className="neo-input font-light" 
+                className="bg-[#1F1D36] border-[#55596E] text-white placeholder-slate-400 focus:border-[#F39C0A] focus:ring-[#F39C0A]" 
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-gold-light font-medium tracking-wide uppercase text-xs">Phone Number</Label>
+              <Label htmlFor="phone" className="text-white font-medium tracking-wide uppercase text-xs">Phone Number</Label>
               <Input 
                 id="phone" 
                 type="tel" 
@@ -108,14 +108,14 @@ const AuthForm: React.FC<AuthFormProps> = ({
                 value={phone} 
                 onChange={e => setPhone(e.target.value)} 
                 required={mode === 'signup'}
-                className="neo-input font-light" 
+                className="bg-[#1F1D36] border-[#55596E] text-white placeholder-slate-400 focus:border-[#F39C0A] focus:ring-[#F39C0A]" 
               />
             </div>
           </>
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-gold-light font-medium tracking-wide uppercase text-xs">Email</Label>
+          <Label htmlFor="email" className="text-white font-medium tracking-wide uppercase text-xs">Email</Label>
           <Input 
             id="email" 
             type="email" 
@@ -123,12 +123,12 @@ const AuthForm: React.FC<AuthFormProps> = ({
             value={email} 
             onChange={e => setEmail(e.target.value)} 
             required 
-            className="neo-input font-light" 
+            className="bg-[#1F1D36] border-[#55596E] text-white placeholder-slate-400 focus:border-[#F39C0A] focus:ring-[#F39C0A]" 
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-gold-light font-medium tracking-wide uppercase text-xs">Password</Label>
+          <Label htmlFor="password" className="text-white font-medium tracking-wide uppercase text-xs">Password</Label>
           <Input 
             id="password" 
             type="password" 
@@ -137,22 +137,22 @@ const AuthForm: React.FC<AuthFormProps> = ({
             onChange={e => setPassword(e.target.value)} 
             required 
             minLength={6}
-            className="neo-input font-light" 
+            className="bg-[#1F1D36] border-[#55596E] text-white placeholder-slate-400 focus:border-[#F39C0A] focus:ring-[#F39C0A]" 
           />
         </div>
         
         <Button 
           type="submit" 
           disabled={loading} 
-          className="w-full bg-gold hover:bg-gold-dark text-black font-medium tracking-wide uppercase mt-8 py-5 text-sm"
+          className="w-full bg-[#F39C0A] hover:bg-[#E18A00] text-black font-medium tracking-wide uppercase mt-8 py-5 text-sm"
         >
           {loading ? (
             <div className="flex items-center justify-center">
               <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
-              <span>Processing...</span>
+              <span className="text-black">Processing...</span>
             </div>
           ) : (
-            mode === 'login' ? 'Sign In' : 'Create Account'
+            <span className="text-black">{mode === 'login' ? 'Sign In' : 'Create Account'}</span>
           )}
         </Button>
       </form>
