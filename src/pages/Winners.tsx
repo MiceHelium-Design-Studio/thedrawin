@@ -24,7 +24,7 @@ const Winners: React.FC = () => {
       
       {completedDraws.length === 0 ? (
         <div className="text-center py-12">
-          <Award className="h-12 w-12 text-gold/50 mx-auto mb-4" />
+          <Award className="h-12 w-12 text-gold mx-auto mb-4" />
           <h2 className="text-xl font-medium mb-2">No Winners Yet</h2>
           <p className="text-gray-500">
             The first draw results will be announced soon. Stay tuned!
