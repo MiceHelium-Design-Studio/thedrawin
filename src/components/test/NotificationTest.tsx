@@ -38,10 +38,16 @@ const NotificationTest: React.FC = () => {
 
       // Generate a random ticket number for testing
       const randomTicketNumber = Math.floor(Math.random() * 100) + 1;
-      const ticketPrice = testDraw.ticketPrices[0] || 10;
+      
+      // Use a default ticket price if ticketPrices is not available
+      let ticketPrice = 10; // Default price
+      if (testDraw.ticketPrices && Array.isArray(testDraw.ticketPrices) && testDraw.ticketPrices.length > 0) {
+        ticketPrice = testDraw.ticketPrices[0];
+      }
 
       console.log('Testing notification system with ticket purchase...');
       console.log('Draw ID:', testDraw.id);
+      console.log('Draw Title:', testDraw.title);
       console.log('Ticket Number:', randomTicketNumber);
       console.log('Price:', ticketPrice);
 
@@ -56,10 +62,17 @@ const NotificationTest: React.FC = () => {
       console.log('Ticket purchase completed - notifications should have been triggered');
     } catch (error) {
       console.error('Test failed:', error);
+      
+      // More detailed error handling
+      let errorMessage = 'Error occurred during notification test';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         variant: 'destructive',
         title: 'Test failed',
-        description: 'Error occurred during notification test'
+        description: errorMessage
       });
     } finally {
       setIsLoading(false);

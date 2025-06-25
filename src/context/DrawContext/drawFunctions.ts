@@ -1,232 +1,188 @@
 
-import { Draw } from '@/types';
-import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { Draw } from '@/types';
 
-export const useMockDrawFunctions = (
-  setDraws: React.Dispatch<React.SetStateAction<Draw[]>>, 
+// Helper function to transform database draw to app draw format
+const transformDatabaseDrawToAppDraw = (dbDraw: any): Draw => {
+  return {
+    id: dbDraw.id,
+    title: dbDraw.title || 'Untitled Draw',
+    description: dbDraw.description || 'No description available',
+    goldWeightGrams: dbDraw.gold_weight_grams || 0,
+    numberOfTickets: dbDraw.number_of_tickets || 0,
+    drawDate: dbDraw.draw_date,
+    status: dbDraw.status || 'open',
+    createdAt: dbDraw.created_at,
+    imageUrl: dbDraw.image_url || null,
+    ticketPrices: dbDraw.ticket_prices || [10], // Default ticket price array
+    winnerTicketNumber: dbDraw.winner_ticket_number || null,
+    winnerId: dbDraw.winner_id || null
+  };
+};
+
+export const useDrawFunctions = (
+  setDraws: React.Dispatch<React.SetStateAction<Draw[]>>,
   draws: Draw[]
 ) => {
-  // Fetch draws from the database
   const fetchDraws = async () => {
     try {
+      console.log('Fetching draws from database...');
+      
       const { data, error } = await supabase
         .from('draws')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      
-      // Transform the database draws to our application Draw type
-      const appDraws: Draw[] = data.map(draw => ({
-        id: draw.id,
-        title: draw.title || 'Untitled Draw',
-        description: `Win ${draw.gold_weight_grams}g of gold in this exciting draw!`,
-        maxParticipants: 100,
-        currentParticipants: draw.number_of_tickets || 0,
-        ticketPrices: [10, 25, 50], // Default prices
-        status: draw.status === 'open' ? 'active' : draw.status as 'upcoming' | 'active' | 'completed',
-        startDate: draw.created_at,
-        endDate: draw.draw_date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        winner: draw.winner_id ? 'Winner Announced' : undefined,
-        numberOfTickets: draw.number_of_tickets || 0,
-        bannerImage: '/lovable-uploads/banner.png',
-        goldWeight: draw.gold_weight_grams
-      }));
-      
-      console.log('Fetched draws from database:', appDraws.length, 'draws');
-      setDraws(appDraws);
-    } catch (err: any) {
-      console.error('Error fetching draws:', err);
-      
-      // Provide more specific error messages
-      if (err.message?.includes('relation "draws" does not exist')) {
-        toast({
-          variant: 'destructive',
-          title: 'Database Error',
-          description: 'The draws table does not exist. Please contact support.'
-        });
-      } else if (err.message?.includes('permission denied')) {
-        toast({
-          variant: 'destructive',
-          title: 'Permission Error',
-          description: 'You do not have permission to access draws.'
-        });
-      } else {
+      if (error) {
+        console.error('Error fetching draws:', error);
         toast({
           variant: 'destructive',
           title: 'Failed to load draws',
-          description: 'There was an error loading the draws. Please try refreshing the page.'
+          description: 'There was an error loading the draws. Please try again later.'
         });
+        throw error;
       }
+
+      console.log('Raw draw data from database:', data);
       
-      // Set empty array as fallback to prevent crashes
-      setDraws([]);
+      // Transform the database data to match our app's expected format
+      const transformedDraws = (data || []).map(transformDatabaseDrawToAppDraw);
+      
+      console.log('Transformed draws for app:', transformedDraws);
+      setDraws(transformedDraws);
+      
+      return transformedDraws;
+    } catch (err) {
+      console.error('Unexpected error fetching draws:', err);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to load draws',
+        description: 'An unexpected error occurred while loading draws.'
+      });
       throw err;
     }
   };
 
-  // Create a new draw
-  const createDraw = async (draw: Omit<Draw, 'id'>) => {
+  const createDraw = async (drawData: Partial<Draw>) => {
     try {
-      // Convert the app draw to the database schema
-      const { data: newDraw, error } = await supabase
+      console.log('Creating new draw:', drawData);
+      
+      const { data, error } = await supabase
         .from('draws')
         .insert({
-          title: draw.title,
-          status: 'open',
-          number_of_tickets: 0,
-          draw_date: draw.endDate,
-          gold_weight_grams: draw.goldWeight || 5.0
+          title: drawData.title,
+          description: drawData.description,
+          gold_weight_grams: drawData.goldWeightGrams,
+          draw_date: drawData.drawDate,
+          status: drawData.status || 'open',
+          image_url: drawData.imageUrl,
+          ticket_prices: drawData.ticketPrices || [10] // Ensure default ticket prices
         })
-        .select('*')
+        .select()
         .single();
 
-      if (error) throw error;
-      
-      // Convert the database draw back to our app Draw type
-      const appDraw: Draw = {
-        id: newDraw.id,
-        title: newDraw.title || 'Untitled Draw',
-        description: draw.description || `Win ${newDraw.gold_weight_grams}g of gold in this exciting draw!`,
-        maxParticipants: draw.maxParticipants || 100,
-        currentParticipants: 0,
-        ticketPrices: draw.ticketPrices || [10, 25, 50],
-        status: 'active',
-        startDate: newDraw.created_at,
-        endDate: newDraw.draw_date || new Date().toISOString(),
-        numberOfTickets: 0,
-        bannerImage: draw.bannerImage || '/lovable-uploads/banner.png',
-        goldWeight: newDraw.gold_weight_grams
-      };
+      if (error) {
+        console.error('Error creating draw:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Failed to create draw',
+          description: 'There was an error creating the draw. Please try again.'
+        });
+        throw error;
+      }
 
-      setDraws([appDraw, ...draws]);
+      console.log('Successfully created draw:', data);
+      
+      // Transform and add to local state
+      const newDraw = transformDatabaseDrawToAppDraw(data);
+      setDraws(prev => [newDraw, ...prev]);
       
       toast({
-        title: 'Draw created',
-        description: `${draw.title} has been created successfully.`
+        title: 'Draw created successfully',
+        description: `"${drawData.title}" has been created.`
       });
       
-      return appDraw;
-    } catch (err: any) {
-      console.error('Error creating draw:', err);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to create draw',
-        description: err.message || 'An unexpected error occurred while creating the draw.'
-      });
+      return newDraw;
+    } catch (err) {
+      console.error('Unexpected error creating draw:', err);
       throw err;
     }
   };
 
-  // Update an existing draw
   const updateDraw = async (id: string, updates: Partial<Draw>) => {
     try {
-      // Convert the app updates to the database schema
-      const dbUpdates: any = {};
+      console.log('Updating draw:', id, updates);
       
-      if (updates.title) dbUpdates.title = updates.title;
-      if (updates.status) {
-        dbUpdates.status = updates.status === 'active' ? 'open' : updates.status;
-      }
-      if (updates.endDate) dbUpdates.draw_date = updates.endDate;
-      if (updates.goldWeight) dbUpdates.gold_weight_grams = updates.goldWeight;
-      
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('draws')
-        .update(dbUpdates)
-        .eq('id', id);
+        .update({
+          title: updates.title,
+          description: updates.description,
+          gold_weight_grams: updates.goldWeightGrams,
+          draw_date: updates.drawDate,
+          status: updates.status,
+          image_url: updates.imageUrl,
+          ticket_prices: updates.ticketPrices
+        })
+        .eq('id', id)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating draw:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Failed to update draw',
+          description: 'There was an error updating the draw. Please try again.'
+        });
+        throw error;
+      }
 
-      // Update local state
-      setDraws(draws.map(draw => (draw.id === id ? { ...draw, ...updates } : draw)));
+      // Transform and update local state
+      const updatedDraw = transformDatabaseDrawToAppDraw(data);
+      setDraws(prev => prev.map(draw => draw.id === id ? updatedDraw : draw));
       
       toast({
-        title: 'Draw updated',
-        description: `${updates.title || 'Draw'} has been updated successfully.`
+        title: 'Draw updated successfully',
+        description: `"${updates.title || updatedDraw.title}" has been updated.`
       });
-    } catch (err: any) {
-      console.error('Error updating draw:', err);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to update draw',
-        description: err.message || 'An unexpected error occurred while updating the draw.'
-      });
+      
+      return updatedDraw;
+    } catch (err) {
+      console.error('Unexpected error updating draw:', err);
       throw err;
     }
   };
 
-  // Delete a draw
   const deleteDraw = async (id: string) => {
     try {
+      console.log('Deleting draw:', id);
+      
       const { error } = await supabase
         .from('draws')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
-      
-      // Update local state
-      setDraws(draws.filter(draw => draw.id !== id));
-      
-      toast({
-        title: 'Draw deleted',
-        description: 'The draw has been deleted successfully.'
-      });
-    } catch (err: any) {
-      console.error('Error deleting draw:', err);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to delete draw',
-        description: err.message || 'An unexpected error occurred while deleting the draw.'
-      });
-      throw err;
-    }
-  };
-
-  // Pick a winner for a draw
-  const pickWinner = async (drawId: string) => {
-    try {
-      const { data: winnerData, error } = await supabase
-        .rpc('pick_draw_winner', { draw_uuid: drawId });
-      
       if (error) {
+        console.error('Error deleting draw:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Failed to delete draw',
+          description: 'There was an error deleting the draw. Please try again.'
+        });
         throw error;
       }
-      
-      // Handle the winner data properly, checking if it's an object with the expected properties
-      let winnerName = 'Unknown';
-      if (winnerData && typeof winnerData === 'object') {
-        const winner = winnerData as Record<string, any>;
-        winnerName = winner.winner_name || 'Unknown';
-      }
-      
-      // Update local state with the winner
-      setDraws(draws.map(draw => {
-        if (draw.id === drawId) {
-          return {
-            ...draw,
-            status: 'completed' as const,
-            winner: winnerName,
-          };
-        }
-        return draw;
-      }));
 
+      // Remove from local state
+      setDraws(prev => prev.filter(draw => draw.id !== id));
+      
       toast({
-        title: 'Winner selected!',
-        description: `A winner has been chosen for the draw: ${winnerName}`
+        title: 'Draw deleted successfully',
+        description: 'The draw has been removed.'
       });
-
-      return winnerData;
-    } catch (err: any) {
-      console.error('Error picking winner:', err);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to pick winner',
-        description: err.message || 'An unexpected error occurred.'
-      });
+    } catch (err) {
+      console.error('Unexpected error deleting draw:', err);
       throw err;
     }
   };
@@ -235,7 +191,6 @@ export const useMockDrawFunctions = (
     fetchDraws,
     createDraw,
     updateDraw,
-    deleteDraw,
-    pickWinner
+    deleteDraw
   };
 };
