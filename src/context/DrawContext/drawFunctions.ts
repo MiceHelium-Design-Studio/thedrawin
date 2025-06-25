@@ -10,11 +10,17 @@ const transformDatabaseDrawToAppDraw = (dbDraw: any): Draw => {
     title: dbDraw.title || 'Untitled Draw',
     description: dbDraw.description || 'No description available',
     goldWeightGrams: dbDraw.gold_weight_grams || 0,
+    goldWeight: dbDraw.gold_weight_grams || 0, // Map to both fields for compatibility
     numberOfTickets: dbDraw.number_of_tickets || 0,
+    maxParticipants: dbDraw.number_of_tickets || 0,
+    currentParticipants: 0, // This would need to be calculated from tickets table
     drawDate: dbDraw.draw_date,
+    startDate: dbDraw.draw_date || '',
+    endDate: dbDraw.draw_date || '',
     status: dbDraw.status || 'open',
     createdAt: dbDraw.created_at,
     imageUrl: dbDraw.image_url || null,
+    bannerImage: dbDraw.image_url || undefined,
     ticketPrices: dbDraw.ticket_prices || [10], // Default ticket price array
     winnerTicketNumber: dbDraw.winner_ticket_number || null,
     winnerId: dbDraw.winner_id || null
@@ -73,10 +79,10 @@ export const useDrawFunctions = (
         .insert({
           title: drawData.title,
           description: drawData.description,
-          gold_weight_grams: drawData.goldWeightGrams,
-          draw_date: drawData.drawDate,
+          gold_weight_grams: drawData.goldWeightGrams || drawData.goldWeight,
+          draw_date: drawData.drawDate || drawData.startDate,
           status: drawData.status || 'open',
-          image_url: drawData.imageUrl,
+          image_url: drawData.imageUrl || drawData.bannerImage,
           ticket_prices: drawData.ticketPrices || [10] // Ensure default ticket prices
         })
         .select()
@@ -119,10 +125,10 @@ export const useDrawFunctions = (
         .update({
           title: updates.title,
           description: updates.description,
-          gold_weight_grams: updates.goldWeightGrams,
-          draw_date: updates.drawDate,
+          gold_weight_grams: updates.goldWeightGrams || updates.goldWeight,
+          draw_date: updates.drawDate || updates.startDate,
           status: updates.status,
-          image_url: updates.imageUrl,
+          image_url: updates.imageUrl || updates.bannerImage,
           ticket_prices: updates.ticketPrices
         })
         .eq('id', id)
@@ -187,10 +193,17 @@ export const useDrawFunctions = (
     }
   };
 
+  const pickWinner = async (drawId: string) => {
+    // Placeholder implementation
+    console.log('Pick winner for draw:', drawId);
+    return {};
+  };
+
   return {
     fetchDraws,
     createDraw,
     updateDraw,
-    deleteDraw
+    deleteDraw,
+    pickWinner
   };
 };

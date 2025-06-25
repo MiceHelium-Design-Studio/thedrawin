@@ -24,6 +24,12 @@ export interface Draw {
   numberOfTickets?: number;
   bannerImage?: string;
   goldWeight?: number; // Added for gold weight in grams
+  goldWeightGrams?: number; // Database field name
+  drawDate?: string; // Database field name
+  imageUrl?: string; // Database field name
+  createdAt?: string;
+  winnerTicketNumber?: number | null;
+  winnerId?: string | null;
 }
 
 export interface Ticket {

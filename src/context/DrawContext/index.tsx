@@ -4,7 +4,7 @@ import { Draw, Ticket, Notification, MediaItem, Banner } from '@/types';
 import { useAuth } from '../AuthContext';
 import { BucketType } from '@/utils/s3Utils';
 import { DrawContextType } from './types';
-import { useMockDrawFunctions } from './drawFunctions';
+import { useDrawFunctions } from './drawFunctions';
 import { useTicketFunctions } from './ticketFunctions';
 import { useNotificationFunctions } from './notificationFunctions';
 import { useBannerFunctions } from './bannerFunctions';
@@ -46,7 +46,7 @@ const DrawProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const { user, loading: authLoading } = useAuth();
 
   // Import functionality from separate hook files
-  const drawFunctions = useMockDrawFunctions(setDraws, draws);
+  const drawFunctions = useDrawFunctions(setDraws, draws);
   const ticketFunctions = useTicketFunctions(setTickets, tickets, draws, setDraws);
   const notificationFunctions = useNotificationFunctions(setNotifications, notifications);
   const bannerFunctions = useBannerFunctions(setBanners, banners);
