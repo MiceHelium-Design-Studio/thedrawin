@@ -14,7 +14,7 @@ export interface DrawContextType {
   fetchTickets: () => Promise<void>;
   fetchNotifications: () => Promise<void>;
   createDraw: (draw: Omit<Draw, 'id'>) => Promise<Draw>;
-  updateDraw: (id: string, updates: Partial<Draw>) => Promise<void>;
+  updateDraw: (id: string, updates: Partial<Draw>) => Promise<Draw>;
   deleteDraw: (id: string) => Promise<void>;
   buyTicket: (drawId: string, ticketNumber: number, price?: number) => Promise<Ticket>;
   markNotificationAsRead: (id: string) => Promise<void>;
