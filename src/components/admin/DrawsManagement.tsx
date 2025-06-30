@@ -115,9 +115,8 @@ const DrawsManagement: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusColors = {
-      'upcoming': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50',
-      'active': 'bg-green-500/20 text-green-400 border-green-500/50',
-      'open': 'bg-blue-500/20 text-blue-400 border-blue-500/50',
+      'open': 'bg-green-500/20 text-green-400 border-green-500/50',
+      'active': 'bg-blue-500/20 text-blue-400 border-blue-500/50',
       'completed': 'bg-gray-500/20 text-gray-400 border-gray-500/50',
     };
     
@@ -180,8 +179,8 @@ const DrawsManagement: React.FC = () => {
           <div className="text-white/70 text-sm">Completed</div>
         </div>
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
-          <div className="text-2xl font-bold text-yellow-400">{draws.filter(d => d.status === 'upcoming').length}</div>
-          <div className="text-white/70 text-sm">Upcoming</div>
+          <div className="text-2xl font-bold text-yellow-400">{draws.filter(d => d.status === 'open').length}</div>
+          <div className="text-white/70 text-sm">Open</div>
         </div>
       </div>
 

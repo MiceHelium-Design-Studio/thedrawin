@@ -40,7 +40,7 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
     ticketPrices: selectedDraw?.ticketPrices?.join(', ') || '5, 10, 15, 20, 30',
     startDate: selectedDraw?.startDate ? new Date(selectedDraw.startDate).toISOString().slice(0, 16) : '',
     endDate: selectedDraw?.endDate ? new Date(selectedDraw.endDate).toISOString().slice(0, 16) : '',
-    status: selectedDraw?.status || 'upcoming' as 'upcoming' | 'active' | 'open' | 'completed',
+    status: selectedDraw?.status || 'open' as 'open' | 'active' | 'completed',
     goldWeightGrams: selectedDraw?.goldWeightGrams || 10
   });
 
@@ -158,9 +158,8 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
   ];
 
   const statusOptions = [
-    { value: 'upcoming', label: 'Upcoming', color: 'bg-blue-100 text-blue-800' },
-    { value: 'active', label: 'Active', color: 'bg-green-100 text-green-800' },
-    { value: 'open', label: 'Open', color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'open', label: 'Open', color: 'bg-green-100 text-green-800' },
+    { value: 'active', label: 'Active', color: 'bg-blue-100 text-blue-800' },
     { value: 'completed', label: 'Completed', color: 'bg-gray-100 text-gray-800' }
   ];
 
@@ -346,7 +345,7 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
                   <Label className="text-sm font-medium">Status</Label>
                   <Select 
                     value={formData.status} 
-                    onValueChange={(value: 'upcoming' | 'active' | 'open' | 'completed') => handleInputChange('status', value)}
+                    onValueChange={(value: 'open' | 'active' | 'completed') => handleInputChange('status', value)}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue />

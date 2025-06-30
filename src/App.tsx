@@ -77,7 +77,8 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   }, [location.pathname, user, loading]);
   
   useEffect(() => {
-    if (!loading && user && !user.isAdmin) {
+    // Only show toast if user is not admin and this isn't from an automatic redirect
+    if (!loading && user && !user.isAdmin && !location.state?.from) {
       console.log("AdminRoute: Non-admin user attempted to access admin area");
       toast({
         variant: 'destructive',
@@ -86,7 +87,7 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
         duration: 5000,
       });
     }
-  }, [user, loading, toast]);
+  }, [user, loading, toast, location.state]);
   
   if (loading) {
     console.log("AdminRoute: Auth state is loading");
@@ -132,6 +133,16 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   if (user) {
     // Get the intended destination from location state, or default to home
     const from = location.state?.from?.pathname || "/home";
+    
+    // Don't redirect to admin routes unless user is actually an admin
+    const adminRoutes = ['/admin', '/media'];
+    const isFromAdminRoute = adminRoutes.includes(from);
+    
+    if (isFromAdminRoute && !user.isAdmin) {
+      console.log("PublicRoute: Non-admin user attempted redirect to admin route, redirecting to home instead");
+      return <Navigate to="/home" replace />;
+    }
+    
     console.log("PublicRoute: User already logged in, redirecting to:", from);
     return <Navigate to={from} replace />;
   }

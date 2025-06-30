@@ -17,7 +17,7 @@ export interface Draw {
   maxParticipants: number;
   currentParticipants: number;
   ticketPrices: number[];
-  status: 'upcoming' | 'active' | 'completed' | 'open';
+  status: 'open' | 'active' | 'completed';
   startDate: string;
   endDate: string;
   winner?: string;

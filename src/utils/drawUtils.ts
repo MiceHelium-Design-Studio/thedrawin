@@ -62,9 +62,7 @@ export const canUserEnterDraw = (draw: Draw, userBalance: number): { canEnter: b
     return { canEnter: false, reason: 'Draw has ended' };
   }
   
-  if (draw.status === 'upcoming') {
-    return { canEnter: false, reason: 'Draw has not started yet' };
-  }
+  // Removed 'upcoming' status check as it's not supported by database
   
   if (draw.status !== 'active' && draw.status !== 'open') {
     return { canEnter: false, reason: 'Draw is not accepting entries' };
@@ -88,8 +86,6 @@ export const canUserEnterDraw = (draw: Draw, userBalance: number): { canEnter: b
  */
 export const getDrawStatusDisplay = (draw: Draw): { text: string; color: string; icon: string } => {
   switch (draw.status) {
-    case 'upcoming':
-      return { text: 'Coming Soon', color: 'yellow', icon: '⏰' };
     case 'active':
     case 'open':
       return { text: 'Open for Entry', color: 'green', icon: '🎯' };
