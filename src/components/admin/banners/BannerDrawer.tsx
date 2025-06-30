@@ -42,10 +42,10 @@ const BannerDrawer: React.FC<BannerDrawerProps> = ({
           Create Banner
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>{selectedBanner ? 'Edit Banner' : 'Create Banner'}</DrawerTitle>
-          <DrawerDescription>
+      <DrawerContent className="max-h-[90vh]">
+        <DrawerHeader className="pb-3">
+          <DrawerTitle className="text-lg text-white">{selectedBanner ? 'Edit Banner' : 'Create Banner'}</DrawerTitle>
+          <DrawerDescription className="text-sm text-white/80">
             {selectedBanner ? 'Edit the banner details.' : 'Create a new banner to display on the site.'}
           </DrawerDescription>
         </DrawerHeader>

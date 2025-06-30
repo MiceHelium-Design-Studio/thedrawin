@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
@@ -67,11 +66,15 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
     <div className="w-full">
       <Button 
         onClick={handleEnterDraw} 
-        className="w-full"
+        className="w-full h-12 text-lg font-semibold"
         disabled={loading}
       >
-        {loading ? 'Processing...' : 'Pick Your Number & Enter Draw'}
+        {loading ? 'Processing...' : '🎯 Choose Your Lucky Number (1-100) & Enter Draw'}
       </Button>
+      
+      <p className="text-center text-sm text-muted-foreground mt-2">
+        Select from numbers 1-100, choose your entry fee, and join the draw!
+      </p>
       
       <SelectNumberModal
         draw={draw}

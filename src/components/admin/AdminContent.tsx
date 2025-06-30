@@ -1,4 +1,3 @@
-
 import React from 'react';
 import StatisticsContent from './StatisticsContent';
 import DrawsManagement from './DrawsManagement';
@@ -48,8 +47,12 @@ const AdminContent: React.FC<AdminContentProps> = ({ activeSection, activeTab })
   };
 
   return (
-    <div className="flex-1 p-6">
-      {renderContent()}
+    <div className="flex-1 min-h-0 overflow-hidden">
+      <div className="h-full overflow-y-auto p-6">
+        <div className="max-w-full">
+          {renderContent()}
+        </div>
+      </div>
     </div>
   );
 };

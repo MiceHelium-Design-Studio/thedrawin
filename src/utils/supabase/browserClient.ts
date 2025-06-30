@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -7,7 +6,7 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 /**
  * Creates a Supabase client configured for browser usage
- * with persistence enabled for auth sessions
+ * with persistence enabled for auth sessions and enhanced refresh token handling
  */
 export function createBrowserClient() {
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -15,7 +14,15 @@ export function createBrowserClient() {
       storage: localStorage,
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true
+      detectSessionInUrl: true,
+      // Enable debug mode in development to help troubleshoot refresh token issues
+      debug: process.env.NODE_ENV === 'development',
+    },
+    // Add global configuration for better error handling
+    global: {
+      headers: {
+        'X-Client-Info': 'thedrawin-web'
+      }
     }
   });
 }

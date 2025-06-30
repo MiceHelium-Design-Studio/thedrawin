@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Wallet, Trophy, Settings, Edit3, Crown } from 'lucide-react';
+import { User, Wallet, Trophy, Settings, Edit3, Crown, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -86,15 +86,27 @@ const Profile: React.FC = () => {
                 {user.email}
               </p>
               
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setActiveTab('settings')}
-                className="premium-outline-button group"
-              >
-                <Edit3 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
-                Edit Profile
-              </Button>
+              <div className="flex items-center justify-center space-x-3">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setActiveTab('settings')}
+                  className="premium-outline-button group"
+                >
+                  <Edit3 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
+                  Edit Profile
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={logout}
+                  className="border-red-500/50 text-black-300 hover:bg-red-500/20 hover:text-white hover:border-red-400 backdrop-blur-sm transition-all duration-200 group"
+                >
+                  <LogOut className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -212,6 +224,36 @@ const Profile: React.FC = () => {
             {activeTab === 'settings' && (
               <div className="space-y-6">
                 <UpdateProfileForm />
+                
+                {/* Sign Out Section */}
+                <Card className="luxury-card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2 text-white">
+                      <Settings className="h-5 w-5 text-[#F39C0A]" />
+                      <span>Account Actions</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <h4 className="text-white font-medium">Sign Out</h4>
+                          <p className="text-slate-400 text-sm">
+                            Sign out of your account on this device
+                          </p>
+                        </div>
+                        <Button
+                          onClick={logout}
+                          variant="outline"
+                          className="border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50 transition-all duration-200"
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>

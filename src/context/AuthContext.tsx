@@ -1,9 +1,24 @@
-
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { User } from '../types';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useAuthActions } from '@/hooks/useAuthActions';
 import { useCacheManagement } from '@/hooks/useCacheManagement';
+import { monitorTokenRefresh, checkTokenStatus, manualTokenRefresh } from '@/utils/authUtils';
+
+interface TokenStatus {
+  hasValidToken: boolean;
+  error?: string | Error;
+  session?: any;
+  expiresAt?: number;
+  timeUntilExpiry?: number;
+  hasRefreshToken?: boolean;
+}
+
+interface TokenRefreshResult {
+  success: boolean;
+  error?: string | Error;
+  session?: any;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -16,6 +31,8 @@ interface AuthContextType {
   addFunds: (amount: number) => Promise<void>;
   clearCacheAndReload: () => void;
   makeUserAdmin: (email: string) => Promise<void>;
+  checkTokenStatus: () => Promise<TokenStatus>;
+  manualTokenRefresh: () => Promise<TokenRefreshResult>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +42,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { login, signup, signInWithGoogle, logout, updateProfile, addFunds, makeUserAdmin } = 
     useAuthActions(user, setUser, setLoading);
   const { clearCacheAndReload } = useCacheManagement();
+
+  useEffect(() => {
+    console.log('🔧 Initializing token refresh monitoring...');
+    monitorTokenRefresh();
+    
+    checkTokenStatus().then(status => {
+      if (status.hasValidToken) {
+        console.log('✅ Initial token check passed');
+      } else {
+        console.log('⚠️ Initial token check failed or no session');
+      }
+    });
+    
+    const tokenCheckInterval = setInterval(async () => {
+      if (user) {
+        const status = await checkTokenStatus();
+        if (!status.hasValidToken && status.hasRefreshToken) {
+          console.log('🔄 Token expired but refresh token available, Supabase should auto-refresh');
+        }
+      }
+    }, 10 * 60 * 1000);
+    
+    return () => {
+      clearInterval(tokenCheckInterval);
+    };
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ 
@@ -37,7 +80,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateProfile, 
       addFunds,
       clearCacheAndReload,
-      makeUserAdmin
+      makeUserAdmin,
+      checkTokenStatus,
+      manualTokenRefresh
     }}>
       {children}
     </AuthContext.Provider>

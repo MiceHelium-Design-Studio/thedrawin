@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DrawHeader } from '@/components/draws/draw-detail/DrawHeader';
 import { DrawProgress } from '@/components/draws/draw-detail/DrawProgress';
 import DrawTicketForm from '@/components/draws/draw-detail/DrawTicketForm';
-import { DrawComplete } from '@/components/draws/draw-detail/DrawComplete';
+import DrawComplete from '@/components/draws/draw-detail/DrawComplete';
 
 const DrawDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -84,6 +83,9 @@ const DrawDetail: React.FC = () => {
         <DrawComplete 
           status={draw.status} 
           winner={draw.winner}
+          winnerTicketNumber={draw.winnerTicketNumber}
+          title={draw.title}
+          endDate={draw.endDate}
         />
       )}
     </div>

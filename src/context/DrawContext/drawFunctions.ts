@@ -1,14 +1,23 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Draw } from '@/types';
 
 // Helper function to transform database draw to app draw format
-const transformDatabaseDrawToAppDraw = (dbDraw: any): Draw => {
+const transformDatabaseDrawToAppDraw = (dbDraw: {
+  id: string;
+  title: string | null;
+  gold_weight_grams: number | null;
+  number_of_tickets: number;
+  draw_date: string | null;
+  status: string | null;
+  created_at: string | null;
+  winner_ticket_number: number | null;
+  winner_id: string | null;
+}): Draw => {
   return {
     id: dbDraw.id,
     title: dbDraw.title || 'Untitled Draw',
-    description: dbDraw.description || 'No description available',
+    description: 'No description available', // Default description since DB doesn't have this column
     goldWeightGrams: dbDraw.gold_weight_grams || 0,
     goldWeight: dbDraw.gold_weight_grams || 0, // Map to both fields for compatibility
     numberOfTickets: dbDraw.number_of_tickets || 0,
@@ -19,11 +28,12 @@ const transformDatabaseDrawToAppDraw = (dbDraw: any): Draw => {
     endDate: dbDraw.draw_date || '',
     status: dbDraw.status || 'open',
     createdAt: dbDraw.created_at,
-    imageUrl: dbDraw.image_url || null,
-    bannerImage: dbDraw.image_url || undefined,
-    ticketPrices: dbDraw.ticket_prices || [10], // Default ticket price array
+    imageUrl: null, // Database doesn't have image_url column
+    bannerImage: undefined, // Database doesn't have image_url column
+    ticketPrices: [5, 10, 15, 20, 30], // Default ticket prices since DB doesn't store this
     winnerTicketNumber: dbDraw.winner_ticket_number || null,
-    winnerId: dbDraw.winner_id || null
+    winnerId: dbDraw.winner_id || null,
+    winner: null // Support for pre-calculated winner names
   };
 };
 
@@ -78,12 +88,10 @@ export const useDrawFunctions = (
         .from('draws')
         .insert({
           title: drawData.title,
-          description: drawData.description,
           gold_weight_grams: drawData.goldWeightGrams || drawData.goldWeight,
           draw_date: drawData.drawDate || drawData.startDate,
           status: drawData.status || 'open',
-          image_url: drawData.imageUrl || drawData.bannerImage,
-          ticket_prices: drawData.ticketPrices || [10] // Ensure default ticket prices
+          number_of_tickets: drawData.maxParticipants || 100
         })
         .select()
         .single();
@@ -124,12 +132,10 @@ export const useDrawFunctions = (
         .from('draws')
         .update({
           title: updates.title,
-          description: updates.description,
           gold_weight_grams: updates.goldWeightGrams || updates.goldWeight,
           draw_date: updates.drawDate || updates.startDate,
           status: updates.status,
-          image_url: updates.imageUrl || updates.bannerImage,
-          ticket_prices: updates.ticketPrices
+          number_of_tickets: updates.maxParticipants
         })
         .eq('id', id)
         .select()
@@ -194,9 +200,142 @@ export const useDrawFunctions = (
   };
 
   const pickWinner = async (drawId: string) => {
-    // Placeholder implementation
-    console.log('Pick winner for draw:', drawId);
-    return {};
+    try {
+      console.log('Picking winner for draw:', drawId);
+      
+      // First, get all tickets for this draw
+      const { data: tickets, error: ticketsError } = await supabase
+        .from('tickets')
+        .select('*')
+        .eq('draw_id', drawId);
+
+      if (ticketsError) {
+        console.error('Error fetching tickets:', ticketsError);
+        toast({
+          variant: 'destructive',
+          title: 'Failed to pick winner',
+          description: 'Could not fetch tickets for this draw.'
+        });
+        throw ticketsError;
+      }
+
+      if (!tickets || tickets.length === 0) {
+        toast({
+          variant: 'destructive',
+          title: 'No participants',
+          description: 'Cannot pick a winner for a draw with no participants.'
+        });
+        throw new Error('No tickets found for this draw');
+      }
+
+      // Randomly select a winning ticket
+      const randomIndex = Math.floor(Math.random() * tickets.length);
+      const winningTicket = tickets[randomIndex];
+      
+      console.log('Selected winning ticket:', winningTicket);
+
+      // Get winner profile information
+      const { data: winnerProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, email')
+        .eq('id', winningTicket.user_id)
+        .single();
+
+      // Create winner name (fallback to email username if names not available)
+      let winnerName = 'Anonymous Winner';
+      if (!profileError && winnerProfile) {
+        if (winnerProfile.first_name && winnerProfile.last_name) {
+          winnerName = `${winnerProfile.first_name} ${winnerProfile.last_name}`;
+        } else if (winnerProfile.email) {
+          winnerName = winnerProfile.email.split('@')[0];
+        }
+      }
+
+      // Update the draw with winner information
+      const { data: updatedDraw, error: updateError } = await supabase
+        .from('draws')
+        .update({
+          winner_id: winningTicket.user_id,
+          winner_ticket_number: parseInt(winningTicket.ticket_number),
+          status: 'completed'
+        })
+        .eq('id', drawId)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('Error updating draw with winner:', updateError);
+        toast({
+          variant: 'destructive',
+          title: 'Failed to update draw',
+          description: 'Could not save winner information.'
+        });
+        throw updateError;
+      }
+
+      console.log('Draw updated with winner:', updatedDraw);
+
+      // Transform and update local state
+      const transformedDraw = transformDatabaseDrawToAppDraw({
+        ...updatedDraw,
+        winner: winnerName // Add the winner name for display
+      });
+      
+      setDraws(prev => prev.map(draw => 
+        draw.id === drawId ? transformedDraw : draw
+      ));
+
+      // Send notification to the winner
+      try {
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: winningTicket.user_id,
+            title: 'Congratulations! You Won!',
+            message: `You are the winner of "${transformedDraw.title}"! Your winning number was ${winningTicket.ticket_number}.`,
+            role: 'user'
+          });
+      } catch (notificationError) {
+        console.error('Error sending winner notification:', notificationError);
+        // Don't throw here, as the main winner selection was successful
+      }
+
+      // Send notification to all other participants
+      try {
+        const otherParticipants = tickets.filter(t => t.user_id !== winningTicket.user_id);
+        
+        if (otherParticipants.length > 0) {
+          const otherNotifications = otherParticipants.map(ticket => ({
+            user_id: ticket.user_id,
+            title: 'Draw Results',
+            message: `The draw "${transformedDraw.title}" has ended. Winner: ${winnerName} with number ${winningTicket.ticket_number}. Better luck next time!`,
+            role: 'user' as const
+          }));
+
+          await supabase
+            .from('notifications')
+            .insert(otherNotifications);
+        }
+      } catch (notificationError) {
+        console.error('Error sending participant notifications:', notificationError);
+        // Don't throw here, as the main winner selection was successful
+      }
+
+      toast({
+        title: 'Winner selected successfully!',
+        description: `${winnerName} won with ticket number ${winningTicket.ticket_number}`,
+      });
+
+      return {
+        winner: winnerName,
+        winningTicket: winningTicket.ticket_number,
+        winnerId: winningTicket.user_id,
+        draw: transformedDraw
+      };
+    } catch (err) {
+      console.error('Unexpected error picking winner:', err);
+      throw err;
+    }
   };
 
   return {

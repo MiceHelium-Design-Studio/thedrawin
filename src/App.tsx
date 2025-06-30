@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -11,6 +10,7 @@ import { DrawProvider } from "./context/DrawContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { BackgroundProvider } from "./context/BackgroundContext";
 import { useCapacitorPlugins } from "./hooks/useCapacitorPlugins";
+import { useToast } from "@/hooks/use-toast";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 // Pages
@@ -67,6 +67,53 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const { toast } = useToast();
+  const location = useLocation();
+  
+  useEffect(() => {
+    console.log("AdminRoute at path:", location.pathname, "user:", user?.id, "isAdmin:", user?.isAdmin, "loading:", loading);
+  }, [location.pathname, user, loading]);
+  
+  useEffect(() => {
+    if (!loading && user && !user.isAdmin) {
+      console.log("AdminRoute: Non-admin user attempted to access admin area");
+      toast({
+        variant: 'destructive',
+        title: '🚫 Access Denied',
+        description: 'You do not have permission to access the admin panel. Only administrators can view this area.',
+        duration: 5000,
+      });
+    }
+  }, [user, loading, toast]);
+  
+  if (loading) {
+    console.log("AdminRoute: Auth state is loading");
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-[#0D0D0D]">
+        <div className="animate-pulse space-y-4 w-full max-w-md">
+          <div className="h-8 bg-gray-300 rounded-md dark:bg-gray-700 w-3/4 mx-auto"></div>
+          <div className="h-32 bg-gray-300 rounded-lg dark:bg-gray-700"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    console.log("AdminRoute: No user, redirecting to login");
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  
+  if (!user.isAdmin) {
+    console.log("AdminRoute: User is not admin, redirecting to home");
+    return <Navigate to="/home" replace />;
+  }
+  
+  console.log("AdminRoute: Admin user authenticated, rendering admin content", user?.id);
+  return <>{children}</>;
+};
+
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -107,8 +154,8 @@ const AppContent = () => {
         <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-        <Route path="/media" element={<ProtectedRoute><MediaLibrary /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+        <Route path="/media" element={<AdminRoute><MediaLibrary /></AdminRoute>} />
         <Route path="/todos" element={<ProtectedRoute><TodoList /></ProtectedRoute>} />
         <Route path="/todo-page" element={<ProtectedRoute><TodoPage /></ProtectedRoute>} />
         

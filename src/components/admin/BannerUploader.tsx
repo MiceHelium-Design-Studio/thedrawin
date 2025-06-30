@@ -19,8 +19,9 @@ const BannerUploader: React.FC = () => {
       await initializeGoldBanner();
       setIsComplete(true);
       toast({
-        title: 'Success!',
-        description: 'The premium gold DRAWIN banner has been updated.',
+        title: '🎉 Premium Banner Updated!',
+        description: 'The premium gold DRAWIN banner has been successfully updated and is now live.',
+        duration: 4000,
       });
     } catch (error) {
       console.error('Error updating banner:', error);

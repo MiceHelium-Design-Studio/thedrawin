@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Draw } from '@/types';
 import { useDraws } from '@/context/DrawContext';
 import { useAuth } from '@/context/AuthContext';
@@ -28,11 +28,48 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUserEntered, setIsUserEntered] = useState(false);
   const [userBalance, setUserBalance] = useState<number>(0);
+  const [searchNumber, setSearchNumber] = useState<string>('');
   const { buyTicket } = useDraws();
   const { user } = useAuth();
 
   // Generate numbers 1-100
   const availableNumbers = Array.from({ length: 100 }, (_, i) => i + 1);
+  
+  // Filter numbers based on search
+  const filteredNumbers = searchNumber 
+    ? availableNumbers.filter(num => num.toString().includes(searchNumber))
+    : availableNumbers;
+
+  // Get available (not taken) numbers
+  const getAvailableNumbers = () => availableNumbers.filter(num => !takenNumbers.includes(num));
+  
+  // Quick selection handlers
+  const selectRandomNumber = () => {
+    const available = getAvailableNumbers();
+    if (available.length > 0) {
+      const randomIndex = Math.floor(Math.random() * available.length);
+      setSelectedNumber(available[randomIndex]);
+    }
+  };
+
+  const selectLuckyNumber = (type: 'low' | 'high' | 'middle') => {
+    const available = getAvailableNumbers();
+    if (available.length === 0) return;
+    
+    let luckyNumbers: number[] = [];
+    if (type === 'low') {
+      luckyNumbers = available.filter(n => n <= 33);
+    } else if (type === 'high') {
+      luckyNumbers = available.filter(n => n >= 67);
+    } else {
+      luckyNumbers = available.filter(n => n >= 34 && n <= 66);
+    }
+    
+    if (luckyNumbers.length > 0) {
+      const randomIndex = Math.floor(Math.random() * luckyNumbers.length);
+      setSelectedNumber(luckyNumbers[randomIndex]);
+    }
+  };
   
   // Check if user already has a ticket for this draw and fetch taken numbers
   useEffect(() => {
@@ -81,8 +118,42 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
       setStep('number');
       setSelectedNumber(null);
       setSelectedPrice(null);
+      setSearchNumber(''); // Reset search when modal opens
     }
   }, [draw?.id, user?.id, isOpen]);
+  
+  // Keyboard support for number selection
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (!isOpen || step !== 'number') return;
+      
+      const key = event.key;
+      if (key >= '0' && key <= '9') {
+        // Build number as user types
+        const newSearch = searchNumber + key;
+        if (newSearch.length <= 3) {
+          setSearchNumber(newSearch);
+          
+          // Auto-select if exact match and available
+          const exactNumber = parseInt(newSearch);
+          if (exactNumber >= 1 && exactNumber <= 100 && !takenNumbers.includes(exactNumber)) {
+            setSelectedNumber(exactNumber);
+          }
+        }
+      } else if (key === 'Backspace') {
+        setSearchNumber(prev => prev.slice(0, -1));
+      } else if (key === 'Enter' && selectedNumber) {
+        if (selectedNumber) {
+          setStep('price');
+        }
+      } else if (key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isOpen, step, searchNumber, selectedNumber, takenNumbers, onClose]);
   
   const handleNumberClick = (number: number) => {
     setSelectedNumber(number === selectedNumber ? null : number);
@@ -177,18 +248,95 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
               <p className="text-xs text-muted-foreground mt-1">
                 Pick a number from 1-100. Taken numbers are grayed out.
               </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                💡 <strong>Tips:</strong> Use search to find specific numbers, try quick selection buttons, or type numbers on your keyboard!
+              </p>
+            </div>
+
+            {/* Search and Quick Selection */}
+            <div className="space-y-3 mb-4">
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    type="text"
+                    placeholder="Search number..."
+                    value={searchNumber}
+                    onChange={(e) => setSearchNumber(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                    className="flex-1"
+                  />
+                  {searchNumber && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                      {(() => {
+                        const num = parseInt(searchNumber);
+                        if (num >= 1 && num <= 100) {
+                          return isNumberTaken(num) ? (
+                            <span className="text-xs text-red-500 font-medium">Taken</span>
+                          ) : (
+                            <span className="text-xs text-green-500 font-medium">Available</span>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={selectRandomNumber}
+                  disabled={getAvailableNumbers().length === 0}
+                >
+                  Random
+                </Button>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectLuckyNumber('low')}
+                  className="flex-1"
+                  disabled={getAvailableNumbers().filter(n => n <= 33).length === 0}
+                >
+                  Low (1-33)
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectLuckyNumber('middle')}
+                  className="flex-1"
+                  disabled={getAvailableNumbers().filter(n => n >= 34 && n <= 66).length === 0}
+                >
+                  Mid (34-66)
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => selectLuckyNumber('high')}
+                  className="flex-1"
+                  disabled={getAvailableNumbers().filter(n => n >= 67).length === 0}
+                >
+                  High (67-100)
+                </Button>
+              </div>
             </div>
             
             <div className="grid grid-cols-10 gap-2 mt-4 max-h-64 overflow-y-auto">
-              {availableNumbers.map((number) => (
+              {filteredNumbers.map((number) => (
                 <Button
                   key={number}
                   variant={selectedNumber === number ? "default" : "outline"}
                   size="sm"
-                  className={`h-8 text-xs ${
+                  className={`h-8 text-xs transition-all ${
                     isNumberTaken(number)
                       ? "opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-700"
-                      : "hover:bg-primary/20"
+                      : selectedNumber === number
+                      ? "bg-primary text-primary-foreground transform scale-105"
+                      : "hover:bg-primary/20 hover:scale-105"
                   }`}
                   disabled={isNumberTaken(number)}
                   onClick={() => handleNumberClick(number)}
@@ -196,6 +344,15 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                   {number}
                 </Button>
               ))}
+            </div>
+
+            {/* Statistics */}
+            <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Available: {getAvailableNumbers().length}</span>
+                <span>Taken: {takenNumbers.length}</span>
+                <span>Total: 100</span>
+              </div>
             </div>
             
             <div className="flex items-center justify-between mt-4 text-xs">

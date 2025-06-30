@@ -35,7 +35,7 @@ export const RATE_LIMITS = {
   },
   BANNER_CREATE: {
     action: 'banner_create',
-    limit: 5,
+    limit: 10,
     windowMinutes: 30
   },
   BANNER_UPDATE: {
