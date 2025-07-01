@@ -233,7 +233,7 @@ const Profile: React.FC = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg mt-5">
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
                           <h4 className="text-white font-medium">Sign Out</h4>
@@ -244,7 +244,7 @@ const Profile: React.FC = () => {
                         <Button
                           onClick={logout}
                           variant="outline"
-                          className="border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50 transition-all duration-200"
+                          className="border-red-500/30 text-black hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50 transition-all duration-200"
                         >
                           <LogOut className="w-4 h-4 mr-2" />
                           Sign Out

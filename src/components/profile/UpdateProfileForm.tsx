@@ -57,7 +57,7 @@ const UpdateProfileForm: React.FC = () => {
   };
 
   return (
-    <Card className="w-full shadow-lg border-2 bg-black-light/20 backdrop-blur-sm">
+    <Card className="w-full shadow-lg border-0 bg-white/5 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Update Profile
