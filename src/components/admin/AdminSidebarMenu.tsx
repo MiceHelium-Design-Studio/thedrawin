@@ -10,7 +10,8 @@ import {
   CreditCard,
   TestTube,
   Ticket,
-  MessageSquare
+  MessageSquare,
+  Images
 } from 'lucide-react';
 
 interface AdminSidebarMenuProps {
@@ -29,6 +30,7 @@ const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({
     { id: 'draws', label: 'Draws', icon: Trophy },
     { id: 'tickets', label: 'Tickets', icon: Ticket },
     { id: 'banners', label: 'Banners', icon: Image },
+    { id: 'media', label: 'Media Library', icon: Images },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'notification-test', label: 'Test Notifications', icon: TestTube },

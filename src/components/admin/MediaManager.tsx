@@ -73,9 +73,9 @@ const MediaManager: React.FC = () => {
 
     try {
       setIsUploading(true);
-      
+
       const result = await uploadToS3(uploadFile, 'media');
-      
+
       // Add new item to the media list
       setMediaItems([
         {
@@ -88,13 +88,13 @@ const MediaManager: React.FC = () => {
         },
         ...mediaItems
       ]);
-      
+
       // Reset upload state
       setUploadFile(null);
-      
+
       // Refresh stats after successful upload
       fetchStorageStats();
-      
+
       toast({
         title: 'Upload successful',
         description: `${result.name} has been uploaded.`
@@ -115,13 +115,13 @@ const MediaManager: React.FC = () => {
     if (window.confirm(`Are you sure you want to delete ${name}?`)) {
       try {
         await deleteFromS3(id);
-        
+
         // Remove the deleted item from the list
         setMediaItems(mediaItems.filter(item => item.id !== id));
-        
+
         // Refresh stats after deletion
         fetchStorageStats();
-        
+
         toast({
           title: 'Media deleted',
           description: `${name} has been deleted.`
@@ -159,13 +159,13 @@ const MediaManager: React.FC = () => {
 
   const formatBytes = (bytes: number, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    
+
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
@@ -190,16 +190,16 @@ const MediaManager: React.FC = () => {
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Media Manager</h2>
+        <h2 className="text-2xl font-semibold text-white">Media Manager</h2>
         <div className="flex items-center gap-2">
           <Button onClick={refreshMediaList} variant="outline" size="sm" className="gap-2">
             <RefreshCw className="h-4 w-4" />
             Refresh
           </Button>
-          <Button 
-            onClick={() => setShowGuide(true)} 
-            variant="outline" 
-            size="sm" 
+          <Button
+            onClick={() => setShowGuide(true)}
+            variant="outline"
+            size="sm"
             className="gap-2"
           >
             <HelpCircle className="h-4 w-4" />
@@ -218,7 +218,7 @@ const MediaManager: React.FC = () => {
             <p className="text-3xl font-bold">{stats?.totalFiles || 0}</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle>Storage Used</CardTitle>
@@ -228,7 +228,7 @@ const MediaManager: React.FC = () => {
             <p className="text-3xl font-bold">{formatBytes(stats?.totalSize || 0)}</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle>Images</CardTitle>
@@ -238,7 +238,7 @@ const MediaManager: React.FC = () => {
             <p className="text-3xl font-bold">{stats?.fileTypeCount.image || 0}</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle>Documents</CardTitle>
@@ -258,20 +258,20 @@ const MediaManager: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <ImageUploader 
-                onImageSelected={handleFileSelected} 
-                previewUrl={uploadFile ? URL.createObjectURL(uploadFile) : ''} 
+              <ImageUploader
+                onImageSelected={handleFileSelected}
+                previewUrl={uploadFile ? URL.createObjectURL(uploadFile) : ''}
                 isUploading={isUploading}
               />
             </div>
-            
+
             {uploadFile && (
               <div className="space-y-2">
                 <Label htmlFor="filename">File Name</Label>
-                <Input 
-                  id="filename" 
-                  value={uploadFile.name} 
-                  disabled 
+                <Input
+                  id="filename"
+                  value={uploadFile.name}
+                  disabled
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Type: {uploadFile.type}</span>
@@ -281,9 +281,9 @@ const MediaManager: React.FC = () => {
             )}
           </CardContent>
           <CardFooter>
-            <Button 
-              onClick={handleUpload} 
-              disabled={!uploadFile || isUploading} 
+            <Button
+              onClick={handleUpload}
+              disabled={!uploadFile || isUploading}
               className="w-full gap-2"
             >
               {isUploading ? (
@@ -300,7 +300,7 @@ const MediaManager: React.FC = () => {
             </Button>
           </CardFooter>
         </Card>
-        
+
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
@@ -325,8 +325,8 @@ const MediaManager: React.FC = () => {
                   <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium">No media files found</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {selectedTab === 'all' 
-                      ? 'Your media library is empty. Upload files to get started.' 
+                    {selectedTab === 'all'
+                      ? 'Your media library is empty. Upload files to get started.'
                       : `You don't have any ${selectedTab} files. Try uploading some or switch to a different category.`}
                   </p>
                 </div>
@@ -348,9 +348,9 @@ const MediaManager: React.FC = () => {
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
                               {item.type === 'image' ? (
-                                <img 
-                                  src={item.url} 
-                                  alt={item.name} 
+                                <img
+                                  src={item.url}
+                                  alt={item.name}
                                   className="w-8 h-8 rounded object-cover cursor-pointer"
                                   onClick={() => handlePreviewImage(item.url)}
                                 />
@@ -407,9 +407,9 @@ const MediaManager: React.FC = () => {
           </DialogHeader>
           {previewImage && (
             <div className="flex justify-center">
-              <img 
-                src={previewImage} 
-                alt="Preview" 
+              <img
+                src={previewImage}
+                alt="Preview"
                 className="max-h-[60vh] object-contain"
               />
             </div>
