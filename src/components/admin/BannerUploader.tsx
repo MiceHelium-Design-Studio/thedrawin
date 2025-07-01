@@ -14,7 +14,7 @@ const BannerUploader: React.FC = () => {
   const handleUpdateBanner = async () => {
     setIsUploading(true);
     setIsComplete(false);
-    
+
     try {
       await initializeGoldBanner();
       setIsComplete(true);
@@ -36,7 +36,7 @@ const BannerUploader: React.FC = () => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto border-gold/30 bg-black shadow-[0_0_15px_rgba(212,175,55,0.15)]">
+    <Card className="w-full max-w-md mx-auto border-gold/30 bg-black/8">
       <CardHeader>
         <CardTitle className="text-gold">Update Premium Banner</CardTitle>
         <CardDescription className="text-gold-light">
@@ -45,9 +45,9 @@ const BannerUploader: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="relative aspect-video overflow-hidden rounded-md bg-black-light border border-gold/20">
-          <img 
-            src="/lovable-uploads/3ba1bfaf-88ef-41ce-8abf-beb7e1144481.png" 
-            alt="Premium Gold DRAWIN Bar" 
+          <img
+            src="/lovable-uploads/3ba1bfaf-88ef-41ce-8abf-beb7e1144481.png"
+            alt="Premium Gold DRAWIN Bar"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -57,10 +57,10 @@ const BannerUploader: React.FC = () => {
         </div>
       </CardContent>
       <CardFooter>
-        <Button 
-          onClick={handleUpdateBanner} 
+        <Button
+          onClick={handleUpdateBanner}
           disabled={isUploading || isComplete}
-          className="w-full bg-gold hover:bg-gold-dark text-black font-bold"
+          className="w-full bg-[#F39C0A] hover:bg-[#F39C0A]/80 text-white font-bold mt-5"
         >
           {isUploading ? (
             <>
@@ -69,12 +69,12 @@ const BannerUploader: React.FC = () => {
             </>
           ) : isComplete ? (
             <>
-              <Check className="mr-2 h-4 w-4 text-black" />
+              <Check className="mr-2 h-4 w-4 text-white" />
               Banner Updated
             </>
           ) : (
             <>
-              <Upload className="mr-2 h-4 w-4 text-black" />
+              <Upload className="mr-2 h-4 w-4 text-white" />
               Update Premium Banner
             </>
           )}

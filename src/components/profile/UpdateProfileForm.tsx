@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Save, RotateCcw } from 'lucide-react';
 import { useProfileManagement } from '@/hooks/useProfileManagement';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import ProfileImageSection from './ProfileImageSection';
@@ -108,7 +109,9 @@ const UpdateProfileForm: React.FC = () => {
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg py-2.5 font-medium transition-all duration-200"
+              variant="outline"
+              size="sm"
+              className="premium-outline-button group flex-1"
               disabled={saving || uploading}
             >
               {saving || uploading ? (
@@ -117,16 +120,21 @@ const UpdateProfileForm: React.FC = () => {
                   {uploading ? 'Uploading...' : 'Updating...'}
                 </div>
               ) : (
-                'Save Profile'
+                <>
+                  <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                  Save Profile
+                </>
               )}
             </Button>
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={handleReset}
               disabled={saving || uploading}
-              className="rounded-lg border-gray-300 hover:bg-gray-50"
+              className="premium-outline-button group"
             >
+              <RotateCcw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform" />
               Reset
             </Button>
           </div>

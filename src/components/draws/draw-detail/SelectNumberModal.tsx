@@ -15,9 +15,9 @@ interface SelectNumberModalProps {
   onSuccess: () => void;
 }
 
-const SelectNumberModal: React.FC<SelectNumberModalProps> = ({ 
-  draw, 
-  isOpen, 
+const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
+  draw,
+  isOpen,
   onClose,
   onSuccess
 }) => {
@@ -34,15 +34,15 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
 
   // Generate numbers 1-100
   const availableNumbers = Array.from({ length: 100 }, (_, i) => i + 1);
-  
+
   // Filter numbers based on search
-  const filteredNumbers = searchNumber 
+  const filteredNumbers = searchNumber
     ? availableNumbers.filter(num => num.toString().includes(searchNumber))
     : availableNumbers;
 
   // Get available (not taken) numbers
   const getAvailableNumbers = () => availableNumbers.filter(num => !takenNumbers.includes(num));
-  
+
   // Quick selection handlers
   const selectRandomNumber = () => {
     const available = getAvailableNumbers();
@@ -55,7 +55,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
   const selectLuckyNumber = (type: 'low' | 'high' | 'middle') => {
     const available = getAvailableNumbers();
     if (available.length === 0) return;
-    
+
     let luckyNumbers: number[] = [];
     if (type === 'low') {
       luckyNumbers = available.filter(n => n <= 33);
@@ -64,33 +64,33 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
     } else {
       luckyNumbers = available.filter(n => n >= 34 && n <= 66);
     }
-    
+
     if (luckyNumbers.length > 0) {
       const randomIndex = Math.floor(Math.random() * luckyNumbers.length);
       setSelectedNumber(luckyNumbers[randomIndex]);
     }
   };
-  
+
   // Check if user already has a ticket for this draw and fetch taken numbers
   useEffect(() => {
     const fetchDrawInfo = async () => {
       if (!draw?.id || !user?.id) return;
-      
+
       try {
         // Check if user already entered this draw
         const { data: userEntered, error: userError } = await supabase
-          .rpc('user_entered_draw', { 
-            draw_uuid: draw.id, 
-            user_uuid: user.id 
+          .rpc('user_entered_draw', {
+            draw_uuid: draw.id,
+            user_uuid: user.id
           });
-        
+
         if (userError) throw userError;
         setIsUserEntered(userEntered);
-        
+
         // Get taken ticket numbers
         const { data: takenNumbersData, error: takenError } = await supabase
           .rpc('get_taken_ticket_numbers', { draw_uuid: draw.id });
-        
+
         if (takenError) throw takenError;
         setTakenNumbers(takenNumbersData || []);
 
@@ -100,7 +100,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
           .select('wallet')
           .eq('id', user.id)
           .single();
-        
+
         if (profileError) throw profileError;
         setUserBalance(profileData?.wallet || 0);
       } catch (error) {
@@ -112,7 +112,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
         });
       }
     };
-    
+
     if (isOpen) {
       fetchDrawInfo();
       setStep('number');
@@ -121,19 +121,19 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
       setSearchNumber(''); // Reset search when modal opens
     }
   }, [draw?.id, user?.id, isOpen]);
-  
+
   // Keyboard support for number selection
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (!isOpen || step !== 'number') return;
-      
+
       const key = event.key;
       if (key >= '0' && key <= '9') {
         // Build number as user types
         const newSearch = searchNumber + key;
         if (newSearch.length <= 3) {
           setSearchNumber(newSearch);
-          
+
           // Auto-select if exact match and available
           const exactNumber = parseInt(newSearch);
           if (exactNumber >= 1 && exactNumber <= 100 && !takenNumbers.includes(exactNumber)) {
@@ -154,17 +154,17 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [isOpen, step, searchNumber, selectedNumber, takenNumbers, onClose]);
-  
+
   const handleNumberClick = (number: number) => {
     setSelectedNumber(number === selectedNumber ? null : number);
   };
-  
+
   const handleNumberConfirm = () => {
     if (selectedNumber) {
       setStep('price');
     }
   };
-  
+
   const handlePriceSelect = (price: number) => {
     setSelectedPrice(price === selectedPrice ? null : price);
   };
@@ -174,10 +174,10 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
       setStep('confirm');
     }
   };
-  
+
   const handleSubmit = async () => {
     if (!selectedNumber || !selectedPrice || !draw?.id || !user?.id) return;
-    
+
     // Check if user has sufficient balance
     if (userBalance < selectedPrice) {
       toast({
@@ -187,16 +187,16 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
       });
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
       await buyTicket(draw.id, selectedNumber, selectedPrice);
-      
+
       toast({
         title: 'Entry successful!',
         description: `You've entered ${draw.title} with number ${selectedNumber} for $${selectedPrice}.`
       });
-      
+
       onSuccess();
       onClose();
     } catch (error) {
@@ -206,7 +206,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
       setIsSubmitting(false);
     }
   };
-  
+
   const isNumberTaken = (number: number) => takenNumbers.includes(number);
 
   const handleBack = () => {
@@ -224,17 +224,17 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            {isUserEntered 
+          <DialogTitle className="text-xl font-bold text-white">
+            {isUserEntered
               ? "You've already entered this draw"
-              : step === 'number' 
+              : step === 'number'
                 ? `Choose Your Lucky Number (1-100)`
                 : step === 'price'
                   ? `Select Your Entry Price`
                   : `Confirm Your Entry`}
           </DialogTitle>
         </DialogHeader>
-        
+
         {isUserEntered ? (
           <div className="text-center py-6">
             <p>You've already entered this draw with a number. Each user can only enter once.</p>
@@ -242,13 +242,13 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
         ) : step === 'number' ? (
           <>
             <div className="mb-4 p-3 bg-muted rounded-lg">
-              <p className="text-sm">
-                <span className="font-medium">Your wallet balance:</span> ${userBalance}
+              <p className="text-sm text-white">
+                <span className="font-medium text-white">Your wallet balance:</span> ${userBalance}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 text-white">
                 Pick a number from 1-100. Taken numbers are grayed out.
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 text-white">
                 💡 <strong>Tips:</strong> Use search to find specific numbers, try quick selection buttons, or type numbers on your keyboard!
               </p>
             </div>
@@ -290,7 +290,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                   Random
                 </Button>
               </div>
-              
+
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -324,20 +324,19 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 </Button>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-10 gap-2 mt-4 max-h-64 overflow-y-auto">
               {filteredNumbers.map((number) => (
                 <Button
                   key={number}
                   variant={selectedNumber === number ? "default" : "outline"}
                   size="sm"
-                  className={`h-8 text-xs transition-all ${
-                    isNumberTaken(number)
-                      ? "opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-700"
-                      : selectedNumber === number
+                  className={`h-8 text-xs transition-all ${isNumberTaken(number)
+                    ? "opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-700"
+                    : selectedNumber === number
                       ? "bg-primary text-primary-foreground transform scale-105"
                       : "hover:bg-primary/20 hover:scale-105"
-                  }`}
+                    }`}
                   disabled={isNumberTaken(number)}
                   onClick={() => handleNumberClick(number)}
                 >
@@ -354,7 +353,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 <span>Total: 100</span>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between mt-4 text-xs">
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 bg-primary rounded-sm"></div>
@@ -369,7 +368,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 <span>Taken</span>
               </div>
             </div>
-            
+
             <DialogFooter className="mt-6">
               <Button
                 variant="outline"
@@ -397,16 +396,15 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                   <span className="font-medium">Your wallet balance:</span> ${userBalance}
                 </p>
               </div>
-              
+
               <p className="text-sm font-medium mb-4">Choose your entry price:</p>
               <div className="grid grid-cols-2 gap-3">
                 {draw.ticketPrices.map((price) => (
                   <Button
                     key={price}
                     variant={selectedPrice === price ? "default" : "outline"}
-                    className={`h-16 flex flex-col ${
-                      !canAffordPrice(price) ? "opacity-50" : ""
-                    }`}
+                    className={`h-16 flex flex-col ${!canAffordPrice(price) ? "opacity-50" : ""
+                      }`}
                     onClick={() => handlePriceSelect(price)}
                     disabled={!canAffordPrice(price)}
                   >
@@ -418,7 +416,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 ))}
               </div>
             </div>
-            
+
             <DialogFooter className="mt-6">
               <Button
                 variant="outline"
@@ -459,12 +457,12 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                   </div>
                 </div>
               </div>
-              
+
               <p className="text-sm text-muted-foreground mb-4">
                 By confirming, you agree to enter this draw with the selected number and pay the entry fee.
               </p>
             </div>
-            
+
             <DialogFooter className="mt-6">
               <Button
                 variant="outline"

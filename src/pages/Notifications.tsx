@@ -95,7 +95,7 @@ const Notifications: React.FC = () => {
           ) : notifications.length === 0 ? (
             <div className="text-center py-16 px-6">
               <div className="w-20 h-20 bg-gold-500/20 rounded-full flex items-center justify-center mx-auto mb-6 gold-pulse">
-                <Bell className="h-10 w-10 text-gold-500" />
+                <Bell className="h-10 w-10 text-[#F39C0A]" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3 font-poppins">
                 No notifications yet

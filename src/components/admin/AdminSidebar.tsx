@@ -15,7 +15,7 @@ interface AdminSidebarProps {
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
-  
+
   return (
     <aside className="h-fit">
       <Card className="p-5 backdrop-blur-sm bg-card/90 shadow-lg border-0 rounded-xl overflow-hidden">
@@ -31,32 +31,32 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
                 <Separator className="bg-gradient-to-r from-transparent via-[rgb(var(--primary))]/30 to-transparent mt-2" />
               </div>
             </div>
-            
+
             <div className="mt-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/')}
                 className="flex items-center gap-1.5 hover:bg-[rgb(var(--secondary-system-fill))]/20 hover:text-[rgb(var(--primary))] transition-colors w-full justify-start px-3 py-2"
-                style={{ color: '#FFFFFF', borderColor: '#FFFFFF' }}
+                style={{ color: '#FFFFFF', borderColor: '#F39C0A' }}
               >
                 <LogOut className="size-4" style={{ color: '#FFFFFF' }} />
                 <span style={{ color: '#FFFFFF' }}>Exit Admin</span>
               </Button>
             </div>
           </div>
-          
+
           {/* Navigation Menu - explicitly contained */}
           <div className="flex-grow mt-2">
-            <Tabs 
-              value={activeTab} 
-              onValueChange={setActiveTab} 
-              orientation="vertical" 
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              orientation="vertical"
               className="w-full"
             >
               <div className="w-full">
-                <AdminSidebarMenu 
-                  activeSection={activeTab} 
+                <AdminSidebarMenu
+                  activeSection={activeTab}
                   onSectionChange={setActiveTab}
                   activeTab={activeTab}
                 />

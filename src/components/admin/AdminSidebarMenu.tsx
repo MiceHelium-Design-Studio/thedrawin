@@ -49,13 +49,13 @@ const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({
               ? 'bg-[rgb(var(--primary))] text-white'
               : 'text-white hover:text-white hover:bg-[rgb(var(--secondary-system-fill))]/20'
               }`}
-            style={{ color: activeTab === item.id ? '#FFFF00' : '#FFFFFF' }}
+            style={{ color: activeTab === item.id ? '#F39C0A' : '#FFFFFF' }}
           >
             <IconComponent
               className="h-4 w-4"
-              style={{ color: activeTab === item.id ? '#FFFF00' : '#FFFFFF' }}
+              style={{ color: activeTab === item.id ? '#F39C0A' : '#FFFFFF' }}
             />
-            <span style={{ color: activeTab === item.id ? '#FFFF00' : '#FFFFFF' }}>
+            <span style={{ color: activeTab === item.id ? '#F39C0A' : '#FFFFFF' }}>
               {item.label}
             </span>
           </button>
