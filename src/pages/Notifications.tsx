@@ -11,11 +11,11 @@ import { cn } from '@/lib/utils';
 const Notifications: React.FC = () => {
   const { notifications, loading, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
   const { toast } = useToast();
-  
+
   useEffect(() => {
     console.log("Notifications page loaded, count:", notifications.length);
   }, [notifications]);
-  
+
   const handleMarkAsRead = async (id: string) => {
     try {
       await markAsRead(id);
@@ -23,7 +23,7 @@ const Notifications: React.FC = () => {
       console.error(error);
     }
   };
-  
+
   const handleDelete = async (id: string) => {
     try {
       await deleteNotification(id);
@@ -34,7 +34,7 @@ const Notifications: React.FC = () => {
       console.error(error);
     }
   };
-  
+
   const handleMarkAllAsRead = async () => {
     try {
       await markAllAsRead();
@@ -45,7 +45,7 @@ const Notifications: React.FC = () => {
       console.error(error);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-[#0D0D0D] hero-glow">
       <div className="max-w-4xl mx-auto px-4 py-8 luxury-fade-in">
@@ -61,7 +61,7 @@ const Notifications: React.FC = () => {
               </span>
             </h1>
           </div>
-          
+
           {!loading && notifications.some(n => !n.read) && (
             <Button
               variant="outline"
@@ -75,7 +75,7 @@ const Notifications: React.FC = () => {
             </Button>
           )}
         </div>
-        
+
         {/* Enhanced Content */}
         <div className="luxury-card rounded-2xl overflow-hidden">
           {loading ? (
@@ -113,8 +113,8 @@ const Notifications: React.FC = () => {
           ) : (
             <div className="divide-y divide-white/10">
               {notifications.map((notification, index) => (
-                <div 
-                  key={notification.id} 
+                <div
+                  key={notification.id}
                   className={cn(
                     "transition-all duration-300 hover:bg-white/5",
                     index === 0 && "rounded-t-2xl",

@@ -76,7 +76,7 @@ const appSettingsFormSchema = z.object({
 const AppSettings: React.FC = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('colors');
-  
+
   // Color scheme form
   const colorSchemeForm = useForm<z.infer<typeof colorSchemeFormSchema>>({
     resolver: zodResolver(colorSchemeFormSchema),
@@ -87,7 +87,7 @@ const AppSettings: React.FC = () => {
       backgroundColor: "#FFFFFF", // White
     },
   });
-  
+
   // Font settings form
   const fontSettingsForm = useForm<z.infer<typeof fontSettingsFormSchema>>({
     resolver: zodResolver(fontSettingsFormSchema),
@@ -97,7 +97,7 @@ const AppSettings: React.FC = () => {
       fontSize: "16px",
     },
   });
-  
+
   // App settings form
   const appSettingsForm = useForm<z.infer<typeof appSettingsFormSchema>>({
     resolver: zodResolver(appSettingsFormSchema),
@@ -111,33 +111,33 @@ const AppSettings: React.FC = () => {
   const onColorSchemeSubmit = (data: z.infer<typeof colorSchemeFormSchema>) => {
     console.log('Color scheme settings:', data);
     // Here you would save these settings to a database or local storage
-    
+
     // Apply colors dynamically (this is a simple example, you would likely use a more robust approach)
     document.documentElement.style.setProperty('--primary', data.primaryColor);
     document.documentElement.style.setProperty('--secondary', data.secondaryColor);
     document.documentElement.style.setProperty('--accent', data.accentColor);
     document.documentElement.style.setProperty('--background', data.backgroundColor);
-    
+
     toast({
       title: "Colors updated",
       description: "The color scheme has been successfully updated.",
     });
   };
-  
+
   const onFontSettingsSubmit = (data: z.infer<typeof fontSettingsFormSchema>) => {
     console.log('Font settings:', data);
     // Here you would save font settings and potentially add font links to the document head
-    
+
     toast({
       title: "Fonts updated",
       description: "The font settings have been successfully updated.",
     });
   };
-  
+
   const onAppSettingsSubmit = (data: z.infer<typeof appSettingsFormSchema>) => {
     console.log('App settings:', data);
     // Here you would save app settings
-    
+
     toast({
       title: "App settings updated",
       description: "The application settings have been successfully updated.",
@@ -147,29 +147,29 @@ const AppSettings: React.FC = () => {
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">App Settings</h2>
+        <h2 className="text-2xl font-semibold text-white">App Settings</h2>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 mb-8">
-          <TabsTrigger value="colors" className="flex items-center gap-2">
+          <TabsTrigger value="colors" className="flex items-center gap-2 text-white">
             <Palette className="h-4 w-4" />
             Colors
           </TabsTrigger>
-          <TabsTrigger value="fonts" className="flex items-center gap-2">
+          <TabsTrigger value="fonts" className="flex items-center gap-2 text-white">
             <Type className="h-4 w-4" />
             Fonts
           </TabsTrigger>
-          <TabsTrigger value="general" className="flex items-center gap-2">
+          <TabsTrigger value="general" className="flex items-center gap-2 text-white">
             <Globe className="h-4 w-4" />
             General
           </TabsTrigger>
-          <TabsTrigger value="payments" className="flex items-center gap-2">
+          <TabsTrigger value="payments" className="flex items-center gap-2 text-white">
             <Wallet className="h-4 w-4" />
             Payments
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="colors">
           <Card>
             <CardHeader>
@@ -192,8 +192,8 @@ const AppSettings: React.FC = () => {
                             <FormControl>
                               <Input type="text" placeholder="#8B5CF6" {...field} />
                             </FormControl>
-                            <Input 
-                              type="color" 
+                            <Input
+                              type="color"
                               value={field.value}
                               onChange={(e) => field.onChange(e.target.value)}
                               className="w-12 h-10 p-1 cursor-pointer"
@@ -206,7 +206,7 @@ const AppSettings: React.FC = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={colorSchemeForm.control}
                       name="secondaryColor"
@@ -217,8 +217,8 @@ const AppSettings: React.FC = () => {
                             <FormControl>
                               <Input type="text" placeholder="#D946EF" {...field} />
                             </FormControl>
-                            <Input 
-                              type="color" 
+                            <Input
+                              type="color"
                               value={field.value}
                               onChange={(e) => field.onChange(e.target.value)}
                               className="w-12 h-10 p-1 cursor-pointer"
@@ -231,7 +231,7 @@ const AppSettings: React.FC = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={colorSchemeForm.control}
                       name="accentColor"
@@ -242,8 +242,8 @@ const AppSettings: React.FC = () => {
                             <FormControl>
                               <Input type="text" placeholder="#F97316" {...field} />
                             </FormControl>
-                            <Input 
-                              type="color" 
+                            <Input
+                              type="color"
                               value={field.value}
                               onChange={(e) => field.onChange(e.target.value)}
                               className="w-12 h-10 p-1 cursor-pointer"
@@ -256,7 +256,7 @@ const AppSettings: React.FC = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={colorSchemeForm.control}
                       name="backgroundColor"
@@ -267,8 +267,8 @@ const AppSettings: React.FC = () => {
                             <FormControl>
                               <Input type="text" placeholder="#FFFFFF" {...field} />
                             </FormControl>
-                            <Input 
-                              type="color" 
+                            <Input
+                              type="color"
                               value={field.value}
                               onChange={(e) => field.onChange(e.target.value)}
                               className="w-12 h-10 p-1 cursor-pointer"
@@ -282,29 +282,29 @@ const AppSettings: React.FC = () => {
                       )}
                     />
                   </div>
-                  
+
                   <div className="mt-6">
                     <h4 className="font-medium mb-2">Color Preview</h4>
                     <div className="grid grid-cols-4 gap-2">
-                      <div 
+                      <div
                         className="h-16 rounded-md flex items-center justify-center text-white font-medium"
                         style={{ backgroundColor: colorSchemeForm.getValues().primaryColor }}
                       >
                         Primary
                       </div>
-                      <div 
+                      <div
                         className="h-16 rounded-md flex items-center justify-center text-white font-medium"
                         style={{ backgroundColor: colorSchemeForm.getValues().secondaryColor }}
                       >
                         Secondary
                       </div>
-                      <div 
+                      <div
                         className="h-16 rounded-md flex items-center justify-center text-white font-medium"
                         style={{ backgroundColor: colorSchemeForm.getValues().accentColor }}
                       >
                         Accent
                       </div>
-                      <div 
+                      <div
                         className="h-16 rounded-md flex items-center justify-center border font-medium"
                         style={{ backgroundColor: colorSchemeForm.getValues().backgroundColor }}
                       >
@@ -312,14 +312,14 @@ const AppSettings: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <Button type="submit" className="w-full">Save Color Settings</Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="fonts">
           <Card>
             <CardHeader>
@@ -348,7 +348,7 @@ const AppSettings: React.FC = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={fontSettingsForm.control}
                       name="headingFont"
@@ -365,7 +365,7 @@ const AppSettings: React.FC = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={fontSettingsForm.control}
                       name="fontSize"
@@ -383,18 +383,18 @@ const AppSettings: React.FC = () => {
                       )}
                     />
                   </div>
-                  
+
                   <div className="mt-6">
                     <h4 className="font-medium mb-2">Typography Preview</h4>
                     <div className="space-y-4 border p-4 rounded-md">
-                      <h1 
-                        className="text-2xl font-bold" 
+                      <h1
+                        className="text-2xl font-bold"
                         style={{ fontFamily: fontSettingsForm.getValues().headingFont }}
                       >
                         Heading Text Example
                       </h1>
-                      <p 
-                        style={{ 
+                      <p
+                        style={{
                           fontFamily: fontSettingsForm.getValues().primaryFont,
                           fontSize: fontSettingsForm.getValues().fontSize,
                         }}
@@ -403,14 +403,14 @@ const AppSettings: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <Button type="submit" className="w-full">Save Font Settings</Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="general">
           <Card>
             <CardHeader>
@@ -438,7 +438,7 @@ const AppSettings: React.FC = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={appSettingsForm.control}
                     name="siteDescription"
@@ -455,7 +455,7 @@ const AppSettings: React.FC = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={appSettingsForm.control}
                     name="contactEmail"
@@ -472,14 +472,14 @@ const AppSettings: React.FC = () => {
                       </FormItem>
                     )}
                   />
-                  
+
                   <Button type="submit" className="w-full">Save General Settings</Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="payments">
           <PaymentSettings />
         </TabsContent>

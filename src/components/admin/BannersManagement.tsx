@@ -38,7 +38,7 @@ const BannersManagement: React.FC = () => {
     setIsBannerDrawerOpen(false);
     fetchBanners(); // Refresh banner data
   };
-  
+
   const handleRefreshBanners = async () => {
     try {
       setIsRefreshing(true);
@@ -62,10 +62,10 @@ const BannersManagement: React.FC = () => {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Banners</h2>
+        <h2 className="text-2xl font-semibold text-white">Banners</h2>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={handleRefreshBanners}
             disabled={isRefreshing}
@@ -77,7 +77,7 @@ const BannersManagement: React.FC = () => {
             )}
             Refresh
           </Button>
-          <Button 
+          <Button
             onClick={() => {
               setSelectedBanner(null);
               setBannerImageUrl('');
@@ -100,26 +100,26 @@ const BannersManagement: React.FC = () => {
       </div>
 
       <Tabs defaultValue="list" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4">
+        <TabsList className="mb-4 text-white">
           <TabsTrigger value="list" className="flex items-center gap-1.5">
-            <LayoutGrid className="h-4 w-4" />
+            <LayoutGrid className="h-4 w-4 text-white" />
             Banner List
           </TabsTrigger>
-          <TabsTrigger value="preview" className="flex items-center gap-1.5">
+          <TabsTrigger value="preview" className="flex items-center gap-1.5 text-white">
             <SlidersHorizontal className="h-4 w-4" />
             Preview
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="list" className="space-y-6">
           <BannerTable banners={banners} onEdit={handleEditBanner} />
-          
+
           <div className="mt-8">
-            <h3 className="text-lg font-medium mb-3">Premium Banner</h3>
+            <h3 className="text-lg font-medium mb-3 text-white">Premium Banner</h3>
             <BannerUploader />
           </div>
         </TabsContent>
-        
+
         <TabsContent value="preview" className="space-y-4">
           <Card className="p-5 bg-black/50 border-gold/10 backdrop-blur-sm">
             <div className="mb-3">
@@ -128,11 +128,11 @@ const BannersManagement: React.FC = () => {
                 This shows how banners will appear on the home page.
               </p>
             </div>
-            
+
             <div className="relative max-w-3xl mx-auto">
               <BannerSlider banners={banners} />
             </div>
-            
+
             <p className="text-xs text-muted-foreground mt-4">
               Note: Only active banners are displayed in the preview and on the home page.
             </p>

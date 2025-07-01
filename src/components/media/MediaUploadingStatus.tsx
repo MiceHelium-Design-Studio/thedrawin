@@ -8,7 +8,7 @@ interface MediaUploadingStatusProps {
 
 const MediaUploadingStatus: React.FC<MediaUploadingStatusProps> = ({ isUploading }) => {
   if (!isUploading) return null;
-  
+
   return (
     <Card className="mb-6">
       <CardContent className="p-6">

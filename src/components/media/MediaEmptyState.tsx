@@ -15,7 +15,7 @@ const MediaEmptyState: React.FC<MediaEmptyStateProps> = ({ onUpload, isUploading
       <CardContent className="p-6 text-center">
         <p className="text-gray-500">No media files found in S3 storage.</p>
         {!isUploading && (
-          <Button 
+          <Button
             className="mt-4 bg-gold hover:bg-gold-dark text-black"
             onClick={onUpload}
           >

@@ -22,7 +22,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     if (notification.role === 'admin') {
       return <Shield className="h-5 w-5 text-orange-500" />;
     }
-    
+
     // Use title to determine icon type for user notifications
     if (notification.title.toLowerCase().includes('winner') || notification.title.includes('🏆')) {
       return <Award className="h-5 w-5 text-green-500" />;
@@ -33,7 +33,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     if (notification.title.toLowerCase().includes('promotion') || notification.title.includes('🎁')) {
       return <Gift className="h-5 w-5 text-purple-500" />;
     }
-    
+
     return <Bell className="h-5 w-5 text-gold" />;
   };
 
@@ -44,13 +44,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   return (
     <Card className={cn(
       "p-4 mb-3 transition-colors border border-gray-800",
-      notification.read 
+      notification.read
         ? "bg-gray-900/60"
         : "bg-gray-800/80 border-l-4 border-l-gold shadow-md"
     )}>
       <div className="flex items-start gap-3">
         <div className="mt-1 bg-black/40 p-2 rounded-full">{getIcon()}</div>
-        
+
         <div className="flex-1">
           {notification.title && (
             <h4 className={cn(
@@ -73,7 +73,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           </p>
           <p className="text-xs text-gray-400">{timeAgo}</p>
         </div>
-        
+
         <div className="flex space-x-2">
           {!notification.read && (
             <Button
@@ -86,7 +86,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
               <CheckCircle className="h-4 w-4" />
             </Button>
           )}
-          
+
           <Button
             variant="ghost"
             size="icon"

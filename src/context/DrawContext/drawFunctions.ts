@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Draw } from '@/types';
+import { getDrawImages, matchImagesToDraws, assignRecentImageToDraws } from '@/utils/drawImageUtils';
 
 // Helper function to transform database draw to app draw format
 const transformDatabaseDrawToAppDraw = (dbDraw: {
@@ -26,7 +27,7 @@ const transformDatabaseDrawToAppDraw = (dbDraw: {
     drawDate: dbDraw.draw_date,
     startDate: dbDraw.draw_date || '',
     endDate: dbDraw.draw_date || '',
-    status: dbDraw.status || 'open',
+    status: (dbDraw.status as 'open' | 'active' | 'completed') || 'open',
     createdAt: dbDraw.created_at,
     imageUrl: null, // Database doesn't have image_url column
     bannerImage: undefined, // Database doesn't have image_url column
@@ -44,7 +45,7 @@ export const useDrawFunctions = (
   const fetchDraws = async () => {
     try {
       console.log('Fetching draws from database...');
-      
+
       const { data, error } = await supabase
         .from('draws')
         .select('*')
@@ -61,14 +62,37 @@ export const useDrawFunctions = (
       }
 
       console.log('Raw draw data from database:', data);
-      
+
       // Transform the database data to match our app's expected format
       const transformedDraws = (data || []).map(transformDatabaseDrawToAppDraw);
-      
-      console.log('Transformed draws for app:', transformedDraws);
-      setDraws(transformedDraws);
-      
-      return transformedDraws;
+
+      // Fetch images from storage and match them to draws
+      console.log('Fetching draw images from storage...');
+      const drawImages = await getDrawImages();
+      console.log(`Found ${drawImages.length} images in storage`);
+
+      let drawsWithImages = transformedDraws;
+
+      if (drawImages.length > 0) {
+        // Try intelligent matching first
+        drawsWithImages = matchImagesToDraws(transformedDraws, drawImages);
+
+        // If no images were matched, use simple assignment
+        const imagesMatched = drawsWithImages.filter(d => d.bannerImage).length;
+        if (imagesMatched === 0) {
+          console.log('No timing matches found, using recent image assignment...');
+          drawsWithImages = assignRecentImageToDraws(transformedDraws, drawImages);
+        }
+
+        console.log(`Successfully matched images to ${imagesMatched} draws`);
+      } else {
+        console.log('No images found in storage');
+      }
+
+      console.log('Final draws with images:', drawsWithImages);
+      setDraws(drawsWithImages);
+
+      return drawsWithImages;
     } catch (err) {
       console.error('Unexpected error fetching draws:', err);
       toast({
@@ -83,7 +107,7 @@ export const useDrawFunctions = (
   const createDraw = async (drawData: Partial<Draw>) => {
     try {
       console.log('Creating new draw:', drawData);
-      
+
       const { data, error } = await supabase
         .from('draws')
         .insert({
@@ -107,16 +131,16 @@ export const useDrawFunctions = (
       }
 
       console.log('Successfully created draw:', data);
-      
+
       // Transform and add to local state
       const newDraw = transformDatabaseDrawToAppDraw(data);
       setDraws(prev => [newDraw, ...prev]);
-      
+
       toast({
         title: 'Draw created successfully',
         description: `"${drawData.title}" has been created.`
       });
-      
+
       return newDraw;
     } catch (err) {
       console.error('Unexpected error creating draw:', err);
@@ -127,7 +151,7 @@ export const useDrawFunctions = (
   const updateDraw = async (id: string, updates: Partial<Draw>) => {
     try {
       console.log('Updating draw:', id, updates);
-      
+
       const { data, error } = await supabase
         .from('draws')
         .update({
@@ -154,12 +178,12 @@ export const useDrawFunctions = (
       // Transform and update local state
       const updatedDraw = transformDatabaseDrawToAppDraw(data);
       setDraws(prev => prev.map(draw => draw.id === id ? updatedDraw : draw));
-      
+
       toast({
         title: 'Draw updated successfully',
         description: `"${updates.title || updatedDraw.title}" has been updated.`
       });
-      
+
       return updatedDraw;
     } catch (err) {
       console.error('Unexpected error updating draw:', err);
@@ -170,7 +194,7 @@ export const useDrawFunctions = (
   const deleteDraw = async (id: string) => {
     try {
       console.log('Deleting draw:', id);
-      
+
       const { error } = await supabase
         .from('draws')
         .delete()
@@ -188,7 +212,7 @@ export const useDrawFunctions = (
 
       // Remove from local state
       setDraws(prev => prev.filter(draw => draw.id !== id));
-      
+
       toast({
         title: 'Draw deleted successfully',
         description: 'The draw has been removed.'
@@ -202,7 +226,7 @@ export const useDrawFunctions = (
   const pickWinner = async (drawId: string) => {
     try {
       console.log('Picking winner for draw:', drawId);
-      
+
       // First, get all tickets for this draw
       const { data: tickets, error: ticketsError } = await supabase
         .from('tickets')
@@ -231,7 +255,7 @@ export const useDrawFunctions = (
       // Randomly select a winning ticket
       const randomIndex = Math.floor(Math.random() * tickets.length);
       const winningTicket = tickets[randomIndex];
-      
+
       console.log('Selected winning ticket:', winningTicket);
 
       // Get winner profile information
@@ -280,8 +304,8 @@ export const useDrawFunctions = (
         ...updatedDraw,
         winner: winnerName // Add the winner name for display
       });
-      
-      setDraws(prev => prev.map(draw => 
+
+      setDraws(prev => prev.map(draw =>
         draw.id === drawId ? transformedDraw : draw
       ));
 
@@ -303,7 +327,7 @@ export const useDrawFunctions = (
       // Send notification to all other participants
       try {
         const otherParticipants = tickets.filter(t => t.user_id !== winningTicket.user_id);
-        
+
         if (otherParticipants.length > 0) {
           const otherNotifications = otherParticipants.map(ticket => ({
             user_id: ticket.user_id,

@@ -25,9 +25,9 @@ interface MediaGridProps {
   formatFileSize: (bytes: number) => string;
 }
 
-const MediaGrid: React.FC<MediaGridProps> = ({ 
-  media, 
-  onDelete, 
+const MediaGrid: React.FC<MediaGridProps> = ({
+  media,
+  onDelete,
   onImageError,
   formatFileSize
 }) => {

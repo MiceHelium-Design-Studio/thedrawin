@@ -13,6 +13,7 @@ import { useDraws } from '@/context/DrawContext';
 import { Draw } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { ImageUploader } from './ImageUploader';
+import { uploadToS3 } from '@/utils/s3Utils';
 
 interface DrawFormContentProps {
   selectedDraw: Draw | null;
@@ -99,11 +100,11 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const drawData = {
         title: formData.title.trim(),
@@ -135,7 +136,7 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
           duration: 4000,
         });
       }
-      
+
       onSuccess();
     } catch (error) {
       console.error('Error saving draw:', error);
@@ -174,7 +175,7 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
                 <Gift className="h-5 w-5 text-orange-500" />
                 <h3 className="text-lg font-semibold">Basic Information</h3>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="title" className="text-sm font-medium">Draw Title *</Label>
@@ -215,7 +216,7 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
                 <Users className="h-5 w-5 text-blue-500" />
                 <h3 className="text-lg font-semibold">Draw Details</h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="maxParticipants" className="text-sm font-medium">Max Participants *</Label>
@@ -256,7 +257,7 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
                 <DollarSign className="h-5 w-5 text-green-500" />
                 <h3 className="text-lg font-semibold">Ticket Pricing</h3>
               </div>
-              
+
               <div>
                 <Label className="text-sm font-medium">Quick Presets</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -301,7 +302,7 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
                 <Calendar className="h-5 w-5 text-purple-500" />
                 <h3 className="text-lg font-semibold">Schedule</h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="startDate" className="text-sm font-medium">Start Date *</Label>
@@ -339,12 +340,12 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
                 <Clock className="h-5 w-5 text-indigo-500" />
                 <h3 className="text-lg font-semibold">Status & Media</h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium">Status</Label>
-                  <Select 
-                    value={formData.status} 
+                  <Select
+                    value={formData.status}
                     onValueChange={(value: 'open' | 'active' | 'completed') => handleInputChange('status', value)}
                   >
                     <SelectTrigger className="mt-1">
@@ -367,14 +368,39 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
                   <div className="mt-1">
                     <ImageUploader
                       previewUrl={drawImageUrl}
-                      onImageSelected={(file) => {
+                      onImageSelected={async (file) => {
+                        // Show immediate preview using blob URL
+                        const blobUrl = URL.createObjectURL(file);
+                        setDrawImageUrl(blobUrl);
+
                         setIsUploadingDrawImage(true);
-                        // Mock upload for now
-                        setTimeout(() => {
-                          const mockUrl = URL.createObjectURL(file);
-                          setDrawImageUrl(mockUrl);
+                        try {
+                          // Upload to S3 using draw_images bucket
+                          const uploadResult = await uploadToS3(file, 'draw_images');
+
+                          // Clean up blob URL and set the actual S3 URL
+                          URL.revokeObjectURL(blobUrl);
+                          setDrawImageUrl(uploadResult.url);
+
+                          toast({
+                            title: "Image uploaded",
+                            description: "Draw image has been successfully uploaded.",
+                          });
+                        } catch (error) {
+                          console.error('Error uploading image:', error);
+
+                          // Revert to previous state on error
+                          URL.revokeObjectURL(blobUrl);
+                          setDrawImageUrl('');
+
+                          toast({
+                            variant: 'destructive',
+                            title: "Upload failed",
+                            description: "There was a problem uploading the image.",
+                          });
+                        } finally {
                           setIsUploadingDrawImage(false);
-                        }, 1000);
+                        }
                       }}
                       isUploading={isUploadingDrawImage}
                     />
@@ -390,8 +416,8 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
         {/* Form Actions */}
         <DrawerFooter className="px-0">
           <div className="flex gap-3 w-full">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting || isUploadingDrawImage}
               className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
             >
@@ -399,6 +425,11 @@ const DrawFormContent: React.FC<DrawFormContentProps> = ({
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   {selectedDraw ? 'Updating...' : 'Creating...'}
+                </>
+              ) : isUploadingDrawImage ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Uploading Image...
                 </>
               ) : (
                 <>

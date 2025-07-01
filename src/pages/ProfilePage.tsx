@@ -9,7 +9,7 @@ import { useImageUpload } from '@/hooks/useImageUpload';
 
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
-  
+
   const {
     profile,
     loading,

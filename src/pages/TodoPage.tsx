@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -56,7 +56,7 @@ function TodoPage() {
   const handleAddTodo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.trim()) return;
-    
+
     try {
       // Make sure we have a user ID before proceeding
       if (!user?.id) {
@@ -67,21 +67,21 @@ function TodoPage() {
         });
         return;
       }
-      
+
       const { error } = await supabase
         .from('todos')
-        .insert({ 
+        .insert({
           task: newTask.trim(),
-          user_id: user.id 
+          user_id: user.id
         });
-      
+
       if (error) throw error;
-      
+
       toast({
         title: "Todo added",
         description: "Your todo was added successfully",
       });
-      
+
       setNewTask('');
       fetchTodos();
     } catch (err) {
@@ -100,10 +100,10 @@ function TodoPage() {
         .from('todos')
         .update({ completed: !currentStatus })
         .eq('id', id);
-      
+
       if (error) throw error;
-      
-      setTodos(todos.map(todo => 
+
+      setTodos(todos.map(todo =>
         todo.id === id ? { ...todo, completed: !currentStatus } : todo
       ));
     } catch (err) {
@@ -137,7 +137,7 @@ function TodoPage() {
   return (
     <div className="p-4 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Todo List</h1>
-      
+
       <form onSubmit={handleAddTodo} className="flex gap-2 mb-6">
         <input
           type="text"
@@ -168,9 +168,9 @@ function TodoPage() {
               {todos.map((todo) => (
                 <TableRow key={todo.id}>
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => toggleTodoStatus(todo.id, todo.completed)}
                     >
                       {todo.completed ? (
@@ -187,8 +187,8 @@ function TodoPage() {
                     {new Date(todo.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="sm"
                       onClick={() => toggleTodoStatus(todo.id, todo.completed)}
                     >

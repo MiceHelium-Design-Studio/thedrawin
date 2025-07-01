@@ -1,11 +1,11 @@
-
 /* Premium utility classes following Apple's design principles */
 @layer utilities {
+
   /* Typography utilities following the premium type scale */
-  .font-system { 
-    font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; 
+  .font-system {
+    font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   }
-  
+
   /* Premium motion and interactions */
   .hover-lift {
     transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -22,27 +22,48 @@
 
   .focus-ring:focus-visible {
     transform: scale(1.02);
-    box-shadow: 
+    box-shadow:
       0 0 0 3px rgba(var(--primary), 0.2),
       0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   /* Premium spacing system (Apple's guidelines) */
-  .spacing-xs { padding: 4px; }
-  .spacing-sm { padding: 8px; }
-  .spacing-md { padding: 16px; }
-  .spacing-lg { padding: 24px; }
-  .spacing-xl { padding: 32px; }
+  .spacing-xs {
+    padding: 4px;
+  }
+
+  .spacing-sm {
+    padding: 8px;
+  }
+
+  .spacing-md {
+    padding: 16px;
+  }
+
+  .spacing-lg {
+    padding: 24px;
+  }
+
+  .spacing-xl {
+    padding: 32px;
+  }
 
   /* Touch targets - minimum 44x44px */
-  .touch-target { min-height: 44px; min-width: 44px; }
-  .touch-target-large { min-height: 48px; min-width: 48px; }
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .touch-target-large {
+    min-height: 48px;
+    min-width: 48px;
+  }
 
   /* Premium status indicators */
   .status-success {
     @apply success-state px-3 py-2 text-sm font-medium;
   }
-  
+
   .status-warning {
     @apply bg-[rgb(var(--primary))]/10 text-[rgb(var(--primary))] border border-[rgb(var(--primary))]/20;
     border-radius: 24px;
@@ -50,7 +71,7 @@
     font-size: 12px;
     font-weight: 500;
   }
-  
+
   .status-error {
     @apply error-state px-3 py-2 text-sm font-medium;
   }
@@ -74,14 +95,12 @@
   .luxury-fade-in {
     animation: luxurySlideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
-  
+
   .gold-shimmer {
-    background: linear-gradient(
-      90deg, 
-      transparent, 
-      rgba(var(--primary), 0.3), 
-      transparent
-    );
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(var(--primary), 0.3),
+        transparent);
     background-size: 200% 100%;
     animation: shimmer 2s ease-in-out infinite;
   }
@@ -90,7 +109,7 @@
   .page-slide-in {
     animation: slideInFromRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
-  
+
   .modal-scale-fade {
     animation: modalScaleFade 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
@@ -99,7 +118,7 @@
   .tab-underline {
     position: relative;
   }
-  
+
   .tab-underline::after {
     content: '';
     position: absolute;
@@ -112,7 +131,7 @@
     transform: scaleX(0);
     transition: transform 0.3s ease;
   }
-  
+
   .tab-underline.active::after {
     transform: scaleX(1);
   }
@@ -120,26 +139,29 @@
 
 /* Premium keyframe definitions */
 @keyframes luxurySlideUp {
-  0% { 
-    opacity: 0; 
-    transform: translateY(20px) scale(0.99); 
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.99);
   }
-  100% { 
-    opacity: 1; 
-    transform: translateY(0) scale(1); 
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
 @keyframes shimmer {
-  0% { 
-    background-position: -200% 0; 
+  0% {
+    background-position: -200% 0;
     opacity: 0;
   }
+
   50% {
     opacity: 1;
   }
-  100% { 
-    background-position: 200% 0; 
+
+  100% {
+    background-position: 200% 0;
     opacity: 0;
   }
 }
@@ -149,6 +171,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   100% {
     transform: translateX(0);
     opacity: 1;
@@ -160,6 +183,7 @@
     transform: scale(0.95);
     opacity: 0;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -168,21 +192,66 @@
 
 /* Accessibility and reduced motion */
 @media (prefers-reduced-motion: reduce) {
+
   .luxury-fade-in,
   .gold-shimmer,
   .page-slide-in,
-  .modal-scale-fade,
-  .hover-lift {
-    animation: none;
-    transition: none;
+  .slide-in-from-bottom,
+  .slide-in-from-top,
+  .slide-in-from-left,
+  .slide-in-from-right {
+    animation: none !important;
+    transition: none !important;
   }
-  
-  .hover-lift:hover {
-    transform: none;
+
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
-  
-  .focus-ring:focus-visible {
-    transform: none;
+}
+
+/* Dark theme typography overrides for visibility */
+@layer utilities {
+
+  /* Force white text on all elements that might have poor contrast */
+  .dark-theme-text,
+  [class*="text-gray"],
+  [class*="text-slate"],
+  [class*="text-neutral"] {
+    color: #FFFFFF !important;
+  }
+
+  /* Ensure proper visibility for common text elements */
+  p,
+  span,
+  div,
+  label,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: #FFFFFF !important;
+  }
+
+  /* Exception for elements with explicit white backgrounds */
+  .bg-white p,
+  .bg-white span,
+  .bg-white div,
+  .bg-white label {
+    color: #000000 !important;
+  }
+
+  /* Ensure proper contrast for interactive elements */
+  button:not(.bg-white):not([class*="bg-gold"]) {
+    color: #FFFFFF !important;
+  }
+
+  /* Make sure icons are visible */
+  svg:not(.bg-white svg) {
+    color: #FFFFFF !important;
   }
 }
 

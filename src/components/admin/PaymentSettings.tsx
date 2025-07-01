@@ -239,15 +239,15 @@ const PaymentSettings: React.FC = () => {
     <section className="mb-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-semibold flex items-center gap-2">
+          <h2 className="text-2xl font-semibold flex items-center gap-2 text-white">
             <Wallet className="h-6 w-6" />
             Payment Settings
           </h2>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-white">
             Configure cryptocurrency wallet addresses for receiving payments
           </p>
         </div>
-        <Button 
+        <Button
           onClick={() => setShowForm(true)}
           className="flex items-center gap-2"
         >
@@ -341,8 +341,8 @@ const PaymentSettings: React.FC = () => {
                     <FormItem>
                       <FormLabel>Wallet Address</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter wallet address..." 
+                        <Input
+                          placeholder="Enter wallet address..."
                           {...field}
                           className="font-mono text-sm"
                         />
@@ -410,7 +410,7 @@ const PaymentSettings: React.FC = () => {
           ) : (
             <div className="space-y-4">
               {walletAddresses.map((wallet) => (
-                <div 
+                <div
                   key={wallet.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                 >
@@ -424,11 +424,10 @@ const PaymentSettings: React.FC = () => {
                           {wallet.network}
                         </span>
                       )}
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        wallet.is_active 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                      }`}>
+                      <span className={`text-xs px-2 py-1 rounded ${wallet.is_active
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                        }`}>
                         {wallet.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </div>

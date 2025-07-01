@@ -30,11 +30,11 @@ function TodoList() {
         .from('todos')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       if (error) {
         throw error;
       }
-      
+
       if (data) {
         setTodos(data as Todo[]);
       }
@@ -58,21 +58,21 @@ function TodoList() {
     try {
       // Get the current user session
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      
+
       if (sessionError) {
         throw sessionError;
       }
-      
+
       if (!sessionData.session?.user?.id) {
         throw new Error('User not authenticated');
       }
-      
+
       // Insert the todo with the user_id
       const { error } = await supabase
         .from('todos')
-        .insert([{ 
+        .insert([{
           task: newTask.trim(),
-          user_id: sessionData.session.user.id 
+          user_id: sessionData.session.user.id
         }]);
 
       if (error) {
@@ -83,7 +83,7 @@ function TodoList() {
         title: 'Todo added',
         description: 'Your new task has been added successfully.'
       });
-      
+
       setNewTask('');
       getTodos(); // Refresh the todo list
     } catch (err) {
@@ -108,10 +108,10 @@ function TodoList() {
       }
 
       // Update local state to reflect the change
-      setTodos(todos.map(todo => 
+      setTodos(todos.map(todo =>
         todo.id === id ? { ...todo, completed: !currentStatus } : todo
       ));
-      
+
       toast({
         title: 'Todo updated',
         description: `Task marked as ${!currentStatus ? 'completed' : 'incomplete'}.`
@@ -146,7 +146,7 @@ function TodoList() {
   return (
     <div className="p-4 max-w-3xl mx-auto">
       <h2 className="text-2xl font-semibold mb-4">Todo List</h2>
-      
+
       <form onSubmit={handleAddTodo} className="mb-6 flex gap-2">
         <input
           type="text"
@@ -157,23 +157,23 @@ function TodoList() {
         />
         <Button type="submit">Add</Button>
       </form>
-      
+
       {loading && <p className="text-gray-500">Refreshing...</p>}
-      
+
       {todos.length === 0 ? (
         <p className="text-center py-8 text-gray-500">No todos found. Add some todos to get started.</p>
       ) : (
         <ul className="space-y-2">
           {todos.map((todo) => (
-            <li 
-              key={todo.id} 
+            <li
+              key={todo.id}
               className={`p-3 border rounded-md flex justify-between items-center ${todo.completed ? 'bg-gray-50 text-gray-500' : ''}`}
             >
               <span className={todo.completed ? 'line-through' : ''}>
                 {todo.task || 'Unnamed todo'}
               </span>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => toggleTodoCompletion(todo.id, todo.completed)}
               >

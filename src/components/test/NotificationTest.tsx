@@ -38,7 +38,7 @@ const NotificationTest: React.FC = () => {
 
       // Generate a random ticket number for testing
       const randomTicketNumber = Math.floor(Math.random() * 100) + 1;
-      
+
       // Use a default ticket price if ticketPrices is not available
       let ticketPrice = 10; // Default price
       if (testDraw.ticketPrices && Array.isArray(testDraw.ticketPrices) && testDraw.ticketPrices.length > 0) {
@@ -62,13 +62,13 @@ const NotificationTest: React.FC = () => {
       console.log('Ticket purchase completed - notifications should have been triggered');
     } catch (error) {
       console.error('Test failed:', error);
-      
+
       // More detailed error handling
       let errorMessage = 'Error occurred during notification test';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       toast({
         variant: 'destructive',
         title: 'Test failed',
@@ -98,7 +98,7 @@ const NotificationTest: React.FC = () => {
                 This should create notifications for both user and admin
               </p>
             </div>
-            <Button 
+            <Button
               onClick={testTicketPurchase}
               disabled={isLoading || !user}
               className="ml-4"
@@ -114,25 +114,24 @@ const NotificationTest: React.FC = () => {
                 {unreadCount} unread
               </span>
             </div>
-            
+
             {currentNotifications.length === 0 ? (
               <p className="text-sm text-gray-500 italic">No notifications yet</p>
             ) : (
               <div className="space-y-2">
                 {currentNotifications.map((notification) => (
-                  <div 
+                  <div
                     key={notification.id}
-                    className={`p-3 rounded-lg border ${
-                      notification.read 
-                        ? 'bg-gray-50 border-gray-200' 
-                        : 'bg-blue-50 border-blue-200'
-                    }`}
+                    className={`p-3 rounded-lg border ${notification.read
+                      ? 'bg-gray-50 border-gray-200'
+                      : 'bg-blue-50 border-blue-200'
+                      }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="text-sm font-medium">{notification.title}</p>
-                        <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-sm font-medium text-black">{notification.title}</p>
+                        <p className="text-sm text-black mt-1">{notification.message}</p>
+                        <p className="text-xs text-black mt-1">
                           Role: {notification.role} | {new Date(notification.createdAt).toLocaleString()}
                         </p>
                       </div>

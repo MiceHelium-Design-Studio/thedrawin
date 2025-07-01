@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Wallet, 
-  DollarSign, 
-  CreditCard, 
-  ArrowLeftRight, 
-  Building, 
+import {
+  Wallet,
+  DollarSign,
+  CreditCard,
+  ArrowLeftRight,
+  Building,
   Banknote,
   Bitcoin
 } from 'lucide-react';
@@ -41,15 +41,15 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
   const [showCryptoDetails, setShowCryptoDetails] = useState(false);
   const [cryptoAddress, setCryptoAddress] = useState('');
   const { toast } = useToast();
-  
+
   const form = useForm({
     defaultValues: {
       paymentMethod: 'regular'
     }
   });
-  
+
   if (!user) return null;
-  
+
   const handleAddFunds = async () => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       toast({
@@ -59,12 +59,12 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
       });
       return;
     }
-    
+
     if (paymentMethod === 'usdt') {
       setShowCryptoDetails(true);
       return;
     }
-    
+
     try {
       await addFunds(Number(amount));
       setAmount('');
@@ -91,13 +91,13 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
       });
       return;
     }
-    
+
     try {
       await addFunds(Number(amount));
       setAmount('');
       setCryptoAddress('');
       setShowCryptoDetails(false);
-      
+
       toast({
         title: 'Crypto payment confirmed',
         description: `$${amount} has been added to your wallet using USDT.`,
@@ -111,7 +111,7 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
       console.error(error);
     }
   };
-  
+
   const getPaymentMethodLabel = (method: PaymentMethod): string => {
     switch (method) {
       case 'card':
@@ -126,7 +126,7 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
         return 'Regular Payment';
     }
   };
-  
+
   const getPaymentMethodIcon = (method: PaymentMethod) => {
     switch (method) {
       case 'card':
@@ -141,16 +141,16 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
         return <Banknote className="h-5 w-5 text-gold" />;
     }
   };
-  
+
   const cryptoInstructions = (
     <div className="mt-4 p-4 border border-gold/30 rounded-md bg-black-light/20">
       <h3 className="font-semibold mb-2">USDT Payment Instructions</h3>
       <p className="text-sm mb-4">Send USDT to the following address:</p>
-      
+
       <div className="bg-black-light/30 p-3 rounded-md mb-4 break-all font-mono text-xs">
         TUr9RRmcMSvEdrxZsXLjn5YhwTX5KKx2WD
       </div>
-      
+
       <div className="space-y-4 mb-4">
         <div>
           <Label htmlFor="txhash" className="text-sm">Transaction Hash</Label>
@@ -166,7 +166,7 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
           </p>
         </div>
       </div>
-      
+
       <div className="flex gap-2">
         <Button
           onClick={handleCryptoPaymentConfirm}
@@ -195,7 +195,7 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
         </h2>
         <div className="text-2xl font-bold text-gold">${user.wallet.toFixed(2)}</div>
       </div>
-      
+
       {!showCryptoDetails ? (
         <div className="space-y-4">
           <div>
@@ -214,31 +214,31 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-3 gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setAmount('5')}
               className="border-gold/30 text-gold hover:text-gold-dark"
             >
               $5
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setAmount('10')}
               className="border-gold/30 text-gold hover:text-gold-dark"
             >
               $10
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setAmount('20')}
               className="border-gold/30 text-gold hover:text-gold-dark"
             >
               $20
             </Button>
           </div>
-          
+
           <div>
             <Label>Payment Method</Label>
             <Form {...form}>
@@ -263,7 +263,7 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
                             <span>Bank Transfer</span>
                           </FormLabel>
                         </div>
-                        
+
                         <div className="border border-gold/30 rounded-md p-4 hover:bg-black-light/30 cursor-pointer transition-colors">
                           <FormLabel className="cursor-pointer flex items-center gap-2">
                             <RadioGroupItem value="card" className="text-gold" />
@@ -271,7 +271,7 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
                             <span>Visa/Mastercard</span>
                           </FormLabel>
                         </div>
-                        
+
                         <div className="border border-gold/30 rounded-md p-4 hover:bg-black-light/30 cursor-pointer transition-colors">
                           <FormLabel className="cursor-pointer flex items-center gap-2">
                             <RadioGroupItem value="whish" className="text-gold" />
@@ -279,7 +279,7 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
                             <span>Whish Money Transfer</span>
                           </FormLabel>
                         </div>
-                        
+
                         <div className="border border-gold/30 rounded-md p-4 hover:bg-black-light/30 cursor-pointer transition-colors">
                           <FormLabel className="cursor-pointer flex items-center gap-2">
                             <RadioGroupItem value="western-union" className="text-gold" />
@@ -287,7 +287,7 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
                             <span>Western Union / OMT</span>
                           </FormLabel>
                         </div>
-                        
+
                         <div className="border border-gold/30 rounded-md p-4 hover:bg-black-light/30 cursor-pointer transition-colors col-span-1 md:col-span-2">
                           <FormLabel className="cursor-pointer flex items-center gap-2">
                             <RadioGroupItem value="usdt" className="text-gold" />
@@ -302,11 +302,11 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
               />
             </Form>
           </div>
-          
+
           <Button
             onClick={handleAddFunds}
             disabled={loading || !amount}
-            className="w-full bg-gold hover:bg-gold-dark text-black"
+            className="w-full bg-gold hover:bg-gold-white text-white"
           >
             {getPaymentMethodIcon(paymentMethod)}
             Pay with {getPaymentMethodLabel(paymentMethod)}

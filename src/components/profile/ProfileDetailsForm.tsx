@@ -30,7 +30,7 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
   handleUpdateProfile,
 }) => {
   if (!user) return null;
-  
+
   return (
     <div className="flex-1">
       {isEditing ? (
@@ -44,7 +44,7 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
               className="border-gold/30 focus:border-gold"
             />
           </div>
-          
+
           <div className="flex gap-2">
             <Button
               onClick={handleUpdateProfile}
@@ -68,19 +68,19 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
             <p className="text-sm text-gray-500">Name</p>
             <p className="font-medium">{user.name}</p>
           </div>
-          
+
           <div>
             <p className="text-sm text-gray-500">Email</p>
             <p className="font-medium">{user.email}</p>
           </div>
-          
+
           {user.avatar_url && (
             <div>
               <p className="text-sm text-gray-500">Using Unsplash Avatar</p>
               <p className="font-medium text-xs text-gold truncate">{user.avatar_url}</p>
             </div>
           )}
-          
+
           <Button
             onClick={() => setIsEditing(true)}
             className="bg-gold hover:bg-gold-dark text-black"

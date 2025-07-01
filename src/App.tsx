@@ -41,11 +41,11 @@ const queryClient = new QueryClient({
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  
+
   useEffect(() => {
     console.log("ProtectedRoute at path:", location.pathname, "user:", user?.id, "loading:", loading);
   }, [location.pathname, user, loading]);
-  
+
   if (loading) {
     console.log("ProtectedRoute: Auth state is loading");
     return (
@@ -57,12 +57,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-  
+
   if (!user) {
     console.log("ProtectedRoute: No user, redirecting to login");
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
-  
+
   console.log("ProtectedRoute: User authenticated, rendering content", user?.id);
   return <>{children}</>;
 };
@@ -71,11 +71,11 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
-  
+
   useEffect(() => {
     console.log("AdminRoute at path:", location.pathname, "user:", user?.id, "isAdmin:", user?.isAdmin, "loading:", loading);
   }, [location.pathname, user, loading]);
-  
+
   useEffect(() => {
     // Only show toast if user is not admin and this isn't from an automatic redirect
     if (!loading && user && !user.isAdmin && !location.state?.from) {
@@ -88,7 +88,7 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
       });
     }
   }, [user, loading, toast, location.state]);
-  
+
   if (loading) {
     console.log("AdminRoute: Auth state is loading");
     return (
@@ -100,17 +100,17 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-  
+
   if (!user) {
     console.log("AdminRoute: No user, redirecting to login");
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
-  
+
   if (!user.isAdmin) {
     console.log("AdminRoute: User is not admin, redirecting to home");
     return <Navigate to="/home" replace />;
   }
-  
+
   console.log("AdminRoute: Admin user authenticated, rendering admin content", user?.id);
   return <>{children}</>;
 };
@@ -118,7 +118,7 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-black/90">
@@ -129,36 +129,36 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-  
+
   if (user) {
     // Get the intended destination from location state, or default to home
     const from = location.state?.from?.pathname || "/home";
-    
+
     // Don't redirect to admin routes unless user is actually an admin
     const adminRoutes = ['/admin', '/media'];
     const isFromAdminRoute = adminRoutes.includes(from);
-    
+
     if (isFromAdminRoute && !user.isAdmin) {
       console.log("PublicRoute: Non-admin user attempted redirect to admin route, redirecting to home instead");
       return <Navigate to="/home" replace />;
     }
-    
+
     console.log("PublicRoute: User already logged in, redirecting to:", from);
     return <Navigate to={from} replace />;
   }
-  
+
   return <>{children}</>;
 };
 
 const AppContent = () => {
   useCapacitorPlugins();
-  
+
   return (
     <Layout>
       <Routes>
         <Route path="/login" element={<PublicRoute><Auth /></PublicRoute>} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
-        
+
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
@@ -169,7 +169,7 @@ const AppContent = () => {
         <Route path="/media" element={<AdminRoute><MediaLibrary /></AdminRoute>} />
         <Route path="/todos" element={<ProtectedRoute><TodoList /></ProtectedRoute>} />
         <Route path="/todo-page" element={<ProtectedRoute><TodoPage /></ProtectedRoute>} />
-        
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Layout>
@@ -178,7 +178,7 @@ const AppContent = () => {
 
 const App = () => {
   console.log("App rendering");
-  
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>

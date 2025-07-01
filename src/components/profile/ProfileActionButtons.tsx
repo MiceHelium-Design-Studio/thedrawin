@@ -40,7 +40,7 @@ const ProfileActionButtons: React.FC<ProfileActionButtonsProps> = ({
               variant="outline"
               onClick={onCancel}
               disabled={saving}
-              className="border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors duration-200 px-6"
+              className="border-white/20 text-white hover:bg-white/10 transition-colors duration-200 px-6"
             >
               <X className="w-4 h-4 mr-2" />
               Cancel

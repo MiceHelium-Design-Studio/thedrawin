@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { 
-  BarChart3, 
-  Trophy, 
-  Users, 
-  Image, 
-  Bell, 
+import {
+  BarChart3,
+  Trophy,
+  Users,
+  Image,
+  Bell,
   Settings,
   CreditCard,
   TestTube,
@@ -19,8 +19,8 @@ interface AdminSidebarMenuProps {
   activeTab: string;
 }
 
-const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({ 
-  activeSection, 
+const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({
+  activeSection,
   onSectionChange,
   activeTab
 }) => {
@@ -45,18 +45,17 @@ const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({
           <button
             key={item.id}
             onClick={() => onSectionChange(item.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors ${
-              activeTab === item.id
-                ? 'bg-[rgb(var(--primary))] text-[rgb(var(--primary-foreground))]'
-                : 'text-white hover:text-white hover:bg-[rgb(var(--secondary-system-fill))]/20'
-            }`}
-            style={{ color: activeTab === item.id ? '#0D0D0D' : '#FFFFFF' }}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors ${activeTab === item.id
+              ? 'bg-[rgb(var(--primary))] text-white'
+              : 'text-white hover:text-white hover:bg-[rgb(var(--secondary-system-fill))]/20'
+              }`}
+            style={{ color: activeTab === item.id ? '#FFFF00' : '#FFFFFF' }}
           >
-            <IconComponent 
-              className="h-4 w-4" 
-              style={{ color: activeTab === item.id ? '#0D0D0D' : '#FFFFFF' }}
+            <IconComponent
+              className="h-4 w-4"
+              style={{ color: activeTab === item.id ? '#FFFF00' : '#FFFFFF' }}
             />
-            <span style={{ color: activeTab === item.id ? '#0D0D0D' : '#FFFFFF' }}>
+            <span style={{ color: activeTab === item.id ? '#FFFF00' : '#FFFFFF' }}>
               {item.label}
             </span>
           </button>

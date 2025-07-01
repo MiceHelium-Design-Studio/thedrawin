@@ -22,7 +22,7 @@ const ProfileFormFields: React.FC<ProfileFormFieldsProps> = ({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name" className="text-gray-700 font-medium flex items-center gap-2">
+        <Label htmlFor="name" className="text-white font-medium flex items-center gap-2">
           <User className="w-4 h-4" />
           Name
         </Label>
@@ -37,7 +37,7 @@ const ProfileFormFields: React.FC<ProfileFormFieldsProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-gray-700 font-medium flex items-center gap-2">
+        <Label htmlFor="email" className="text-white font-medium flex items-center gap-2">
           <Mail className="w-4 h-4" />
           Email
         </Label>

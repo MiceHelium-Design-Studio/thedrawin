@@ -22,16 +22,16 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({
     <div className="flex flex-col items-center space-y-4">
       <div className="relative group">
         <Avatar className="w-32 h-32 border-4 border-gray-200 transition-all duration-200 group-hover:border-blue-300">
-          <AvatarImage 
-            src={imagePreview || avatarUrl || ''} 
-            alt="Profile" 
+          <AvatarImage
+            src={imagePreview || avatarUrl || ''}
+            alt="Profile"
             className="object-cover"
           />
           <AvatarFallback className="text-2xl">
             <User className="w-12 h-12 text-gray-400" />
           </AvatarFallback>
         </Avatar>
-        
+
         {isEditing && (
           <button
             type="button"
@@ -43,7 +43,7 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({
           </button>
         )}
       </div>
-      
+
       {isEditing && (
         <input
           id="image-upload"
@@ -53,7 +53,7 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({
           className="hidden"
         />
       )}
-      
+
       {uploading && (
         <div className="flex items-center space-x-2">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>

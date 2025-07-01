@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Wallet, Trophy, Settings, Edit3, Crown, LogOut } from 'lucide-react';
@@ -48,7 +47,7 @@ const Profile: React.FC = () => {
       {/* Premium background effects */}
       <div className="fixed inset-0 pattern-bg pointer-events-none" />
       <div className="fixed inset-0 hero-glow pointer-events-none" />
-      
+
       <div className="relative z-10">
         <div className="max-w-4xl mx-auto px-4 py-8 luxury-fade-in">
           {/* Fixed Profile Header */}
@@ -57,8 +56,8 @@ const Profile: React.FC = () => {
               <div className="relative inline-block">
                 <div className="relative">
                   <Avatar className="w-24 h-24 mx-auto ring-4 ring-[#F39C0A]/20 shadow-gold">
-                    <AvatarImage 
-                      src={user.avatar || user.avatar_url} 
+                    <AvatarImage
+                      src={user.avatar || user.avatar_url}
                       alt={user.email}
                       className="object-cover"
                     />
@@ -77,7 +76,7 @@ const Profile: React.FC = () => {
                 )}
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <h1 className="text-3xl font-bold text-white bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
                 {user.name || 'Welcome'}
@@ -85,10 +84,10 @@ const Profile: React.FC = () => {
               <p className="text-slate-400 text-lg font-medium">
                 {user.email}
               </p>
-              
+
               <div className="flex items-center justify-center space-x-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => setActiveTab('settings')}
                   className="premium-outline-button group"
@@ -96,12 +95,12 @@ const Profile: React.FC = () => {
                   <Edit3 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
                   Edit Profile
                 </Button>
-                
-                <Button 
-                  variant="outline" 
+
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={logout}
-                  className="border-red-500/50 text-black-300 hover:bg-red-500/20 hover:text-white hover:border-red-400 backdrop-blur-sm transition-all duration-200 group"
+                  className="border-red-500/50 text-white hover:bg-red-500/20 hover:text-white hover:border-red-400 backdrop-blur-sm transition-all duration-200 group"
                 >
                   <LogOut className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
                   Sign Out
@@ -151,10 +150,10 @@ const Profile: React.FC = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Member since</label>
                       <p className="text-white font-medium text-lg">
-                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
                         }) : 'N/A'}
                       </p>
                     </div>
@@ -212,7 +211,7 @@ const Profile: React.FC = () => {
                   <CardTitle className="text-white">Wallet & Payments</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <WalletSection 
+                  <WalletSection
                     user={user}
                     loading={authLoading}
                     addFunds={addFunds}
@@ -224,7 +223,7 @@ const Profile: React.FC = () => {
             {activeTab === 'settings' && (
               <div className="space-y-6">
                 <UpdateProfileForm />
-                
+
                 {/* Sign Out Section */}
                 <Card className="luxury-card">
                   <CardHeader>

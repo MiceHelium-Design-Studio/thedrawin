@@ -91,17 +91,17 @@ const PushNotifications: React.FC = () => {
     try {
       setIsLoading(true);
       console.log('Fetching users for admin notifications...');
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('id, email, name')
         .order('created_at', { ascending: false });
-      
+
       if (error) {
         console.error('Error fetching users:', error);
         throw error;
       }
-      
+
       console.log('Fetched users:', data);
       setUsers(data || []);
     } catch (error) {
@@ -119,7 +119,7 @@ const PushNotifications: React.FC = () => {
   const fetchRecentNotifications = async () => {
     try {
       console.log('Fetching recent notifications...');
-      
+
       const { data, error } = await supabase
         .from('notifications')
         .select(`
@@ -131,12 +131,12 @@ const PushNotifications: React.FC = () => {
         `)
         .order('created_at', { ascending: false })
         .limit(10);
-      
+
       if (error) {
         console.error('Error fetching recent notifications:', error);
         throw error;
       }
-      
+
       console.log('Fetched recent notifications:', data);
       setRecentNotifications(data || []);
     } catch (error) {
@@ -164,16 +164,16 @@ const PushNotifications: React.FC = () => {
     try {
       setIsSending(true);
       console.log('Submitting notification:', data);
-      
+
       const notificationTitle = getNotificationTitle(data.type);
-      
+
       if (data.target === 'all') {
         // Send to all users with 'user' role
         const userIds = users.map(user => user.id);
         console.log('Sending to all users:', userIds.length);
-        
+
         await sendNotification(data.message, 'user', userIds);
-        
+
         toast({
           title: "Notification sent",
           description: `Sent to ${userIds.length} users`,
@@ -181,25 +181,25 @@ const PushNotifications: React.FC = () => {
       } else if (data.target === 'selected' && data.selectedUsers) {
         // Send to selected users with 'user' role
         const selectedEmails = data.selectedUsers.split(',').map(email => email.trim());
-        const selectedUsers = users.filter(user => 
+        const selectedUsers = users.filter(user =>
           selectedEmails.includes(user.email)
         );
-        
+
         if (selectedUsers.length === 0) {
           throw new Error('No valid users found with the provided emails');
         }
-        
+
         const userIds = selectedUsers.map(user => user.id);
         console.log('Sending to selected users:', userIds);
-        
+
         await sendNotification(data.message, 'user', userIds);
-        
+
         toast({
           title: "Notification sent",
           description: `Sent to ${userIds.length} selected users`,
         });
       }
-      
+
       // Reset form
       notificationForm.reset({
         message: "",
@@ -207,7 +207,7 @@ const PushNotifications: React.FC = () => {
         target: "all",
         selectedUsers: "",
       });
-      
+
       // Refresh notifications list
       fetchRecentNotifications();
     } catch (error) {
@@ -251,7 +251,7 @@ const PushNotifications: React.FC = () => {
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Push Notifications</h2>
+        <h2 className="text-2xl font-semibold text-white">Push Notifications</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -281,7 +281,7 @@ const PushNotifications: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={notificationForm.control}
                   name="type"
@@ -308,7 +308,7 @@ const PushNotifications: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={notificationForm.control}
                   name="target"
@@ -333,7 +333,7 @@ const PushNotifications: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 {notificationForm.watch('target') === 'selected' && (
                   <FormField
                     control={notificationForm.control}
@@ -342,9 +342,9 @@ const PushNotifications: React.FC = () => {
                       <FormItem>
                         <FormLabel>Selected Users</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="user1@example.com, user2@example.com" 
-                            {...field} 
+                          <Input
+                            placeholder="user1@example.com, user2@example.com"
+                            {...field}
                           />
                         </FormControl>
                         <FormDescription>
@@ -355,7 +355,7 @@ const PushNotifications: React.FC = () => {
                     )}
                   />
                 )}
-                
+
                 <Button type="submit" className="w-full" disabled={isSending}>
                   {isSending ? (
                     <>
@@ -373,7 +373,7 @@ const PushNotifications: React.FC = () => {
             </Form>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Recent Notifications</CardTitle>

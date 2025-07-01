@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash, Plus, ImagePlus } from 'lucide-react';
+
 import {
   Table,
   TableBody,
@@ -44,17 +45,17 @@ interface DrawActionProps {
 const DrawAction: React.FC<DrawActionProps> = ({ draw, onEdit, onDeleteConfirm }) => {
   return (
     <div className="flex items-center space-x-1">
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         size="sm"
         onClick={() => onEdit(draw)}
         className="h-8 px-2"
       >
         <Edit className="h-3 w-3" />
       </Button>
-      
-      <Button 
-        variant="destructive" 
+
+      <Button
+        variant="destructive"
         size="sm"
         onClick={() => onDeleteConfirm(draw.id)}
         className="h-8 px-2"
@@ -67,7 +68,7 @@ const DrawAction: React.FC<DrawActionProps> = ({ draw, onEdit, onDeleteConfirm }
 
 const DrawsManagement: React.FC = () => {
   const { toast } = useToast();
-  const { draws, deleteDraw } = useDraws();
+  const { draws, deleteDraw, fetchDraws } = useDraws();
   const [isDrawDrawerOpen, setIsDrawDrawerOpen] = useState(false);
   const [selectedDraw, setSelectedDraw] = useState<Draw | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -80,15 +81,15 @@ const DrawsManagement: React.FC = () => {
     setDrawImageUrl(draw.bannerImage || '');
     setIsDrawDrawerOpen(true);
   };
-  
+
   const confirmDeleteDraw = (id: string) => {
     setDrawToDelete(id);
     setIsDeleteDialogOpen(true);
   };
-  
+
   const handleDrawDelete = async () => {
     if (!drawToDelete) return;
-    
+
     try {
       await deleteDraw(drawToDelete);
       setIsDeleteDialogOpen(false);
@@ -107,10 +108,12 @@ const DrawsManagement: React.FC = () => {
     }
   };
 
-  const resetDrawForm = () => {
+  const resetDrawForm = async () => {
     setSelectedDraw(null);
     setDrawImageUrl('');
     setIsDrawDrawerOpen(false);
+    // Refresh draws list to show the newly saved image immediately
+    await fetchDraws();
   };
 
   const getStatusBadge = (status: string) => {
@@ -119,10 +122,10 @@ const DrawsManagement: React.FC = () => {
       'active': 'bg-blue-500/20 text-blue-400 border-blue-500/50',
       'completed': 'bg-gray-500/20 text-gray-400 border-gray-500/50',
     };
-    
+
     return (
-      <Badge 
-        variant="outline" 
+      <Badge
+        variant="outline"
         className={`text-xs ${statusColors[status as keyof typeof statusColors] || 'bg-gray-500/20 text-gray-400 border-gray-500/50'}`}
       >
         {status}
@@ -152,7 +155,7 @@ const DrawsManagement: React.FC = () => {
                 {selectedDraw ? 'Edit the draw details.' : 'Create a new draw for users to participate in.'}
               </DrawerDescription>
             </DrawerHeader>
-            <DrawFormContent 
+            <DrawFormContent
               selectedDraw={selectedDraw}
               drawImageUrl={drawImageUrl}
               isUploadingDrawImage={isUploadingDrawImage}
@@ -165,7 +168,7 @@ const DrawsManagement: React.FC = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
           <div className="text-2xl font-bold text-white">{draws.length}</div>
           <div className="text-white/70 text-sm">Total Draws</div>
@@ -182,6 +185,10 @@ const DrawsManagement: React.FC = () => {
           <div className="text-2xl font-bold text-yellow-400">{draws.filter(d => d.status === 'open').length}</div>
           <div className="text-white/70 text-sm">Open</div>
         </div>
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
+          <div className="text-2xl font-bold text-purple-400">{draws.filter(d => d.bannerImage).length}</div>
+          <div className="text-white/70 text-sm">With Images</div>
+        </div>
       </div>
 
       {/* Table Section */}
@@ -189,7 +196,7 @@ const DrawsManagement: React.FC = () => {
         <div className="p-4 border-b border-white/10">
           <h3 className="text-lg font-medium text-white">All Draws</h3>
         </div>
-        
+
         {/* Responsive Table Container */}
         <div className="overflow-x-auto">
           <div className="min-w-full">
@@ -203,7 +210,7 @@ const DrawsManagement: React.FC = () => {
                   <TableHead className="text-white/90 font-medium min-w-[100px] hidden xl:table-cell">Start Date</TableHead>
                   <TableHead className="text-white/90 font-medium min-w-[100px] hidden xl:table-cell">End Date</TableHead>
                   <TableHead className="text-white/90 font-medium min-w-[80px] text-center">Status</TableHead>
-                  <TableHead className="text-white/90 font-medium min-w-[80px] text-center hidden sm:table-cell">Image</TableHead>
+                  <TableHead className="text-white/90 font-medium min-w-[100px] text-center hidden md:table-cell">Banner Image</TableHead>
                   <TableHead className="text-white/90 font-medium min-w-[100px] text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -211,7 +218,13 @@ const DrawsManagement: React.FC = () => {
                 {draws.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center py-8 text-white/70">
-                      No draws found. Create your first draw to get started.
+                      <div className="flex flex-col items-center gap-2">
+                        <ImagePlus className="h-12 w-12 text-white/40" />
+                        <div>
+                          <div className="font-medium">No draws found</div>
+                          <div className="text-sm">Create your first draw to get started</div>
+                        </div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -245,39 +258,52 @@ const DrawsManagement: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell className="text-white/80 text-sm hidden xl:table-cell">
-                        {new Date(draw.startDate).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric' 
+                        {new Date(draw.startDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric'
                         })}
                       </TableCell>
                       <TableCell className="text-white/80 text-sm hidden xl:table-cell">
-                        {new Date(draw.endDate).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric' 
+                        {new Date(draw.endDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric'
                         })}
                       </TableCell>
                       <TableCell className="text-center">
                         {getStatusBadge(draw.status)}
                       </TableCell>
-                      <TableCell className="text-center hidden sm:table-cell">
+                      <TableCell className="text-center hidden md:table-cell">
                         {draw.bannerImage ? (
-                          <a href={draw.bannerImage} target="_blank" rel="noopener noreferrer">
-                            <img 
-                              src={draw.bannerImage} 
-                              alt="Draw banner" 
-                              className="w-12 h-8 object-cover rounded border border-white/20 mx-auto hover:scale-110 transition-transform" 
-                            />
-                          </a>
+                          <div className="relative group">
+                            <a href={draw.bannerImage} target="_blank" rel="noopener noreferrer">
+                              <img
+                                src={draw.bannerImage}
+                                alt={`Draw banner for ${draw.title}`}
+                                className="w-16 h-12 object-cover rounded-lg border border-white/20 mx-auto hover:scale-105 transition-all duration-200 shadow-lg"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  target.parentElement?.nextElementSibling?.classList.remove('hidden');
+                                }}
+                              />
+                            </a>
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center">
+                              <span className="text-white text-xs font-medium">View Full</span>
+                            </div>
+                            <div className="hidden w-16 h-12 bg-red-500/20 rounded-lg border border-red-500/50 mx-auto flex items-center justify-center">
+                              <span className="text-red-400 text-xs">Error</span>
+                            </div>
+                          </div>
                         ) : (
-                          <div className="w-12 h-8 bg-white/10 rounded border border-white/20 mx-auto flex items-center justify-center">
-                            <ImagePlus className="h-3 w-3 text-white/40" />
+                          <div className="w-16 h-12 bg-white/10 rounded-lg border border-white/20 mx-auto flex items-center justify-center group hover:bg-white/20 transition-colors">
+                            <ImagePlus className="h-4 w-4 text-white/40 group-hover:text-white/60" />
                           </div>
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        <DrawAction 
-                          draw={draw} 
-                          onEdit={handleEditDraw} 
+                        <DrawAction
+                          draw={draw}
+                          onEdit={handleEditDraw}
                           onDeleteConfirm={confirmDeleteDraw}
                         />
                       </TableCell>

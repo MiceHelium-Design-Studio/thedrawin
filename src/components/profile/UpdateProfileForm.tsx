@@ -19,7 +19,7 @@ const UpdateProfileForm: React.FC = () => {
     saveProfile,
     resetForm
   } = useProfileManagement();
-  
+
   const {
     imageFile,
     imagePreview,
@@ -31,9 +31,9 @@ const UpdateProfileForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     let avatarUrl: string | null = null;
-    
+
     if (imageFile) {
       console.log('Uploading new profile image...');
       avatarUrl = await uploadImage();
@@ -43,7 +43,7 @@ const UpdateProfileForm: React.FC = () => {
       }
       console.log('Image uploaded successfully:', avatarUrl);
     }
-    
+
     const success = await saveProfile(avatarUrl);
     if (success) {
       clearImageState();
@@ -72,10 +72,10 @@ const UpdateProfileForm: React.FC = () => {
             uploading={uploading}
             onImageChange={handleImageChange}
           />
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="fullName" className="text-sm font-medium text-white">
                 Full Name
               </Label>
               <Input
@@ -88,9 +88,9 @@ const UpdateProfileForm: React.FC = () => {
                 className="rounded-lg"
               />
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="email" className="text-sm font-medium text-white">
                 Email
               </Label>
               <Input
@@ -104,10 +104,10 @@ const UpdateProfileForm: React.FC = () => {
               />
             </div>
           </div>
-          
+
           <div className="flex gap-3 pt-4">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg py-2.5 font-medium transition-all duration-200"
               disabled={saving || uploading}
             >
@@ -120,8 +120,8 @@ const UpdateProfileForm: React.FC = () => {
                 'Save Profile'
               )}
             </Button>
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               variant="outline"
               onClick={handleReset}
               disabled={saving || uploading}

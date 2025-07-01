@@ -24,7 +24,7 @@ const CompleteProfileForm: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     setFile(selectedFile);
-    
+
     if (selectedFile) {
       // Validate file size (max 5MB)
       if (selectedFile.size > 5 * 1024 * 1024) {
@@ -55,7 +55,7 @@ const CompleteProfileForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!fullName.trim()) {
       toast({
         variant: 'destructive',
@@ -143,9 +143,9 @@ const CompleteProfileForm: React.FC = () => {
               <div className="relative group">
                 <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-200 bg-gray-100 flex items-center justify-center transition-all duration-200 group-hover:border-blue-300">
                   {previewUrl ? (
-                    <img 
-                      src={previewUrl} 
-                      alt="Avatar preview" 
+                    <img
+                      src={previewUrl}
+                      alt="Avatar preview"
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -173,10 +173,10 @@ const CompleteProfileForm: React.FC = () => {
                 Upload a profile picture (max 5MB)
               </p>
             </div>
-            
+
             {/* Full Name Input */}
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-gray-700 font-medium">
+              <Label htmlFor="fullName" className="text-white font-medium">
                 Full Name *
               </Label>
               <Input
@@ -190,11 +190,11 @@ const CompleteProfileForm: React.FC = () => {
                 disabled={isLoading}
               />
             </div>
-            
+
             {/* Action Buttons */}
             <div className="space-y-3 pt-4">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-3 transition-all duration-200 shadow-lg hover:shadow-xl"
                 disabled={isLoading || !fullName.trim()}
               >
@@ -207,11 +207,11 @@ const CompleteProfileForm: React.FC = () => {
                   'Complete Profile'
                 )}
               </Button>
-              
-              <Button 
+
+              <Button
                 type="button"
                 variant="outline"
-                className="w-full border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors duration-200"
+                className="w-full border-white/20 text-white hover:bg-white/10 transition-colors duration-200"
                 onClick={handleSkip}
                 disabled={isLoading}
               >

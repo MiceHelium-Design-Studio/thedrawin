@@ -40,15 +40,15 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
 
     try {
       setIsUploading(true);
-      
+
       const { url, name } = await uploadToS3(files[0], 'profile_images');
       setAvatarUrl(url);
-      
+
       toast({
         title: 'Image uploaded',
         description: `${name} has been uploaded successfully.`,
       });
-      
+
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -63,7 +63,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       setIsUploading(false);
     }
   };
-  
+
   const handleUnsplashUrlUpdate = () => {
     if (!unsplashInputRef.current?.value) {
       toast({
@@ -73,7 +73,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       });
       return;
     }
-    
+
     setUnsplashUrl(unsplashInputRef.current.value);
     toast({
       title: 'Unsplash URL added',
@@ -92,9 +92,9 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       </Avatar>
       {isEditing && (
         <div className="absolute -bottom-2 -right-2">
-          <Button 
-            size="sm" 
-            variant="outline" 
+          <Button
+            size="sm"
+            variant="outline"
             className="rounded-full w-8 h-8 p-0 bg-background border-gold/30"
             onClick={() => fileInputRef.current?.click()}
           >
@@ -117,24 +117,24 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
                   placeholder="URL will appear here after upload"
                 />
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="border-gold/30 text-gold hover:text-gold-dark"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Upload
               </Button>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
                 accept="image/*"
                 onChange={handleFileUpload}
               />
             </div>
           </div>
-          
+
           {/* Unsplash URL input */}
           <div>
             <Label htmlFor="unsplashUrl">Unsplash Image URL</Label>
@@ -148,8 +148,8 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
                   placeholder="Enter Unsplash image URL"
                 />
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="border-gold/30 text-gold hover:text-gold-dark"
                 onClick={handleUnsplashUrlUpdate}
               >
@@ -161,7 +161,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
               Example: https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead
             </p>
           </div>
-          
+
           {/* Preview section for both types of images */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {avatarUrl && (
@@ -170,13 +170,13 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
                 <img src={avatarUrl} alt="Uploaded avatar preview" className="w-full object-cover max-h-40" />
               </div>
             )}
-            
+
             {unsplashUrl && (
               <div className="mt-2 w-full overflow-hidden rounded border border-gray-200">
                 <p className="text-xs text-gray-400 p-1 bg-black-light/30">Unsplash Avatar</p>
-                <img 
-                  src={unsplashUrl} 
-                  alt="Unsplash avatar preview" 
+                <img
+                  src={unsplashUrl}
+                  alt="Unsplash avatar preview"
                   className="w-full object-cover max-h-40"
                   onError={(e) => {
                     toast({
@@ -185,7 +185,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
                       description: 'Could not load the Unsplash image. Please check the URL and try again.'
                     });
                     e.currentTarget.src = "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead";
-                  }} 
+                  }}
                 />
               </div>
             )}

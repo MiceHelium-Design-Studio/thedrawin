@@ -35,7 +35,7 @@ const UserManagement: React.FC = () => {
     handleAddFunds,
     closeWalletDialog
   } = useWalletManagement(users, fetchUsers);
-  
+
   useEffect(() => {
     if (connectionStatus === false) {
       toast({
@@ -50,7 +50,7 @@ const UserManagement: React.FC = () => {
       });
     }
   }, [connectionStatus, connectionErrorDetails, toast]);
-  
+
   const handleTestConnection = async () => {
     setIsTestingConnection(true);
     try {
@@ -63,49 +63,49 @@ const UserManagement: React.FC = () => {
       setIsTestingConnection(false);
     }
   };
-  
+
   return <section className="mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">User Management</h2>
-        <div className="flex gap-2">
-          <Link to="/media">
-            <Button variant="outline" size="sm" className="flex items-center gap-1.5">
-              <Image className="h-4 w-4" />
-              Media Library
-            </Button>
-          </Link>
-          <Button onClick={fetchUsers} variant="outline" size="sm" disabled={connectionStatus === false || loading}>
-            {loading ? <>
-                <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                Loading...
-              </> : <>
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Refresh List
-              </>}
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-2xl font-semibold text-white">User Management</h2>
+      <div className="flex gap-2">
+        <Link to="/media">
+          <Button variant="outline" size="sm" className="flex items-center gap-1.5">
+            <Image className="h-4 w-4" />
+            Media Library
           </Button>
-        </div>
+        </Link>
+        <Button onClick={fetchUsers} variant="outline" size="sm" disabled={connectionStatus === false || loading}>
+          {loading ? <>
+            <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+            Loading...
+          </> : <>
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Refresh List
+          </>}
+        </Button>
       </div>
+    </div>
 
-      {connectionStatus === true && <div className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-300 dark:border-green-800 rounded-md p-3 mb-4">
-          <div className="flex items-start">
-            <CheckCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-            <p>Connected to Supabase database successfully. Showing users from profiles table.</p>
-          </div>
-        </div>}
+    {connectionStatus === true && <div className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-300 dark:border-green-800 rounded-md p-3 mb-4">
+      <div className="flex items-start">
+        <CheckCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+        <p>Connected to Supabase database successfully. Showing users from profiles table.</p>
+      </div>
+    </div>}
 
-      {connectionStatus === false}
+    {connectionStatus === false}
 
-      {connectionStatus === true && users.length > 0 && <StatsOverview users={users} />}
+    {connectionStatus === true && users.length > 0 && <StatsOverview users={users} />}
 
-      <div className="rounded-md border overflow-x-auto">
-        <UserTable users={users} loading={loading} fetchError={fetchError} onToggleAdmin={toggleAdminStatus} onSendNotification={sendNotificationToUser} onAddFunds={userId => {
+    <div className="rounded-md border overflow-x-auto">
+      <UserTable users={users} loading={loading} fetchError={fetchError} onToggleAdmin={toggleAdminStatus} onSendNotification={sendNotificationToUser} onAddFunds={userId => {
         setSelectedUserId(userId);
         setIsWalletDialogOpen(true);
       }} />
-      </div>
+    </div>
 
-      <WalletDialog isOpen={isWalletDialogOpen} onClose={closeWalletDialog} walletAmount={walletAmount} onWalletAmountChange={setWalletAmount} onAddFunds={handleAddFunds} />
-    </section>;
+    <WalletDialog isOpen={isWalletDialogOpen} onClose={closeWalletDialog} walletAmount={walletAmount} onWalletAmountChange={setWalletAmount} onAddFunds={handleAddFunds} />
+  </section>;
 };
 
 export default UserManagement;

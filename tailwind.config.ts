@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -25,24 +24,24 @@ export default {
 				ring: 'rgb(var(--ring))',
 				background: 'rgb(var(--background))',
 				foreground: 'rgb(var(--foreground))',
-				
+
 				// Apple semantic colors
 				'label-primary': 'rgb(var(--label-primary))',
 				'label-secondary': 'rgb(var(--label-secondary))',
 				'label-tertiary': 'rgb(var(--label-tertiary))',
 				'label-quaternary': 'rgb(var(--label-quaternary))',
-				
+
 				// Apple system backgrounds
 				'system-background': 'rgb(var(--system-background))',
 				'secondary-system-background': 'rgb(var(--secondary-system-background))',
 				'tertiary-system-background': 'rgb(var(--tertiary-system-background))',
-				
+
 				// Apple system fills
 				'system-fill': 'rgba(var(--system-fill), 0.36)',
 				'secondary-system-fill': 'rgba(var(--secondary-system-fill), 0.32)',
 				'tertiary-system-fill': 'rgba(var(--tertiary-system-fill), 0.24)',
 				'quaternary-system-fill': 'rgba(var(--quaternary-system-fill), 0.18)',
-				
+
 				// Brand gold palette with proper contrast
 				gold: {
 					50: 'rgb(var(--gold-50))',
@@ -56,7 +55,7 @@ export default {
 					800: 'rgb(var(--gold-800))',
 					900: 'rgb(var(--gold-900))',
 				},
-				
+
 				primary: {
 					DEFAULT: 'rgb(var(--primary))',
 					foreground: 'rgb(var(--primary-foreground))'
@@ -84,6 +83,20 @@ export default {
 				card: {
 					DEFAULT: 'rgb(var(--card))',
 					foreground: 'rgb(var(--card-foreground))'
+				},
+
+				// Override gray colors to ensure visibility on dark backgrounds
+				gray: {
+					50: '#FFFFFF',
+					100: '#FFFFFF',
+					200: '#FFFFFF',
+					300: '#FFFFFF',
+					400: '#FFFFFF',
+					500: '#FFFFFF',
+					600: '#FFFFFF',
+					700: '#FFFFFF',
+					800: '#FFFFFF',
+					900: '#FFFFFF',
 				},
 			},
 			borderRadius: {
