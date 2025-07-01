@@ -171,7 +171,7 @@ const WalletSection: React.FC<WalletSectionProps> = ({ user, loading, addFunds }
         <Button
           onClick={handleCryptoPaymentConfirm}
           disabled={!cryptoAddress}
-          className="bg-gold hover:bg-gold-dark text-black"
+          className="bg-gold hover:bg-gold-dark text-white"
         >
           Confirm Payment
         </Button>

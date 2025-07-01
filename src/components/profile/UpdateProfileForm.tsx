@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Save, RotateCcw } from 'lucide-react';
 import { useProfileManagement } from '@/hooks/useProfileManagement';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { useAuth } from '@/context/AuthContext';
 import ProfileImageSection from './ProfileImageSection';
 
 const UpdateProfileForm: React.FC = () => {
+  const { updateProfile } = useAuth();
   const {
     profile,
     name,
@@ -47,6 +49,16 @@ const UpdateProfileForm: React.FC = () => {
 
     const success = await saveProfile(avatarUrl);
     if (success) {
+      // Update the AuthContext immediately with the new avatar
+      if (avatarUrl) {
+        console.log('Updating AuthContext with new avatar:', avatarUrl);
+        await updateProfile({
+          avatar: avatarUrl,
+          avatar_url: avatarUrl,
+          name,
+          email
+        });
+      }
       clearImageState();
       console.log('Profile updated successfully');
     }

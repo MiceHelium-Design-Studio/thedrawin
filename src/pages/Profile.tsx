@@ -60,6 +60,7 @@ const Profile: React.FC = () => {
                       src={user.avatar || user.avatar_url}
                       alt={user.email}
                       className="object-cover"
+                      key={`avatar-${user.id}-${user.avatar || user.avatar_url}`}
                     />
                     <AvatarFallback className="bg-gradient-to-br from-[#F39C0A] to-[#FFA726] text-black text-xl font-bold">
                       {getUserInitials(user.email)}
