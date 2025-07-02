@@ -17,6 +17,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import DrawDetail from "./pages/DrawDetail";
+import Draws from "./pages/Draws";
 import Winners from "./pages/Winners";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
@@ -161,6 +162,7 @@ const AppContent = () => {
 
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/draws" element={<ProtectedRoute><Draws /></ProtectedRoute>} />
         <Route path="/draw/:id" element={<ProtectedRoute><DrawDetail /></ProtectedRoute>} />
         <Route path="/winners" element={<ProtectedRoute><Winners /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />

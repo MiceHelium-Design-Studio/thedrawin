@@ -11,9 +11,10 @@ import { Draw } from '@/types';
 
 interface DrawCardProps {
   draw: Draw;
+  hideActions?: boolean;
 }
 
-const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
+const DrawCard: React.FC<DrawCardProps> = ({ draw, hideActions = false }) => {
   const { user } = useAuth();
   const { pickWinner } = useDraws();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -23,7 +24,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
   const isAdmin = user?.isAdmin || false;
   const canPickWinner = isAdmin && (draw.status === 'active' || draw.status === 'open') && (draw.numberOfTickets || 0) > 0;
   const canEnterDraw = (draw.status === 'active' || draw.status === 'open') && !!user;
-  
+
   const handlePickWinner = async () => {
     try {
       setIsPickingWinner(true);
@@ -49,16 +50,17 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
           title={draw.title}
           status={draw.status}
         />
-        
+
         <DrawCardContent
           draw={draw}
           canEnterDraw={canEnterDraw}
           canPickWinner={canPickWinner}
           onEnterDraw={() => setIsSelectNumberOpen(true)}
           onPickWinner={() => setIsDialogOpen(true)}
+          hideActions={hideActions}
         />
       </Card>
-      
+
       {/* Winner Selection Dialog */}
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent>
@@ -70,7 +72,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw }) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isPickingWinner}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               disabled={isPickingWinner}
               onClick={(e) => {
                 e.preventDefault();
