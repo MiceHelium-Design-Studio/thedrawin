@@ -334,7 +334,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                   className={`h-8 text-xs transition-all ${isNumberTaken(number)
                     ? "opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-700"
                     : selectedNumber === number
-                      ? "bg-primary text-primary-foreground transform scale-105"
+                      ? "bg-primary text-primary-foreground transform scale-105 text-white"
                       : "hover:bg-primary/20 hover:scale-105"
                     }`}
                   disabled={isNumberTaken(number)}
@@ -347,7 +347,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
 
             {/* Statistics */}
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-              <div className="flex justify-between text-xs text-muted-foreground">
+              <div className="flex justify-between text-xs text-white">
                 <span>Available: {getAvailableNumbers().length}</span>
                 <span>Taken: {takenNumbers.length}</span>
                 <span>Total: 100</span>
@@ -355,17 +355,17 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
             </div>
 
             <div className="flex items-center justify-between mt-4 text-xs">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-white">
                 <div className="h-3 w-3 bg-primary rounded-sm"></div>
                 <span>Selected</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 border border-border rounded-sm"></div>
-                <span>Available</span>
+                <div className="h-3 w-3 border border-border rounded-sm text-white"></div>
+                <span className='text-white'>Available</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 bg-gray-300 dark:bg-gray-700 rounded-sm"></div>
-                <span>Taken</span>
+                <span className='text-white'>Taken</span>
               </div>
             </div>
 
@@ -390,14 +390,14 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
             <div className="mt-4">
               <div className="mb-4 p-3 bg-muted rounded-lg">
                 <p className="text-sm">
-                  <span className="font-medium">Selected Number:</span> #{selectedNumber}
+                  <span className="font-medium text-white">Selected Number:</span> #{selectedNumber}
                 </p>
                 <p className="text-sm">
-                  <span className="font-medium">Your wallet balance:</span> ${userBalance}
+                  <span className="font-medium text-white">Your wallet balance:</span> ${userBalance}
                 </p>
               </div>
 
-              <p className="text-sm font-medium mb-4">Choose your entry price:</p>
+              <p className="text-sm font-medium mb-4 text-white">Choose your entry price:</p>
               <div className="grid grid-cols-2 gap-3">
                 {draw.ticketPrices.map((price) => (
                   <Button
@@ -436,7 +436,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
         ) : (
           <>
             <div className="mt-4">
-              <div className="mb-6 p-4 bg-muted rounded-lg">
+              <div className="mb-6 p-4 bg-muted rounded-lg text-white">
                 <h3 className="font-semibold mb-3">Entry Summary</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -458,7 +458,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 </div>
               </div>
 
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-4 text-white">
                 By confirming, you agree to enter this draw with the selected number and pay the entry fee.
               </p>
             </div>

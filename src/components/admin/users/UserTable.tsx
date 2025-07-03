@@ -80,9 +80,9 @@ export const UserTable: React.FC<UserTableProps> = ({
             <TableCell className="font-medium">
               <div className="flex items-center gap-2">
                 {user.avatar_url || user.avatar ? (
-                  <img 
-                    src={user.avatar_url || user.avatar} 
-                    alt={user.name || user.email} 
+                  <img
+                    src={user.avatar_url || user.avatar}
+                    alt={user.name || user.email}
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
@@ -103,8 +103,9 @@ export const UserTable: React.FC<UserTableProps> = ({
             </TableCell>
             <TableCell>
               <div className="flex items-center space-x-2">
-                <Switch 
-                  checked={user.isAdmin} 
+                <Switch
+                  className="border-[#F39C0A] [&>span]:bg-[#F39C0A] focus-visible:ring-[#F39C0A]"
+                  checked={user.isAdmin}
                   onCheckedChange={() => onToggleAdmin(user.id, user.isAdmin || false)}
                 />
                 <span className={user.isAdmin ? 'text-[#F39C0A]' : 'text-white'}>
@@ -114,16 +115,16 @@ export const UserTable: React.FC<UserTableProps> = ({
             </TableCell>
             <TableCell>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => onSendNotification(user.id, user.email)}
                 >
                   <Mail className="h-4 w-4 mr-1" />
                   <span>Notify</span>
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => onAddFunds(user.id)}
                 >
