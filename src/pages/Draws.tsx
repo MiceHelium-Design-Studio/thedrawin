@@ -120,7 +120,7 @@ const Draws: React.FC = () => {
             onClick={() => navigate('/home')}
             className="mb-6 pl-0 flex items-center text-slate-400 hover:text-white transition-colors"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Home
           </Button>
 

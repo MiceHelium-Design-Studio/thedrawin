@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">The Draw Win</string>
+    <string name="title_activity_main">The Draw Win</string>
+    <string name="package_name">com.thedrawin.app</string>
+    <string name="custom_url_scheme">com.thedrawin.app</string>
+</resources>
