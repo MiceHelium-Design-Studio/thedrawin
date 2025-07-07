@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.thedrawin.app',
-  appName: 'The Draw Win',
+  appName: 'DrawWin - Lucky Draws',
   webDir: 'dist',
   plugins: {
     SplashScreen: {

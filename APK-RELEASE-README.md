@@ -2,7 +2,8 @@
 
 ## 🎯 Overview
 
-**The Draw Win** is a mobile application built with Capacitor + React that allows users to participate in draws and win prizes. This document contains information about the signed release APK ready for distribution.
+**The Draw Win** is a mobile application built with Capacitor + React that allows users to participate in draws and win prizes. 
+This document contains information about the signed release APK ready for distribution.
 
 ---
 
