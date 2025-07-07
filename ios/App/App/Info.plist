@@ -45,5 +45,28 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to camera to take photos for profile and media uploads.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to photo library to select images for profile and media uploads.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs access to photo library to save images.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs access to microphone for media recording.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to location for enhanced features.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIRequiresFullScreen</key>
+	<false/>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDefault</string>
 </dict>
 </plist>
