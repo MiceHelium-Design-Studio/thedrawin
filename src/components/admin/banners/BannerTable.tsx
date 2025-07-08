@@ -11,6 +11,7 @@ import {
 import { Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { Banner } from '@/types';
 import BannerAction from './BannerAction';
+import { useTranslation } from 'react-i18next';
 
 interface BannerTableProps {
   banners: Banner[];
@@ -19,6 +20,7 @@ interface BannerTableProps {
 
 const BannerTable: React.FC<BannerTableProps> = ({ banners, onEdit }) => {
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
+  const { t } = useTranslation();
 
   const handleImageError = (banner: Banner) => {
     setLoadErrors(prev => ({
@@ -31,7 +33,7 @@ const BannerTable: React.FC<BannerTableProps> = ({ banners, onEdit }) => {
   const bannerTableColumns = [
     {
       accessorKey: 'imageUrl',
-      header: 'Image',
+      header: t('admin.banners.image'),
       cell: ({ row }: { row: { original: Banner } }) => {
         const banner = row.original;
         const hasError = loadErrors[banner.id];
@@ -49,7 +51,7 @@ const BannerTable: React.FC<BannerTableProps> = ({ banners, onEdit }) => {
             >
               <img 
                 src={hasError ? "/placeholder.svg" : banner.imageUrl} 
-                alt={hasError ? "Failed to load" : "Banner"} 
+                alt={hasError ? t('admin.banners.failedToLoad') : t('admin.banners.banner')} 
                 className={`w-20 h-12 object-cover rounded ${hasError ? 'opacity-50' : ''}`}
                 onError={() => handleImageError(banner)}
               />
@@ -57,7 +59,7 @@ const BannerTable: React.FC<BannerTableProps> = ({ banners, onEdit }) => {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="bg-black/70 text-white text-xs p-1 rounded flex items-center">
                     <AlertTriangle className="h-3 w-3 mr-1 text-red-400" />
-                    Error
+                    {t('common.error')}
                   </div>
                 </div>
               )}
@@ -68,7 +70,7 @@ const BannerTable: React.FC<BannerTableProps> = ({ banners, onEdit }) => {
     },
     {
       accessorKey: 'linkUrl',
-      header: 'Link',
+      header: t('admin.banners.link'),
       cell: ({ row }: { row: { original: Banner } }) => (
         <div className="max-w-[200px] truncate">
           <a 
@@ -84,14 +86,14 @@ const BannerTable: React.FC<BannerTableProps> = ({ banners, onEdit }) => {
     },
     {
       accessorKey: 'active',
-      header: 'Active',
+      header: t('admin.banners.active'),
       cell: ({ row }: { row: { original: Banner } }) => (
         row.original.active ? <Eye className="h-4 w-4 text-green-500" /> : <EyeOff className="h-4 w-4 text-red-500" />
       ),
     },
     {
       id: "actions",
-      header: "Actions",
+      header: t('admin.users.actions'),
       cell: ({ row }: { row: { original: Banner } }) => (
         <BannerAction banner={row.original} onEdit={onEdit} />
       )
@@ -110,7 +112,7 @@ const BannerTable: React.FC<BannerTableProps> = ({ banners, onEdit }) => {
           {banners.length === 0 && (
             <TableRow>
               <TableCell colSpan={bannerTableColumns.length} className="h-24 text-center">
-                No banners found. Create a new banner to get started.
+                {t('admin.banners.noBannersFound')}
               </TableCell>
             </TableRow>
           )}

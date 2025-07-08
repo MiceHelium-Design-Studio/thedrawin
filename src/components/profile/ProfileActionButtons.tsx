@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Save, X, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileActionButtonsProps {
   isEditing: boolean;
@@ -22,6 +23,7 @@ const ProfileActionButtons: React.FC<ProfileActionButtonsProps> = ({
   onCancel
 }) => {
   const { logout } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-4 pt-6">
@@ -32,7 +34,7 @@ const ProfileActionButtons: React.FC<ProfileActionButtonsProps> = ({
             onClick={onEdit}
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium px-8 py-3 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            Edit Profile
+            {t('profile.editProfile')}
           </Button>
         ) : (
           <>
@@ -43,7 +45,7 @@ const ProfileActionButtons: React.FC<ProfileActionButtonsProps> = ({
               className="border-white/20 text-white hover:bg-white/10 transition-colors duration-200 px-6"
             >
               <X className="w-4 h-4 mr-2" />
-              Cancel
+              {t('profile.cancel')}
             </Button>
             <Button
               onClick={onSave}
@@ -53,12 +55,12 @@ const ProfileActionButtons: React.FC<ProfileActionButtonsProps> = ({
               {saving ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Saving...
+                  {t('profile.actions.saving')}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Save Changes
+                  {t('profile.saveChanges')}
                 </>
               )}
             </Button>
@@ -74,7 +76,7 @@ const ProfileActionButtons: React.FC<ProfileActionButtonsProps> = ({
           className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all duration-200 px-6"
         >
           <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
+          {t('profile.signOut')}
         </Button>
       </div>
     </div>

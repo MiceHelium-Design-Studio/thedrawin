@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Award, Calendar, Trophy } from 'lucide-react';
 import { testSupabaseConnection } from '@/utils/supabaseTest';
+import { useTranslation } from 'react-i18next';
 
 interface DrawCompleteProps {
   status: string;
@@ -14,32 +15,30 @@ interface DrawCompleteProps {
 const DrawComplete: React.FC<DrawCompleteProps> = ({ 
   status, 
   winner, 
-  winnerTicketNumber,
-  title,
+  winnerTicketNumber, 
+  title, 
   endDate 
 }) => {
+  const { t } = useTranslation();
+
   useEffect(() => {
-    // Test the Supabase connection when the component mounts
-    testSupabaseConnection().then(isConnected => {
-      if (isConnected) {
-        console.log('✅ Supabase connection is working properly');
-      } else {
-        console.error('❌ Supabase connection test failed');
+    const testConnection = async () => {
+      try {
+        await testSupabaseConnection();
+      } catch (error) {
+        console.error('Supabase connection test failed:', error);
       }
-    });
+    };
+
+    testConnection();
   }, []);
 
-  if (status === 'completed' && winner) {
+  // If there's a winner, show the winner announcement
+  if (winner) {
     return (
-      <Card className="luxury-card overflow-hidden">
-        {/* Winner Banner */}
-        <div className="bg-gradient-to-r from-[#F39C0A] to-[#FFD700] text-black px-6 py-4">
-          <div className="flex items-center justify-center space-x-3">
-            <Trophy className="h-8 w-8" />
-            <h2 className="text-2xl font-bold">🎉 We Have a Winner! 🎉</h2>
-            <Trophy className="h-8 w-8" />
-          </div>
-        </div>
+      <Card className="luxury-card">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#F39C0A]/10 via-transparent to-[#FFD700]/5 rounded-xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent rounded-xl"></div>
         
         <CardContent className="p-8 text-center">
           <div className="space-y-6">
@@ -53,7 +52,7 @@ const DrawComplete: React.FC<DrawCompleteProps> = ({
             {/* Winner Information */}
             <div className="space-y-4">
               <div>
-                <p className="text-lg text-slate-400 mb-2">🏆 Champion</p>
+                <p className="text-lg text-slate-400 mb-2">{t('draws.complete.champion')}</p>
                 <h3 className="text-4xl font-bold text-white bg-gradient-to-r from-[#F39C0A] to-[#FFD700] bg-clip-text text-transparent">
                   {winner}
                 </h3>
@@ -61,7 +60,7 @@ const DrawComplete: React.FC<DrawCompleteProps> = ({
               
               {winnerTicketNumber && (
                 <div className="bg-gradient-to-br from-[#F39C0A]/10 to-[#FFD700]/5 rounded-xl p-6 border border-[#F39C0A]/20">
-                  <p className="text-slate-400 mb-2">Winning Number</p>
+                  <p className="text-slate-400 mb-2">{t('draws.complete.winningNumber')}</p>
                   <p className="text-3xl font-bold text-[#F39C0A]">#{winnerTicketNumber}</p>
                 </div>
               )}
@@ -69,14 +68,14 @@ const DrawComplete: React.FC<DrawCompleteProps> = ({
               {endDate && (
                 <div className="flex items-center justify-center text-slate-400">
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span>Draw completed on {new Date(endDate).toLocaleDateString()}</span>
+                  <span>{t('draws.complete.completedOn', { date: new Date(endDate).toLocaleDateString() })}</span>
                 </div>
               )}
             </div>
             
             <div className="pt-6 border-t border-white/10">
               <p className="text-slate-300 text-lg">
-                Congratulations to our winner! 🎊 Thank you to all participants.
+                {t('draws.complete.congratulationsText')}
               </p>
             </div>
           </div>
@@ -93,10 +92,10 @@ const DrawComplete: React.FC<DrawCompleteProps> = ({
           <div className="w-16 h-16 bg-gradient-to-br from-slate-500/20 to-slate-600/10 rounded-full flex items-center justify-center mx-auto">
             <Award className="h-8 w-8 text-slate-400" />
           </div>
-          <h3 className="text-2xl font-bold text-white">Draw Completed</h3>
-          <p className="text-slate-400">This draw has ended.</p>
+          <h3 className="text-2xl font-bold text-white">{t('draws.complete.drawCompleted')}</h3>
+          <p className="text-slate-400">{t('draws.complete.drawEnded')}</p>
           {status !== 'completed' && (
-            <p className="text-slate-500">Status: {status}</p>
+            <p className="text-slate-500">{t('draws.complete.status', { status })}</p>
           )}
         </div>
       </CardContent>

@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Banner } from '@/types';
 import { useDraws } from '@/context/DrawContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
 interface BannerActionProps {
   banner: Banner;
@@ -28,6 +29,7 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { fetchBanners } = useDraws();
+  const { t } = useTranslation();
   
   const handleDelete = async () => {
     try {
@@ -52,15 +54,15 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
       await fetchBanners();
       
       toast({
-        title: 'Banner deleted',
-        description: 'The banner has been successfully removed.',
+        title: t('admin.banners.bannerDeleted'),
+        description: t('admin.banners.bannerDeletedDescription'),
       });
     } catch (error) {
       console.error('Error deleting banner:', error);
       toast({
         variant: 'destructive',
-        title: 'Deletion failed',
-        description: 'There was a problem deleting the banner. Please try again.',
+        title: t('admin.banners.deletionFailed'),
+        description: t('admin.banners.deletionFailedDescription'),
       });
     } finally {
       setIsDeleting(false);
@@ -75,26 +77,26 @@ const BannerAction: React.FC<BannerActionProps> = ({ banner, onEdit }) => {
         onClick={() => onEdit(banner)}
       >
         <Edit className="h-4 w-4 mr-2" />
-        Edit
+        {t('common.edit')}
       </Button>
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogTrigger asChild>
           <Button variant="destructive" size="sm">
             <Trash className="h-4 w-4 mr-2" />
-            Delete
+            {t('common.delete')}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.banners.deleteConfirmationTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the banner from our servers.
+              {t('admin.banners.deleteConfirmationDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? t('admin.banners.deleting') : t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

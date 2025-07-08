@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import DrawCard from '../draws/DrawCard';
 import { Draw } from '@/types';
+import { useTranslation } from 'react-i18next';
 interface ActiveDrawsSectionProps {
   activeDraws: Draw[];
   onViewAll: () => void;
@@ -10,6 +11,8 @@ const ActiveDrawsSection: React.FC<ActiveDrawsSectionProps> = ({
   activeDraws,
   onViewAll
 }) => {
+  const { t } = useTranslation();
+  
   if (!activeDraws || activeDraws.length === 0) {
     return null;
   }
@@ -25,17 +28,17 @@ const ActiveDrawsSection: React.FC<ActiveDrawsSectionProps> = ({
                 
               </div>
               <h2 className="text-3xl font-bold text-white tracking-tight">
-                Active <span className="bg-gold-gradient bg-clip-text text-transparent">Draws</span>
+                {t('home.activeDrawsTitle')} <span className="bg-gold-gradient bg-clip-text text-transparent">{t('navigation.draws')}</span>
               </h2>
             </div>
             <div className="h-px w-32 bg-gradient-to-r from-[#F39C0A] to-transparent" />
             <p className="text-slate-400 text-lg">
-              Live draws waiting for your participation
+              {t('home.activeDrawsSubtitle')}
             </p>
           </div>
           
           <Button variant="outline" size="lg" onClick={onViewAll} className="premium-outline-button group min-w-[160px]">
-            <span className="relative z-10">View All Draws</span>
+            <span className="relative z-10">{t('home.viewAllDraws')}</span>
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F39C0A]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </Button>
         </div>

@@ -8,6 +8,7 @@ import { DrawHeader } from '@/components/draws/draw-detail/DrawHeader';
 import { DrawProgress } from '@/components/draws/draw-detail/DrawProgress';
 import DrawTicketForm from '@/components/draws/draw-detail/DrawTicketForm';
 import DrawComplete from '@/components/draws/draw-detail/DrawComplete';
+import { useTranslation } from 'react-i18next';
 
 const DrawDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +16,7 @@ const DrawDetail: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const draw = draws.find(d => d.id === id);
   
@@ -24,9 +26,9 @@ const DrawDetail: React.FC = () => {
   if (!draw) {
     return (
       <div className="container mx-auto px-4 py-6 text-center">
-        <p>Draw not found</p>
+        <p>{t('draws.detail.notFound')}</p>
         <Button onClick={() => navigate('/')} className="mt-4">
-          Go Back
+          {t('draws.detail.goBack')}
         </Button>
       </div>
     );
@@ -43,16 +45,16 @@ const DrawDetail: React.FC = () => {
       await buyTicket(draw.id, number, price);
       
       toast({
-        title: 'Entry successful!',
-        description: `You've entered the ${draw.title} draw with number ${number} for $${price}.`,
+        title: t('draws.modal.entrySuccessful'),
+        description: t('draws.modal.entrySuccessfulDesc', { title: draw.title, number, price }),
       });
       
       navigate('/');
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Entry failed',
-        description: 'There was an error entering the draw.',
+        title: t('draws.messages.entryFailed'),
+        description: t('draws.messages.entryFailedDesc'),
       });
       console.error(error);
     }

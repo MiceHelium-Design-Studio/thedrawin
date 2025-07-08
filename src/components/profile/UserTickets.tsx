@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Ticket as TicketIcon, Trophy, Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface UserTicket {
   id: string;
@@ -20,6 +21,7 @@ const UserTickets: React.FC = () => {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<UserTicket[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchUserTickets = async () => {
@@ -68,13 +70,13 @@ const UserTickets: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'open':
-        return <Badge variant="default">Active</Badge>;
+        return <Badge variant="default">{t('profile.tickets.active')}</Badge>;
       case 'announced':
-        return <Badge variant="secondary">Completed</Badge>;
+        return <Badge variant="secondary">{t('profile.tickets.completed')}</Badge>;
       case 'closed':
-        return <Badge variant="destructive">Closed</Badge>;
+        return <Badge variant="destructive">{t('profile.tickets.closed')}</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge variant="outline">{t('profile.tickets.unknown')}</Badge>;
     }
   };
 
@@ -84,7 +86,7 @@ const UserTickets: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TicketIcon className="h-5 w-5" />
-            My Tickets
+            {t('profile.tickets.myTickets')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -102,13 +104,13 @@ const UserTickets: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TicketIcon className="h-5 w-5" />
-            My Tickets
+            {t('profile.tickets.myTickets')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
             <TicketIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">You haven't entered any draws yet.</p>
+            <p className="text-muted-foreground">{t('profile.tickets.noTicketsYet')}</p>
           </div>
         </CardContent>
       </Card>
@@ -120,7 +122,7 @@ const UserTickets: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TicketIcon className="h-5 w-5" />
-          My Tickets ({tickets.length})
+          {t('profile.tickets.ticketsCount', { count: tickets.length })}
         </CardTitle>
       </CardHeader>
       <CardContent>

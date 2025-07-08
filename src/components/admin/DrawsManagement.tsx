@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash, Plus, ImagePlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import {
   Table,
@@ -69,6 +70,7 @@ const DrawAction: React.FC<DrawActionProps> = ({ draw, onEdit, onDeleteConfirm }
 const DrawsManagement: React.FC = () => {
   const { toast } = useToast();
   const { draws, deleteDraw, fetchDraws } = useDraws();
+  const { t } = useTranslation();
   const [isDrawDrawerOpen, setIsDrawDrawerOpen] = useState(false);
   const [selectedDraw, setSelectedDraw] = useState<Draw | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -95,15 +97,15 @@ const DrawsManagement: React.FC = () => {
       setIsDeleteDialogOpen(false);
       setDrawToDelete(null);
       toast({
-        title: "Draw deleted",
-        description: "The draw has been successfully deleted.",
+        title: t('admin.draws.drawDeleted'),
+        description: t('admin.draws.drawDeletedDescription'),
       });
     } catch (error) {
       console.error('Error deleting draw:', error);
       toast({
         variant: 'destructive',
-        title: "Deletion failed",
-        description: "There was a problem deleting the draw.",
+        title: t('admin.draws.deletionFailed'),
+        description: t('admin.draws.deletionFailedDescription'),
       });
     }
   };
@@ -128,7 +130,7 @@ const DrawsManagement: React.FC = () => {
         variant="outline"
         className={`text-xs ${statusColors[status as keyof typeof statusColors] || 'bg-gray-500/20 text-gray-400 border-gray-500/50'}`}
       >
-        {status}
+        {t(`admin.draws.status.${status}`)}
       </Badge>
     );
   };
@@ -138,21 +140,21 @@ const DrawsManagement: React.FC = () => {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Draws Management</h2>
-          <p className="text-white/70 text-sm mt-1">Manage all draws and their settings</p>
+          <h2 className="text-2xl font-semibold text-white">{t('admin.draws.title')}</h2>
+          <p className="text-white/70 text-sm mt-1">{t('admin.draws.subtitle')}</p>
         </div>
         <Drawer open={isDrawDrawerOpen} onOpenChange={setIsDrawDrawerOpen}>
           <DrawerTrigger asChild>
             <Button className="bg-[#F39C0A] hover:bg-[#F39C0A]/90 text-black font-medium">
               <Plus className="h-4 w-4 mr-2" />
-              Create Draw
+              {t('admin.draws.createDraw')}
             </Button>
           </DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
-              <DrawerTitle>{selectedDraw ? 'Edit Draw' : 'Create Draw'}</DrawerTitle>
+              <DrawerTitle>{selectedDraw ? t('admin.draws.editDraw') : t('admin.draws.createDraw')}</DrawerTitle>
               <DrawerDescription>
-                {selectedDraw ? 'Edit the draw details.' : 'Create a new draw for users to participate in.'}
+                {selectedDraw ? t('admin.draws.editDrawDescription') : t('admin.draws.createDrawDescription')}
               </DrawerDescription>
             </DrawerHeader>
             <DrawFormContent
@@ -171,30 +173,30 @@ const DrawsManagement: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
           <div className="text-2xl font-bold text-white">{draws.length}</div>
-          <div className="text-white/70 text-sm">Total Draws</div>
+          <div className="text-white/70 text-sm">{t('admin.draws.totalDraws')}</div>
         </div>
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
           <div className="text-2xl font-bold text-green-400">{draws.filter(d => d.status === 'active').length}</div>
-          <div className="text-white/70 text-sm">Active Draws</div>
+          <div className="text-white/70 text-sm">{t('admin.draws.activeDraws')}</div>
         </div>
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
           <div className="text-2xl font-bold text-blue-400">{draws.filter(d => d.status === 'completed').length}</div>
-          <div className="text-white/70 text-sm">Completed</div>
+          <div className="text-white/70 text-sm">{t('admin.draws.completed')}</div>
         </div>
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
           <div className="text-2xl font-bold text-yellow-400">{draws.filter(d => d.status === 'open').length}</div>
-          <div className="text-white/70 text-sm">Open</div>
+          <div className="text-white/70 text-sm">{t('admin.draws.open')}</div>
         </div>
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
           <div className="text-2xl font-bold text-purple-400">{draws.filter(d => d.bannerImage).length}</div>
-          <div className="text-white/70 text-sm">With Images</div>
+          <div className="text-white/70 text-sm">{t('admin.draws.withImages')}</div>
         </div>
       </div>
 
       {/* Table Section */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden">
         <div className="p-4 border-b border-white/10">
-          <h3 className="text-lg font-medium text-white">All Draws</h3>
+          <h3 className="text-lg font-medium text-white">{t('admin.draws.allDraws')}</h3>
         </div>
 
         {/* Responsive Table Container */}

@@ -8,6 +8,7 @@ import SelectNumberModal from './draw-detail/SelectNumberModal';
 import DrawCardImage from './draw-card/DrawCardImage';
 import DrawCardContent from './draw-card/DrawCardContent';
 import { Draw } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 interface DrawCardProps {
   draw: Draw;
@@ -20,6 +21,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw, hideActions = false }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPickingWinner, setIsPickingWinner] = useState(false);
   const [isSelectNumberOpen, setIsSelectNumberOpen] = useState(false);
+  const { t } = useTranslation();
 
   const isAdmin = user?.isAdmin || false;
   const canPickWinner = isAdmin && (draw.status === 'active' || draw.status === 'open') && (draw.numberOfTickets || 0) > 0;
@@ -65,13 +67,13 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw, hideActions = false }) => {
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Pick a Winner</AlertDialogTitle>
+            <AlertDialogTitle>{t('draws.pickWinner.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will randomly select a winner for the draw "{draw.title}". This action cannot be undone.
+              {t('draws.pickWinner.description', { title: draw.title })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPickingWinner}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPickingWinner}>{t('draws.pickWinner.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               disabled={isPickingWinner}
               onClick={(e) => {
@@ -79,7 +81,7 @@ const DrawCard: React.FC<DrawCardProps> = ({ draw, hideActions = false }) => {
                 handlePickWinner();
               }}
             >
-              {isPickingWinner ? 'Selecting Winner...' : 'Confirm'}
+              {isPickingWinner ? t('draws.pickWinner.selecting') : t('draws.pickWinner.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

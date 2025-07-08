@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Upload, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { uploadToS3 } from '@/utils/s3Utils';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileAvatarProps {
   user: {
@@ -33,6 +34,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const unsplashInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const { t } = useTranslation();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -45,8 +47,8 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       setAvatarUrl(url);
 
       toast({
-        title: 'Image uploaded',
-        description: `${name} has been uploaded successfully.`,
+        title: t('profile.messages.imageUploaded'),
+        description: t('profile.messages.imageUploadedDesc', { name }),
       });
 
       if (fileInputRef.current) {
@@ -55,8 +57,8 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Upload failed',
-        description: 'There was an error uploading your avatar.',
+        title: t('profile.messages.uploadFailed'),
+        description: t('profile.messages.uploadFailedDesc'),
       });
       console.error(error);
     } finally {
@@ -68,16 +70,16 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     if (!unsplashInputRef.current?.value) {
       toast({
         variant: 'destructive',
-        title: 'Invalid URL',
-        description: 'Please enter a valid Unsplash image URL.',
+        title: t('profile.messages.invalidUrl'),
+        description: t('profile.messages.invalidUrlDesc'),
       });
       return;
     }
 
     setUnsplashUrl(unsplashInputRef.current.value);
     toast({
-      title: 'Unsplash URL added',
-      description: 'The Unsplash image URL has been saved.',
+      title: t('profile.messages.unsplashUrlAdded'),
+      description: t('profile.messages.unsplashUrlAddedDesc'),
     });
   };
 
@@ -106,7 +108,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       {isEditing && (
         <div className="mt-4 space-y-4">
           <div>
-            <Label htmlFor="avatar">Avatar URL</Label>
+            <Label htmlFor="avatar">{t('profile.avatar.avatarUrl')}</Label>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Input
@@ -114,7 +116,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
                   value={avatarUrl}
                   onChange={(e) => setAvatarUrl(e.target.value)}
                   className="border-gold/30 focus:border-gold"
-                  placeholder="URL will appear here after upload"
+                  placeholder={t('profile.avatar.urlPlaceholder')}
                 />
               </div>
               <Button
@@ -123,7 +125,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload className="h-4 w-4 mr-2" />
-                Upload
+                {t('profile.upload')}
               </Button>
               <input
                 type="file"
@@ -137,7 +139,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
 
           {/* Unsplash URL input */}
           <div>
-            <Label htmlFor="unsplashUrl">Unsplash Image URL</Label>
+            <Label htmlFor="unsplashUrl">{t('profile.avatar.unsplashUrl')}</Label>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Input
@@ -145,7 +147,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
                   ref={unsplashInputRef}
                   defaultValue={unsplashUrl}
                   className="border-gold/30 focus:border-gold"
-                  placeholder="Enter Unsplash image URL"
+                  placeholder={t('profile.avatar.unsplashPlaceholder')}
                 />
               </div>
               <Button
@@ -154,11 +156,11 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
                 onClick={handleUnsplashUrlUpdate}
               >
                 <Image className="h-4 w-4 mr-2" />
-                Add URL
+                {t('profile.avatar.addUrl')}
               </Button>
             </div>
             <p className="mt-1 text-xs text-gray-400">
-              Example: https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead
+              {t('profile.avatar.exampleUrl')}
             </p>
           </div>
 
@@ -166,23 +168,23 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {avatarUrl && (
               <div className="mt-2 w-full overflow-hidden rounded border border-gray-200">
-                <p className="text-xs text-gray-400 p-1 bg-black-light/30">Uploaded Avatar</p>
-                <img src={avatarUrl} alt="Uploaded avatar preview" className="w-full object-cover max-h-40" />
+                <p className="text-xs text-gray-400 p-1 bg-black-light/30">{t('profile.avatar.uploadedAvatar')}</p>
+                <img src={avatarUrl} alt={t('profile.avatar.uploadedAvatar')} className="w-full object-cover max-h-40" />
               </div>
             )}
 
             {unsplashUrl && (
               <div className="mt-2 w-full overflow-hidden rounded border border-gray-200">
-                <p className="text-xs text-gray-400 p-1 bg-black-light/30">Unsplash Avatar</p>
+                <p className="text-xs text-gray-400 p-1 bg-black-light/30">{t('profile.avatar.unsplashAvatar')}</p>
                 <img
                   src={unsplashUrl}
-                  alt="Unsplash avatar preview"
+                  alt={t('profile.avatar.unsplashAvatar')}
                   className="w-full object-cover max-h-40"
                   onError={(e) => {
                     toast({
                       variant: 'destructive',
-                      title: 'Invalid image URL',
-                      description: 'Could not load the Unsplash image. Please check the URL and try again.'
+                      title: t('profile.messages.invalidImageUrl'),
+                      description: t('profile.messages.invalidImageUrlDesc')
                     });
                     e.currentTarget.src = "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead";
                   }}

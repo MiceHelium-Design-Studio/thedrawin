@@ -2,6 +2,7 @@
 import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Camera, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileImageSectionProps {
   imagePreview: string | null;
@@ -18,6 +19,8 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({
   uploading,
   onImageChange
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="relative group">
@@ -57,7 +60,7 @@ const ProfileImageSection: React.FC<ProfileImageSectionProps> = ({
       {uploading && (
         <div className="flex items-center space-x-2">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-          <p className="text-sm text-gray-600">Uploading image...</p>
+          <p className="text-sm text-gray-600">{t('profile.updateProfile.uploadingImage')}</p>
         </div>
       )}
     </div>

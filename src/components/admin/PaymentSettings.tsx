@@ -32,6 +32,7 @@ import * as z from "zod";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Wallet, Plus, Edit, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Wallet address form schema
 const walletFormSchema = z.object({
@@ -58,6 +59,7 @@ interface WalletAddress {
 }
 
 const PaymentSettings: React.FC = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [walletAddresses, setWalletAddresses] = useState<WalletAddress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,8 +111,8 @@ const PaymentSettings: React.FC = () => {
       console.error('Error fetching wallet addresses:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to load wallet addresses.',
+        title: t('common.error'),
+        description: t('admin.payments.failedToLoadWallets'),
       });
     } finally {
       setIsLoading(false);
@@ -139,8 +141,8 @@ const PaymentSettings: React.FC = () => {
         if (error) throw error;
 
         toast({
-          title: "Wallet updated",
-          description: "The wallet address has been successfully updated.",
+          title: t('admin.payments.walletUpdated'),
+          description: t('admin.payments.walletUpdatedDescription'),
         });
       } else {
         // Create new wallet
@@ -157,8 +159,8 @@ const PaymentSettings: React.FC = () => {
         if (error) throw error;
 
         toast({
-          title: "Wallet added",
-          description: "The wallet address has been successfully added.",
+          title: t('admin.payments.walletAdded'),
+          description: t('admin.payments.walletAddedDescription'),
         });
       }
 
@@ -170,8 +172,8 @@ const PaymentSettings: React.FC = () => {
       console.error('Error saving wallet:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Failed to save wallet address.',
+        title: t('common.error'),
+        description: error.message || t('admin.payments.failedToSaveWallet'),
       });
     }
   };
@@ -198,8 +200,8 @@ const PaymentSettings: React.FC = () => {
       if (error) throw error;
 
       toast({
-        title: "Wallet deleted",
-        description: "The wallet address has been successfully deleted.",
+        title: t('admin.payments.walletDeleted'),
+        description: t('admin.payments.walletDeletedDescription'),
       });
 
       fetchWalletAddresses();
@@ -207,8 +209,8 @@ const PaymentSettings: React.FC = () => {
       console.error('Error deleting wallet:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Failed to delete wallet address.',
+        title: t('common.error'),
+        description: error.message || t('admin.payments.failedToDeleteWallet'),
       });
     }
   };
@@ -241,10 +243,10 @@ const PaymentSettings: React.FC = () => {
         <div>
           <h2 className="text-2xl font-semibold flex items-center gap-2 text-white">
             <Wallet className="h-6 w-6" />
-            Payment Settings
+            {t('admin.payments.title')}
           </h2>
           <p className="text-muted-foreground mt-1 text-white">
-            Configure cryptocurrency wallet addresses for receiving payments
+            {t('admin.payments.description')}
           </p>
         </div>
         <Button
@@ -252,7 +254,7 @@ const PaymentSettings: React.FC = () => {
           className="flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
-          Add Wallet
+          {t('admin.payments.addWallet')}
         </Button>
       </div>
 
@@ -261,10 +263,10 @@ const PaymentSettings: React.FC = () => {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>
-              {editingWallet ? 'Edit Wallet Address' : 'Add New Wallet Address'}
+              {editingWallet ? t('admin.payments.editWalletAddress') : t('admin.payments.addNewWalletAddress')}
             </CardTitle>
             <CardDescription>
-              Add or edit cryptocurrency wallet addresses for receiving payments.
+              {t('admin.payments.walletFormDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -276,14 +278,14 @@ const PaymentSettings: React.FC = () => {
                     name="currency_code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cryptocurrency</FormLabel>
+                        <FormLabel>{t('admin.payments.cryptocurrency')}</FormLabel>
                         <Select
                           value={field.value}
                           onValueChange={handleCurrencySelect}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select cryptocurrency" />
+                              <SelectValue placeholder={t('admin.payments.selectCryptocurrency')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -295,7 +297,7 @@ const PaymentSettings: React.FC = () => {
                           </SelectContent>
                         </Select>
                         <FormDescription>
-                          Select the cryptocurrency type
+                          {t('admin.payments.selectCryptocurrencyDescription')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -307,14 +309,14 @@ const PaymentSettings: React.FC = () => {
                     name="network"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Network</FormLabel>
+                        <FormLabel>{t('admin.payments.network')}</FormLabel>
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select network" />
+                              <SelectValue placeholder={t('admin.payments.selectNetwork')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -326,7 +328,7 @@ const PaymentSettings: React.FC = () => {
                           </SelectContent>
                         </Select>
                         <FormDescription>
-                          Select the blockchain network
+                          {t('admin.payments.selectNetworkDescription')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -339,16 +341,16 @@ const PaymentSettings: React.FC = () => {
                   name="wallet_address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Wallet Address</FormLabel>
+                      <FormLabel>{t('admin.payments.walletAddress')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter wallet address..."
+                          placeholder={t('admin.payments.enterWalletAddress')}
                           {...field}
                           className="font-mono text-sm"
                         />
                       </FormControl>
                       <FormDescription>
-                        The cryptocurrency wallet address where payments will be received
+                        {t('admin.payments.walletAddressDescription')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -362,10 +364,10 @@ const PaymentSettings: React.FC = () => {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">
-                          Active Wallet
+                          {t('admin.payments.activeWallet')}
                         </FormLabel>
                         <FormDescription>
-                          Enable this wallet address for receiving payments
+                          {t('admin.payments.activeWalletDescription')}
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -380,10 +382,10 @@ const PaymentSettings: React.FC = () => {
 
                 <div className="flex gap-3">
                   <Button type="submit">
-                    {editingWallet ? 'Update Wallet' : 'Add Wallet'}
+                    {editingWallet ? t('admin.payments.updateWallet') : t('admin.payments.addWallet')}
                   </Button>
                   <Button type="button" variant="outline" onClick={cancelForm}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                 </div>
               </form>
@@ -395,17 +397,17 @@ const PaymentSettings: React.FC = () => {
       {/* Existing Wallet Addresses */}
       <Card>
         <CardHeader>
-          <CardTitle>Configured Wallet Addresses</CardTitle>
+          <CardTitle>{t('admin.payments.configuredWalletAddresses')}</CardTitle>
           <CardDescription>
-            Manage your cryptocurrency wallet addresses for receiving payments.
+            {t('admin.payments.manageWalletAddresses')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {walletAddresses.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Wallet className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No wallet addresses configured yet.</p>
-              <p className="text-sm">Add your first wallet address to start receiving payments.</p>
+              <p>{t('admin.payments.noWalletAddressesConfigured')}</p>
+              <p className="text-sm">{t('admin.payments.addFirstWalletAddress')}</p>
             </div>
           ) : (
             <div className="space-y-4">

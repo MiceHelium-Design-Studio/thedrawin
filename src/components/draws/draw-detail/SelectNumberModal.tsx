@@ -7,6 +7,7 @@ import { useDraws } from '@/context/DrawContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface SelectNumberModalProps {
   draw: Draw;
@@ -31,6 +32,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
   const [searchNumber, setSearchNumber] = useState<string>('');
   const { buyTicket } = useDraws();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   // Generate numbers 1-100
   const availableNumbers = Array.from({ length: 100 }, (_, i) => i + 1);
@@ -107,8 +109,8 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
         console.error('Error fetching draw info:', error);
         toast({
           variant: 'destructive',
-          title: 'Error fetching draw information',
-          description: 'Please try again later.'
+          title: t('draws.messages.errorFetchingInfo'),
+          description: t('draws.messages.errorFetchingInfoDesc')
         });
       }
     };
@@ -120,7 +122,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
       setSelectedPrice(null);
       setSearchNumber(''); // Reset search when modal opens
     }
-  }, [draw?.id, user?.id, isOpen]);
+  }, [draw?.id, user?.id, isOpen, t]);
 
   // Keyboard support for number selection
   useEffect(() => {
@@ -182,8 +184,8 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
     if (userBalance < selectedPrice) {
       toast({
         variant: 'destructive',
-        title: 'Insufficient balance',
-        description: `You need $${selectedPrice} but only have $${userBalance}. Please add funds to your wallet.`
+        title: t('draws.modal.insufficientBalance'),
+        description: t('draws.modal.insufficientBalanceDesc', { needed: selectedPrice, balance: userBalance })
       });
       return;
     }
@@ -193,8 +195,8 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
       await buyTicket(draw.id, selectedNumber, selectedPrice);
 
       toast({
-        title: 'Entry successful!',
-        description: `You've entered ${draw.title} with number ${selectedNumber} for $${selectedPrice}.`
+        title: t('draws.modal.entrySuccessful'),
+        description: t('draws.modal.entrySuccessfulDesc', { title: draw.title, number: selectedNumber, price: selectedPrice })
       });
 
       onSuccess();
@@ -226,30 +228,30 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-white">
             {isUserEntered
-              ? "You've already entered this draw"
+              ? t('draws.modal.alreadyEntered')
               : step === 'number'
-                ? `Choose Your Lucky Number (1-100)`
+                ? t('draws.modal.chooseNumber')
                 : step === 'price'
-                  ? `Select Your Entry Price`
-                  : `Confirm Your Entry`}
+                  ? t('draws.modal.selectPrice')
+                  : t('draws.modal.confirmEntry')}
           </DialogTitle>
         </DialogHeader>
 
         {isUserEntered ? (
           <div className="text-center py-6">
-            <p>You've already entered this draw with a number. Each user can only enter once.</p>
+            <p>{t('draws.modal.alreadyEnteredDesc')}</p>
           </div>
         ) : step === 'number' ? (
           <>
             <div className="mb-4 p-3 bg-muted rounded-lg">
               <p className="text-sm text-white">
-                <span className="font-medium text-white">Your wallet balance:</span> ${userBalance}
+                <span className="font-medium text-white">{t('draws.modal.walletBalance')}</span> ${userBalance}
               </p>
               <p className="text-xs text-muted-foreground mt-1 text-white">
-                Pick a number from 1-100. Taken numbers are grayed out.
+                {t('draws.modal.pickNumber')}
               </p>
               <p className="text-xs text-muted-foreground mt-1 text-white">
-                💡 <strong>Tips:</strong> Use search to find specific numbers, try quick selection buttons, or type numbers on your keyboard!
+                {t('draws.modal.tips')}
               </p>
             </div>
 
@@ -259,7 +261,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 <div className="flex-1 relative">
                   <Input
                     type="text"
-                    placeholder="Search number..."
+                    placeholder={t('draws.modal.searchPlaceholder')}
                     value={searchNumber}
                     onChange={(e) => setSearchNumber(e.target.value.replace(/\D/g, '').slice(0, 3))}
                     className="flex-1"
@@ -270,9 +272,9 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                         const num = parseInt(searchNumber);
                         if (num >= 1 && num <= 100) {
                           return isNumberTaken(num) ? (
-                            <span className="text-xs text-red-500 font-medium">Taken</span>
+                            <span className="text-xs text-red-500 font-medium">{t('draws.modal.legend.taken')}</span>
                           ) : (
-                            <span className="text-xs text-green-500 font-medium">Available</span>
+                            <span className="text-xs text-green-500 font-medium">{t('draws.modal.legend.available')}</span>
                           );
                         }
                         return null;
@@ -287,40 +289,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                   onClick={selectRandomNumber}
                   disabled={getAvailableNumbers().length === 0}
                 >
-                  Random
-                </Button>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => selectLuckyNumber('low')}
-                  className="flex-1"
-                  disabled={getAvailableNumbers().filter(n => n <= 33).length === 0}
-                >
-                  Low (1-33)
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => selectLuckyNumber('middle')}
-                  className="flex-1"
-                  disabled={getAvailableNumbers().filter(n => n >= 34 && n <= 66).length === 0}
-                >
-                  Mid (34-66)
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => selectLuckyNumber('high')}
-                  className="flex-1"
-                  disabled={getAvailableNumbers().filter(n => n >= 67).length === 0}
-                >
-                  High (67-100)
+                  {t('draws.modal.randomNumber')}
                 </Button>
               </div>
             </div>
@@ -348,24 +317,24 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
             {/* Statistics */}
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
               <div className="flex justify-between text-xs text-white">
-                <span>Available: {getAvailableNumbers().length}</span>
-                <span>Taken: {takenNumbers.length}</span>
-                <span>Total: 100</span>
+                <span>{t('draws.modal.statistics.available', { count: getAvailableNumbers().length })}</span>
+                <span>{t('draws.modal.statistics.taken', { count: takenNumbers.length })}</span>
+                <span>{t('draws.modal.statistics.total', { count: 100 })}</span>
               </div>
             </div>
 
             <div className="flex items-center justify-between mt-4 text-xs">
               <div className="flex items-center gap-2 text-white">
                 <div className="h-3 w-3 bg-primary rounded-sm"></div>
-                <span>Selected</span>
+                <span>{t('draws.modal.legend.selected')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 border border-border rounded-sm text-white"></div>
-                <span className='text-white'>Available</span>
+                <span className='text-white'>{t('draws.modal.legend.available')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 bg-gray-300 dark:bg-gray-700 rounded-sm"></div>
-                <span className='text-white'>Taken</span>
+                <span className='text-white'>{t('draws.modal.legend.taken')}</span>
               </div>
             </div>
 
@@ -375,13 +344,13 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 onClick={onClose}
                 disabled={isSubmitting}
               >
-                Cancel
+                {t('draws.modal.cancel')}
               </Button>
               <Button
                 onClick={handleNumberConfirm}
                 disabled={!selectedNumber || isSubmitting}
               >
-                Continue with #{selectedNumber}
+                {t('draws.modal.continueWithNumber', { number: selectedNumber })}
               </Button>
             </DialogFooter>
           </>
@@ -390,14 +359,14 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
             <div className="mt-4">
               <div className="mb-4 p-3 bg-muted rounded-lg">
                 <p className="text-sm">
-                  <span className="font-medium text-white">Selected Number:</span> #{selectedNumber}
+                  <span className="font-medium text-white">{t('draws.modal.selectedNumber')}</span> #{selectedNumber}
                 </p>
                 <p className="text-sm">
-                  <span className="font-medium text-white">Your wallet balance:</span> ${userBalance}
+                  <span className="font-medium text-white">{t('draws.modal.walletBalance')}</span> ${userBalance}
                 </p>
               </div>
 
-              <p className="text-sm font-medium mb-4 text-white">Choose your entry price:</p>
+              <p className="text-sm font-medium mb-4 text-white">{t('draws.modal.chooseEntryPrice')}</p>
               <div className="grid grid-cols-2 gap-3">
                 {draw.ticketPrices.map((price) => (
                   <Button
@@ -410,7 +379,7 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                   >
                     <span className="text-lg font-bold">${price}</span>
                     <span className="text-xs">
-                      {canAffordPrice(price) ? "Entry Fee" : "Insufficient funds"}
+                      {canAffordPrice(price) ? t('draws.modal.entryFee') : t('draws.modal.insufficientFunds')}
                     </span>
                   </Button>
                 ))}
@@ -423,13 +392,13 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 onClick={handleBack}
                 disabled={isSubmitting}
               >
-                Back
+                {t('draws.modal.back')}
               </Button>
               <Button
                 onClick={handlePriceConfirm}
                 disabled={!selectedPrice || !canAffordPrice(selectedPrice || 0) || isSubmitting}
               >
-                Continue with ${selectedPrice}
+                {t('draws.modal.continueWith', { price: selectedPrice })}
               </Button>
             </DialogFooter>
           </>
@@ -437,29 +406,29 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
           <>
             <div className="mt-4">
               <div className="mb-6 p-4 bg-muted rounded-lg text-white">
-                <h3 className="font-semibold mb-3">Entry Summary</h3>
+                <h3 className="font-semibold mb-3">{t('draws.modal.entrySummary')}</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>Draw:</span>
+                    <span>{t('draws.modal.draw')}</span>
                     <span className="font-medium">{draw.title}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Your Number:</span>
+                    <span>{t('draws.modal.yourNumber')}</span>
                     <span className="font-bold text-primary">#{selectedNumber}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Entry Fee:</span>
+                    <span>{t('draws.modal.entryFee')}:</span>
                     <span className="font-medium">${selectedPrice}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Remaining Balance:</span>
+                    <span>{t('draws.modal.remainingBalance')}</span>
                     <span className="font-medium">${userBalance - (selectedPrice || 0)}</span>
                   </div>
                 </div>
               </div>
 
               <p className="text-sm text-muted-foreground mb-4 text-white">
-                By confirming, you agree to enter this draw with the selected number and pay the entry fee.
+                {t('draws.modal.confirmText')}
               </p>
             </div>
 
@@ -469,14 +438,14 @@ const SelectNumberModal: React.FC<SelectNumberModalProps> = ({
                 onClick={handleBack}
                 disabled={isSubmitting}
               >
-                Back
+                {t('draws.modal.back')}
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
                 className="bg-green-600 hover:bg-green-700"
               >
-                {isSubmitting ? "Processing..." : `Confirm Entry`}
+                {isSubmitting ? t('draws.modal.processing') : t('draws.modal.confirmEntryButton')}
               </Button>
             </DialogFooter>
           </>

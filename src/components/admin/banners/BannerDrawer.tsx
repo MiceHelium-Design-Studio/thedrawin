@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Banner } from '@/types';
 import { BannerFormContent } from '../BannerFormContent';
+import { useTranslation } from 'react-i18next';
 
 interface BannerDrawerProps {
   isOpen: boolean;
@@ -34,19 +35,21 @@ const BannerDrawer: React.FC<BannerDrawerProps> = ({
   setIsUploading,
   onSuccess
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerTrigger asChild>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
-          Create Banner
+          {t('admin.banners.createBanner')}
         </Button>
       </DrawerTrigger>
       <DrawerContent className="max-h-[90vh]">
         <DrawerHeader className="pb-3">
-          <DrawerTitle className="text-lg text-white">{selectedBanner ? 'Edit Banner' : 'Create Banner'}</DrawerTitle>
+          <DrawerTitle className="text-lg text-white">{selectedBanner ? t('admin.banners.editBanner') : t('admin.banners.createBanner')}</DrawerTitle>
           <DrawerDescription className="text-sm text-white/80">
-            {selectedBanner ? 'Edit the banner details.' : 'Create a new banner to display on the site.'}
+            {selectedBanner ? t('admin.banners.editBannerDescription') : t('admin.banners.createBannerDescription')}
           </DrawerDescription>
         </DrawerHeader>
         <BannerFormContent

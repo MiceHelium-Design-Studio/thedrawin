@@ -6,10 +6,12 @@ import { useDraws } from '../../context/DrawContext';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const RecentWinnersSection: React.FC = () => {
   const { draws } = useDraws();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   // Get recent completed draws with winners (limit to 3)
   const recentWinners = draws
@@ -29,7 +31,7 @@ const RecentWinnersSection: React.FC = () => {
               <Trophy className="h-6 w-6 text-[#F39C0A]" />
             </div>
             <h2 className="text-4xl font-bold text-white tracking-tight">
-              Recent <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent">Winners</span>
+              {t('home.recentWinners.title')} <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent">{t('home.recentWinners.winners')}</span>
             </h2>
           </div>
           <div className="w-24 h-1 bg-gradient-to-r from-[#F39C0A] to-[#06B6D4] rounded-full mx-auto mb-8" />
@@ -39,15 +41,15 @@ const RecentWinnersSection: React.FC = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-[#F39C0A]/20 to-[#06B6D4]/10 rounded-full flex items-center justify-center mx-auto border border-[#F39C0A]/20">
                 <Trophy className="h-10 w-10 text-[#F39C0A]" />
               </div>
-              <h3 className="text-2xl font-bold text-white">Champions Hall Coming Soon</h3>
+              <h3 className="text-2xl font-bold text-white">{t('home.recentWinners.championsHall')}</h3>
               <p className="text-slate-400 text-lg leading-relaxed">
-                The first champions will be crowned soon. Join the competition and make history!
+                {t('home.recentWinners.championsDescription')}
               </p>
               <Button 
                 onClick={() => navigate('/draws')}
                 className="luxury-button mt-6"
               >
-                View Active Draws
+                {t('home.recentWinners.viewActiveDraws')}
               </Button>
             </div>
           </div>
@@ -68,12 +70,12 @@ const RecentWinnersSection: React.FC = () => {
               <Trophy className="h-6 w-6 text-[#F39C0A]" />
             </div>
             <h2 className="text-4xl font-bold text-white tracking-tight">
-              Recent <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent">Winners</span>
+              {t('home.recentWinners.title')} <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent">{t('home.recentWinners.winners')}</span>
             </h2>
           </div>
           <div className="w-24 h-1 bg-gradient-to-r from-[#F39C0A] to-[#06B6D4] rounded-full mx-auto mb-6" />
           <p className="text-slate-400 text-xl leading-relaxed">
-            Celebrating our latest champions and their incredible victories
+            {t('home.recentWinners.subtitle')}
           </p>
         </div>
 
@@ -110,14 +112,14 @@ const RecentWinnersSection: React.FC = () => {
                 </h3>
                 
                 <div className="mb-8">
-                  <p className="text-sm text-slate-400 mb-2">🏆 Champion</p>
+                  <p className="text-sm text-slate-400 mb-2">{t('home.recentWinners.champion')}</p>
                   <p className="font-bold text-white text-xl bg-gradient-to-r from-[#F39C0A] to-[#FFD700] bg-clip-text text-transparent">
                     {draw.winner}
                   </p>
                 </div>
                 
                 <div className="bg-gradient-to-br from-[#F39C0A]/10 to-[#06B6D4]/5 rounded-xl p-6 text-center border border-[#F39C0A]/20">
-                  <p className="text-sm text-slate-400 mb-2">Prize Value</p>
+                  <p className="text-sm text-slate-400 mb-2">{t('home.recentWinners.prizeValue')}</p>
                   <p className="font-bold text-[#F39C0A] text-2xl">
                     ${Math.max(...draw.ticketPrices).toLocaleString()}
                   </p>
@@ -134,7 +136,7 @@ const RecentWinnersSection: React.FC = () => {
             onClick={() => navigate('/winners')}
             className="premium-outline-button group"
           >
-            <span className="relative z-10">View All Winners</span>
+            <span className="relative z-10">{t('home.recentWinners.viewAllWinners')}</span>
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F39C0A]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </Button>
         </div>

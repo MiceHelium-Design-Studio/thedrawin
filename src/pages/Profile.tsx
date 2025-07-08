@@ -9,10 +9,12 @@ import UserTickets from '../components/profile/UserTickets';
 import WalletSection from '../components/profile/WalletSection';
 import UpdateProfileForm from '../components/profile/UpdateProfileForm';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 const Profile: React.FC = () => {
   const { user, loading: authLoading, updateProfile, addFunds, logout } = useAuth();
   const [activeTab, setActiveTab] = React.useState<'overview' | 'tickets' | 'wallet' | 'settings'>('overview');
+  const { t } = useTranslation();
 
   if (!user) {
     return (
@@ -23,7 +25,7 @@ const Profile: React.FC = () => {
               <User className="w-8 h-8 text-[#F39C0A]" />
             </div>
             <p className="text-slate-400 text-lg">
-              Please log in to view your profile.
+              {t('profile.page.pleaseLogin')}
             </p>
           </CardContent>
         </div>
@@ -36,10 +38,10 @@ const Profile: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: User },
-    { id: 'tickets', label: 'My Tickets', icon: Trophy },
-    { id: 'wallet', label: 'Wallet', icon: Wallet },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'overview', label: t('profile.page.overview'), icon: User },
+    { id: 'tickets', label: t('profile.page.myTickets'), icon: Trophy },
+    { id: 'wallet', label: t('profile.page.wallet'), icon: Wallet },
+    { id: 'settings', label: t('profile.page.settings'), icon: Settings },
   ] as const;
 
   return (
@@ -71,7 +73,7 @@ const Profile: React.FC = () => {
                   <div className="absolute -top-2 -right-2 z-10">
                     <Badge className="bg-[#F39C0A] text-black text-xs px-3 py-1 rounded-full font-bold shadow-gold">
                       <Crown className="w-3 h-3 mr-1" />
-                      Admin
+                      {t('profile.page.admin')}
                     </Badge>
                   </div>
                 )}
@@ -94,7 +96,7 @@ const Profile: React.FC = () => {
                   className="premium-outline-button group"
                 >
                   <Edit3 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
-                  Edit Profile
+                  {t('profile.page.editProfile')}
                 </Button>
 
                 <Button
@@ -104,7 +106,7 @@ const Profile: React.FC = () => {
                   className="border-red-500/50 text-white hover:bg-red-500/20 hover:text-white hover:border-red-400 backdrop-blur-sm transition-all duration-200 group"
                 >
                   <LogOut className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                  Sign Out
+                  {t('profile.page.signOut')}
                 </Button>
               </div>
             </div>
@@ -140,16 +142,16 @@ const Profile: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2 text-white">
                       <User className="h-5 w-5 text-[#F39C0A] group-hover:scale-110 transition-transform" />
-                      <span>Account Information</span>
+                      <span>{t('profile.page.accountInformation')}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Email</label>
+                      <label className="text-sm font-semibold text-slate-400 uppercase tracking-wide">{t('auth.email')}</label>
                       <p className="text-white font-medium text-lg">{user.email}</p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Member since</label>
+                      <label className="text-sm font-semibold text-slate-400 uppercase tracking-wide">{t('profile.page.memberSince')}</label>
                       <p className="text-white font-medium text-lg">
                         {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',
@@ -159,10 +161,10 @@ const Profile: React.FC = () => {
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Account Type</label>
+                      <label className="text-sm font-semibold text-slate-400 uppercase tracking-wide">{t('profile.page.accountType')}</label>
                       <div className="flex items-center space-x-2">
                         <p className="text-white font-medium text-lg">
-                          {user.isAdmin ? 'Administrator' : 'Premium Member'}
+                          {user.isAdmin ? t('profile.page.administrator') : t('profile.page.premiumMember')}
                         </p>
                         {user.isAdmin && <Crown className="w-5 h-5 text-[#F39C0A]" />}
                       </div>
@@ -174,20 +176,20 @@ const Profile: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2 text-white">
                       <Trophy className="h-5 w-5 text-[#F39C0A] group-hover:scale-110 transition-transform" />
-                      <span>Activity Summary</span>
+                      <span>{t('profile.page.activitySummary')}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="flex justify-between items-center py-2 border-b border-white/10">
-                      <span className="text-slate-400 font-medium">Draws Entered</span>
+                      <span className="text-slate-400 font-medium">{t('profile.page.drawsEntered')}</span>
                       <span className="font-bold text-white text-lg">-</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-white/10">
-                      <span className="text-slate-400 font-medium">Total Spent</span>
+                      <span className="text-slate-400 font-medium">{t('profile.page.totalSpent')}</span>
                       <span className="font-bold text-white text-lg">$0.00</span>
                     </div>
                     <div className="flex justify-between items-center py-2">
-                      <span className="text-slate-400 font-medium">Prizes Won</span>
+                      <span className="text-slate-400 font-medium">{t('profile.page.prizesWon')}</span>
                       <span className="font-bold text-[#F39C0A] text-lg">0</span>
                     </div>
                   </CardContent>
@@ -198,7 +200,7 @@ const Profile: React.FC = () => {
             {activeTab === 'tickets' && (
               <Card className="luxury-card">
                 <CardHeader>
-                  <CardTitle className="text-white">My Tickets</CardTitle>
+                  <CardTitle className="text-white">{t('profile.page.myTickets')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <UserTickets />
@@ -209,7 +211,7 @@ const Profile: React.FC = () => {
             {activeTab === 'wallet' && (
               <Card className="luxury-card">
                 <CardHeader>
-                  <CardTitle className="text-white">Wallet & Payments</CardTitle>
+                  <CardTitle className="text-white">{t('profile.page.walletPayments')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <WalletSection
@@ -230,16 +232,16 @@ const Profile: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2 text-white">
                       <Settings className="h-5 w-5 text-[#F39C0A]" />
-                      <span>Account Actions</span>
+                      <span>{t('profile.page.accountActions')}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg mt-5">
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                          <h4 className="text-white font-medium">Sign Out</h4>
+                          <h4 className="text-white font-medium">{t('profile.page.signOut')}</h4>
                           <p className="text-slate-400 text-sm">
-                            Sign out of your account on this device
+                            {t('profile.page.signOutDescription')}
                           </p>
                         </div>
                         <Button
@@ -248,7 +250,7 @@ const Profile: React.FC = () => {
                           className="border-red-500/30 text-black hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50 transition-all duration-200"
                         >
                           <LogOut className="w-4 h-4 mr-2" />
-                          Sign Out
+                          {t('profile.page.signOut')}
                         </Button>
                       </div>
                     </div>

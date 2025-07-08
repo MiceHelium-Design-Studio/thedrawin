@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import DrawCard from '../draws/DrawCard';
 import { Draw } from '@/types';
+import { useTranslation } from 'react-i18next';
 interface AllDrawsSectionProps {
   draws: Draw[];
   onViewAll: () => void;
@@ -12,6 +13,7 @@ const AllDrawsSection: React.FC<AllDrawsSectionProps> = ({
   onViewAll
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   return <section className="mb-8 relative">
       {/* Premium section background */}
       <div className="absolute inset-0 bg-gradient-to-l from-[#06B6D4]/5 via-transparent to-[#F39C0A]/5 rounded-2xl" />
@@ -42,15 +44,15 @@ const AllDrawsSection: React.FC<AllDrawsSectionProps> = ({
                 
                 <div className="space-y-3">
                   <h3 className="text-xl font-bold text-white uppercase tracking-wide">
-                    NO ACTIVE DRAWS
+                    {t('home.noActiveDraws.title')}
                   </h3>
                   <p className="text-slate-400 max-w-md mx-auto">
-                    New exciting draws are being prepared. Stay tuned for amazing opportunities.
+                    {t('home.noActiveDraws.description')}
                   </p>
                 </div>
                 
                 <Button variant="outline" onClick={() => navigate('/notifications')} className="premium-outline-button group mt-6">
-                  <span className="relative z-10">ENABLE NOTIFICATIONS</span>
+                  <span className="relative z-10">{t('home.noActiveDraws.enableNotifications')}</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F39C0A]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Button>
               </div>

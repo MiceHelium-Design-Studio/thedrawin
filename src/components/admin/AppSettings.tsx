@@ -30,6 +30,7 @@ import * as z from "zod";
 import { useToast } from '@/hooks/use-toast';
 import { Paintbrush, Type, Palette, Globe, Wallet } from 'lucide-react';
 import PaymentSettings from './PaymentSettings';
+import { useTranslation } from 'react-i18next';
 
 // Color Scheme Form Schema
 const colorSchemeFormSchema = z.object({
@@ -74,6 +75,7 @@ const appSettingsFormSchema = z.object({
 });
 
 const AppSettings: React.FC = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('colors');
 
@@ -119,8 +121,8 @@ const AppSettings: React.FC = () => {
     document.documentElement.style.setProperty('--background', data.backgroundColor);
 
     toast({
-      title: "Colors updated",
-      description: "The color scheme has been successfully updated.",
+      title: t('admin.settings.colorsUpdated'),
+      description: t('admin.settings.colorSchemeUpdated'),
     });
   };
 
@@ -129,8 +131,8 @@ const AppSettings: React.FC = () => {
     // Here you would save font settings and potentially add font links to the document head
 
     toast({
-      title: "Fonts updated",
-      description: "The font settings have been successfully updated.",
+      title: t('admin.settings.fontsUpdated'),
+      description: t('admin.settings.fontSettingsUpdated'),
     });
   };
 
@@ -139,43 +141,43 @@ const AppSettings: React.FC = () => {
     // Here you would save app settings
 
     toast({
-      title: "App settings updated",
-      description: "The application settings have been successfully updated.",
+      title: t('admin.settings.appSettingsUpdated'),
+      description: t('admin.settings.applicationSettingsUpdated'),
     });
   };
 
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-white">App Settings</h2>
+        <h2 className="text-2xl font-semibold text-white">{t('admin.settings.title')}</h2>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 mb-8">
           <TabsTrigger value="colors" className="flex items-center gap-2 text-white">
             <Palette className="h-4 w-4" />
-            Colors
+            {t('admin.settings.colors')}
           </TabsTrigger>
           <TabsTrigger value="fonts" className="flex items-center gap-2 text-white">
             <Type className="h-4 w-4" />
-            Fonts
+            {t('admin.settings.fonts')}
           </TabsTrigger>
           <TabsTrigger value="general" className="flex items-center gap-2 text-white">
             <Globe className="h-4 w-4" />
-            General
+            {t('admin.settings.general')}
           </TabsTrigger>
           <TabsTrigger value="payments" className="flex items-center gap-2 text-white">
             <Wallet className="h-4 w-4" />
-            Payments
+            {t('admin.settings.payments')}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="colors">
           <Card>
             <CardHeader>
-              <CardTitle>Color Scheme</CardTitle>
+              <CardTitle>{t('admin.settings.colorScheme')}</CardTitle>
               <CardDescription>
-                Customize the application's color scheme. Changes will be applied site-wide.
+                {t('admin.settings.colorSchemeDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -187,7 +189,7 @@ const AppSettings: React.FC = () => {
                       name="primaryColor"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Primary Color</FormLabel>
+                          <FormLabel>{t('admin.settings.primaryColor')}</FormLabel>
                           <div className="flex gap-2">
                             <FormControl>
                               <Input type="text" placeholder="#8B5CF6" {...field} />
@@ -200,7 +202,7 @@ const AppSettings: React.FC = () => {
                             />
                           </div>
                           <FormDescription>
-                            Used for primary buttons and key UI elements
+                            {t('admin.settings.primaryColorDescription')}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -212,7 +214,7 @@ const AppSettings: React.FC = () => {
                       name="secondaryColor"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Secondary Color</FormLabel>
+                          <FormLabel>{t('admin.settings.secondaryColor')}</FormLabel>
                           <div className="flex gap-2">
                             <FormControl>
                               <Input type="text" placeholder="#D946EF" {...field} />
@@ -225,7 +227,7 @@ const AppSettings: React.FC = () => {
                             />
                           </div>
                           <FormDescription>
-                            Used for secondary buttons and accents
+                            {t('admin.settings.secondaryColorDescription')}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -237,7 +239,7 @@ const AppSettings: React.FC = () => {
                       name="accentColor"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Accent Color</FormLabel>
+                          <FormLabel>{t('admin.settings.accentColor')}</FormLabel>
                           <div className="flex gap-2">
                             <FormControl>
                               <Input type="text" placeholder="#F97316" {...field} />
@@ -250,7 +252,7 @@ const AppSettings: React.FC = () => {
                             />
                           </div>
                           <FormDescription>
-                            Used for highlights and important notifications
+                            {t('admin.settings.accentColorDescription')}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -262,7 +264,7 @@ const AppSettings: React.FC = () => {
                       name="backgroundColor"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Background Color</FormLabel>
+                          <FormLabel>{t('admin.settings.backgroundColor')}</FormLabel>
                           <div className="flex gap-2">
                             <FormControl>
                               <Input type="text" placeholder="#FFFFFF" {...field} />
@@ -275,7 +277,7 @@ const AppSettings: React.FC = () => {
                             />
                           </div>
                           <FormDescription>
-                            Main background color for the application
+                            {t('admin.settings.backgroundColorDescription')}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -284,36 +286,36 @@ const AppSettings: React.FC = () => {
                   </div>
 
                   <div className="mt-6">
-                    <h4 className="font-medium mb-2">Color Preview</h4>
+                    <h4 className="font-medium mb-2">{t('admin.settings.colorPreview')}</h4>
                     <div className="grid grid-cols-4 gap-2">
                       <div
                         className="h-16 rounded-md flex items-center justify-center text-white font-medium"
                         style={{ backgroundColor: colorSchemeForm.getValues().primaryColor }}
                       >
-                        Primary
+                        {t('admin.settings.primary')}
                       </div>
                       <div
                         className="h-16 rounded-md flex items-center justify-center text-white font-medium"
                         style={{ backgroundColor: colorSchemeForm.getValues().secondaryColor }}
                       >
-                        Secondary
+                        {t('admin.settings.secondary')}
                       </div>
                       <div
                         className="h-16 rounded-md flex items-center justify-center text-white font-medium"
                         style={{ backgroundColor: colorSchemeForm.getValues().accentColor }}
                       >
-                        Accent
+                        {t('admin.settings.accent')}
                       </div>
                       <div
                         className="h-16 rounded-md flex items-center justify-center border font-medium"
                         style={{ backgroundColor: colorSchemeForm.getValues().backgroundColor }}
                       >
-                        Background
+                        {t('admin.settings.background')}
                       </div>
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full">Save Color Settings</Button>
+                  <Button type="submit" className="w-full">{t('admin.settings.saveColorSettings')}</Button>
                 </form>
               </Form>
             </CardContent>
@@ -323,9 +325,9 @@ const AppSettings: React.FC = () => {
         <TabsContent value="fonts">
           <Card>
             <CardHeader>
-              <CardTitle>Font Settings</CardTitle>
+              <CardTitle>{t('admin.settings.fontSettings')}</CardTitle>
               <CardDescription>
-                Configure the typography settings for the application.
+                {t('admin.settings.fontSettingsDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -337,12 +339,12 @@ const AppSettings: React.FC = () => {
                       name="primaryFont"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Primary Font</FormLabel>
+                          <FormLabel>{t('admin.settings.primaryFont')}</FormLabel>
                           <FormControl>
                             <Input placeholder="Inter" {...field} />
                           </FormControl>
                           <FormDescription>
-                            Main font for body text
+                            {t('admin.settings.primaryFontDescription')}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -354,12 +356,12 @@ const AppSettings: React.FC = () => {
                       name="headingFont"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Heading Font</FormLabel>
+                          <FormLabel>{t('admin.settings.headingFont')}</FormLabel>
                           <FormControl>
                             <Input placeholder="Poppins" {...field} />
                           </FormControl>
                           <FormDescription>
-                            Font used for headings and titles
+                            {t('admin.settings.headingFontDescription')}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -371,12 +373,12 @@ const AppSettings: React.FC = () => {
                       name="fontSize"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Base Font Size</FormLabel>
+                          <FormLabel>{t('admin.settings.baseFontSize')}</FormLabel>
                           <FormControl>
                             <Input placeholder="16px" {...field} />
                           </FormControl>
                           <FormDescription>
-                            Default size for body text (e.g. 16px)
+                            {t('admin.settings.baseFontSizeDescription')}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -385,13 +387,13 @@ const AppSettings: React.FC = () => {
                   </div>
 
                   <div className="mt-6">
-                    <h4 className="font-medium mb-2">Typography Preview</h4>
+                    <h4 className="font-medium mb-2">{t('admin.settings.typographyPreview')}</h4>
                     <div className="space-y-4 border p-4 rounded-md">
                       <h1
                         className="text-2xl font-bold"
                         style={{ fontFamily: fontSettingsForm.getValues().headingFont }}
                       >
-                        Heading Text Example
+                        {t('admin.settings.headingTextExample')}
                       </h1>
                       <p
                         style={{
@@ -399,12 +401,12 @@ const AppSettings: React.FC = () => {
                           fontSize: fontSettingsForm.getValues().fontSize,
                         }}
                       >
-                        This is an example of body text using the selected font settings. The quick brown fox jumps over the lazy dog.
+                        {t('admin.settings.bodyTextExample')}
                       </p>
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full">Save Font Settings</Button>
+                  <Button type="submit" className="w-full">{t('admin.settings.saveFontSettings')}</Button>
                 </form>
               </Form>
             </CardContent>
@@ -414,9 +416,9 @@ const AppSettings: React.FC = () => {
         <TabsContent value="general">
           <Card>
             <CardHeader>
-              <CardTitle>General Settings</CardTitle>
+              <CardTitle>{t('admin.settings.generalSettings')}</CardTitle>
               <CardDescription>
-                Configure general application settings.
+                {t('admin.settings.generalSettingsDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -427,12 +429,12 @@ const AppSettings: React.FC = () => {
                     name="siteName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Site Name</FormLabel>
+                        <FormLabel>{t('admin.settings.siteName')}</FormLabel>
                         <FormControl>
                           <Input placeholder="Gold Drawin" {...field} />
                         </FormControl>
                         <FormDescription>
-                          The name of your application
+                          {t('admin.settings.siteNameDescription')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -444,12 +446,12 @@ const AppSettings: React.FC = () => {
                     name="siteDescription"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Site Description</FormLabel>
+                        <FormLabel>{t('admin.settings.siteDescription')}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Participate in exclusive gold coin draws and win big prizes!" {...field} />
+                          <Input placeholder={t('admin.settings.siteDescriptionPlaceholder')} {...field} />
                         </FormControl>
                         <FormDescription>
-                          A brief description of your application
+                          {t('admin.settings.siteDescriptionDescription')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -461,19 +463,19 @@ const AppSettings: React.FC = () => {
                     name="contactEmail"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Contact Email</FormLabel>
+                        <FormLabel>{t('admin.settings.contactEmail')}</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="support@golddrawin.com" {...field} />
+                          <Input type="email" placeholder={t('admin.settings.contactEmailPlaceholder')} {...field} />
                         </FormControl>
                         <FormDescription>
-                          Main contact email for support inquiries
+                          {t('admin.settings.contactEmailDescription')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <Button type="submit" className="w-full">Save General Settings</Button>
+                  <Button type="submit" className="w-full">{t('admin.settings.saveGeneralSettings')}</Button>
                 </form>
               </Form>
             </CardContent>

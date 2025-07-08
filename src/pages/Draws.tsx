@@ -9,6 +9,7 @@ import DrawCard from '../components/draws/DrawCard';
 import { useDraws } from '../context/DrawContext';
 import { useAuth } from '../context/AuthContext';
 import { Search, Filter, ArrowLeft, Trophy, Target, CheckCircle, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Draws: React.FC = () => {
   const { draws, loading, error } = useDraws();
@@ -17,12 +18,13 @@ const Draws: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const { t } = useTranslation();
 
   // Filter and sort draws
   const filteredAndSortedDraws = useMemo(() => {
     if (!draws) return [];
 
-    let filtered = draws.filter(draw => {
+    const filtered = draws.filter(draw => {
       const matchesSearch = draw.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         draw.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' || draw.status === statusFilter;
@@ -94,10 +96,10 @@ const Draws: React.FC = () => {
             <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <div className="text-4xl">⚠️</div>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">Failed to Load Draws</h3>
-            <p className="text-slate-400 mb-8">There was an error loading the draws. Please try again.</p>
+            <h3 className="text-2xl font-bold text-white mb-4">{t('draws.page.failedToLoad')}</h3>
+            <p className="text-slate-400 mb-8">{t('draws.page.errorMessage')}</p>
             <Button onClick={() => window.location.reload()} className="luxury-button">
-              Retry
+              {t('draws.page.retry')}
             </Button>
           </div>
         </div>
@@ -121,7 +123,7 @@ const Draws: React.FC = () => {
             className="mb-6 pl-0 flex items-center text-slate-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Home
+            {t('draws.page.backToHome')}
           </Button>
 
           <div className="text-center mb-8">
@@ -130,12 +132,12 @@ const Draws: React.FC = () => {
                 <Target className="h-6 w-6 text-[#F39C0A]" />
               </div>
               <h1 className="text-4xl font-bold text-white tracking-tight">
-                All <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent">Draws</span>
+                {t('draws.page.allDraws')} <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent">{t('draws.page.draws')}</span>
               </h1>
             </div>
             <div className="w-24 h-1 bg-gradient-to-r from-[#F39C0A] to-[#06B6D4] rounded-full mx-auto mb-6" />
             <p className="text-slate-400 text-xl leading-relaxed max-w-2xl mx-auto">
-              Discover all available draws and find your next opportunity to win
+              {t('draws.page.subtitle')}
             </p>
           </div>
 
@@ -147,7 +149,7 @@ const Draws: React.FC = () => {
                   <Target className="h-6 w-6 text-blue-400" />
                 </div>
                 <div className="text-2xl font-bold text-white">{statusCounts.total}</div>
-                <div className="text-slate-400 text-sm">Total Draws</div>
+                <div className="text-slate-400 text-sm">{t('draws.page.totalDraws')}</div>
               </CardContent>
             </Card>
 
@@ -157,7 +159,7 @@ const Draws: React.FC = () => {
                   <Trophy className="h-6 w-6 text-green-400" />
                 </div>
                 <div className="text-2xl font-bold text-green-400">{statusCounts.active}</div>
-                <div className="text-slate-400 text-sm">Active</div>
+                <div className="text-slate-400 text-sm">{t('draws.page.active')}</div>
               </CardContent>
             </Card>
 
@@ -167,7 +169,7 @@ const Draws: React.FC = () => {
                   <Clock className="h-6 w-6 text-yellow-400" />
                 </div>
                 <div className="text-2xl font-bold text-yellow-400">{statusCounts.open}</div>
-                <div className="text-slate-400 text-sm">Open</div>
+                <div className="text-slate-400 text-sm">{t('draws.page.open')}</div>
               </CardContent>
             </Card>
 
@@ -177,7 +179,7 @@ const Draws: React.FC = () => {
                   <CheckCircle className="h-6 w-6 text-purple-400" />
                 </div>
                 <div className="text-2xl font-bold text-purple-400">{statusCounts.completed}</div>
-                <div className="text-slate-400 text-sm">Completed</div>
+                <div className="text-slate-400 text-sm">{t('draws.page.completed')}</div>
               </CardContent>
             </Card>
           </div>
@@ -188,7 +190,7 @@ const Draws: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center text-white mb-5">
               <Filter className="h-5 w-5 mr-2 text-[#F39C0A]" />
-              Filter & Search
+              {t('draws.page.filterAndSearch')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -196,7 +198,7 @@ const Draws: React.FC = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="Search draws..."
+                  placeholder={t('draws.page.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-400"
@@ -205,27 +207,27 @@ const Draws: React.FC = () => {
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Filter by status" />
+                  <SelectValue placeholder={t('draws.page.filterByStatus')} />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="open">Open</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="all">{t('draws.page.allStatus')}</SelectItem>
+                  <SelectItem value="active">{t('draws.page.active')}</SelectItem>
+                  <SelectItem value="open">{t('draws.page.open')}</SelectItem>
+                  <SelectItem value="completed">{t('draws.page.completed')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Sort by" />
+                  <SelectValue placeholder={t('draws.page.sortBy')} />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="ending_soon">Ending Soon</SelectItem>
-                  <SelectItem value="title">Title A-Z</SelectItem>
-                  <SelectItem value="price_high">Highest Prize</SelectItem>
-                  <SelectItem value="price_low">Lowest Prize</SelectItem>
+                  <SelectItem value="newest">{t('draws.page.newestFirst')}</SelectItem>
+                  <SelectItem value="oldest">{t('draws.page.oldestFirst')}</SelectItem>
+                  <SelectItem value="ending_soon">{t('draws.page.endingSoon')}</SelectItem>
+                  <SelectItem value="title">{t('draws.page.titleAZ')}</SelectItem>
+                  <SelectItem value="price_high">{t('draws.page.highestPrize')}</SelectItem>
+                  <SelectItem value="price_low">{t('draws.page.lowestPrize')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -234,12 +236,12 @@ const Draws: React.FC = () => {
             <div className="flex flex-wrap gap-2 mt-4">
               {searchTerm && (
                 <Badge variant="secondary" className="bg-[#F39C0A]/20 text-[#F39C0A] border-[#F39C0A]/30">
-                  Search: "{searchTerm}"
+                  {t('draws.page.search')}: "{searchTerm}"
                 </Badge>
               )}
               {statusFilter !== 'all' && (
                 <Badge variant="secondary" className="bg-[#06B6D4]/20 text-[#06B6D4] border-[#06B6D4]/30">
-                  Status: {statusFilter}
+                  {t('draws.page.status')}: {statusFilter}
                 </Badge>
               )}
             </div>
@@ -252,11 +254,11 @@ const Draws: React.FC = () => {
             <div className="w-20 h-20 bg-gradient-to-br from-[#F39C0A]/20 to-[#06B6D4]/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#F39C0A]/20">
               <Search className="h-10 w-10 text-[#F39C0A]" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">No Draws Found</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">{t('draws.page.noDrawsFound')}</h3>
             <p className="text-slate-400 mb-8">
               {searchTerm || statusFilter !== 'all'
-                ? "Try adjusting your search criteria or filters."
-                : "No draws are currently available. Check back soon!"
+                ? t('draws.page.tryAdjusting')
+                : t('draws.page.noDrawsMessage')
               }
             </p>
             {(searchTerm || statusFilter !== 'all') && (
@@ -267,7 +269,7 @@ const Draws: React.FC = () => {
                 }}
                 className="luxury-button"
               >
-                Clear Filters
+                {t('draws.page.clearFilters')}
               </Button>
             )}
           </div>
@@ -289,7 +291,7 @@ const Draws: React.FC = () => {
         {filteredAndSortedDraws.length > 0 && (
           <div className="text-center mt-12">
             <p className="text-slate-400">
-              Showing {filteredAndSortedDraws.length} of {draws?.length || 0} draws
+              {t('draws.page.showingResults', { count: filteredAndSortedDraws.length, total: draws?.length || 0 })}
             </p>
           </div>
         )}

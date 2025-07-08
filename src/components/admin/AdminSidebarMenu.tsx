@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Images
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AdminSidebarMenuProps {
   activeSection: string;
@@ -25,18 +26,20 @@ const AdminSidebarMenu: React.FC<AdminSidebarMenuProps> = ({
   onSectionChange,
   activeTab
 }) => {
+  const { t } = useTranslation();
+  
   const menuItems = [
-    { id: 'statistics', label: 'Statistics', icon: BarChart3 },
-    { id: 'draws', label: 'Draws', icon: Trophy },
-    { id: 'tickets', label: 'Tickets', icon: Ticket },
-    { id: 'banners', label: 'Banners', icon: Image },
-    { id: 'media', label: 'Media Library', icon: Images },
-    { id: 'users', label: 'Users', icon: Users },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'notification-test', label: 'Test Notifications', icon: TestTube },
-    { id: 'payments', label: 'Payment Settings', icon: CreditCard },
-    { id: 'push-notifications', label: 'Push Notifications', icon: MessageSquare },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'statistics', label: t('admin.sidebar.statistics'), icon: BarChart3 },
+    { id: 'draws', label: t('admin.sidebar.draws'), icon: Trophy },
+    { id: 'tickets', label: t('admin.sidebar.tickets'), icon: Ticket },
+    { id: 'banners', label: t('admin.sidebar.banners'), icon: Image },
+    { id: 'media', label: t('admin.sidebar.mediaLibrary'), icon: Images },
+    { id: 'users', label: t('admin.sidebar.users'), icon: Users },
+    { id: 'notifications', label: t('admin.sidebar.notifications'), icon: Bell },
+    { id: 'notification-test', label: t('admin.sidebar.testNotifications'), icon: TestTube },
+    { id: 'payments', label: t('admin.sidebar.paymentSettings'), icon: CreditCard },
+    { id: 'push-notifications', label: t('admin.sidebar.pushNotifications'), icon: MessageSquare },
+    { id: 'settings', label: t('admin.sidebar.settings'), icon: Settings },
   ];
 
   return (

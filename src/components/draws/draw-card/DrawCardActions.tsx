@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface DrawCardActionsProps {
   canEnterDraw: boolean;
@@ -21,6 +22,7 @@ const DrawCardActions: React.FC<DrawCardActionsProps> = ({
   hideActions = false
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   if (hideActions) {
     return null;
@@ -34,7 +36,7 @@ const DrawCardActions: React.FC<DrawCardActionsProps> = ({
           className="flex-1"
           onClick={onEnterDraw}
         >
-          Enter Draw
+          {t('draws.enterDraw')}
         </Button>
       ) : (
         <Button
@@ -42,7 +44,7 @@ const DrawCardActions: React.FC<DrawCardActionsProps> = ({
           className="flex-1"
           onClick={() => navigate(`/draw/${drawId}`)}
         >
-          View Details
+          {t('draws.viewDetails')}
         </Button>
       )}
 
@@ -51,7 +53,7 @@ const DrawCardActions: React.FC<DrawCardActionsProps> = ({
           variant="outline"
           onClick={onPickWinner}
         >
-          Pick Winner
+          {t('draws.pickWinner.button')}
         </Button>
       )}
     </div>

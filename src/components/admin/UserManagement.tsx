@@ -7,9 +7,11 @@ import { UserTable } from './users/UserTable';
 import { WalletDialog } from './users/WalletDialog';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const UserManagement: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const { t } = useTranslation();
   const {
     users,
     loading,
@@ -39,13 +41,13 @@ const UserManagement: React.FC = () => {
     if (connectionStatus === false) {
       toast({
         variant: 'destructive',
-        title: 'Connection Error',
-        description: connectionErrorDetails || 'Failed to connect to the database. Please check your network and try again.'
+        title: t('admin.users.connectionError'),
+        description: connectionErrorDetails || t('admin.users.connectionErrorDescription')
       });
     } else if (connectionStatus === true) {
       toast({
-        title: 'Connection Successful',
-        description: 'Successfully connected to the Supabase database.'
+        title: t('admin.users.connectionSuccessful'),
+        description: t('admin.users.connectionSuccessfulDescription')
       });
     }
   }, [connectionStatus, connectionErrorDetails, toast]);
@@ -65,15 +67,15 @@ const UserManagement: React.FC = () => {
 
   return <section className="mb-8">
     <div className="flex items-center justify-between mb-4">
-      <h2 className="text-2xl font-semibold text-white">User Management</h2>
+      <h2 className="text-2xl font-semibold text-white">{t('admin.users.title')}</h2>
       <div className="flex gap-2">
         <Button onClick={fetchUsers} variant="outline" size="sm" disabled={connectionStatus === false || loading}>
           {loading ? <>
             <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-            Loading...
+            {t('common.loading')}
           </> : <>
             <RefreshCw className="h-4 w-4 mr-1" />
-            Refresh List
+            {t('admin.users.refreshList')}
           </>}
         </Button>
       </div>
@@ -82,7 +84,7 @@ const UserManagement: React.FC = () => {
     {connectionStatus === true && <div className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-300 dark:border-green-800 rounded-md p-3 mb-4">
       <div className="flex items-start">
         <CheckCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-        <p>Connected to Supabase database successfully. Showing users from profiles table.</p>
+        <p>{t('admin.users.connectionSuccessMessage')}</p>
       </div>
     </div>}
 

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
@@ -27,20 +28,21 @@ const AuthForm: React.FC<AuthFormProps> = ({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   const validateForm = () => {
     if (!email || !password) {
-      setError('Email and password are required');
+      setError(t('errors.validation'));
       return false;
     }
     
     if (mode === 'signup' && (!name || !phone)) {
-      setError('Name and phone are required for signup');
+      setError(t('errors.validation'));
       return false;
     }
     
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError(t('errors.validation'));
       return false;
     }
     
@@ -67,14 +69,14 @@ const AuthForm: React.FC<AuthFormProps> = ({
       });
     } catch (error: any) {
       console.error('Form submission error:', error);
-      setError(error.message || 'An error occurred. Please try again.');
+      setError(error.message || t('errors.general'));
     }
   };
 
   return (
     <div className="w-full max-w-md mx-auto px-8">
       <h2 className="text-xl font-serif text-center mb-6 text-white tracking-wider uppercase font-bold">
-        {mode === 'login' ? 'Sign In' : 'Create Account'}
+        {mode === 'login' ? t('auth.login') : t('auth.signup')}
       </h2>
       
       {error && (
@@ -88,10 +90,10 @@ const AuthForm: React.FC<AuthFormProps> = ({
         {mode === 'signup' && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white font-medium tracking-wide uppercase text-xs">Name</Label>
+              <Label htmlFor="name" className="text-white font-medium tracking-wide uppercase text-xs">{t('profile.firstName')}</Label>
               <Input 
                 id="name" 
-                placeholder="Your name" 
+                placeholder={t('profile.firstName')} 
                 value={name} 
                 onChange={e => setName(e.target.value)} 
                 required={mode === 'signup'}
@@ -100,7 +102,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-white font-medium tracking-wide uppercase text-xs">Phone Number</Label>
+              <Label htmlFor="phone" className="text-white font-medium tracking-wide uppercase text-xs">{t('profile.phone')}</Label>
               <Input 
                 id="phone" 
                 type="tel" 
@@ -115,7 +117,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-white font-medium tracking-wide uppercase text-xs">Email</Label>
+          <Label htmlFor="email" className="text-white font-medium tracking-wide uppercase text-xs">{t('auth.email')}</Label>
           <Input 
             id="email" 
             type="email" 
@@ -128,7 +130,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-white font-medium tracking-wide uppercase text-xs">Password</Label>
+          <Label htmlFor="password" className="text-white font-medium tracking-wide uppercase text-xs">{t('auth.password')}</Label>
           <Input 
             id="password" 
             type="password" 
@@ -149,10 +151,10 @@ const AuthForm: React.FC<AuthFormProps> = ({
           {loading ? (
             <div className="flex items-center justify-center">
               <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
-              <span className="text-black">Processing...</span>
+              <span className="text-black">{t('common.loading')}</span>
             </div>
           ) : (
-            <span className="text-black">{mode === 'login' ? 'Sign In' : 'Create Account'}</span>
+            <span className="text-black">{mode === 'login' ? t('auth.login') : t('auth.signup')}</span>
           )}
         </Button>
       </form>

@@ -12,6 +12,7 @@ import { BackgroundProvider } from "./context/BackgroundContext";
 import { useCapacitorPlugins } from "./hooks/useCapacitorPlugins";
 import { useToast } from "@/hooks/use-toast";
 import ErrorBoundary from "./components/ErrorBoundary";
+import './i18n'; // Initialize i18n
 
 // Pages
 import Home from "./pages/Home";

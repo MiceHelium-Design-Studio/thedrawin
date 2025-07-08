@@ -3,10 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminContent from '@/components/admin/AdminContent';
 import { Home, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState('draws');
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col min-h-screen relative overflow-hidden" style={{ backgroundColor: '#0D0D0D' }}>
@@ -22,10 +24,10 @@ const Admin: React.FC = () => {
             className="flex items-center text-[#CCCCCC] hover:text-[#F39C0A] transition-colors"
           >
             <Home className="h-4 w-4 mr-1" />
-            Home
+            {t('admin.page.home')}
           </a>
           <ChevronRight className="mx-2 h-4 w-4 text-[#CCCCCC]" />
-          <span className="text-white font-medium">Administration</span>
+          <span className="text-white font-medium">{t('admin.page.administration')}</span>
         </div>
         
         {/* Main Content Area */}

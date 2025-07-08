@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Ticket as TicketIcon, Users, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface AdminTicket {
   id: string;
@@ -20,6 +21,7 @@ interface AdminTicket {
 }
 
 const TicketsOverview: React.FC = () => {
+  const { t } = useTranslation();
   const [tickets, setTickets] = useState<AdminTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUserDetails, setShowUserDetails] = useState(false);
@@ -86,9 +88,9 @@ const TicketsOverview: React.FC = () => {
             ticket_number: ticket.ticket_number,
             price: ticket.price,
             purchased_at: ticket.purchased_at,
-            user_name: profile?.name || 'Unknown User',
-            user_email: profile?.email || 'No email',
-            draw_title: draw?.title || 'Unknown Draw',
+            user_name: profile?.name || t('admin.tickets.unknownUser'),
+            user_email: profile?.email || t('admin.tickets.noEmail'),
+            draw_title: draw?.title || t('admin.tickets.unknownDraw'),
             draw_status: draw?.status || 'unknown'
           };
         }) || [];
@@ -98,8 +100,8 @@ const TicketsOverview: React.FC = () => {
         console.error('Error fetching tickets:', error);
         toast({
           variant: 'destructive',
-          title: 'Error loading tickets',
-          description: 'Failed to load tickets data.'
+          title: t('admin.tickets.errorLoadingTickets'),
+          description: t('admin.tickets.failedToLoadTickets')
         });
       } finally {
         setLoading(false);
@@ -116,13 +118,13 @@ const TicketsOverview: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'open':
-        return <Badge variant="default">Active</Badge>;
+        return <Badge variant="default">{t('admin.tickets.status.active')}</Badge>;
       case 'announced':
-        return <Badge variant="secondary">Completed</Badge>;
+        return <Badge variant="secondary">{t('admin.tickets.status.completed')}</Badge>;
       case 'closed':
-        return <Badge variant="destructive">Closed</Badge>;
+        return <Badge variant="destructive">{t('admin.tickets.status.closed')}</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge variant="outline">{t('admin.tickets.status.unknown')}</Badge>;
     }
   };
 
@@ -134,7 +136,7 @@ const TicketsOverview: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <TicketIcon className="h-5 w-5" />
-            Tickets Overview
+            {t('admin.tickets.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -152,7 +154,7 @@ const TicketsOverview: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <TicketIcon className="h-5 w-5" />
-            Tickets Overview
+            {t('admin.tickets.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -160,14 +162,14 @@ const TicketsOverview: React.FC = () => {
             <div className="bg-muted p-4 rounded-lg">
               <div className="flex items-center gap-2">
                 <TicketIcon className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-white">Total Tickets</span>
+                <span className="text-sm font-medium text-white">{t('admin.tickets.totalTickets')}</span>
               </div>
               <p className="text-2xl font-bold text-white">{filteredTickets.length}</p>
             </div>
             <div className="bg-muted p-4 rounded-lg">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-white">Unique Players</span>
+                <span className="text-sm font-medium text-white">{t('admin.tickets.uniquePlayers')}</span>
               </div>
               <p className="text-2xl font-bold text-white">
                 {new Set(filteredTickets.map(t => t.user_email)).size}
@@ -175,7 +177,7 @@ const TicketsOverview: React.FC = () => {
             </div>
             <div className="bg-muted p-4 rounded-lg">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-white">Total Revenue</span>
+                <span className="text-sm font-medium text-white">{t('admin.tickets.totalRevenue')}</span>
               </div>
               <p className="text-2xl font-bold text-white">${totalRevenue}</p>
             </div>
@@ -187,7 +189,7 @@ const TicketsOverview: React.FC = () => {
               onChange={(e) => setSelectedDraw(e.target.value)}
               className="px-3 py-2 border rounded-md bg-[#1F1D36] text-white border-white/20"
             >
-              <option value="all">All Draws</option>
+              <option value="all">{t('admin.tickets.allDraws')}</option>
               {draws.map(draw => (
                 <option key={draw.id} value={draw.id}>
                   {draw.title}
@@ -202,7 +204,7 @@ const TicketsOverview: React.FC = () => {
               className="flex items-center gap-2"
             >
               {showUserDetails ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              {showUserDetails ? 'Hide' : 'Show'} User Details
+              {showUserDetails ? t('admin.tickets.hide') : t('admin.tickets.show')} {t('admin.tickets.userDetails')}
             </Button>
           </div>
 
@@ -210,7 +212,7 @@ const TicketsOverview: React.FC = () => {
             {filteredTickets.length === 0 ? (
               <div className="text-center py-8">
                 <TicketIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-white">No tickets found for the selected criteria.</p>
+                <p className="text-white">{t('admin.tickets.noTicketsFound')}</p>
               </div>
             ) : (
               filteredTickets.map((ticket) => (

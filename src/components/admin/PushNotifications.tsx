@@ -40,6 +40,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '@/context/NotificationContext';
 import { BellRing, Users, User, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
 // Notification Form Schema
 const notificationFormSchema = z.object({
@@ -64,6 +65,7 @@ interface Profile {
 }
 
 const PushNotifications: React.FC = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { sendNotification } = useNotifications();
   const [users, setUsers] = useState<Profile[]>([]);
@@ -108,8 +110,8 @@ const PushNotifications: React.FC = () => {
       console.error('Error fetching users:', error);
       toast({
         variant: 'destructive',
-        title: 'Error fetching users',
-        description: 'There was a problem loading the user list.'
+        title: t('admin.pushNotifications.errorFetchingUsers'),
+        description: t('admin.pushNotifications.errorLoadingUserList')
       });
     } finally {
       setIsLoading(false);
@@ -148,15 +150,15 @@ const PushNotifications: React.FC = () => {
   const getNotificationTitle = (type: string) => {
     switch (type) {
       case 'system':
-        return 'System Message';
+        return t('admin.pushNotifications.systemMessage');
       case 'win':
-        return '🏆 Winner Announcement';
+        return '🏆 ' + t('admin.pushNotifications.winnerAnnouncement');
       case 'draw':
-        return '🎉 Draw Update';
+        return '🎉 ' + t('admin.pushNotifications.drawUpdate');
       case 'promotion':
-        return '🎁 Promotion';
+        return '🎁 ' + t('admin.pushNotifications.promotion');
       default:
-        return 'Notification';
+        return t('admin.pushNotifications.notification');
     }
   };
 
@@ -175,8 +177,8 @@ const PushNotifications: React.FC = () => {
         await sendNotification(data.message, 'user', userIds);
 
         toast({
-          title: "Notification sent",
-          description: `Sent to ${userIds.length} users`,
+          title: t('admin.pushNotifications.notificationSent'),
+          description: t('admin.pushNotifications.sentToUsers', { count: userIds.length }),
         });
       } else if (data.target === 'selected' && data.selectedUsers) {
         // Send to selected users with 'user' role
@@ -186,7 +188,7 @@ const PushNotifications: React.FC = () => {
         );
 
         if (selectedUsers.length === 0) {
-          throw new Error('No valid users found with the provided emails');
+          throw new Error(t('admin.pushNotifications.noValidUsersFound'));
         }
 
         const userIds = selectedUsers.map(user => user.id);
@@ -195,8 +197,8 @@ const PushNotifications: React.FC = () => {
         await sendNotification(data.message, 'user', userIds);
 
         toast({
-          title: "Notification sent",
-          description: `Sent to ${userIds.length} selected users`,
+          title: t('admin.pushNotifications.notificationSent'),
+          description: t('admin.pushNotifications.sentToSelectedUsers', { count: userIds.length }),
         });
       }
 
@@ -214,8 +216,8 @@ const PushNotifications: React.FC = () => {
       console.error('Error sending notification:', error);
       toast({
         variant: 'destructive',
-        title: "Failed to send notification",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        title: t('admin.pushNotifications.failedToSendNotification'),
+        description: error instanceof Error ? error.message : t('admin.pushNotifications.unknownError'),
       });
     } finally {
       setIsSending(false);
@@ -237,29 +239,29 @@ const PushNotifications: React.FC = () => {
 
   const getNotificationTypeLabel = (title: string) => {
     if (title?.includes('🏆') || title?.toLowerCase().includes('winner')) {
-      return 'Winner';
+      return t('admin.pushNotifications.winner');
     }
     if (title?.includes('🎉') || title?.toLowerCase().includes('draw')) {
-      return 'Draw';
+      return t('admin.pushNotifications.draw');
     }
     if (title?.includes('🎁') || title?.toLowerCase().includes('promotion')) {
-      return 'Promotion';
+      return t('admin.pushNotifications.promotionLabel');
     }
-    return 'System';
+    return t('admin.pushNotifications.system');
   };
 
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-white">Push Notifications</h2>
+        <h2 className="text-2xl font-semibold text-white">{t('admin.pushNotifications.title')}</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Send New Notification</CardTitle>
+            <CardTitle>{t('admin.pushNotifications.sendNewNotification')}</CardTitle>
             <CardDescription>
-              Create and send push notifications to your users
+              {t('admin.pushNotifications.createAndSendNotifications')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -270,12 +272,12 @@ const PushNotifications: React.FC = () => {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notification Message</FormLabel>
+                      <FormLabel>{t('admin.pushNotifications.notificationMessage')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter your notification message here..." {...field} />
+                        <Input placeholder={t('admin.pushNotifications.enterNotificationMessage')} {...field} />
                       </FormControl>
                       <FormDescription>
-                        Keep it concise and clear (max 200 characters)
+                        {t('admin.pushNotifications.keepConciseAndClear')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -287,22 +289,22 @@ const PushNotifications: React.FC = () => {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notification Type</FormLabel>
+                      <FormLabel>{t('admin.pushNotifications.notificationType')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a notification type" />
+                            <SelectValue placeholder={t('admin.pushNotifications.selectNotificationType')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="system">System Message</SelectItem>
-                          <SelectItem value="win">Winner Announcement</SelectItem>
-                          <SelectItem value="draw">Draw Update</SelectItem>
-                          <SelectItem value="promotion">Promotion</SelectItem>
+                          <SelectItem value="system">{t('admin.pushNotifications.systemMessage')}</SelectItem>
+                          <SelectItem value="win">{t('admin.pushNotifications.winnerAnnouncement')}</SelectItem>
+                          <SelectItem value="draw">{t('admin.pushNotifications.drawUpdate')}</SelectItem>
+                          <SelectItem value="promotion">{t('admin.pushNotifications.promotion')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        This determines how the notification will be displayed
+                        {t('admin.pushNotifications.notificationDisplayDescription')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -314,20 +316,20 @@ const PushNotifications: React.FC = () => {
                   name="target"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Target Audience</FormLabel>
+                      <FormLabel>{t('admin.pushNotifications.targetAudience')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select target audience" />
+                            <SelectValue placeholder={t('admin.pushNotifications.selectTargetAudience')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="all">All Users</SelectItem>
-                          <SelectItem value="selected">Selected Users</SelectItem>
+                          <SelectItem value="all">{t('admin.pushNotifications.allUsers')}</SelectItem>
+                          <SelectItem value="selected">{t('admin.pushNotifications.selectedUsers')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Who should receive this notification
+                        {t('admin.pushNotifications.whoShouldReceive')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -340,15 +342,15 @@ const PushNotifications: React.FC = () => {
                     name="selectedUsers"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Selected Users</FormLabel>
+                        <FormLabel>{t('admin.pushNotifications.selectedUsers')}</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="user1@example.com, user2@example.com"
+                            placeholder={t('admin.pushNotifications.emailPlaceholder')}
                             {...field}
                           />
                         </FormControl>
                         <FormDescription>
-                          Enter email addresses separated by commas
+                          {t('admin.pushNotifications.enterEmailsSeparated')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -360,12 +362,12 @@ const PushNotifications: React.FC = () => {
                   {isSending ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Sending...
+                      {t('admin.pushNotifications.sending')}
                     </>
                   ) : (
                     <>
                       <BellRing className="h-4 w-4 mr-2" />
-                      Send Notification
+                      {t('admin.pushNotifications.sendNotification')}
                     </>
                   )}
                 </Button>
@@ -376,25 +378,25 @@ const PushNotifications: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Notifications</CardTitle>
+            <CardTitle>{t('admin.pushNotifications.recentNotifications')}</CardTitle>
             <CardDescription>
-              The 10 most recent notifications sent
+              {t('admin.pushNotifications.recentNotificationsDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Message</TableHead>
-                  <TableHead>Recipient</TableHead>
-                  <TableHead>Sent At</TableHead>
+                  <TableHead>{t('admin.pushNotifications.type')}</TableHead>
+                  <TableHead>{t('admin.pushNotifications.message')}</TableHead>
+                  <TableHead>{t('admin.pushNotifications.recipient')}</TableHead>
+                  <TableHead>{t('admin.pushNotifications.sentAt')}</TableHead>
                 </TableHeader>
                 <TableBody>
                   {recentNotifications.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center py-4">
-                        No notifications sent yet
+                        {t('admin.pushNotifications.noNotificationsSentYet')}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -410,7 +412,7 @@ const PushNotifications: React.FC = () => {
                           {notification.message}
                         </TableCell>
                         <TableCell>
-                          {notification.profiles?.name || notification.profiles?.email || 'Unknown'}
+                          {notification.profiles?.name || notification.profiles?.email || t('admin.pushNotifications.unknown')}
                         </TableCell>
                         <TableCell>
                           {new Date(notification.created_at).toLocaleString()}

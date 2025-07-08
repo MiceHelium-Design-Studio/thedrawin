@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User as UserIcon } from 'lucide-react'; // Import the User icon from lucide-react
 import { User } from '@/types'; // Import the User type
+import { useTranslation } from 'react-i18next';
 
 interface ProfileDetailsFormProps {
   user: User | null;
@@ -29,6 +30,8 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
   loading,
   handleUpdateProfile,
 }) => {
+  const { t } = useTranslation();
+
   if (!user) return null;
 
   return (
@@ -36,7 +39,7 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
       {isEditing ? (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('profile.name')}</Label>
             <Input
               id="name"
               value={name}
@@ -51,32 +54,32 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
               disabled={loading}
               className="bg-gold hover:bg-gold-dark text-black"
             >
-              Save
+              {t('profile.save')}
             </Button>
             <Button
               variant="outline"
               onClick={() => setIsEditing(false)}
               className="border-gold/30 text-gold hover:text-gold-dark"
             >
-              Cancel
+              {t('profile.cancel')}
             </Button>
           </div>
         </div>
       ) : (
         <div className="space-y-4">
           <div>
-            <p className="text-sm text-gray-500">Name</p>
+            <p className="text-sm text-gray-500">{t('profile.name')}</p>
             <p className="font-medium">{user.name}</p>
           </div>
 
           <div>
-            <p className="text-sm text-gray-500">Email</p>
+            <p className="text-sm text-gray-500">{t('profile.email')}</p>
             <p className="font-medium">{user.email}</p>
           </div>
 
           {user.avatar_url && (
             <div>
-              <p className="text-sm text-gray-500">Using Unsplash Avatar</p>
+              <p className="text-sm text-gray-500">{t('profile.avatar.usingUnsplashAvatar')}</p>
               <p className="font-medium text-xs text-gold truncate">{user.avatar_url}</p>
             </div>
           )}
@@ -86,7 +89,7 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
             className="bg-gold hover:bg-gold-dark text-black"
           >
             <UserIcon className="h-4 w-4 mr-2" />
-            Edit Profile
+            {t('profile.actions.editProfile')}
           </Button>
         </div>
       )}

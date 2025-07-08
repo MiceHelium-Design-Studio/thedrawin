@@ -7,10 +7,12 @@ import NotificationItem from '../components/notifications/NotificationItem';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 const Notifications: React.FC = () => {
   const { notifications, loading, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     console.log("Notifications page loaded, count:", notifications.length);
@@ -28,7 +30,7 @@ const Notifications: React.FC = () => {
     try {
       await deleteNotification(id);
       toast({
-        title: 'Notification deleted',
+        title: t('notifications.page.notificationDeleted'),
       });
     } catch (error) {
       console.error(error);
@@ -39,7 +41,7 @@ const Notifications: React.FC = () => {
     try {
       await markAllAsRead();
       toast({
-        title: 'All notifications marked as read',
+        title: t('notifications.page.allNotificationsMarkedAsRead'),
       });
     } catch (error) {
       console.error(error);
@@ -57,7 +59,7 @@ const Notifications: React.FC = () => {
             </div>
             <h1 className="text-3xl font-bold text-white tracking-tight">
               <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent">
-                Notifications
+                {t('notifications.page.title')}
               </span>
             </h1>
           </div>
@@ -71,7 +73,7 @@ const Notifications: React.FC = () => {
               className="group"
             >
               <CheckCheck className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-              Mark all as read
+              {t('notifications.page.markAllAsRead')}
             </Button>
           )}
         </div>
@@ -98,15 +100,15 @@ const Notifications: React.FC = () => {
                 <Bell className="h-10 w-10 text-[#F39C0A]" />
               </div>
               <h3 className="text-xl font-bold text-white mb-3 font-poppins">
-                No notifications yet
+                {t('notifications.page.noNotificationsYet')}
               </h3>
               <p className="text-gray-400 max-w-sm mx-auto font-inter">
-                When you have new activity, we'll notify you here so you don't miss anything important.
+                {t('notifications.page.noNotificationsMessage')}
               </p>
               <div className="mt-6">
                 <Button variant="outline" size="sm">
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Enable Notifications
+                  {t('notifications.page.enableNotifications')}
                 </Button>
               </div>
             </div>

@@ -10,6 +10,9 @@ import TicketsOverview from './TicketsOverview';
 import AppSettings from './AppSettings';
 import PaymentSettings from './PaymentSettings';
 import PushNotifications from './PushNotifications';
+import { useTranslation } from 'react-i18next';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 interface AdminContentProps {
   activeSection: string;
@@ -17,32 +20,57 @@ interface AdminContentProps {
 }
 
 const AdminContent: React.FC<AdminContentProps> = ({ activeSection, activeTab }) => {
+  const { t } = useTranslation();
+  
   const renderContent = () => {
-    switch (activeSection || activeTab) {
-      case 'statistics':
-        return <StatisticsContent />;
-      case 'draws':
-        return <DrawsManagement />;
-      case 'tickets':
-        return <TicketsOverview />;
-      case 'banners':
-        return <BannersManagement />;
-      case 'media':
-        return <MediaManager />;
-      case 'users':
-        return <UserManagement />;
-      case 'notifications':
-        return <AdminNotifications />;
-      case 'notification-test':
-        return <NotificationTestPanel />;
-      case 'settings':
-        return <AppSettings />;
-      case 'payments':
-        return <PaymentSettings />;
-      case 'push-notifications':
-        return <PushNotifications />;
-      default:
-        return <StatisticsContent />;
+    try {
+      switch (activeSection || activeTab) {
+        case 'statistics':
+          return <StatisticsContent />;
+        case 'draws':
+          return <DrawsManagement />;
+        case 'tickets':
+          return <TicketsOverview />;
+        case 'banners':
+          return <BannersManagement />;
+        case 'media':
+          return <MediaManager />;
+        case 'users':
+          return <UserManagement />;
+        case 'notifications':
+          return <AdminNotifications />;
+        case 'notification-test':
+          return <NotificationTestPanel />;
+        case 'settings':
+          return <AppSettings />;
+        case 'payments':
+          return <PaymentSettings />;
+        case 'push-notifications':
+          return <PushNotifications />;
+        case '':
+        case null:
+        case undefined:
+          return <StatisticsContent />;
+        default:
+          return (
+            <Alert className="max-w-2xl mx-auto mt-8">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                {t('admin.content.unknownSection', { section: activeSection || activeTab })}
+              </AlertDescription>
+            </Alert>
+          );
+      }
+    } catch (error) {
+      console.error('Error rendering admin content:', error);
+      return (
+        <Alert variant="destructive" className="max-w-2xl mx-auto mt-8">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            {t('admin.content.errorLoadingSection')}
+          </AlertDescription>
+        </Alert>
+      );
     }
   };
 

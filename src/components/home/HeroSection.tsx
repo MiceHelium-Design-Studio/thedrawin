@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 interface HeroSectionProps {
-  user: any;
+  user: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   authLoading: boolean;
 }
 const HeroSection: React.FC<HeroSectionProps> = ({
@@ -10,6 +11,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   authLoading
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   return <div className="flex flex-col items-center mb-20 text-center relative">
     {/* Premium background glow */}
     <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-[#F39C0A]/10 rounded-full blur-3xl opacity-30" />
@@ -32,9 +34,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="space-y-6">
           {/* Perfectly aligned title */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-none">
-            THE FUTURE OF{' '}
+            {t('hero.title')}{' '}
             <span className="bg-gradient-to-r from-[#F39C0A] via-[#FFD700] to-[#F39C0A] bg-clip-text text-transparent animate-pulse">
-              GAMING
+              {t('hero.gaming')}
             </span>
           </h1>
 
@@ -42,9 +44,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="relative max-w-4xl mx-auto">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F39C0A]/10 to-transparent blur-sm rounded-xl" />
             <p className="relative text-slate-300 text-lg md:text-xl leading-relaxed font-light px-4">
-              Join exclusive draws, win premium prizes, and experience the next generation of{' '}
+              {t('hero.subtitle')}{' '}
               <span className="text-[#F39C0A] font-semibold">
-                digital entertainment
+                {t('hero.digitalEntertainment')}
               </span>
             </p>
           </div>
@@ -54,19 +56,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="flex flex-wrap justify-center gap-6 text-sm">
           <div className="flex items-center space-x-3 luxury-card px-6 py-3 border border-[#F39C0A]/20 rounded-full">
             <div className="w-2 h-2 bg-[#F39C0A] rounded-full animate-pulse" />
-            <span className="text-white font-medium">Secure & Fair</span>
+            <span className="text-white font-medium">{t('hero.features.secure')}</span>
           </div>
           <div className="flex items-center space-x-3 luxury-card px-6 py-3 border border-[#19C37D]/20 rounded-full">
             <div className="w-2 h-2 bg-[#19C37D] rounded-full animate-pulse" style={{
               animationDelay: '0.5s'
             }} />
-            <span className="text-white font-medium">Instant Wins</span>
+            <span className="text-white font-medium">{t('hero.features.instant')}</span>
           </div>
           <div className="flex items-center space-x-3 luxury-card px-6 py-3 border border-[#06B6D4]/20 rounded-full">
             <div className="w-2 h-2 bg-[#06B6D4] rounded-full animate-pulse" style={{
               animationDelay: '1s'
             }} />
-            <span className="text-white font-medium">Premium Rewards</span>
+            <span className="text-white font-medium">{t('hero.features.premium')}</span>
           </div>
         </div>
       </div>
@@ -106,19 +108,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 
           <div className="space-y-8 text-center">
             <h3 className="text-[#F39C0A] mb-6 font-bold text-xl tracking-wide">
-              Ready to Enter the Arena?
+              {t('hero.authPrompt.title')}
             </h3>
             <p className="text-slate-300 mb-10 text-lg leading-relaxed max-w-lg mx-auto">
-              Join thousands of players in the ultimate gaming experience where every draw could change your life
+              {t('hero.authPrompt.description')}
             </p>
 
             <Button onClick={() => navigate('/login')} className="w-full max-w-sm mx-auto luxury-button relative overflow-hidden group text-lg py-6 font-bold tracking-wide">
-              <span className="relative z-10">Start Your Journey</span>
+              <span className="relative z-10">{t('hero.authPrompt.button')}</span>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </Button>
 
             <p className="text-slate-400 mt-6 text-sm uppercase tracking-widest font-medium">
-              No hidden fees • Instant payouts • 24/7 support
+              {t('hero.authPrompt.footer')}
             </p>
           </div>
         </div>

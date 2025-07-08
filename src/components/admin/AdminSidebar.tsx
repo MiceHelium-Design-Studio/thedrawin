@@ -7,6 +7,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { useNavigate } from 'react-router-dom';
 import AdminSidebarMenu from './AdminSidebarMenu';
 import { Separator } from '@/components/ui/separator';
+import { useTranslation } from 'react-i18next';
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -15,6 +16,7 @@ interface AdminSidebarProps {
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <aside className="h-fit">
@@ -27,7 +29,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
                 <Medal className="size-6" style={{ color: '#F39C0A' }} />
               </div>
               <div className="flex-grow">
-                <h2 className="text-xl font-bold" style={{ color: '#FFFFFF' }}>Admin Panel</h2>
+                <h2 className="text-xl font-bold" style={{ color: '#FFFFFF' }}>{t('admin.sidebar.adminPanel')}</h2>
                 <Separator className="bg-gradient-to-r from-transparent via-[rgb(var(--primary))]/30 to-transparent mt-2" />
               </div>
             </div>
@@ -41,7 +43,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeTab, setActiveTab }) 
                 style={{ color: '#FFFFFF', borderColor: '#F39C0A' }}
               >
                 <LogOut className="size-4" style={{ color: '#FFFFFF' }} />
-                <span style={{ color: '#FFFFFF' }}>Exit Admin</span>
+                <span style={{ color: '#FFFFFF' }}>{t('admin.exitAdmin')}</span>
               </Button>
             </div>
           </div>

@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { User } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 interface UserTableProps {
   users: User[];
@@ -30,13 +31,14 @@ export const UserTable: React.FC<UserTableProps> = ({
   onSendNotification,
   onAddFunds,
 }) => {
+  const { t } = useTranslation();
   if (loading) {
     return (
       <div className="w-full py-8">
         <div className="flex justify-center items-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[rgb(var(--primary))]"></div>
         </div>
-        <p className="text-center mt-4 text-sm text-white">Loading users...</p>
+        <p className="text-center mt-4 text-sm text-white">{t('admin.users.loadingUsers')}</p>
       </div>
     );
   }
@@ -45,7 +47,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     return (
       <div className="w-full py-8">
         <div className="text-center text-[rgb(var(--destructive))]">
-          <p className="font-medium text-[#FF4C4C]">Failed to load users</p>
+          <p className="font-medium text-[#FF4C4C]">{t('admin.users.failedToLoadUsers')}</p>
           <p className="text-sm mt-1 text-[#FF4C4C]">{fetchError}</p>
         </div>
       </div>
@@ -56,7 +58,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     return (
       <div className="w-full py-8">
         <div className="text-center">
-          <p className="text-white">No users found</p>
+          <p className="text-white">{t('admin.users.noUsersFound')}</p>
         </div>
       </div>
     );
@@ -66,12 +68,12 @@ export const UserTable: React.FC<UserTableProps> = ({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>User</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Created At</TableHead>
-          <TableHead>Wallet</TableHead>
-          <TableHead>Admin Status</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead>{t('admin.users.user')}</TableHead>
+          <TableHead>{t('admin.users.email')}</TableHead>
+          <TableHead>{t('admin.users.createdAt')}</TableHead>
+          <TableHead>{t('admin.users.wallet')}</TableHead>
+          <TableHead>{t('admin.users.adminStatus')}</TableHead>
+          <TableHead>{t('admin.users.actions')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -90,7 +92,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                     <UserRound className="w-4 h-4 text-white" />
                   </div>
                 )}
-                <span>{user.name || 'User'}</span>
+                <span>{user.name || t('admin.users.user')}</span>
               </div>
             </TableCell>
             <TableCell>{user.email}</TableCell>
@@ -109,7 +111,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                   onCheckedChange={() => onToggleAdmin(user.id, user.isAdmin || false)}
                 />
                 <span className={user.isAdmin ? 'text-[#F39C0A]' : 'text-white'}>
-                  {user.isAdmin ? 'Admin' : 'Regular User'}
+                  {user.isAdmin ? t('admin.users.admin') : t('admin.users.regularUser')}
                 </span>
               </div>
             </TableCell>
@@ -121,7 +123,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                   onClick={() => onSendNotification(user.id, user.email)}
                 >
                   <Mail className="h-4 w-4 mr-1" />
-                  <span>Notify</span>
+                  <span>{t('admin.users.notify')}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -129,7 +131,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                   onClick={() => onAddFunds(user.id)}
                 >
                   <PlusCircle className="h-4 w-4 mr-1" />
-                  <span>Add Funds</span>
+                  <span>{t('admin.users.addFunds')}</span>
                 </Button>
               </div>
             </TableCell>

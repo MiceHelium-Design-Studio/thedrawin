@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { initializeGoldBanner } from '../../utils/bannerUtils';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Check, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const BannerUploader: React.FC = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
@@ -19,16 +21,16 @@ const BannerUploader: React.FC = () => {
       await initializeGoldBanner();
       setIsComplete(true);
       toast({
-        title: '🎉 Premium Banner Updated!',
-        description: 'The premium gold DRAWIN banner has been successfully updated and is now live.',
+        title: t('admin.banners.premiumBannerUpdated'),
+        description: t('admin.banners.premiumBannerUpdatedDescription'),
         duration: 4000,
       });
     } catch (error) {
       console.error('Error updating banner:', error);
       toast({
         variant: 'destructive',
-        title: 'Update Failed',
-        description: 'There was a problem updating the banner.',
+        title: t('admin.banners.updateFailed'),
+        description: t('admin.banners.updateFailedDescription'),
       });
     } finally {
       setIsUploading(false);
@@ -38,9 +40,9 @@ const BannerUploader: React.FC = () => {
   return (
     <Card className="w-full max-w-md mx-auto border-gold/30 bg-black/8">
       <CardHeader>
-        <CardTitle className="text-gold">Update Premium Banner</CardTitle>
+        <CardTitle className="text-gold">{t('admin.banners.updatePremiumBanner')}</CardTitle>
         <CardDescription className="text-gold-light">
-          Replace the current banner with the premium gold DRAWIN bar image.
+          {t('admin.banners.updatePremiumBannerDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -52,7 +54,7 @@ const BannerUploader: React.FC = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           <div className="absolute bottom-2 right-2 bg-gold/20 backdrop-blur-sm px-2 py-1 rounded text-xs text-gold font-semibold">
-            Premium
+            {t('admin.banners.premium')}
           </div>
         </div>
       </CardContent>
@@ -65,17 +67,17 @@ const BannerUploader: React.FC = () => {
           {isUploading ? (
             <>
               <RefreshCw className="mr-2 h-4 w-4 animate-spin text-black" />
-              Uploading...
+              {t('admin.banners.uploading')}
             </>
           ) : isComplete ? (
             <>
               <Check className="mr-2 h-4 w-4 text-white" />
-              Banner Updated
+              {t('admin.banners.bannerUpdated')}
             </>
           ) : (
             <>
               <Upload className="mr-2 h-4 w-4 text-white" />
-              Update Premium Banner
+              {t('admin.banners.updatePremiumBanner')}
             </>
           )}
         </Button>

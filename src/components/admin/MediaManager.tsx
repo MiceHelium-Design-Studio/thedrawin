@@ -12,6 +12,7 @@ import { Image, Trash2, Upload, RefreshCw, HardDrive, FileText, Video, AlertTria
 import { useToast } from '@/hooks/use-toast';
 import { uploadToS3, getMediaItems, deleteFromS3, getStorageStats, StorageStats } from '@/utils/s3Utils';
 import ImageStorageGuide from '../guides/ImageStorageGuide';
+import { useTranslation } from 'react-i18next';
 
 const MediaManager: React.FC = () => {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -24,6 +25,7 @@ const MediaManager: React.FC = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Get media items on component mount
   useEffect(() => {
@@ -40,8 +42,8 @@ const MediaManager: React.FC = () => {
       console.error('Failed to fetch media items:', error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to load media items. Please try again.'
+        title: t('common.error'),
+        description: t('admin.media.failedToLoadMediaItems')
       });
     } finally {
       setIsLoading(false);
@@ -65,8 +67,8 @@ const MediaManager: React.FC = () => {
     if (!uploadFile) {
       toast({
         variant: 'destructive',
-        title: 'No file selected',
-        description: 'Please select a file to upload.'
+        title: t('admin.media.noFileSelected'),
+        description: t('admin.media.pleaseSelectFile')
       });
       return;
     }
@@ -96,15 +98,15 @@ const MediaManager: React.FC = () => {
       fetchStorageStats();
 
       toast({
-        title: 'Upload successful',
-        description: `${result.name} has been uploaded.`
+        title: t('admin.media.uploadSuccessful'),
+        description: t('admin.media.fileUploaded', { name: result.name })
       });
     } catch (error) {
       console.error('Upload error:', error);
       toast({
         variant: 'destructive',
-        title: 'Upload failed',
-        description: 'There was a problem uploading your file. Please try again.'
+        title: t('admin.media.uploadFailed'),
+        description: t('admin.media.uploadError')
       });
     } finally {
       setIsUploading(false);
@@ -112,7 +114,7 @@ const MediaManager: React.FC = () => {
   };
 
   const handleDeleteMedia = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+    if (window.confirm(t('admin.media.deleteConfirmation', { name }))) {
       try {
         await deleteFromS3(id);
 
@@ -123,15 +125,15 @@ const MediaManager: React.FC = () => {
         fetchStorageStats();
 
         toast({
-          title: 'Media deleted',
-          description: `${name} has been deleted.`
+          title: t('admin.media.mediaDeleted'),
+          description: t('admin.media.fileDeleted', { name })
         });
       } catch (error) {
         console.error('Deletion error:', error);
         toast({
           variant: 'destructive',
-          title: 'Deletion failed',
-          description: 'There was a problem deleting the file. Please try again.'
+          title: t('admin.media.deletionFailed'),
+          description: t('admin.media.deletionError')
         });
       }
     }
@@ -146,8 +148,8 @@ const MediaManager: React.FC = () => {
     fetchMediaItems();
     fetchStorageStats();
     toast({
-      title: 'Refreshed',
-      description: 'Media list has been refreshed.'
+      title: t('admin.media.refreshed'),
+      description: t('admin.media.mediaListRefreshed')
     });
   };
 
@@ -190,11 +192,11 @@ const MediaManager: React.FC = () => {
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-white">Media Manager</h2>
+        <h2 className="text-2xl font-semibold text-white">{t('admin.media.title')}</h2>
         <div className="flex items-center gap-2">
           <Button onClick={refreshMediaList} variant="outline" size="sm" className="gap-2">
             <RefreshCw className="h-4 w-4" />
-            Refresh
+            {t('common.refresh')}
           </Button>
           <Button
             onClick={() => setShowGuide(true)}
@@ -203,7 +205,7 @@ const MediaManager: React.FC = () => {
             className="gap-2"
           >
             <HelpCircle className="h-4 w-4" />
-            Storage Guide
+            {t('admin.media.storageGuide')}
           </Button>
         </div>
       </div>
@@ -211,8 +213,8 @@ const MediaManager: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Total Files</CardTitle>
-            <CardDescription>Number of media files</CardDescription>
+            <CardTitle>{t('admin.media.totalFilesTitle')}</CardTitle>
+            <CardDescription>{t('admin.media.totalFilesDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats?.totalFiles || 0}</p>
@@ -221,8 +223,8 @@ const MediaManager: React.FC = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Storage Used</CardTitle>
-            <CardDescription>Total space used</CardDescription>
+            <CardTitle>{t('admin.media.storageUsedTitle')}</CardTitle>
+            <CardDescription>{t('admin.media.storageUsedDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{formatBytes(stats?.totalSize || 0)}</p>
@@ -231,8 +233,8 @@ const MediaManager: React.FC = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Images</CardTitle>
-            <CardDescription>Number of image files</CardDescription>
+            <CardTitle>{t('admin.media.imagesTitle')}</CardTitle>
+            <CardDescription>{t('admin.media.imagesDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats?.fileTypeCount.image || 0}</p>
@@ -241,8 +243,8 @@ const MediaManager: React.FC = () => {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Documents</CardTitle>
-            <CardDescription>Number of document files</CardDescription>
+            <CardTitle>{t('admin.media.documentsTitle')}</CardTitle>
+            <CardDescription>{t('admin.media.documentsDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats?.fileTypeCount.document || 0}</p>
@@ -253,8 +255,8 @@ const MediaManager: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle>Upload Media</CardTitle>
-            <CardDescription>Add new media files to your library</CardDescription>
+            <CardTitle>{t('admin.media.uploadMediaTitle')}</CardTitle>
+            <CardDescription>{t('admin.media.uploadMediaDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -267,15 +269,15 @@ const MediaManager: React.FC = () => {
 
             {uploadFile && (
               <div className="space-y-2">
-                <Label htmlFor="filename">File Name</Label>
+                <Label htmlFor="filename">{t('admin.media.fileName')}</Label>
                 <Input
                   id="filename"
                   value={uploadFile.name}
                   disabled
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Type: {uploadFile.type}</span>
-                  <span>Size: {formatBytes(uploadFile.size)}</span>
+                  <span>{t('admin.media.type')}: {uploadFile.type}</span>
+                  <span>{t('admin.media.size')}: {formatBytes(uploadFile.size)}</span>
                 </div>
               </div>
             )}
@@ -289,12 +291,12 @@ const MediaManager: React.FC = () => {
               {isUploading ? (
                 <>
                   <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                  Uploading...
+                  {t('admin.media.uploading')}
                 </>
               ) : (
                 <>
                   <Upload className="h-4 w-4" />
-                  Upload Media
+                  {t('admin.media.uploadMediaButton')}
                 </>
               )}
             </Button>
@@ -304,14 +306,14 @@ const MediaManager: React.FC = () => {
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Media Library</CardTitle>
-              <CardDescription>Manage your uploaded media files</CardDescription>
+              <CardTitle>{t('admin.media.mediaLibraryTitle')}</CardTitle>
+              <CardDescription>{t('admin.media.mediaLibraryDescription')}</CardDescription>
               <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-3">
                 <TabsList className="w-full">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="image">Images</TabsTrigger>
-                  <TabsTrigger value="document">Documents</TabsTrigger>
-                  <TabsTrigger value="video">Videos</TabsTrigger>
+                  <TabsTrigger value="all">{t('admin.media.all')}</TabsTrigger>
+                  <TabsTrigger value="image">{t('admin.media.images')}</TabsTrigger>
+                  <TabsTrigger value="document">{t('admin.media.documents')}</TabsTrigger>
+                  <TabsTrigger value="video">{t('admin.media.videos')}</TabsTrigger>
                 </TabsList>
               </Tabs>
             </CardHeader>
@@ -323,11 +325,11 @@ const MediaManager: React.FC = () => {
               ) : filteredMedia.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium">No media files found</h3>
+                  <h3 className="text-lg font-medium">{t('admin.media.noMediaFilesFound')}</h3>
                   <p className="text-sm text-muted-foreground mt-1">
                     {selectedTab === 'all'
-                      ? 'Your media library is empty. Upload files to get started.'
-                      : `You don't have any ${selectedTab} files. Try uploading some or switch to a different category.`}
+                      ? t('admin.media.mediaLibraryEmpty')
+                      : t('admin.media.noMediaFilesInCategory', { category: selectedTab })}
                   </p>
                 </div>
               ) : (
@@ -335,11 +337,11 @@ const MediaManager: React.FC = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>File</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Size</TableHead>
-                        <TableHead>Uploaded</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t('admin.media.file')}</TableHead>
+                        <TableHead>{t('admin.media.type')}</TableHead>
+                        <TableHead>{t('admin.media.size')}</TableHead>
+                        <TableHead>{t('admin.media.uploaded')}</TableHead>
+                        <TableHead className="text-right">{t('admin.media.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -400,9 +402,9 @@ const MediaManager: React.FC = () => {
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Image Preview</DialogTitle>
+            <DialogTitle>{t('admin.media.imagePreview')}</DialogTitle>
             <DialogDescription>
-              Full size preview of the selected image
+              {t('admin.media.imagePreviewDescription')}
             </DialogDescription>
           </DialogHeader>
           {previewImage && (
@@ -415,7 +417,7 @@ const MediaManager: React.FC = () => {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={() => setPreviewOpen(false)}>Close</Button>
+            <Button onClick={() => setPreviewOpen(false)}>{t('common.close')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -424,16 +426,16 @@ const MediaManager: React.FC = () => {
       <Dialog open={showGuide} onOpenChange={setShowGuide}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Image Storage Guide</DialogTitle>
+            <DialogTitle>{t('admin.media.imageStorageGuide')}</DialogTitle>
             <DialogDescription>
-              Learn how to access and display images from storage in your application
+              {t('admin.media.imageStorageGuideDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <ImageStorageGuide />
           </div>
           <DialogFooter>
-            <Button onClick={() => setShowGuide(false)}>Close</Button>
+            <Button onClick={() => setShowGuide(false)}>{t('common.close')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

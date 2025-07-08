@@ -9,6 +9,7 @@ import { useProfileManagement } from '@/hooks/useProfileManagement';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useAuth } from '@/context/AuthContext';
 import ProfileImageSection from './ProfileImageSection';
+import { useTranslation } from 'react-i18next';
 
 const UpdateProfileForm: React.FC = () => {
   const { updateProfile } = useAuth();
@@ -31,6 +32,8 @@ const UpdateProfileForm: React.FC = () => {
     uploadImage,
     clearImageState
   } = useImageUpload();
+
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +76,7 @@ const UpdateProfileForm: React.FC = () => {
     <Card className="w-full shadow-lg border-0 bg-white/5 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Update Profile
+          {t('profile.updateProfile.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -89,12 +92,12 @@ const UpdateProfileForm: React.FC = () => {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullName" className="text-sm font-medium text-white">
-                Full Name
+                {t('profile.updateProfile.fullName')}
               </Label>
               <Input
                 id="fullName"
                 type="text"
-                placeholder="Enter your full name"
+                placeholder={t('profile.updateProfile.fullNamePlaceholder')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -104,12 +107,12 @@ const UpdateProfileForm: React.FC = () => {
 
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-white">
-                Email
+                {t('profile.email')}
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('profile.updateProfile.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -129,12 +132,12 @@ const UpdateProfileForm: React.FC = () => {
               {saving || uploading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  {uploading ? 'Uploading...' : 'Updating...'}
+                  {uploading ? t('profile.updateProfile.uploading') : t('profile.updateProfile.updating')}
                 </div>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                  Save Profile
+                  {t('profile.updateProfile.saveProfile')}
                 </>
               )}
             </Button>
@@ -147,7 +150,7 @@ const UpdateProfileForm: React.FC = () => {
               className="premium-outline-button group"
             >
               <RotateCcw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform" />
-              Reset
+              {t('profile.reset')}
             </Button>
           </div>
         </form>

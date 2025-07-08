@@ -7,6 +7,8 @@ import { useNotifications } from '../../context/NotificationContext';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { cn } from '../../lib/utils';
 import MobileLayout from './MobileLayout';
+import LanguageSwitcher from '../ui/language-switcher';
+import { useTranslation } from 'react-i18next';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,6 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { notifications, loading: notificationsLoading } = useNotifications();
   const { isMobile, isNativeMobile } = useMobileDetection();
   const location = useLocation();
+  const { t } = useTranslation();
   
   const unreadCount = notifications?.filter(n => !n.read)?.length || 0;
   const isAuthPage = location.pathname === '/login' || location.pathname === '/auth';
@@ -89,7 +92,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 }
               >
                 <Home className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
-                <span className="font-semibold">Home</span>
+                <span className="font-semibold">{t('navigation.home')}</span>
               </NavLink>
               
               <NavLink
@@ -104,7 +107,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 }
               >
                 <Award className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
-                <span className="font-semibold">Winners</span>
+                <span className="font-semibold">{t('navigation.winners')}</span>
               </NavLink>
               
               <NavLink
@@ -126,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </span>
                   )}
                 </div>
-                <span className="font-semibold">Alerts</span>
+                <span className="font-semibold">{t('navigation.alerts')}</span>
               </NavLink>
               
               <NavLink
@@ -141,7 +144,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 }
               >
                 <User className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
-                <span className="font-semibold">Profile</span>
+                <span className="font-semibold">{t('navigation.profile')}</span>
               </NavLink>
               
               {user?.isAdmin && (
@@ -157,13 +160,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   }
                 >
                   <Settings className="h-5 w-5 mb-1 transition-transform group-hover:scale-110" />
-                  <span className="font-semibold">Admin</span>
+                  <span className="font-semibold">{t('navigation.admin')}</span>
                 </NavLink>
               )}
             </div>
           </div>
         </nav>
       )}
+
+      {/* Language Switcher - Fixed position for easy access */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
     </MobileLayout>
   );
 };

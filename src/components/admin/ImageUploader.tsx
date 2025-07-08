@@ -2,6 +2,7 @@
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, ImagePlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ImageUploaderProps { 
   onImageSelected: (file: File) => void; 
@@ -15,6 +16,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   isUploading = false 
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -35,7 +37,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         <div className="flex items-center justify-center p-6 border border-gold/20 rounded-lg bg-black-light w-full">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold mx-auto mb-2"></div>
-            <p className="text-sm text-gold-light">Uploading image...</p>
+            <p className="text-sm text-gold-light">{t('admin.media.uploadingImage')}</p>
           </div>
         </div>
       ) : previewUrl ? (
@@ -54,7 +56,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             onClick={triggerFileInput}
           >
             <Edit className="h-4 w-4 mr-1" />
-            Change
+            {t('admin.media.change')}
           </Button>
         </div>
       ) : (
@@ -66,7 +68,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         >
           <div className="flex flex-col items-center gap-2">
             <ImagePlus className="h-10 w-10 text-gold/70" />
-            <span className="text-sm text-gold-light">Click to select an image</span>
+            <span className="text-sm text-gold-light">{t('admin.media.clickToSelectImage')}</span>
           </div>
         </Button>
       )}

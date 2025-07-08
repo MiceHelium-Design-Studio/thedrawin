@@ -6,19 +6,21 @@ import { useNotifications } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const NotificationTest: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { draws, buyTicket } = useDraws();
   const { notifications } = useNotifications();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const testTicketPurchase = async () => {
     if (!user) {
       toast({
         variant: 'destructive',
-        title: 'Please login first',
-        description: 'You need to be logged in to test notifications'
+        title: t('test.notifications.pleaseLoginFirst'),
+        description: t('test.notifications.needToBeLoggedIn')
       });
       return;
     }
@@ -30,8 +32,8 @@ const NotificationTest: React.FC = () => {
       if (!testDraw) {
         toast({
           variant: 'destructive',
-          title: 'No draws available',
-          description: 'Please create a draw first to test notifications'
+          title: t('test.notifications.noDrawsAvailable'),
+          description: t('test.notifications.createDrawFirst')
         });
         return;
       }
@@ -55,8 +57,8 @@ const NotificationTest: React.FC = () => {
       await buyTicket(testDraw.id, randomTicketNumber, ticketPrice);
 
       toast({
-        title: 'Test completed!',
-        description: 'Check your notifications to see if the system is working.'
+        title: t('test.notifications.testCompleted'),
+        description: t('test.notifications.checkNotifications')
       });
 
       console.log('Ticket purchase completed - notifications should have been triggered');
@@ -64,14 +66,14 @@ const NotificationTest: React.FC = () => {
       console.error('Test failed:', error);
 
       // More detailed error handling
-      let errorMessage = 'Error occurred during notification test';
+      let errorMessage = t('test.notifications.errorOccurred');
       if (error instanceof Error) {
         errorMessage = error.message;
       }
 
       toast({
         variant: 'destructive',
-        title: 'Test failed',
+        title: t('test.notifications.testFailed'),
         description: errorMessage
       });
     } finally {
@@ -86,16 +88,16 @@ const NotificationTest: React.FC = () => {
     <div className="container mx-auto px-4 py-6 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>🔔 Notification System Test</CardTitle>
+          <CardTitle>{t('test.notifications.notificationSystemTest')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">
-                Test the notification system by purchasing a ticket
+                {t('test.notifications.testDescription')}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                This should create notifications for both user and admin
+                {t('test.notifications.testSubdescription')}
               </p>
             </div>
             <Button
@@ -103,20 +105,20 @@ const NotificationTest: React.FC = () => {
               disabled={isLoading || !user}
               className="ml-4"
             >
-              {isLoading ? 'Testing...' : 'Test Notifications'}
+              {isLoading ? t('test.notifications.testing') : t('test.notifications.testNotifications')}
             </Button>
           </div>
 
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium">Current Notifications</h3>
+              <h3 className="font-medium">{t('test.notifications.currentNotifications')}</h3>
               <span className="text-sm bg-primary text-primary-foreground px-2 py-1 rounded-full">
-                {unreadCount} unread
+                {t('test.notifications.unreadCount', { count: unreadCount })}
               </span>
             </div>
 
             {currentNotifications.length === 0 ? (
-              <p className="text-sm text-gray-500 italic">No notifications yet</p>
+              <p className="text-sm text-gray-500 italic">{t('test.notifications.noNotificationsYet')}</p>
             ) : (
               <div className="space-y-2">
                 {currentNotifications.map((notification) => (
@@ -132,7 +134,7 @@ const NotificationTest: React.FC = () => {
                         <p className="text-sm font-medium text-black">{notification.title}</p>
                         <p className="text-sm text-black mt-1">{notification.message}</p>
                         <p className="text-xs text-black mt-1">
-                          Role: {notification.role} | {new Date(notification.createdAt).toLocaleString()}
+                          {t('test.notifications.role')}: {notification.role} | {new Date(notification.createdAt).toLocaleString()}
                         </p>
                       </div>
                       {!notification.read && (
@@ -146,28 +148,28 @@ const NotificationTest: React.FC = () => {
           </div>
 
           <div className="border-t pt-4">
-            <h4 className="font-medium mb-2">System Status</h4>
+            <h4 className="font-medium mb-2">{t('test.notifications.systemStatus')}</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600">User logged in:</span>
-                <span className={`ml-2 ${user ? 'text-green-600' : 'text-red-600'}`}>
-                  {user ? '✅ Yes' : '❌ No'}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-600">Available draws:</span>
-                <span className="ml-2 text-blue-600">{draws.length}</span>
-              </div>
-              <div>
-                <span className="text-gray-600">Total notifications:</span>
-                <span className="ml-2 text-blue-600">{notifications.length}</span>
-              </div>
-              <div>
-                <span className="text-gray-600">User is admin:</span>
-                <span className={`ml-2 ${user?.isAdmin ? 'text-green-600' : 'text-gray-600'}`}>
-                  {user?.isAdmin ? '✅ Yes' : '❌ No'}
-                </span>
-              </div>
+                              <div>
+                  <span className="text-gray-600">{t('test.notifications.userLoggedIn')}:</span>
+                  <span className={`ml-2 ${user ? 'text-green-600' : 'text-red-600'}`}>
+                    {user ? `✅ ${t('common.yes')}` : `❌ ${t('common.no')}`}
+                  </span>
+                </div>
+                              <div>
+                  <span className="text-gray-600">{t('test.notifications.availableDraws')}:</span>
+                  <span className="ml-2 text-blue-600">{draws.length}</span>
+                </div>
+                              <div>
+                  <span className="text-gray-600">{t('test.notifications.totalNotifications')}:</span>
+                  <span className="ml-2 text-blue-600">{notifications.length}</span>
+                </div>
+                              <div>
+                  <span className="text-gray-600">{t('test.notifications.userIsAdmin')}:</span>
+                  <span className={`ml-2 ${user?.isAdmin ? 'text-green-600' : 'text-gray-600'}`}>
+                    {user?.isAdmin ? `✅ ${t('common.yes')}` : `❌ ${t('common.no')}`}
+                  </span>
+                </div>
             </div>
           </div>
         </CardContent>

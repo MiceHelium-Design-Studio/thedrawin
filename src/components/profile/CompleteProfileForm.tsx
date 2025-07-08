@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { User, Camera } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const CompleteProfileForm: React.FC = () => {
   const [fullName, setFullName] = useState('');
@@ -20,6 +21,7 @@ const CompleteProfileForm: React.FC = () => {
   const { toast } = useToast();
   const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
@@ -30,8 +32,8 @@ const CompleteProfileForm: React.FC = () => {
       if (selectedFile.size > 5 * 1024 * 1024) {
         toast({
           variant: 'destructive',
-          title: 'File too large',
-          description: 'Please select an image smaller than 5MB.',
+          title: t('profile.messages.fileTooLarge'),
+          description: t('profile.messages.fileTooLargeDesc'),
         });
         return;
       }
@@ -40,8 +42,8 @@ const CompleteProfileForm: React.FC = () => {
       if (!selectedFile.type.startsWith('image/')) {
         toast({
           variant: 'destructive',
-          title: 'Invalid file type',
-          description: 'Please select an image file.',
+          title: t('profile.messages.invalidFileType'),
+          description: t('profile.messages.invalidFileTypeDesc'),
         });
         return;
       }
@@ -59,8 +61,8 @@ const CompleteProfileForm: React.FC = () => {
     if (!fullName.trim()) {
       toast({
         variant: 'destructive',
-        title: 'Name required',
-        description: 'Please enter your full name.',
+        title: t('profile.messages.nameRequired'),
+        description: t('profile.messages.nameRequiredDesc'),
       });
       return;
     }
@@ -73,7 +75,7 @@ const CompleteProfileForm: React.FC = () => {
       } = await supabase.auth.getUser();
 
       if (!authUser) {
-        throw new Error('User not authenticated');
+        throw new Error(t('profile.messages.userNotAuthenticated'));
       }
 
       console.log('Starting profile completion for user:', authUser.id);
@@ -100,8 +102,8 @@ const CompleteProfileForm: React.FC = () => {
       }
 
       toast({
-        title: 'Profile completed!',
-        description: 'Your profile has been set up successfully.',
+        title: t('profile.messages.profileCompleted'),
+        description: t('profile.messages.profileCompletedDesc'),
       });
 
       // Navigate to the home page
@@ -110,8 +112,8 @@ const CompleteProfileForm: React.FC = () => {
       console.error('Profile completion error:', error);
       toast({
         variant: 'destructive',
-        title: 'Error saving profile',
-        description: error instanceof Error ? error.message : 'There was an error updating your profile. Please try again.',
+        title: t('profile.messages.errorSavingProfile'),
+        description: error instanceof Error ? error.message : t('profile.messages.errorSavingProfileDesc'),
       });
     } finally {
       setIsLoading(false);
@@ -130,10 +132,10 @@ const CompleteProfileForm: React.FC = () => {
             <User className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Complete Your Profile
+            {t('profile.completeProfile.title')}
           </CardTitle>
           <p className="text-gray-600 text-sm mt-2">
-            Let's personalize your experience
+            {t('profile.completeProfile.subtitle')}
           </p>
         </CardHeader>
         <CardContent>
@@ -145,7 +147,7 @@ const CompleteProfileForm: React.FC = () => {
                   {previewUrl ? (
                     <img
                       src={previewUrl}
-                      alt="Avatar preview"
+                      alt={t('profile.completeProfile.avatarPreview')}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -170,19 +172,19 @@ const CompleteProfileForm: React.FC = () => {
                 disabled={isLoading}
               />
               <p className="text-xs text-gray-500 text-center">
-                Upload a profile picture (max 5MB)
+                {t('profile.completeProfile.uploadPicture')}
               </p>
             </div>
 
             {/* Full Name Input */}
             <div className="space-y-2">
               <Label htmlFor="fullName" className="text-white font-medium">
-                Full Name *
+                {t('profile.completeProfile.fullName')}
               </Label>
               <Input
                 id="fullName"
                 type="text"
-                placeholder="Enter your full name"
+                placeholder={t('profile.completeProfile.fullNamePlaceholder')}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
@@ -201,10 +203,10 @@ const CompleteProfileForm: React.FC = () => {
                 {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Setting up profile...
+                    {t('profile.completeProfile.settingUp')}
                   </>
                 ) : (
-                  'Complete Profile'
+                  t('profile.completeProfile.completeButton')
                 )}
               </Button>
 
@@ -215,7 +217,7 @@ const CompleteProfileForm: React.FC = () => {
                 onClick={handleSkip}
                 disabled={isLoading}
               >
-                Skip for now
+                {t('profile.completeProfile.skipButton')}
               </Button>
             </div>
           </form>

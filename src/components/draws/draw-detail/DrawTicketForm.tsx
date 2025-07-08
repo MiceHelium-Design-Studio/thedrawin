@@ -5,6 +5,7 @@ import { useDraws } from '@/context/DrawContext';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import SelectNumberModal from './SelectNumberModal';
+import { useTranslation } from 'react-i18next';
 
 interface DrawTicketFormProps {
   ticketPrices: number[];
@@ -17,6 +18,7 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
   const { draws } = useDraws();
   const navigate = useNavigate();
   const [isNumberModalOpen, setIsNumberModalOpen] = useState(false);
+  const { t } = useTranslation();
 
   // Get the current draw from the URL or use the first available draw
   const currentDrawId = window.location.pathname.split('/').pop();
@@ -35,8 +37,8 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
   const handleEnterDraw = () => {
     if (!user) {
       toast({
-        title: "Login required",
-        description: "Please login to enter this draw",
+        title: t('draws.messages.loginRequired'),
+        description: t('draws.messages.loginRequiredDesc'),
         variant: "default",
       });
       navigate('/auth');
@@ -46,8 +48,8 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
     // If the draw is not active, show an error message
     if (draw.status !== 'active' && draw.status !== 'open') {
       toast({
-        title: "Draw not available",
-        description: "This draw is not currently accepting entries",
+        title: t('draws.messages.drawNotAvailable'),
+        description: t('draws.messages.drawNotAvailableDesc'),
         variant: "destructive",
       });
       return;
@@ -69,11 +71,11 @@ const DrawTicketForm: React.FC<DrawTicketFormProps> = ({ ticketPrices, onSubmit,
         className="w-full h-12 text-lg font-semibold"
         disabled={loading}
       >
-        {loading ? 'Processing...' : '🎯 Choose Your Lucky Number (1-100) & Enter Draw'}
+        {loading ? t('draws.detail.processing') : t('draws.detail.enterDrawFull')}
       </Button>
       
       <p className="text-center text-sm text-muted-foreground mt-2">
-        Select from numbers 1-100, choose your entry fee, and join the draw!
+        {t('draws.detail.selectFromNumbers')}
       </p>
       
       <SelectNumberModal

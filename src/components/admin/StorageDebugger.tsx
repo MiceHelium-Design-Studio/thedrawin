@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { getDrawImages } from '@/utils/drawImageUtils';
 import { useDraws } from '@/context/DrawContext';
+import { useTranslation } from 'react-i18next';
 
 const StorageDebugger: React.FC = () => {
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const { draws } = useDraws();
+  const { t } = useTranslation();
 
   const checkStorage = async () => {
     setLoading(true);
@@ -79,52 +81,52 @@ const StorageDebugger: React.FC = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle>Storage Debugger</CardTitle>
+        <CardTitle>{t('admin.storage.storageDebugger')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button onClick={checkStorage} disabled={loading}>
-          {loading ? 'Checking Storage...' : 'Debug Storage'}
+          {loading ? t('admin.storage.checkingStorage') : t('admin.storage.debugStorage')}
         </Button>
 
         {debugInfo && (
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold">Buckets ({debugInfo.buckets?.length || 0})</h3>
+              <h3 className="font-semibold">{t('admin.storage.buckets')} ({debugInfo.buckets?.length || 0})</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs overflow-auto">
                 {JSON.stringify(debugInfo.buckets, null, 2)}
               </pre>
             </div>
 
             <div>
-              <h3 className="font-semibold">Root Files in draw_images ({debugInfo.rootFiles?.length || 0})</h3>
+              <h3 className="font-semibold">{t('admin.storage.rootFiles')} ({debugInfo.rootFiles?.length || 0})</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs overflow-auto">
                 {JSON.stringify(debugInfo.rootFiles, null, 2)}
               </pre>
             </div>
 
             <div>
-              <h3 className="font-semibold">All Files Found ({debugInfo.allFiles?.length || 0})</h3>
+              <h3 className="font-semibold">{t('admin.storage.allFilesFound')} ({debugInfo.allFiles?.length || 0})</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs overflow-auto">
                 {JSON.stringify(debugInfo.allFiles, null, 2)}
               </pre>
             </div>
 
             <div>
-              <h3 className="font-semibold">Utility Function Result ({debugInfo.utilityImages?.length || 0})</h3>
+              <h3 className="font-semibold">{t('admin.storage.utilityFunctionResult')} ({debugInfo.utilityImages?.length || 0})</h3>
               <pre className="bg-gray-100 p-2 rounded text-xs overflow-auto">
                 {JSON.stringify(debugInfo.utilityImages, null, 2)}
               </pre>
             </div>
 
             <div>
-              <h3 className="font-semibold">Draws Status</h3>
-              <p>Total draws: {debugInfo.drawsCount}</p>
-              <p>Draws with images: {debugInfo.drawsWithImages}</p>
+              <h3 className="font-semibold">{t('admin.storage.drawsStatus')}</h3>
+              <p>{t('admin.storage.totalDraws')}: {debugInfo.drawsCount}</p>
+              <p>{t('admin.storage.drawsWithImages')}: {debugInfo.drawsWithImages}</p>
             </div>
 
             {debugInfo.error && (
               <div className="text-red-600">
-                <h3 className="font-semibold">Error</h3>
+                <h3 className="font-semibold">{t('common.error')}</h3>
                 <p>{debugInfo.error}</p>
               </div>
             )}

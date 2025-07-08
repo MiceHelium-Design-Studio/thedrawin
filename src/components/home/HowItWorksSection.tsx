@@ -1,22 +1,25 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Coins, Award, Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const HowItWorksSection: React.FC = () => {
+  const { t } = useTranslation();
+  
   const steps = [{
     icon: Coins,
-    title: "Purchase Tickets",
-    description: "Select your favorite draws and purchase tickets using your secure wallet balance.",
+    title: t('home.steps.purchaseTickets.title'),
+    description: t('home.steps.purchaseTickets.description'),
     color: "from-[#F39C0A] to-[#FFD700]"
   }, {
     icon: Users,
-    title: "Join the Community",
-    description: "Connect with players worldwide as draws fill up and excitement builds.",
+    title: t('home.steps.joinCommunity.title'),
+    description: t('home.steps.joinCommunity.description'),
     color: "from-[#06B6D4] to-[#0EA5E9]"
   }, {
     icon: Award,
-    title: "Win Premium Prizes",
-    description: "Experience the thrill as winners are selected and claim their exclusive rewards.",
+    title: t('home.steps.winPrizes.title'),
+    description: t('home.steps.winPrizes.description'),
     color: "from-[#F39C0A] to-[#F97316]"
   }];
   return (
@@ -27,12 +30,12 @@ const HowItWorksSection: React.FC = () => {
       <div className="relative">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 tracking-tight">
-            How It Works
+            {t('home.howItWorksTitle')}
           </h2>
 
           <div className="w-24 h-1 bg-gradient-to-r from-[#F39C0A] to-[#06B6D4] rounded-full mx-auto mb-6" />
           <p className="text-slate-400 max-w-3xl mx-auto text-xl leading-relaxed">
-            Three simple steps to join the future of digital gaming and start winning amazing prizes
+            {t('home.howItWorksSubtitle')}
           </p>
         </div>
 

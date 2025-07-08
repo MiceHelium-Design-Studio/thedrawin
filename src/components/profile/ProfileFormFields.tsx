@@ -3,6 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User, Mail } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileFormFieldsProps {
   name: string;
@@ -19,12 +20,14 @@ const ProfileFormFields: React.FC<ProfileFormFieldsProps> = ({
   onNameChange,
   onEmailChange
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name" className="text-white font-medium flex items-center gap-2">
           <User className="w-4 h-4" />
-          Name
+          {t('profile.name')}
         </Label>
         <Input
           id="name"
@@ -39,7 +42,7 @@ const ProfileFormFields: React.FC<ProfileFormFieldsProps> = ({
       <div className="space-y-2">
         <Label htmlFor="email" className="text-white font-medium flex items-center gap-2">
           <Mail className="w-4 h-4" />
-          Email
+          {t('profile.email')}
         </Label>
         <Input
           id="email"
