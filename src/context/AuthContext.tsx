@@ -31,6 +31,7 @@ interface AuthContextType {
   addFunds: (amount: number) => Promise<void>;
   clearCacheAndReload: () => void;
   makeUserAdmin: (email: string) => Promise<void>;
+  resetPassword: (email: string, newPassword: string) => Promise<void>;
   checkTokenStatus: () => Promise<TokenStatus>;
   manualTokenRefresh: () => Promise<TokenRefreshResult>;
 }
@@ -39,7 +40,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, setUser, loading, setLoading } = useAuthState();
-  const { login, signup, signInWithGoogle, logout, updateProfile, addFunds, makeUserAdmin } = 
+  const { login, signup, signInWithGoogle, logout, updateProfile, addFunds, makeUserAdmin, resetPassword } = 
     useAuthActions(user, setUser, setLoading);
   const { clearCacheAndReload } = useCacheManagement();
 
@@ -81,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addFunds,
       clearCacheAndReload,
       makeUserAdmin,
+      resetPassword,
       checkTokenStatus,
       manualTokenRefresh
     }}>

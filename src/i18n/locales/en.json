@@ -209,7 +209,12 @@
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
+    "newPassword": "New Password",
     "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "resetPasswordSuccess": "Password reset email sent successfully!",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "dontHaveAccount": "Don't have an account?",
     "alreadyHaveAccount": "Already have an account?",
     "signInWith": "Sign in with",
@@ -549,12 +554,24 @@
       "refreshFailed": "Refresh Failed",
       "refreshFailedDescription": "Failed to refresh banners. Please try again.",
       "createBanner": "Create Banner",
+      "editBanner": "Edit Banner",
+      "editBannerDescription": "Update the details of this banner",
+      "createBannerDescription": "Create a new banner for your platform",
       "bannerList": "Banner List",
       "preview": "Preview",
       "premiumBanner": "Premium Banner Upload",
+      "updatePremiumBanner": "Update Premium Banner",
+      "updatePremiumBannerDescription": "Upload a new premium banner image",
+      "premium": "Premium",
       "bannerPreview": "Banner Preview",
       "bannerPreviewDescription": "See how your banners appear to users",
-      "activeBannersNote": "Only active banners are displayed in the preview"
+      "activeBannersNote": "Only active banners are displayed in the preview",
+      "image": "Image",
+      "link": "Link",
+      "active": "Active",
+      "banner": "Banner",
+      "failedToLoad": "Failed to load",
+      "noBannersFound": "No banners found"
     },
     "tickets": {
       "title": "Tickets Overview",
@@ -623,6 +640,11 @@
       "primaryColor": "Primary Color"
     },
     "payments": {
+      "title": "Payment Settings",
+      "description": "Configure payment methods and wallet addresses",
+      "configuredWalletAddresses": "Configured Wallet Addresses",
+      "manageWalletAddresses": "Manage wallet addresses for cryptocurrency payments",
+      "addWallet": "Add Wallet",
       "failedToLoadWallets": "Failed to load wallet addresses. Please try again.",
       "walletUpdated": "Wallet Updated",
       "walletUpdatedDescription": "Wallet address has been updated successfully.",
@@ -670,7 +692,11 @@
     "network": "Network error. Please check your connection.",
     "unauthorized": "You are not authorized to perform this action.",
     "notFound": "The requested resource was not found.",
-    "validation": "Please check your input and try again."
+    "validation": "Please check your input and try again.",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordsDoNotMatch": "Passwords do not match"
   },
   "messages": {
     "welcome": "Welcome",

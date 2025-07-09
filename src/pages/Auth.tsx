@@ -12,7 +12,7 @@ import { useAuthForm } from '@/hooks/useAuthForm';
 import { useTranslation } from 'react-i18next';
 
 const Auth = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, resetPassword } = useAuth();
   const { authBackgroundImage } = useBackground();
   const { 
     mode, 
@@ -70,7 +70,12 @@ const Auth = () => {
           
           <div className="relative z-10">
             <AuthHeader />
-            <AuthForm mode={mode} onSubmit={handleSubmit} loading={isProcessing} />
+            <AuthForm 
+              mode={mode} 
+              onSubmit={handleSubmit} 
+              onResetPassword={resetPassword}
+              loading={isProcessing} 
+            />
 
             <div className="mt-6">
               <div className="relative flex items-center justify-center">

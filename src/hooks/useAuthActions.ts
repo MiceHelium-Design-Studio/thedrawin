@@ -249,6 +249,50 @@ export const useAuthActions = (
     }
   };
 
+  const resetPassword = async (email: string, newPassword: string) => {
+    setLoading(true);
+    try {
+      console.log('Starting password reset for:', email);
+      
+      // First, send password reset email
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login`
+      });
+
+      if (resetError) {
+        console.error('Password reset error:', resetError);
+        throw resetError;
+      }
+
+      console.log('Password reset email sent successfully');
+      
+      toast({
+        title: 'Password reset email sent',
+        description: 'Please check your email for password reset instructions.',
+      });
+      
+    } catch (error: any) {
+      console.error('Password reset error:', error);
+      
+      let errorMessage = error.message || 'An error occurred during password reset';
+      
+      if (error.message?.includes('User not found')) {
+        errorMessage = 'No account found with this email address.';
+      } else if (error.message?.includes('Email not confirmed')) {
+        errorMessage = 'Please confirm your email address before resetting your password.';
+      }
+      
+      toast({
+        variant: 'destructive',
+        title: 'Password reset failed',
+        description: errorMessage,
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     login,
     signup,
@@ -256,6 +300,7 @@ export const useAuthActions = (
     logout,
     updateProfile,
     addFunds,
-    makeUserAdmin
+    makeUserAdmin,
+    resetPassword
   };
 };

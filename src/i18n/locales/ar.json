@@ -209,7 +209,12 @@
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
     "confirmPassword": "تأكيد كلمة المرور",
+    "newPassword": "كلمة المرور الجديدة",
     "forgotPassword": "نسيت كلمة المرور؟",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "resetPasswordSuccess": "تم إرسال رابط إعادة تعيين كلمة المرور بنجاح!",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
     "dontHaveAccount": "ليس لديك حساب؟",
     "alreadyHaveAccount": "لديك حساب بالفعل؟",
     "signInWith": "تسجيل الدخول بـ",
@@ -549,12 +554,24 @@
       "refreshFailed": "فشل التحديث",
       "refreshFailedDescription": "فشل في تحديث البانرات. يرجى المحاولة مرة أخرى.",
       "createBanner": "إنشاء بانر",
+      "editBanner": "تعديل البانر",
+      "editBannerDescription": "تحديث تفاصيل هذا البانر",
+      "createBannerDescription": "إنشاء بانر جديد لمنصتك",
       "bannerList": "قائمة البانرات",
       "preview": "معاينة",
       "premiumBanner": "رفع بانر مميز",
+      "updatePremiumBanner": "تحديث البانر المميز",
+      "updatePremiumBannerDescription": "رفع صورة بانر مميز جديدة",
+      "premium": "مميز",
       "bannerPreview": "معاينة البانر",
       "bannerPreviewDescription": "شاهد كيف تظهر البانرات للمستخدمين",
-      "activeBannersNote": "فقط البانرات النشطة تظهر في المعاينة"
+      "activeBannersNote": "فقط البانرات النشطة تظهر في المعاينة",
+      "image": "الصورة",
+      "link": "الرابط",
+      "active": "نشط",
+      "banner": "بانر",
+      "failedToLoad": "فشل في التحميل",
+      "noBannersFound": "لم يتم العثور على بانرات"
     },
     "tickets": {
       "title": "نظرة عامة على التذاكر",
@@ -623,6 +640,11 @@
       "primaryColor": "اللون الأساسي"
     },
     "payments": {
+      "title": "إعدادات الدفع",
+      "description": "تكوين طرق الدفع وعناوين المحافظ",
+      "configuredWalletAddresses": "عناوين المحافظ المكونة",
+      "manageWalletAddresses": "إدارة عناوين المحافظ لمدفوعات العملات المشفرة",
+      "addWallet": "إضافة محفظة",
       "failedToLoadWallets": "فشل في تحميل عناوين المحافظ. يرجى المحاولة مرة أخرى.",
       "walletUpdated": "تم تحديث المحفظة",
       "walletUpdatedDescription": "تم تحديث عنوان المحفظة بنجاح.",
@@ -668,7 +690,11 @@
     "network": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
     "unauthorized": "غير مصرح لك بتنفيذ هذا الإجراء.",
     "notFound": "لم يتم العثور على المورد المطلوب.",
-    "validation": "يرجى التحقق من إدخالك والمحاولة مرة أخرى."
+    "validation": "يرجى التحقق من إدخالك والمحاولة مرة أخرى.",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "passwordTooShort": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    "passwordsDoNotMatch": "كلمات المرور غير متطابقة"
   },
   "messages": {
     "welcome": "مرحباً",
