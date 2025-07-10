@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { User } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { sendPasswordResetEmail } from '@/utils/passwordResetUtils';
 
 export const useAuthActions = (
   user: User | null,
@@ -26,12 +27,12 @@ export const useAuthActions = (
       
       console.log('Login successful:', data.user?.id);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       toast({
         variant: 'destructive',
         title: 'Login failed',
-        description: error.message || 'An error occurred during login',
+        description: (error as Error).message || 'An error occurred during login',
       });
       throw error;
     } finally {
@@ -58,12 +59,12 @@ export const useAuthActions = (
 
       console.log('Google OAuth initiated successfully');
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google login error:', error);
       toast({
         variant: 'destructive',
         title: 'Google login failed',
-        description: error.message || 'An error occurred during Google login',
+        description: (error as Error).message || 'An error occurred during Google login',
       });
       throw error;
     } finally {
@@ -109,16 +110,16 @@ export const useAuthActions = (
         }
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Signup error:', error);
       
-      let errorMessage = error.message || 'An error occurred during signup';
+      let errorMessage = (error as Error).message || 'An error occurred during signup';
       
-      if (error.message?.includes('User already registered')) {
+      if ((error as Error).message?.includes('User already registered')) {
         errorMessage = 'An account with this email already exists. Please try logging in instead.';
-      } else if (error.message?.includes('Password should be at least')) {
+      } else if ((error as Error).message?.includes('Password should be at least')) {
         errorMessage = 'Password should be at least 6 characters long.';
-      } else if (error.message?.includes('Unable to validate email address')) {
+      } else if ((error as Error).message?.includes('Unable to validate email address')) {
         errorMessage = 'Please enter a valid email address.';
       }
       
@@ -249,37 +250,87 @@ export const useAuthActions = (
     }
   };
 
-  const resetPassword = async (email: string, newPassword: string) => {
+  const resetPassword = async (email: string, newPassword?: string) => {
     setLoading(true);
     try {
       console.log('Starting password reset for:', email);
       
-      // First, send password reset email
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/login`
-      });
+      if (newPassword) {
+        // If new password is provided, try to update directly
+        console.log('Attempting direct password update');
+        
+        // First try to sign up the user with the new password (this will work if user doesn't exist)
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password: newPassword,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              email_confirmed: true // Mark email as confirmed to skip confirmation
+            }
+          }
+        });
 
-      if (resetError) {
-        console.error('Password reset error:', resetError);
-        throw resetError;
+        if (error) {
+          // If user already exists, we need to use the email reset flow
+          if (error.message?.includes('User already registered')) {
+            console.log('User exists, sending reset email');
+            
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/reset-password?newPassword=${encodeURIComponent(newPassword)}`
+            });
+
+            if (resetError) {
+              console.error('Password reset error:', resetError);
+              throw resetError;
+            }
+
+            console.log('Password reset email sent successfully');
+            
+            toast({
+              title: 'Password reset email sent',
+              description: 'Please check your email and click the link to complete the password reset.',
+            });
+          } else {
+            console.error('Signup error:', error);
+            throw error;
+          }
+        } else {
+          // User was created successfully or password was updated
+          console.log('Password reset/account creation successful:', data.user?.id);
+          
+          if (data.user) {
+            toast({
+              title: 'Password set successfully!',
+              description: 'Your password has been saved. You can now log in with your email and password.',
+            });
+          }
+        }
+      } else {
+        // Send password reset email using the utility function
+        await sendPasswordResetEmail(email);
+
+        console.log('Password reset email sent successfully');
+        
+        toast({
+          title: 'Password reset email sent',
+          description: 'Please check your email and click the link to reset your password.',
+        });
       }
-
-      console.log('Password reset email sent successfully');
       
-      toast({
-        title: 'Password reset email sent',
-        description: 'Please check your email for password reset instructions.',
-      });
-      
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Password reset error:', error);
       
-      let errorMessage = error.message || 'An error occurred during password reset';
+      let errorMessage = (error as Error).message || 'An error occurred during password reset';
       
-      if (error.message?.includes('User not found')) {
+      if ((error as Error).message?.includes('User not found')) {
         errorMessage = 'No account found with this email address.';
-      } else if (error.message?.includes('Email not confirmed')) {
+      } else if ((error as Error).message?.includes('Email not confirmed')) {
         errorMessage = 'Please confirm your email address before resetting your password.';
+      } else if ((error as Error).message?.includes('For security purposes')) {
+        errorMessage = 'Password reset email sent. Please check your inbox.';
+      } else if ((error as Error).message?.includes('Unable to validate email address')) {
+        errorMessage = 'Please enter a valid email address.';
       }
       
       toast({

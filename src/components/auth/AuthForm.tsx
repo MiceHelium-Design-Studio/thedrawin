@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
@@ -15,7 +16,7 @@ interface AuthFormProps {
     name?: string;
     phone?: string;
   }) => Promise<void>;
-  onResetPassword?: (email: string, newPassword: string) => Promise<void>;
+  onResetPassword?: (email: string, newPassword?: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -35,11 +36,13 @@ const AuthForm: React.FC<AuthFormProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState(''); // Store email from login form for reset
   const { t } = useTranslation();
+  const { toast } = useToast();
 
   const validateForm = () => {
     if (isResetMode) {
-      if (!email) {
+      if (!resetEmail) {
         setError(t('errors.emailRequired') || 'Email is required');
         return false;
       }
@@ -87,15 +90,14 @@ const AuthForm: React.FC<AuthFormProps> = ({
     
     try {
       if (isResetMode) {
-        // Handle password reset
-        console.log('Submitting password reset for:', email);
+        // Handle password reset with new password
+        console.log('Submitting password reset for:', resetEmail);
         if (onResetPassword) {
-          await onResetPassword(email, password);
-          setSuccess(t('auth.resetPasswordSuccess') || 'Password reset email sent successfully!');
+          await onResetPassword(resetEmail, password);
+          setSuccess(t('auth.resetPasswordSuccess') || 'Password reset successfully!');
           // Reset form after success
           setTimeout(() => {
             setIsResetMode(false);
-            setEmail('');
             setPassword('');
             setConfirmPassword('');
             setSuccess('');
@@ -123,16 +125,29 @@ const AuthForm: React.FC<AuthFormProps> = ({
   };
 
   const handleResetPassword = () => {
+    // Check if email is entered in login form
+    if (!email.trim()) {
+      toast({
+        title: t('errors.emailRequired') || 'Email is required',
+        description: t('auth.pleaseEnterEmail') || 'Please enter your email address first',
+      });
+      return;
+    }
+    
+    // Store the email for reset and switch to reset mode
+    setResetEmail(email);
     setIsResetMode(true);
     setError('');
     setSuccess('');
+    setPassword('');
+    setConfirmPassword('');
   };
 
   const handleBackToLogin = () => {
     setIsResetMode(false);
-    setEmail('');
     setPassword('');
     setConfirmPassword('');
+    setResetEmail('');
     setError('');
     setSuccess('');
   };
@@ -166,21 +181,21 @@ const AuthForm: React.FC<AuthFormProps> = ({
             <AlertDescription className="text-green-400">{success}</AlertDescription>
           </Alert>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="reset-email" className="text-white font-medium tracking-wide uppercase text-xs">{t('auth.email')}</Label>
-            <Input 
-              id="reset-email" 
-              type="email" 
-              placeholder="you@example.com" 
-              value={email} 
-              onChange={e => setEmail(e.target.value)} 
-              required 
-              className="bg-white text-black placeholder:text-gray-600 border-gray-300 focus:border-[#F39C0A] focus:ring-[#F39C0A]/20" 
+            <Label htmlFor="reset-email" className="text-white font-medium tracking-wide uppercase text-xs">{t('auth.email') || 'Email'}</Label>
+            <Input
+              id="reset-email"
+              type="email"
+              placeholder="Enter your email address"
+              value={resetEmail}
+              onChange={e => setResetEmail(e.target.value)}
+              required
+              className="bg-white text-black placeholder:text-gray-600 border-gray-300 focus:border-[#F39C0A] focus:ring-[#F39C0A]/20"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="new-password" className="text-white font-medium tracking-wide uppercase text-xs">{t('auth.newPassword') || 'New Password'}</Label>
             <div className="relative">
@@ -207,7 +222,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm-password" className="text-white font-medium tracking-wide uppercase text-xs">{t('auth.confirmPassword')}</Label>
+            <Label htmlFor="confirm-password" className="text-white font-medium tracking-wide uppercase text-xs">{t('auth.confirmPassword') || 'Confirm Password'}</Label>
             <div className="relative">
               <Input
                 id="confirm-password"
@@ -242,7 +257,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
                 <span className="text-black">{t('common.loading')}</span>
               </div>
             ) : (
-              <span className="text-black">{t('auth.resetPassword') || 'Reset Password'}</span>
+              <span className="text-black">{t('auth.resetPassword') || 'RESET PASSWORD'}</span>
             )}
           </Button>
         </form>

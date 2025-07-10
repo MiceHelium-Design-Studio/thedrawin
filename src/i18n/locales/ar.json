@@ -212,7 +212,10 @@
     "newPassword": "كلمة المرور الجديدة",
     "forgotPassword": "نسيت كلمة المرور؟",
     "resetPassword": "إعادة تعيين كلمة المرور",
-    "resetPasswordSuccess": "تم إرسال رابط إعادة تعيين كلمة المرور بنجاح!",
+    "resetPasswordSuccess": "تم حفظ كلمة المرور بنجاح!",
+    "resetEmailSent": "تم إرسال رابط إعادة تعيين كلمة المرور!",
+    "sendResetEmail": "إرسال رابط إعادة التعيين",
+    "pleaseEnterEmail": "يرجى إدخال عنوان بريدك الإلكتروني أولاً",
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور",
     "dontHaveAccount": "ليس لديك حساب؟",
@@ -686,6 +689,10 @@
     "no": "لا"
   },
   "errors": {
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "passwordTooShort": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
     "general": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "network": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
     "unauthorized": "غير مصرح لك بتنفيذ هذا الإجراء.",

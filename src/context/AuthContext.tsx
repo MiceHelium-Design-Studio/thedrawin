@@ -31,7 +31,7 @@ interface AuthContextType {
   addFunds: (amount: number) => Promise<void>;
   clearCacheAndReload: () => void;
   makeUserAdmin: (email: string) => Promise<void>;
-  resetPassword: (email: string, newPassword: string) => Promise<void>;
+  resetPassword: (email: string, newPassword?: string) => Promise<void>;
   checkTokenStatus: () => Promise<TokenStatus>;
   manualTokenRefresh: () => Promise<TokenRefreshResult>;
 }

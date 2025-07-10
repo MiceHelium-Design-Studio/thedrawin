@@ -27,6 +27,7 @@ import MediaLibrary from "./pages/MediaLibrary";
 import NotFound from "./pages/NotFound";
 import TodoList from "./pages/TodoList";
 import TodoPage from "./pages/TodoPage";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -159,6 +160,7 @@ const AppContent = () => {
     <Layout>
       <Routes>
         <Route path="/login" element={<PublicRoute><Auth /></PublicRoute>} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
 
         <Route path="/" element={<Navigate to="/home" replace />} />
