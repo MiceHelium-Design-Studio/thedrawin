@@ -610,18 +610,38 @@
       "deletionError": "An error occurred while deleting the file.",
       "refreshed": "Refreshed",
       "mediaListRefreshed": "Media list has been refreshed.",
-      "totalFiles": "Total Files",
+      "storageGuide": "Storage Guide",
+      "totalFilesTitle": "Total Files",
       "totalFilesDescription": "Total number of uploaded files",
-      "storageUsed": "Storage Used",
+      "storageUsedTitle": "Storage Used",
       "storageUsedDescription": "Total storage space consumed",
-      "images": "Images",
+      "imagesTitle": "Images",
       "imagesDescription": "Number of image files",
-      "documents": "Documents",
+      "documentsTitle": "Documents",
       "documentsDescription": "Number of document files",
-      "uploadMedia": "Upload Media",
-      "mediaLibraryTitle": "Media Library",
+      "uploadMediaTitle": "Upload Media",
       "uploadMediaDescription": "Upload and manage your media files",
-      "mediaLibraryDescription": "Browse and manage all uploaded media files"
+      "mediaLibraryTitle": "Media Library",
+      "mediaLibraryDescription": "Browse and manage all uploaded media files",
+      "fileName": "File Name",
+      "type": "Type",
+      "size": "Size",
+      "uploading": "Uploading...",
+      "uploadMediaButton": "Upload Media",
+      "all": "All",
+      "images": "Images",
+      "documents": "Documents",
+      "videos": "Videos",
+      "noMediaFilesFound": "No media files found",
+      "mediaLibraryEmpty": "Media library is empty. Start by uploading your first files!",
+      "noMediaFilesInCategory": "No media files in {{category}} category",
+      "file": "File",
+      "uploaded": "Uploaded",
+      "actions": "Actions",
+      "imagePreview": "Image Preview",
+      "imagePreviewDescription": "Preview the selected image",
+      "imageStorageGuide": "Image Storage Guide",
+      "imageStorageGuideDescription": "Learn how to store and manage images in the system"
     },
     "notificationTest": {
       "developmentTools": "Development Tools"
@@ -713,4 +733,4 @@
     "operationSuccessful": "Operation completed successfully",
     "operationFailed": "Operation failed. Please try again."
   }
-} 
+}
